@@ -7,147 +7,146 @@ description: Use when a website experienced a sudden visibility/ranking drop tha
 
 ## Overview
 
-Spezifisches Recovery-Framework für Domains, die **nach einem Google Core Update** Sichtbarkeit verloren haben. Kernerkenntnis aus realen März-/April-2026-Recovery-Cases: *Authority-Items > Tech-Hygiene*. Recovery 6–12 Monate, nicht 6–8 Wochen.
+A specific recovery framework for domains that **lost visibility after a Google Core Update**. Core insight from real March/April 2026 recovery cases: *Authority items > technical hygiene*. Recovery 6–12 months, not 6–8 weeks.
 
-## Wann anwenden
+## When to use
 
-- VI-Drop fällt zeitlich mit publiziertem Core Update zusammen (siehe Search Status Dashboard)
-- Drop ist **breit** (viele Keywords gleichzeitig, nicht punktuell)
-- Pages indexieren weiter normal, kein technischer Bruch
-- GSC zeigt keine Manual Action
-- Pattern: über 1–6 Wochen, dann Bodenbildung
+- VI drop correlates timely with a published Core Update (see Google Search Status Dashboard)
+- Drop is **broad** (many keywords simultaneously, not pinpoint)
+- Pages keep indexing normally, no technical break
+- GSC shows no manual action
+- Pattern: 1–6 weeks of decline, then bottoming out
 
-**Nicht anwenden für:**
-- Punktuelle Keyword-Verluste → meist on-page-Thema, kein Core-Update
-- Drop fällt mit Migration / Theme-Change / Robots-Änderung zusammen → das ist technisch, nicht Core
-- Drop ist <20 % vs Peak → kann normales Marktrauschen sein
+**Don't use for:**
+- Point keyword losses → usually on-page issue, not core update
+- Drop coincides with migration / theme change / robots change → that's technical, not core
+- Drop is <20 % from peak → can be normal market noise
 
-## Diagnose-Entscheidungsbaum
+## Diagnosis decision tree
 
 ```dot
 digraph diag {
-    "Sichtbarkeit gefallen?" [shape=diamond];
-    "Mit Core-Update-Datum korreliert?" [shape=diamond];
-    "Auch Brand-Keywords gefallen?" [shape=diamond];
-    "Manuelle Maßnahme in GSC?" [shape=diamond];
-    "CWV plötzlich rot?" [shape=diamond];
-    "Apply Recovery (dieses Skill)" [shape=box,style=filled,fillcolor=lightblue];
-    "Technisches Problem zuerst" [shape=box,style=filled,fillcolor=lightyellow];
-    "Penalty-Workflow, nicht hier" [shape=box,style=filled,fillcolor=lightcoral];
-    "Performance-First-Workflow" [shape=box,style=filled,fillcolor=lightyellow];
-    "Marktrauschen, beobachten" [shape=box];
+    "Visibility dropped?" [shape=diamond];
+    "Correlates with Core Update date?" [shape=diamond];
+    "Brand keywords also dropped?" [shape=diamond];
+    "Manual action in GSC?" [shape=diamond];
+    "CWV suddenly red?" [shape=diamond];
+    "Apply Recovery (this skill)" [shape=box,style=filled,fillcolor=lightblue];
+    "Technical problem first" [shape=box,style=filled,fillcolor=lightyellow];
+    "Penalty workflow, not here" [shape=box,style=filled,fillcolor=lightcoral];
+    "Performance-first workflow" [shape=box,style=filled,fillcolor=lightyellow];
+    "Market noise, observe" [shape=box];
 
-    "Sichtbarkeit gefallen?" -> "Mit Core-Update-Datum korreliert?" [label="ja"];
-    "Mit Core-Update-Datum korreliert?" -> "Manuelle Maßnahme in GSC?" [label="ja"];
-    "Manuelle Maßnahme in GSC?" -> "Penalty-Workflow, nicht hier" [label="ja"];
-    "Manuelle Maßnahme in GSC?" -> "Auch Brand-Keywords gefallen?" [label="nein"];
-    "Auch Brand-Keywords gefallen?" -> "Technisches Problem zuerst" [label="ja"];
-    "Auch Brand-Keywords gefallen?" -> "CWV plötzlich rot?" [label="nein"];
-    "CWV plötzlich rot?" -> "Performance-First-Workflow" [label="ja"];
-    "CWV plötzlich rot?" -> "Apply Recovery (dieses Skill)" [label="nein"];
-    "Mit Core-Update-Datum korreliert?" -> "Marktrauschen, beobachten" [label="nein"];
+    "Visibility dropped?" -> "Correlates with Core Update date?" [label="yes"];
+    "Correlates with Core Update date?" -> "Manual action in GSC?" [label="yes"];
+    "Manual action in GSC?" -> "Penalty workflow, not here" [label="yes"];
+    "Manual action in GSC?" -> "Brand keywords also dropped?" [label="no"];
+    "Brand keywords also dropped?" -> "Technical problem first" [label="yes"];
+    "Brand keywords also dropped?" -> "CWV suddenly red?" [label="no"];
+    "CWV suddenly red?" -> "Performance-first workflow" [label="yes"];
+    "CWV suddenly red?" -> "Apply Recovery (this skill)" [label="no"];
+    "Correlates with Core Update date?" -> "Market noise, observe" [label="no"];
 }
 ```
 
-Wenn Brand-Keywords intakt sind und CWV stabil ist, aber Generic-Keywords breit verloren → das ist die Kern-Signatur eines Core-Update-Hits.
+If brand keywords are intact and CWV is stable but generic keywords are broadly lost → this is the core signature of a Core Update hit.
 
-## Diagnose-Pflichtschritte (Tag 1)
+## Required diagnostic steps (day 1)
 
-1. **Core-Update-Datum dokumentieren** — siehe `https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history`. Sistrix-Drop-Datum exakt damit abgleichen.
-2. **Sistrix-Drop-Diff messen** — siehe `sistrix-deep-fetch` Pattern, monatliche Werte für 12 Monate vor und 1–3 Monate nach Update.
-3. **DataForSEO Ranked-Keywords-Diff** — vergleiche Top-Positionen pre vs post Update. Sind es spezifische URL-Cluster oder gleichmäßiger Verteilung?
-4. **GSC-Klick-Diff** — welche URLs haben am meisten Traffic verloren? Pattern erkennen (z. B. alle Blog-Pages? Alle Produktseiten? Alle YMYL?)
-5. **EEAT-Audit der verlorenen Top-URLs** — Autor sichtbar? Quellen? Letzter Update-Stempel? Vertrauensschicht (About, Impressum, Reviews)?
+1. **Document the Core Update date** — see https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history. Match Sistrix drop date exactly.
+2. **Measure the Sistrix drop diff** — monthly values 12 months before vs 1–3 months after the update.
+3. **DataForSEO ranked-keywords diff** — compare top positions pre vs post update. Specific URL clusters affected or distributed uniformly?
+4. **GSC click diff** — which URLs lost most traffic? Pattern visible (all blog posts? all product pages? all YMYL topics?)
+5. **EEAT audit of lost top URLs** — author visible? Sources cited? Last-updated stamp? Trust layer (About, Imprint, Reviews)?
 
-## Recovery-Plan (3 Phasen × 6–12 Monate)
+## Recovery plan (3 phases × 6–12 months)
 
-### Phase A — Authority-Foundation (Monat 1–2)
+### Phase A — Authority foundation (months 1–2)
 
-**Was Google bei Core-Updates besonders bewertet:**
-- **Author-Authority** — Person hinter dem Content, Qualifikation sichtbar
-- **Topical Authority** — Site behandelt Thema in Tiefe + Breite, nicht nur einzelne Pages
-- **Trust-Signale** — About, Impressum, Reviews, Quellen, Datum
-- **Original Insight** — eigene Daten, eigene Sichtweise statt "ich schreibe ab"
+**What Google especially scrutinizes in Core Updates:**
+- **Author authority** — Person behind the content, qualifications visible
+- **Topical authority** — Site covers the topic in depth AND breadth, not just isolated pages
+- **Trust signals** — About, Imprint, Reviews, Sources, Date stamps
+- **Original insight** — Own data, own perspective rather than "I read elsewhere"
 
-**Konkrete Maßnahmen:**
-1. Jede Autorenseite überarbeiten: Foto, Bio mit Qualifikation, Liste aller Artikel, Sozialprofile (LinkedIn/X), Schema `Person`
-2. Jede betroffene Top-URL nachbearbeiten: Autor sichtbar (+Schema), `dateModified`, Quellen mit Outbound-Links, Update-Hinweise
-3. About-/Über-Uns-Seite stärken: Team-Vorstellung, Firmen-History, Standort, Kontakt — Pflicht-Trust-Signale
-4. Sitewide: Reviews/Testimonials sichtbar oberhalb der Fold (Original-Plattform-Pflege, NICHT Mirror-Site)
+**Concrete steps:**
+1. Rebuild every author page: photo, bio with qualifications, list of articles, social profiles (LinkedIn/X), `Person` schema
+2. Edit each affected top URL: author visible (+schema), `dateModified`, sources with outbound links, update notes
+3. Strengthen About/Imprint pages: team intro, company history, location, contact — mandatory trust signals
+4. Sitewide: reviews/testimonials visible above the fold (manage on original platforms, NOT mirror sites)
 
-### Phase B — Topical-Authority-Hubs (Monat 2–4)
+### Phase B — Topical authority hubs (months 2–4)
 
-**Ziel:** Aus einer Sammlung verstreuter Pages → kohärente Themen-Hubs machen.
+**Goal:** transform a collection of scattered pages into coherent topic hubs.
 
-1. Hauptthemen identifizieren (3–7 für eCommerce, 5–15 für News/Publisher)
-2. Pro Thema: 1 Pillar-Page (1500–3000 Wörter, umfassend) + 5–15 Sub-Pages (jeweils 600–1500 Wörter, spezifisch)
-3. Interne Verlinkung: Sub-Pages linken zu Pillar, Pillar verlinkt zu allen Subs ("Hub-and-Spoke")
-4. Wenn vorhanden: claude-seo:seo-cluster für Daten-getriebene Themen-Identifikation nutzen
+1. Identify main topics (3–7 for e-commerce, 5–15 for news/publishers)
+2. Per topic: 1 pillar page (1500–3000 words, comprehensive) + 5–15 sub-pages (600–1500 words each, specific)
+3. Internal linking: sub-pages link to pillar, pillar links to all subs ("hub-and-spoke")
+4. If available: use `claude-seo:seo-cluster` for data-driven topic identification
 
-### Phase C — Off-Page Authority (Monat 4–8)
+### Phase C — Off-page authority (months 4–8)
 
-**Backlinks gezielt, nicht im Massenkauf:**
-1. Hersteller-/Lieferanten-Partnerschaften für Verlinkungen
-2. Branchen-Communities (eCommerce: Camper-Foren, Boots-Bau-Blogs, etc.; News: Investigativ-Recherchen, Exklusiv-Stories)
-3. Lokale Presse (PLZ-Bezug, PR-Anlässe)
-4. Original-Studien/Daten — generiert organische Verlinkungen besser als alles andere
+**Backlinks deliberately, not at scale:**
+1. Manufacturer/supplier partnerships for links
+2. Industry communities (e-commerce: camper forums, boating blogs; news: investigations, exclusive stories)
+3. Local press (regional anchor, PR opportunities)
+4. Original studies/data — generates organic links better than anything else
 
-**Was NICHT:**
-- Linkbuilding-Services mit "100 Links für 500 €" → führt zu Spam-Score, Recovery noch schwerer
-- Reziproke Links in Massen
-- PBN-Backlinks
-- Forum-Spam
+**What NOT to do:**
+- Link-building services with "100 links for €500" → leads to spam score, recovery even harder
+- Reciprocal links at scale
+- PBN backlinks
+- Forum spam
 
-### Phase D — Tech-Hygiene (parallel, niedrigste Priorität)
+### Phase D — Technical hygiene (in parallel, lowest priority)
 
-Erst wenn A–C laufen:
-- PSI-Optimierung (LCP, INP, CLS)
-- Schema-Markup-Vollständigkeit
-- Image-Alt-Texts, Sitemap-Hygiene
+Only after A–C are running:
+- PSI optimization (LCP, INP, CLS)
+- Schema markup completeness
+- Image alt texts, sitemap hygiene
 
-Diese sind **NICHT** der Recovery-Hebel — Core Update bestraft nicht Tech, sondern Vertrauen/Authority. Aber Tech-Hygiene unterstützt die anderen Hebel.
+These are **NOT** the recovery lever — Core Updates don't penalize tech, they penalize trust/authority. But technical hygiene supports the other levers.
 
-## Realistische Erwartungen
+## Realistic expectations
 
-- **Recovery startet sichtbar erst nach 3–4 Monaten** — Google braucht Zeit, um Authority-Signale zu re-evaluieren
-- **Vollständige Recovery 9–18 Monate** — selten schneller
-- **Häufig: 60–80 % vom Vorhoch wiederholbar, 100 % selten ohne strukturellen Wandel**
-- **Pattern: Recovery in Sprüngen, oft mit dem nächsten Core Update**
+- **Recovery starts visibly only after 3–4 months** — Google needs time to re-evaluate authority signals
+- **Full recovery 9–18 months** — rarely faster
+- **Common outcome: 60–80 % of pre-drop visibility recoverable; 100 % rare without structural changes**
+- **Pattern: recovery in jumps, often with the next Core Update**
 
-## Inhaber-Kommunikation
+## Owner communication
 
-**Was NICHT sagen:**
-- "Wird in 6 Wochen wieder gut"
-- "Wir kennen den Trick, der das fixt"
-- "Sistrix-Score wird in 4 Wochen verdoppelt sein"
+**Don't say:**
+- "It'll be back to normal in 6 weeks"
+- "We know the trick to fix this"
+- "Sistrix score will double in 4 weeks"
 
-**Was sagen:**
-- "Wir messen monatlich. Erste positive Bewegung in 3–4 Monaten."
-- "Das ist ein Authority-Problem, kein Tech-Problem. Behebung dauert."
-- "Wir bauen jetzt die Substanz, die Google sucht — nicht den Trick."
+**Do say:**
+- "We measure monthly. First positive movement expected in 3–4 months."
+- "This is an authority problem, not a technical problem. Fixing it takes time."
+- "We're building the substance Google looks for — not the trick."
 
-## Häufige Rationalisierungs-Fallen
+## Common rationalization traps
 
-| Aussage | Realität |
-|---------|----------|
-| "Lass uns 200 Backlinks kaufen" | Erhöht Spam-Score, macht Recovery schwerer |
-| "Wir machen einen Relaunch" | Mehr Risiko als Gewinn — erst Substanz, dann Form |
-| "Mit besserer PSI ranken wir wieder" | PSI ist Hygiene, kein Core-Update-Hebel |
-| "Mehr Pages = mehr Traffic" | Falsch — Thin-Content schwächt Authority weiter |
-| "Wir haben doch alles richtig gemacht" | Bei Core Update verändert Google die Bewertung. Recht-haben hilft nicht |
+| Statement | Reality |
+|-----------|---------|
+| "Let's buy 200 backlinks" | Raises spam score, makes recovery harder |
+| "Let's do a relaunch" | More risk than upside — substance first, then form |
+| "Better PSI will bring us back" | PSI is hygiene, not the core update lever |
+| "More pages = more traffic" | False — thin content weakens authority further |
+| "We did everything right" | In a Core Update Google changes the scoring. Being "right" doesn't help. |
 
-## Verwandte Skills
+## Related skills
 
-- **ecommerce-rescue-playbook** — wenn ein eCommerce als Ganzes in Trouble ist (nicht nur Core-Update)
-- **claude-seo:seo-audit** — für die Tech-Hygiene-Schicht in Phase D
-- **claude-seo:seo-cluster** — für Topical-Authority-Hub-Identifikation
-- **seo-outreach-report** — wenn der Inhaber einen ausdruckbaren Status braucht
+- **claude-seo:seo-audit** — for the technical hygiene layer in Phase D
+- **claude-seo:seo-cluster** — for topical-authority-hub identification
+- **seo-outreach-report** — when the owner needs a printable status report
 
-## Reale Datenpunkte (anonymisierte Cases 2026)
+## Real data points (anonymized 2026 cases)
 
-- März/April-Update 2026: Mid-size DE-Shop verlor 50 % VI in 4 Wochen
-- Diagnose-Pattern bestätigt: Brand-Keywords stabil, Generic-Keywords breit verloren, CWV unverändert
-- Recovery-Plan: 6–12 Monate, Authority-First. Tech (PSI/Schema) parallel, aber nicht primärer Hebel.
-- Lesson (Sistrix-Sprachregelung zum März-Update): "Autorität schlägt Austauschbarkeit"
+- March/April 2026 update: mid-size DE shop lost 50 % VI in 4 weeks
+- Diagnosis pattern confirmed: brand keywords stable, generic keywords broadly lost, CWV unchanged
+- Recovery plan: 6–12 months, Authority-First. Tech (PSI/Schema) in parallel but not the primary lever.
+- Lesson (Sistrix wording on March update): "Authority beats interchangeability"
 
-Ein zweiter realer Case (deutsche News-Site) zeigte im April/Mai 2026 das gleiche Pattern: −60 % VI in 6 Wochen, Brand-Stabilität intakt — News-/YMYL-Variante derselben Algo-Recalibration.
+A second real case (DE news site) showed the same pattern in April/May 2026: −60 % VI in 6 weeks, brand stability intact — news/YMYL variant of the same algo recalibration.

@@ -1,108 +1,118 @@
 ---
 name: seo-outreach-report
-description: Use when generating a polished single-PDF outreach pitch or cold-acquisition document for a third-party domain owner — NOT a technical site audit, but a sales-ready, decision-maker-friendly snapshot in plain language for non-SEO-experts (shop owners, founders, executives). Triggers include "send the owner of X.de an SEO snapshot", "outreach pitch", "cold email PDF for prospect", "generate a report for the inhaber/owner", "show X.de their SEO status", "make a PDF for non-technical decision maker about their SEO". USE THIS instead of `claude-seo:seo-audit` when the audience is a non-technical decision-maker and the goal is communication, not technical depth. USE THIS instead of `make-pdf` when the input is a domain (not a markdown file) and you need editorial narrative + Sistrix/DataForSEO/PSI data integrated.
+description: Use when generating a polished single-PDF outreach pitch or cold-acquisition document for a third-party domain owner — NOT a technical site audit, but a sales-ready, decision-maker-friendly snapshot in plain language for non-SEO-experts (shop owners, founders, executives). Triggers include "send the owner of X.de an SEO snapshot", "outreach pitch", "cold email PDF for prospect", "generate a report for the owner", "show X.de their SEO status", "make a PDF for non-technical decision maker about their SEO". USE THIS instead of `claude-seo:seo-audit` when the audience is a non-technical decision-maker and the goal is communication, not technical depth. USE THIS instead of `make-pdf` when the input is a domain (not a markdown file) and you need editorial narrative + Sistrix/DataForSEO/PSI data integrated.
 ---
 
-# SEO-Outreach-Report
+# SEO Outreach Report
 
 ## Overview
 
-Generiert pro Domain einen 10-Kapitel-PDF-Bericht für nicht-technische Entscheider. Datenquellen: Sistrix-VI, DataForSEO Labs (Rankings + Competitors + Backlinks), Google PSI v5 (Lab + CrUX). Rendert via Chrome-Headless ohne Puppeteer.
+Generates a 10-chapter PDF report per domain for non-technical decision-makers. Data sources: Sistrix VI, DataForSEO Labs (rankings + competitors + backlinks), Google PSI v5 (lab + CrUX). Renders via Chrome-headless without puppeteer.
 
-**Output:** `~/Downloads/SEO-Auswertung-<domain>-<YYYY-MM-DD>.pdf` (ca. 1 MB pro Bericht)
+**Output:** `~/Downloads/SEO-Auswertung-<domain>-<YYYY-MM-DD>.pdf` (~1 MB per report)
 
-## Wann anwenden
+## When to use
 
-- Inhaber/Geschäftsführer einer Domain braucht SEO-Klarheit
-- Cold-Outreach an potenzielle Kunden mit datenbasiertem Hook
-- Multi-Domain-Audit für Wettbewerbsanalyse oder Portfolio-Review
-- Du brauchst einen ausdruckbaren, versandbaren Snapshot
+- A shop owner / executive needs SEO clarity
+- Cold outreach to potential clients with a data-driven hook
+- Multi-domain audit for competitive analysis or portfolio review
+- You need a printable, sendable snapshot
 
-**Nicht anwenden für:**
-- Tiefer Technical-SEO-Audit (zu viel Detail, falscher Adressat)
-- Eigene Domain-Optimierung — dann arbeite direkt mit den Daten, kein PDF nötig
-- Reine Keyword-Recherche
+**Don't use for:**
+- Deep technical SEO audit (too much detail, wrong audience)
+- Your own domain optimization — work directly with the data, no PDF needed
+- Pure keyword research
 
-## Pipeline (4 Schritte)
+## Pipeline (4 steps)
 
 ```
-seo-audit-fetch-v2.js  →  /tmp/seo-<slug>-raw.json   (Sistrix + DataForSEO + PSI)
-seo-extract-v2.js      →  /tmp/seo-<slug>-summary.json  (KPIs, Top-Keywords, Quick-Wins)
-seo-onpage.js          →  /tmp/seo-onpage.json       (Title, H1, Schema aus lokalem HTML)
+seo-audit-fetch-v2.js  →  /tmp/seo-<slug>-raw.json     (Sistrix + DataForSEO + PSI)
+seo-extract-v2.js      →  /tmp/seo-<slug>-summary.json (KPIs, top keywords, quick wins)
+seo-onpage.js          →  /tmp/seo-onpage.json         (title, H1, schema from local HTML)
 seo-report-gen.js      →  ~/Downloads/SEO-Auswertung-<domain>-<date>.pdf
 ```
 
-Scripts in diesem Skill-Verzeichnis sind self-contained. Voraussetzung: eine `.env`-Datei (beliebiger Pfad) mit:
+The scripts in this skill folder are self-contained. Prerequisite: a `.env` file (any path) with:
 
 ```
-SISTRIX_API_KEY=...       # https://www.sistrix.de/ (API-Tier braucht mindestens VI-Endpoint)
-DATAFORSEO_LOGIN=...      # https://dataforseo.com/ — Pay-per-call
+SISTRIX_API_KEY=...       # https://www.sistrix.de/ (API tier must include VI endpoint)
+DATAFORSEO_LOGIN=...      # https://dataforseo.com/ — pay-per-call
 DATAFORSEO_PASSWORD=...
-GOOGLE_API_KEY=...        # https://console.cloud.google.com/ → PageSpeed Insights API enablen
+GOOGLE_API_KEY=...        # https://console.cloud.google.com/ — enable PageSpeed Insights API
 ```
 
-Empfohlener Pfad-Konvention: `~/.config/seo-outreach-report/.env` oder `./.env` im Arbeitsverzeichnis. Siehe `.env.example` in diesem Skill-Folder.
+Recommended path convention: `~/.config/seo-outreach-report/.env` or `./.env` in your working directory. See `.env.example` in this skill folder.
 
-## Schnellanleitung (neue Domain hinzufügen)
+## Quick start (adding a new domain)
 
-1. In `seo-audit-fetch-v2.js` neuen Target-Eintrag im `TARGETS`-Map-Lookup:
-   ```js
-   newslug: { domain: 'beispiel.de', host: 'https://beispiel.de/', slug: 'newslug' }
+1. Edit `audit-config.json` (copy from `audit-config.example.json`):
+   ```json
+   {
+     "targets": [
+       { "slug": "newslug", "domain": "example.de", "host": "https://example.de/", "label": "Example Company" }
+     ],
+     "narrative": {
+       "newslug": { "headline": "...", "business_one_liner": "...", "diagnose": [...], "fazit": [...], "action_plan": [...] }
+     }
+   }
    ```
-2. Homepage lokal cachen für On-Page-Analyse: `curl -s -A "Mozilla/5.0..." "https://beispiel.de/" > /tmp/<slug>-home.html`
-3. In `seo-onpage.js` `TARGETS`-Array erweitern, in `seo-report-gen.js` ebenfalls + im `NARRATIVE`-Objekt einen domain-spezifischen Editorial-Block (headline, business_one_liner, diagnose) ergänzen.
-4. In `seo-report-gen.js` → `buildActionPlan` einen `if (slug === 'newslug')`-Branch mit 5–8 Action-Items (sofort/30/60/90) anlegen.
-5. Pipeline laufen lassen:
+
+2. Cache the homepage HTML locally for on-page analysis:
    ```bash
-   ENV_PATH=/path/to/your/.env  # oder ~/.config/seo-outreach-report/.env
-   node --env-file="$ENV_PATH" ~/.claude/skills/seo-outreach-report/seo-audit-fetch-v2.js newslug
-   node ~/.claude/skills/seo-outreach-report/seo-extract-v2.js
-   node ~/.claude/skills/seo-outreach-report/seo-onpage.js
-   node ~/.claude/skills/seo-outreach-report/seo-report-gen.js
+   curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://example.de/" > /tmp/newslug-home.html
    ```
 
-## Report-Aufbau (10 Kapitel)
+3. Run the pipeline:
+   ```bash
+   ENV_PATH=/path/to/your/.env  # or ~/.config/seo-outreach-report/.env
+   node --env-file="$ENV_PATH" seo-audit-fetch-v2.js newslug
+   node seo-extract-v2.js
+   node seo-onpage.js
+   node seo-report-gen.js
+   ```
 
-1. **Cover** mit Headline (datengetrieben)
-2. **Zusammenfassung für Entscheider** — 4 KPI-Tachos + 5 Top-Maßnahmen (priorisiert)
-3. **Bestandsaufnahme** — neutrale Status-Erfassung (kein Bewerten)
-4. **Sichtbarkeit bei Google** — 18-Monats-VI-Chart + Klartext
-5. **Wo Sie heute ranken** — Top-15-KW-Tabelle + Quick-Wins Pos 4–20
-6. **Wettbewerb** — DataForSEO-Competitors mit Klick-Schätzung
-7. **Tempo der Website** — PSI Mobile + Desktop mit Ampel-Tachos
-8. **Was Google von Ihrer Seite versteht** — Schlüsselsignale (Title, Meta, H1, Schema, Bilder)
-9. **Vertrauen + Verlinkungen** — Backlinks-KPIs + Top-RDs
-10. **Fazit** + **Aktionsplan 30/60/90** — pro Item: Was/Warum/Vorgehen/Wer/Kosten/Erwartung
+## Report structure (10 chapters)
 
-## Sprache-Regel
+1. **Cover** with data-driven headline
+2. **Executive summary for decision-makers** — 4 KPI gauges + top 5 prioritized actions
+3. **Status quo** — neutral inventory (no judgment)
+4. **Google visibility over time** — 18-month VI chart + plain-language interpretation
+5. **Where you rank today** — top 15 keywords + quick wins (positions 4–20)
+6. **Competitors** — DataForSEO competitors with click estimates
+7. **Website speed** — PSI mobile + desktop with traffic-light gauges
+8. **What Google understands about your site** — key signals (title, meta, H1, schema, images)
+9. **Trust + backlinks** — backlink KPIs + top referring domains
+10. **Conclusion + action plan 30/60/90 days** — per item: what, why, how, who, cost, expected impact
 
-Für Entscheider ohne SEO-Vorwissen. Keine Abkürzungen unerklärt (LCP/CLS/INP/TBT/CWV → einmal Klartext einleiten). Beispiele für gute Sätze siehe `seo-report-gen.js` → Funktion `lightLCP`, `lightCLS` und die Schlussworte je Domain.
+## Language rule
 
-## Häufige Fallstricke
+Written for decision-makers without SEO knowledge. No unexplained abbreviations (LCP/CLS/INP/TBT/CWV → expand on first mention). For examples of good sentences, see `seo-report-gen.js` → functions `lightLCP`, `lightCLS` and the per-domain conclusion text.
 
-| Problem | Lösung |
-|---------|--------|
-| WebFetch liefert 403 (Cloudflare) | Direkt mit `curl -A "Mozilla/5.0 (Macintosh; ...) Chrome/120.0"` arbeiten |
-| Sistrix-History leer | History-Workaround via 18× Monats-Calls — siehe sistrix-deep-fetch |
-| PSI-Quota erschöpft | `GOOGLE_API_KEY` setzen (PageSpeed Insights API in GCP enablen), nicht ohne Key calls |
-| PDF wirkt zerschnitten | `page-break-before: always` zwischen Kapiteln nicht vergessen + `@page { size: A4 }` |
-| Quick-Wins-Liste leer | Eventuell rankt Domain nicht hoch genug — Filter auf `position > 3 && <= 20 && sv >= 100` lockern |
+## Common pitfalls
 
-## Audit-Verlauf
+| Problem | Solution |
+|---------|----------|
+| WebFetch returns 403 (Cloudflare) | Use `curl -A "Mozilla/5.0 (Macintosh; ...) Chrome/120.0"` directly |
+| Sistrix history empty | History workaround via 18× monthly calls — see `seo-audit-fetch-v2.js` |
+| PSI quota exhausted | Set `GOOGLE_API_KEY` (enable PageSpeed Insights API in GCP), don't call without key |
+| PDF looks cut off | Don't forget `page-break-before: always` between chapters + `@page { size: A4 }` |
+| Quick wins list empty | Domain may not rank high enough — loosen filter from `position > 3 && <= 20 && sv >= 100` |
 
-Erstanwendung 2026-05-21 für vier reale Domains (DE-Matratzen-Shop, Schaumstoff-Hersteller, News-Publisher, Camper-Matratzen-Hersteller). PDFs liefen in unter 5 Minuten Gesamt-Pipeline pro Domain.
+## Audit history
 
-## Alternative Tools (Ahrefs, SEMrush, XOVI, Moz, Majestic, Searchmetrics)
+First use: 2026-05-21 on four real domains (DE mattress shop, foam-cushion manufacturer, news publisher, camper-mattress brand). PDFs ran in under 5 minutes of total pipeline time per domain.
 
-Wenn du **bereits ein anderes SEO-Tool** abonniert hast und nicht extra Sistrix/DataForSEO kaufen willst — siehe [TOOLS.md](./TOOLS.md). Adapter-Pattern für 8+ alternative Tools inkl. Migrations-Beispielen (Sistrix→XOVI, DataForSEO→Ahrefs etc.) und Tool-Vergleichs-Matrix nach Budget-Stufe.
+## Alternative tools (Ahrefs, SEMrush, XOVI, Moz, Majestic, Searchmetrics)
 
-Kurzfassung:
-- **Backlinks:** DataForSEO → Ahrefs/SEMrush/Majestic (Drop-In)
-- **Keywords:** DataForSEO Labs → Ahrefs/SEMrush (Drop-In) oder Sistrix Pro Tier
-- **Visibility:** Sistrix → XOVI (DE) oder Searchmetrics (global)
-- **Crawl:** Standard-Regex → Screaming Frog (MCP verfügbar)
-- **Performance:** PSI v5 (kostenfrei) → Lighthouse CLI als Fallback
+If you **already subscribe to a different SEO tool** and don't want to also pay for Sistrix/DataForSEO — see [TOOLS.md](./TOOLS.md). Adapter patterns for 8+ alternative tools including migration examples (Sistrix→XOVI, DataForSEO→Ahrefs, etc.) and a budget-tier tool comparison matrix.
 
-## Shop-System-spezifische Hinweise
+Short version:
+- **Backlinks:** DataForSEO → Ahrefs/SEMrush/Majestic (drop-in)
+- **Keywords:** DataForSEO Labs → Ahrefs/SEMrush (drop-in) or Sistrix Pro tier
+- **Visibility:** Sistrix → XOVI (DE-focused) or Searchmetrics (global)
+- **Crawl:** standard regex → Screaming Frog (MCP available)
+- **Performance:** PSI v5 (free) → Lighthouse CLI as fallback
 
-Siehe [SHOP-SYSTEMS.md](./SHOP-SYSTEMS.md) für Plattform-spezifische Anbindung — Shopware, Shopify, WooCommerce, Magento, Gambio, JTL, OXID, Webflow, Wix, Squarespace, Custom/Headless. Wo Title/Meta/Schema/Canonicals/Redirects pro System gepflegt werden + bekannte Gotchas.
+## Shop-system specific notes
+
+See [SHOP-SYSTEMS.md](./SHOP-SYSTEMS.md) for platform-specific integration — Shopware, Shopify, WooCommerce, Magento, Gambio, JTL, OXID, Webflow, Wix, Squarespace, Custom/Headless. Where title/meta/schema/canonicals/redirects are maintained per system, plus known gotchas.
