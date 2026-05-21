@@ -340,7 +340,8 @@ cp ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/
 ### Schritt 4 — Homepage-Cache fürs On-Page-Audit
 Pro Domain im audit-config.json:
 ```bash
-curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://your-domain.de/" > /tmp/your-slug-home.html
+CACHE_DIR="${SEO_CACHE_DIR:-$HOME/.cache/seo-rescue}"; mkdir -p "$CACHE_DIR" && chmod 700 "$CACHE_DIR"
+curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://your-domain.de/" > "$CACHE_DIR/your-slug-home.html"
 ```
 (Wobei `your-slug` der `slug`-Wert aus audit-config.json ist)
 
@@ -358,7 +359,7 @@ PDF landet in `~/Downloads/SEO-Auswertung-<domain>-<date>.pdf`.
 ### Schritt 6 — Verifizieren
 1. PDF öffnen, durchlesen aus Inhaber-Perspektive
 2. Werte gegen Search Console quergecheckt (wenn Zugriff)
-3. Bei Anomalien: das Skill verwendet plain JSON in `/tmp/seo-<slug>-summary.json` — manuell prüfen
+3. Bei Anomalien: das Skill verwendet plain JSON in `~/.cache/seo-rescue/<slug>-summary.json` — manuell prüfen
 
 ## Häufige Anbindungs-Fehler
 
@@ -367,8 +368,8 @@ PDF landet in `~/Downloads/SEO-Auswertung-<domain>-<date>.pdf`.
 | `Config not found: ./audit-config.json` | Setze `SEO_AUDIT_CONFIG=/absolute/path/to/audit-config.json` |
 | `Chrome not found at /Applications/...` | Setze `CHROME_PATH=/path/to/chrome` oder installiere Chrome |
 | `Unsafe slug rejected` | Slug-Whitelist: nur `a-z A-Z 0-9 - _`. Anpassen in audit-config.json |
-| `Skip <slug>: /tmp/seo-<slug>-raw.json missing` | Erst Schritt 5 fetch lauf vorher |
-| `Skip <slug>: /tmp/<slug>-home.html missing` | Schritt 4 (Homepage-Cache) ausführen |
+| `Skip <slug>: ~/.cache/seo-rescue/<slug>-raw.json missing` | Erst Schritt 5 fetch lauf vorher |
+| `Skip <slug>: ~/.cache/seo-rescue/<slug>-home.html missing` | Schritt 4 (Homepage-Cache) ausführen |
 | `Skip <slug>: no narrative entry` | In audit-config.json `narrative.<slug>` mit allen Pflicht-Feldern ergänzen |
 | Sistrix `error_code: 5001` | Tier zu niedrig — Sistrix Toolbox API Tier upgraden |
 | DataForSEO `401 Unauthorized` | Login (Email) statt Dashboard-Passwort? Du brauchst das **API Password** aus dem Account-Settings |

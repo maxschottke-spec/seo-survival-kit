@@ -1,16 +1,18 @@
 'use strict';
 // Extracts on-page signals (title, meta, H1, schema, CMS, image-alt) from locally cached
-// homepage HTML files. Expects `/tmp/<slug>-home.html` to exist for each target.
-//
-// To cache homepage HTML for a domain:
-//   curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://example.com/" > /tmp/<slug>-home.html
+// homepage HTML files. Expects `<cache-dir>/<slug>-home.html` to exist for each target.
+// Cache dir defaults to ~/.cache/seo-rescue/ (per-user, 0700 perms), overridable via
+// SEO_CACHE_DIR env var. Use `node -e 'console.log(require("../../lib/safe.js").getCacheDir())'`
+// to print the active path, then cache homepage HTML for a domain:
+//   curl -s -A "Mozilla/5.0 (...) Chrome/120.0" "https://example.com/" > <cache-dir>/<slug>-home.html
 
 const fs = require('node:fs');
+const { safeSlug, validateConfigTargets, safeReadFile, cachePath, writeFileExclusive } = require('../../lib/safe.js');
 
 const CONFIG_PATH = process.env.SEO_AUDIT_CONFIG || './audit-config.json';
 if (!fs.existsSync(CONFIG_PATH)) { console.error(`Config not found: ${CONFIG_PATH}`); process.exit(1); }
-const CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-const TARGETS = CONFIG.targets;
+const CONFIG = JSON.parse(safeReadFile(CONFIG_PATH));
+const TARGETS = validateConfigTargets(CONFIG.targets || []);
 
 function extract(html) {
   const out = {};
@@ -68,11 +70,14 @@ function extract(html) {
 
 const result = {};
 for (const t of TARGETS) {
-  const file = `/tmp/${t.slug}-home.html`;
-  if (!fs.existsSync(file)) { console.error(`Skip ${t.slug}: ${file} missing — cache the homepage first with curl`); continue; }
-  const html = fs.readFileSync(file, 'utf8');
-  result[t.slug] = extract(html);
-  const r = result[t.slug];
-  console.error(`[${t.slug}] title="${r.title}" h1=${r.h1_count} schema=${r.schema_types.join(',')} cms=${r.cms} img=${r.img_total} (no-alt=${r.img_no_alt}) words=${r.word_count}`);
+  const slug = safeSlug(t.slug);
+  const file = cachePath(slug, '-home.html');
+  if (!fs.existsSync(file)) { console.error(`Skip ${slug}: ${file} missing — cache the homepage first with curl`); continue; }
+  const html = safeReadFile(file, 50 * 1024 * 1024); // 50 MB cap for raw HTML
+  result[slug] = extract(html);
+  const r = result[slug];
+  console.error(`[${slug}] title="${r.title}" h1=${r.h1_count} schema=${r.schema_types.join(',')} cms=${r.cms} img=${r.img_total} (no-alt=${r.img_no_alt}) words=${r.word_count}`);
 }
-fs.writeFileSync('/tmp/seo-onpage.json', JSON.stringify(result, null, 2));
+const outPath = cachePath('seo-onpage', '.json');
+try { fs.unlinkSync(outPath); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+writeFileExclusive(outPath, JSON.stringify(result, null, 2));

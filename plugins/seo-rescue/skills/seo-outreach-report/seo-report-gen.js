@@ -12,19 +12,23 @@
 // Run: node seo-report-gen.js [slug,slug,...]   (defaults to all targets)
 
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
-const { execSync } = require('node:child_process');
+const { spawnSync } = require('node:child_process');
+const { safeSlug, validateConfigTargets, safeReadFile, cachePath, mkRunDir, writeFileExclusive } = require('../../lib/safe.js');
 
 const CONFIG_PATH = process.env.SEO_AUDIT_CONFIG || './audit-config.json';
 if (!fs.existsSync(CONFIG_PATH)) { console.error(`Config not found: ${CONFIG_PATH}`); process.exit(1); }
-const CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-const filterSlugs = (process.argv[2] || '').split(',').filter(Boolean);
+const CONFIG = JSON.parse(safeReadFile(CONFIG_PATH));
+validateConfigTargets(CONFIG.targets || []);
+const filterSlugs = (process.argv[2] || '').split(',').filter(Boolean).map(safeSlug);
 const TARGETS = filterSlugs.length
   ? CONFIG.targets.filter(t => filterSlugs.includes(t.slug))
   : CONFIG.targets;
 
-const ONPAGE_ALL = fs.existsSync('/tmp/seo-onpage.json')
-  ? JSON.parse(fs.readFileSync('/tmp/seo-onpage.json', 'utf8'))
+const ONPAGE_PATH = cachePath('seo-onpage', '.json');
+const ONPAGE_ALL = fs.existsSync(ONPAGE_PATH)
+  ? JSON.parse(safeReadFile(ONPAGE_PATH))
   : {};
 
 const OUTPUT_DIR = process.env.SEO_PDF_OUTPUT_DIR || `${process.env.HOME}/Downloads`;
@@ -32,16 +36,23 @@ const OUTPUT_DIR = process.env.SEO_PDF_OUTPUT_DIR || `${process.env.HOME}/Downlo
 const CHROME_PATH = process.env.CHROME_PATH
   || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
-// Slug validator — prevents shell injection in execSync below.
-// Slugs come from a JSON config file the user controls, but we still validate.
-function safeSlug(s) {
-  if (!/^[a-z0-9][a-z0-9_-]{0,63}$/i.test(s)) {
-    throw new Error(`Unsafe slug rejected: ${JSON.stringify(s)}`);
-  }
-  return s;
+// HTML-escape: covers & < > " ' ` to make output safe inside both double- and
+// single-quoted attributes plus template-literal-style backticks. The PDF is
+// rendered by Chrome with a strict <meta CSP> below, but defense-in-depth here
+// matters because tool API responses (DataForSEO backlink rows, schema_types
+// extracted from third-party HTML) can carry attacker-controlled strings.
+function esc(s) {
+  return s == null ? '' : String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
 }
-
-function esc(s) { return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// Numeric coercion — for fields that the pipeline expects as numbers but which
+// could be replaced by hostile strings if the cache file was tampered with.
+function num(v) { return Number.isFinite(+v) ? +v : 0; }
 function trunc(s, n) { if (!s) return '—'; return s.length > n ? s.slice(0,n-1)+'…' : s; }
 function formatVI(v) { return v != null ? v.toFixed(4) : '—'; }
 function formatPct(v) { return v != null ? (v >= 0 ? '+' : '') + v + '%' : '—'; }
@@ -118,14 +129,14 @@ function posBars(dist) {
   }).join('');
 }
 
-function renderReport(target) {
+function renderReport(target, runDir) {
   const slug = safeSlug(target.slug);
-  const summaryPath = `/tmp/seo-${slug}-summary.json`;
+  const summaryPath = cachePath(slug, '-summary.json');
   if (!fs.existsSync(summaryPath)) {
     console.error(`Skip ${slug}: ${summaryPath} missing — run seo-extract-v2.js first`);
     return null;
   }
-  const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+  const summary = JSON.parse(safeReadFile(summaryPath));
   const onpage = ONPAGE_ALL[slug] || {};
   const narrative = (CONFIG.narrative || {})[slug];
   if (!narrative) {
@@ -143,7 +154,11 @@ function renderReport(target) {
   const actions = narrative.action_plan || [];
 
   // ---- HTML ----
-  const html = `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>SEO-Auswertung ${esc(target.domain)}</title><style>
+  // Strict CSP: no scripts, no iframes, no remote loads, no plugins. Even if a
+  // string slips past esc() and emits e.g. <iframe src="file://...">, the CSP
+  // header below blocks it — Chrome will refuse to load the frame and the
+  // attacker can't exfiltrate local files into the rendered PDF.
+  const html = `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'"><title>SEO-Auswertung ${esc(target.domain)}</title><style>
 @page { size: A4; margin: 18mm 16mm; }
 * { box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: #111827; line-height: 1.55; font-size: 10.5pt; margin: 0; }
@@ -278,13 +293,13 @@ ${(() => {
 
 <h3>Inhalte und Auszeichnung</h3>
 <div class="bestand-grid">
-  <div class="bestand-row"><div class="label">Seitentitel</div><div class="value">${onpage.title_len === 0 ? 'FEHLT' : onpage.title_len < 30 ? 'sehr kurz ('+onpage.title_len+' Z.)' : onpage.title_len > 65 ? 'zu lang ('+onpage.title_len+' Z.)' : onpage.title_len+' Zeichen — ok'}</div></div>
-  <div class="bestand-row"><div class="label">Meta-Beschreibung</div><div class="value">${onpage.meta_desc_len === 0 ? 'FEHLT' : onpage.meta_desc_len < 80 ? 'zu kurz' : onpage.meta_desc_len > 165 ? 'zu lang' : onpage.meta_desc_len+' Zeichen — ok'}</div></div>
-  <div class="bestand-row"><div class="label">H1-Hauptüberschrift</div><div class="value">${onpage.h1_count === 0 ? 'FEHLT' : onpage.h1_count === 1 ? '1 (ideal)' : onpage.h1_count + ' (sollte 1 sein)'}</div></div>
-  <div class="bestand-row"><div class="label">H2-Unterüberschriften</div><div class="value">${onpage.h2_count}</div></div>
-  <div class="bestand-row"><div class="label">Textumfang</div><div class="value">${formatNumber(onpage.word_count)} Wörter</div></div>
-  <div class="bestand-row"><div class="label">Bilder (gesamt / ohne Alt)</div><div class="value">${onpage.img_total} / ${onpage.img_no_alt}</div></div>
-  <div class="bestand-row"><div class="label">Strukturierte Daten</div><div class="value">${(onpage.schema_types || []).length === 0 ? 'KEINE' : onpage.schema_types.join(', ')}</div></div>
+  <div class="bestand-row"><div class="label">Seitentitel</div><div class="value">${(() => { const n = num(onpage.title_len); return n === 0 ? 'FEHLT' : n < 30 ? 'sehr kurz ('+n+' Z.)' : n > 65 ? 'zu lang ('+n+' Z.)' : n+' Zeichen — ok'; })()}</div></div>
+  <div class="bestand-row"><div class="label">Meta-Beschreibung</div><div class="value">${(() => { const n = num(onpage.meta_desc_len); return n === 0 ? 'FEHLT' : n < 80 ? 'zu kurz' : n > 165 ? 'zu lang' : n+' Zeichen — ok'; })()}</div></div>
+  <div class="bestand-row"><div class="label">H1-Hauptüberschrift</div><div class="value">${(() => { const n = num(onpage.h1_count); return n === 0 ? 'FEHLT' : n === 1 ? '1 (ideal)' : n + ' (sollte 1 sein)'; })()}</div></div>
+  <div class="bestand-row"><div class="label">H2-Unterüberschriften</div><div class="value">${num(onpage.h2_count)}</div></div>
+  <div class="bestand-row"><div class="label">Textumfang</div><div class="value">${formatNumber(num(onpage.word_count))} Wörter</div></div>
+  <div class="bestand-row"><div class="label">Bilder (gesamt / ohne Alt)</div><div class="value">${num(onpage.img_total)} / ${num(onpage.img_no_alt)}</div></div>
+  <div class="bestand-row"><div class="label">Strukturierte Daten</div><div class="value">${(onpage.schema_types || []).length === 0 ? 'KEINE' : esc((onpage.schema_types || []).join(', '))}</div></div>
 </div>
 
 <div class="page-break"></div>
@@ -358,9 +373,9 @@ ${(summary.d4s_competitors || []).slice(0,8).map((c,i) => `<tr><td>${i+1}</td><t
 <div class="signal-grid">
   <div class="signal ${onpage.title_len < 30 || onpage.title_len > 65 ? 'bad' : 'good'}"><div class="l">Seitentitel</div><div class="v">${esc(trunc(onpage.title, 80))} <small>(${onpage.title_len} Z.)</small></div></div>
   <div class="signal ${onpage.meta_desc_len === 0 ? 'bad' : onpage.meta_desc_len < 80 ? 'warn' : 'good'}"><div class="l">Meta-Beschreibung</div><div class="v">${onpage.meta_desc ? esc(trunc(onpage.meta_desc, 120)) : '<span style="color:#ef4444">— FEHLT —</span>'}</div></div>
-  <div class="signal ${onpage.h1_count === 1 ? 'good' : 'bad'}"><div class="l">H1-Hauptüberschrift</div><div class="v">${onpage.h1_count} H1${onpage.h1_count === 0 ? ' <span style="color:#ef4444">— FEHLT</span>' : onpage.h1_count > 1 ? ' <span style="color:#f59e0b">— sollte 1 sein</span>' : ''}</div></div>
+  <div class="signal ${num(onpage.h1_count) === 1 ? 'good' : 'bad'}"><div class="l">H1-Hauptüberschrift</div><div class="v">${num(onpage.h1_count)} H1${num(onpage.h1_count) === 0 ? ' <span style="color:#ef4444">— FEHLT</span>' : num(onpage.h1_count) > 1 ? ' <span style="color:#f59e0b">— sollte 1 sein</span>' : ''}</div></div>
   <div class="signal ${(onpage.schema_types || []).length >= 3 ? 'good' : (onpage.schema_types || []).length > 0 ? 'warn' : 'bad'}"><div class="l">Strukturierte Daten</div><div class="v">${(onpage.schema_types || []).length ? esc(onpage.schema_types.join(', ')) : '<span style="color:#ef4444">— KEINE —</span>'}</div></div>
-  <div class="signal ${onpage.img_no_alt / Math.max(1, onpage.img_total) > 0.3 ? 'bad' : onpage.img_no_alt > 0 ? 'warn' : 'good'}"><div class="l">Bilder ohne Bildbeschreibung</div><div class="v">${onpage.img_no_alt} von ${onpage.img_total} (${Math.round(onpage.img_no_alt / Math.max(1, onpage.img_total) * 100)} %)</div></div>
+  <div class="signal ${num(onpage.img_no_alt) / Math.max(1, num(onpage.img_total)) > 0.3 ? 'bad' : num(onpage.img_no_alt) > 0 ? 'warn' : 'good'}"><div class="l">Bilder ohne Bildbeschreibung</div><div class="v">${num(onpage.img_no_alt)} von ${num(onpage.img_total)} (${Math.round(num(onpage.img_no_alt) / Math.max(1, num(onpage.img_total)) * 100)} %)</div></div>
   <div class="signal ${onpage.canonical ? 'good' : 'bad'}"><div class="l">Kanonische URL</div><div class="v">${onpage.canonical ? esc(trunc(onpage.canonical, 60)) : '<span style="color:#ef4444">FEHLT</span>'}</div></div>
 </div>
 
@@ -378,7 +393,7 @@ ${(summary.top_referring_domains || []).length ? `<h3>Top verlinkende Domains</h
 <table>
 <thead><tr><th>Domain</th><th class="text-r">Rank</th><th class="text-r">Backlinks</th><th>seit</th></tr></thead>
 <tbody>
-${summary.top_referring_domains.slice(0,12).map(d => `<tr><td class="mono">${esc(d.domain)}</td><td class="text-r">${d.rank ?? '—'}</td><td class="text-r">${formatNumber(d.backlinks)}</td><td>${(d.first_seen||'').slice(0,10)}</td></tr>`).join('')}
+${summary.top_referring_domains.slice(0,12).map(d => `<tr><td class="mono">${esc(d.domain)}</td><td class="text-r">${d.rank == null ? '—' : num(d.rank)}</td><td class="text-r">${formatNumber(d.backlinks)}</td><td>${esc(String(d.first_seen || '').slice(0,10))}</td></tr>`).join('')}
 </tbody></table>` : ''}
 
 <div class="page-break"></div>
@@ -408,26 +423,56 @@ ${actions.map(a => {
 
 </body></html>`;
 
-  // Write HTML to tmp folder (safe path)
-  const tmpHtmlPath = path.join('/tmp', `seo-report-${slug}.html`);
+  // Write HTML into the per-run isolated tmp dir created by main(). The dir was
+  // freshly mkdtempSync'd, mode 0700 — no other local user could pre-create a
+  // symlink there, so writeFileSync is safe without O_EXCL.
+  const tmpHtmlPath = path.join(runDir, `seo-report-${slug}.html`);
   fs.writeFileSync(tmpHtmlPath, html);
 
   // Construct safe PDF path. `target.domain` may contain dots; we sanitize for filename.
-  const fileSafeDomain = (target.domain || slug).replace(/[^a-z0-9.-]/gi, '-');
+  const fileSafeDomain = String(target.domain || slug).replace(/[^a-z0-9.-]/gi, '-');
   const pdfPath = path.join(OUTPUT_DIR, `SEO-Auswertung-${fileSafeDomain.replace(/\./g,'-')}-${new Date().toISOString().slice(0,10)}.pdf`);
 
-  // execSync with safe arguments — Chrome path comes from env (validate exists), html/pdf paths are tmp+OUTPUT_DIR
-  // Use array form? execSync supports string only — but we control all inputs above via safeSlug and sanitization.
   if (!fs.existsSync(CHROME_PATH)) {
     throw new Error(`Chrome not found at ${CHROME_PATH}. Set CHROME_PATH env var to your Chrome binary.`);
   }
-  // Quote paths to handle spaces (Chrome.app has spaces)
-  const cmd = `"${CHROME_PATH}" --headless --disable-gpu --print-to-pdf=${JSON.stringify(pdfPath)} --no-pdf-header-footer "file://${tmpHtmlPath}"`;
-  execSync(cmd, { stdio: 'pipe' });
+  // spawnSync with array form bypasses the shell entirely — CHROME_PATH, paths
+  // with spaces, $VARs, semicolons, quotes etc. are passed as literal argv
+  // entries. Plus --user-data-dir points at our isolated runDir so the headless
+  // render never touches the user's real Chrome profile/cookies/extensions.
+  const chromeArgs = [
+    '--headless=new',
+    '--disable-gpu',
+    '--no-default-browser-check',
+    '--no-first-run',
+    `--user-data-dir=${path.join(runDir, 'chrome-profile')}`,
+    `--print-to-pdf=${pdfPath}`,
+    '--no-pdf-header-footer',
+    `file://${tmpHtmlPath}`,
+  ];
+  const result = spawnSync(CHROME_PATH, chromeArgs, { stdio: 'pipe', shell: false, timeout: 120_000 });
+  if (result.status !== 0) {
+    throw new Error(`Chrome render failed (exit ${result.status}): ${result.stderr?.toString().slice(0, 500)}`);
+  }
   console.error(`[${slug}] -> ${pdfPath}`);
   return pdfPath;
 }
 
-const outs = TARGETS.map(renderReport).filter(Boolean);
-console.log('PDFs created:');
-outs.forEach(p => console.log(' -', p));
+function main() {
+  const runDir = mkRunDir('seo-rescue-render-');
+  let cleanup = true;
+  try {
+    if (process.env.SEO_KEEP_RUN_DIR === '1') cleanup = false;
+    const outs = TARGETS.map(t => renderReport(t, runDir)).filter(Boolean);
+    console.log('PDFs created:');
+    outs.forEach(p => console.log(' -', p));
+  } finally {
+    if (cleanup) {
+      try { fs.rmSync(runDir, { recursive: true, force: true }); } catch (e) { /* best effort */ }
+    } else {
+      console.error(`Run dir kept: ${runDir}`);
+    }
+  }
+}
+
+main();

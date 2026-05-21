@@ -4,7 +4,14 @@ This guide gets you from installing the plugin to generating your first decision
 
 ## Step 1 — Install the plugin (1 min)
 
-In Claude Code:
+In Claude Code, **pinned to a tag** (recommended — see [SECURITY.md](./SECURITY.md#recommended-install-pinned-to-a-tag-or-commit)):
+```
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.2.0
+/plugin install seo-rescue@seo-survival-kit
+/reload-plugins
+```
+
+Or always-latest (less safe — a maintainer-account compromise propagates on next reload):
 ```
 /plugin marketplace add maxschottke-spec/seo-survival-kit
 /plugin install seo-rescue@seo-survival-kit
@@ -15,9 +22,13 @@ Verify:
 ```
 /plugin
 ```
-You should see `seo-rescue` in the Installed tab with two skills:
+You should see `seo-rescue` in the Installed tab with all six skills:
+- `seo-audit-free`
 - `post-core-update-recovery`
 - `seo-outreach-report`
+- `channel-economics-analyzer`
+- `competitor-deep-audit`
+- `psi-weekly-cron-baseline`
 
 ## Step 2 — Decide if you need the API setup (2 min)
 
@@ -150,7 +161,7 @@ After 3+ entries confirming a pattern, consolidate it into the main SKILL.md. Th
 ## Cost-conscious workflow tips
 
 1. **Batch domain audits** — fetch raw data once, render PDF multiple times (re-render is free)
-2. **Cache `/tmp/seo-*-raw.json`** between runs — pipeline reuses if files exist (currently always overwrites; you can manually back up)
+2. **Cache `~/.cache/seo-rescue/<slug>-raw.json`** between runs — pipeline reuses if files exist (currently always overwrites; you can manually back up). Override path with `SEO_CACHE_DIR=...`
 3. **Skip Sistrix history if budget tight** — comment out the 18 monthly calls in `seo-audit-fetch-v2.js` to save ~17 Sistrix credits per domain
 4. **Test on your own domain first** before running on prospects, so you don't accidentally spend $5 because of a config typo
 
