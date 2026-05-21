@@ -1,0 +1,43 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "seo-rescue-skills",
+  "owner": {
+    "name": "maxschottke-spec",
+    "url": "https://github.com/maxschottke-spec"
+  },
+  "metadata": {
+    "description": "SEO rescue, outreach and beginner-audit skills for Claude Code. Three focused skills: a free-tools beginner SEO audit (no paid APIs needed), a 6–12 month Google Core Update recovery playbook, and a polished decision-maker-friendly PDF outreach report (Sistrix + DataForSEO + PSI pipeline)."
+  },
+  "plugins": [
+    {
+      "name": "seo-rescue",
+      "source": "./plugins/seo-rescue",
+      "description": "Three complementary SEO skills built from real 2026 recovery cases — a free-tools beginner audit (Google Search Console + PageSpeed + Lighthouse + manual checks), a post-Core-Update Authority-First recovery framework, and a 10-chapter outreach-ready PDF report generator for non-technical site owners. Complements existing audit-focused skills like claude-seo with a rescue-and-communication angle. Includes paid (Sistrix/DataForSEO) and free-tier workflows.",
+      "author": {
+        "name": "Max Schottke",
+        "url": "https://github.com/maxschottke-spec"
+      },
+      "category": "marketing",
+      "homepage": "https://github.com/maxschottke-spec/seo-rescue-skills",
+      "keywords": [
+        "seo",
+        "ecommerce",
+        "core-update",
+        "google-update",
+        "recovery",
+        "outreach",
+        "pdf-report",
+        "sistrix",
+        "dataforseo",
+        "pagespeed",
+        "rescue",
+        "authority",
+        "e-e-a-t",
+        "free-tools",
+        "beginner",
+        "lighthouse",
+        "search-console"
+      ]
+    }
+  ]
+}

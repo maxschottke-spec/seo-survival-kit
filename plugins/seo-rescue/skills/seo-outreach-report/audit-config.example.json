@@ -1,0 +1,47 @@
+{
+  "comment": "Copy to audit-config.json (gitignored) and fill in real targets. Each target gets a corresponding entry in 'narrative' keyed by slug.",
+  "targets": [
+    {
+      "slug": "client-a",
+      "domain": "example-client-a.de",
+      "host": "https://www.example-client-a.de/",
+      "label": "Example Client A — what they do"
+    }
+  ],
+  "narrative": {
+    "client-a": {
+      "headline": "One-sentence editorial headline driven by the data — appears on the PDF cover",
+      "business_one_liner": "What does this company do in one neutral sentence (1 line, max 25 words).",
+      "diagnose": [
+        "First paragraph: What is the overall state? Use plain language for non-SEO readers.",
+        "Second paragraph: What is the central finding? Be specific (numbers, percentages).",
+        "Third paragraph: What is the implication? What should the owner understand?"
+      ],
+      "fazit": [
+        "First paragraph: Overall verdict in plain language. What went well, what is broken.",
+        "Second paragraph: What it would take to fix. Realistic timeline + cost range.",
+        "Third paragraph: The one thing to do first. Make it concrete."
+      ],
+      "action_plan": [
+        {
+          "when": "sofort",
+          "what": "Concrete title of the action",
+          "why": "Why does this matter — what breaks if not done",
+          "how": "Specific steps to execute",
+          "who": "Who should do this (role, not person)",
+          "cost": "Time or € estimate",
+          "impact": "What changes after this is done + timeline"
+        },
+        {
+          "when": "30 Tage",
+          "what": "Next priority",
+          "why": "...",
+          "how": "...",
+          "who": "...",
+          "cost": "...",
+          "impact": "..."
+        }
+      ]
+    }
+  }
+}
