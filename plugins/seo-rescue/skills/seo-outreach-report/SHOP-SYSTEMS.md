@@ -318,22 +318,22 @@ Diese Schritte funktionieren immer, unabhängig vom Shop-System:
 
 ### Schritt 1 — Plugin installieren
 ```
-/plugin marketplace add maxschottke-spec/seo-rescue-skills
-/plugin install seo-rescue@seo-rescue-skills
+/plugin marketplace add maxschottke-spec/seo-survival-kit
+/plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
 
 ### Schritt 2 — Credentials einrichten
 ```bash
 mkdir -p ~/.config/seo-rescue
-cp ~/.claude/plugins/cache/maxschottke-spec-seo-rescue-skills/plugins/seo-rescue/skills/seo-outreach-report/.env.example ~/.config/seo-rescue/.env
+cp ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/.env.example ~/.config/seo-rescue/.env
 chmod 600 ~/.config/seo-rescue/.env
 # .env editieren und API-Keys eintragen
 ```
 
 ### Schritt 3 — Audit-Config für deine Domains
 ```bash
-cp ~/.claude/plugins/cache/maxschottke-spec-seo-rescue-skills/plugins/seo-rescue/skills/seo-outreach-report/audit-config.example.json ./audit-config.json
+cp ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/audit-config.example.json ./audit-config.json
 # audit-config.json editieren — targets + narrative pro Slug
 ```
 
@@ -347,10 +347,10 @@ curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 ### Schritt 5 — Pipeline laufen lassen
 ```bash
 ENV_PATH=~/.config/seo-rescue/.env
-node --env-file="$ENV_PATH" ~/.claude/plugins/cache/maxschottke-spec-seo-rescue-skills/plugins/seo-rescue/skills/seo-outreach-report/seo-audit-fetch-v2.js
-node ~/.claude/plugins/cache/maxschottke-spec-seo-rescue-skills/plugins/seo-rescue/skills/seo-outreach-report/seo-extract-v2.js
-node ~/.claude/plugins/cache/maxschottke-spec-seo-rescue-skills/plugins/seo-rescue/skills/seo-outreach-report/seo-onpage.js
-node ~/.claude/plugins/cache/maxschottke-spec-seo-rescue-skills/plugins/seo-rescue/skills/seo-outreach-report/seo-report-gen.js
+node --env-file="$ENV_PATH" ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/seo-audit-fetch-v2.js
+node ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/seo-extract-v2.js
+node ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/seo-onpage.js
+node ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/seo-report-gen.js
 ```
 
 PDF landet in `~/Downloads/SEO-Auswertung-<domain>-<date>.pdf`.

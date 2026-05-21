@@ -1,9 +1,15 @@
-# SEO Rescue Skills for Claude Code
+# SEO Survival Kit for Claude Code
 
-> Six focused SEO + e-commerce skills built from real 2026 recovery cases — for the moments when a website is in trouble and the owner doesn't know SEO well enough to fix it themselves.
+> Six focused SEO skills built from real 2026 recovery cases — for any website owner who needs to understand what's wrong, what to fix, and how to talk about it to non-technical stakeholders. **E-commerce, publishers, SaaS, services, agencies — same workflow.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
+
+## What's new
+
+- **Renamed** from `seo-rescue-skills` to `seo-survival-kit` (2026-05-22) — better captures the scope: rescue + survival + growth across the post-AI-Overview 2026 SERP landscape. See [ROADMAP-2026.md](./ROADMAP-2026.md) for how the skills are positioned for Google's announced direction.
+- **6 skills** covering free-tier audit → recovery framework → outreach reports → channel economics → competitor gaps → automated PSI tracking.
+- **Smoke-tested** on 10 diverse domains across 7 categories (e-commerce, news, SaaS, comparison, content/UGC, services, travel) — pipeline works domain-agnostically.
 
 ## See it in action
 
@@ -15,13 +21,26 @@ Full sample PDF: [examples/sample-audit.pdf](./examples/sample-audit.pdf) (1 MB,
 
 ## What this is
 
-Most SEO Claude Code skills focus on **audits and implementation**. This plugin focuses on the three scenarios audits don't fully address:
+Most SEO Claude Code skills focus on **audits and implementation**. This plugin focuses on the scenarios audits don't fully address:
 
 1. **You have no budget** for SEO tools and want a quick health check using only Google's free tools
 2. **A website got hit by a Google Core Update** — what's actually happening, and how to recover over 6–12 months
-3. **You want to send a non-technical site owner a polished SEO report** as outreach or audit handoff — without writing it manually
+3. **You want to send a non-technical site owner a polished SEO report** — outreach pitch, client handoff, founder briefing, board-level snapshot
+4. **You need to know which channel actually makes money** (Amazon vs OTTO vs direct shop) and which to drop
+5. **You need a real competitor analysis** that catches the actual organic competitors, not who you think competes
+6. **You need automated weekly performance tracking** to catch regressions before customers do
 
-If you're already running [claude-seo](https://github.com/AgriciDaniel/claude-seo) for technical audits, this complements it with the **free-tier entry path**, the **rescue framing**, and the **decision-maker communication layer**.
+If you're already running [claude-seo](https://github.com/AgriciDaniel/claude-seo) for technical audits, this complements it with the **free-tier entry path**, the **rescue framing**, the **decision-maker communication layer**, and **multi-channel financial perspective**.
+
+**Who uses this:**
+- 🏪 E-commerce shop owners and operators
+- 📰 News publishers and content sites
+- 💼 SaaS founders and growth teams
+- 🛎️ Service businesses (agencies, consultants, freelancers)
+- 🏥 YMYL sites (healthcare, finance, legal) — Authority-First recovery framework is especially relevant
+- 🤝 SEO agencies and freelancers doing cold outreach
+
+The skills are domain-type-agnostic. The example data in `examples/` happens to be an e-commerce sample, but the workflow works identically for a B2B SaaS or a news site.
 
 ## The six skills
 
@@ -94,8 +113,8 @@ Automated weekly PageSpeed Insights tracking with regression detection. Runs as 
 ## Installation
 
 ```shell
-/plugin marketplace add maxschottke-spec/seo-rescue-skills
-/plugin install seo-rescue@seo-rescue-skills
+/plugin marketplace add maxschottke-spec/seo-survival-kit
+/plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
 

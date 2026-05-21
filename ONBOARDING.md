@@ -6,8 +6,8 @@ This guide gets you from installing the plugin to generating your first decision
 
 In Claude Code:
 ```
-/plugin marketplace add maxschottke-spec/seo-rescue-skills
-/plugin install seo-rescue@seo-rescue-skills
+/plugin marketplace add maxschottke-spec/seo-survival-kit
+/plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
 
@@ -63,7 +63,7 @@ Realistic spend: **€0.05 – €0.50 per domain audit** plus your Sistrix subs
 Copy the template:
 ```bash
 mkdir -p ~/.config/seo-rescue
-cp ~/.claude/plugins/cache/maxschottke-spec-seo-rescue-skills/plugins/seo-rescue/skills/seo-outreach-report/.env.example ~/.config/seo-rescue/.env
+cp ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/.env.example ~/.config/seo-rescue/.env
 chmod 600 ~/.config/seo-rescue/.env   # owner-only read/write
 ```
 
@@ -160,7 +160,7 @@ After 3+ entries confirming a pattern, consolidate it into the main SKILL.md. Th
 - **Cost details:** [COSTS.md](./COSTS.md)
 - **Security questions:** [SECURITY.md](./SECURITY.md)
 - **Maturity reality check:** [MATURITY.md](./MATURITY.md)
-- **Bugs / feature requests:** [Open an issue](https://github.com/maxschottke-spec/seo-rescue-skills/issues)
+- **Bugs / feature requests:** [Open an issue](https://github.com/maxschottke-spec/seo-survival-kit/issues)
 
 ## What you should expect
 

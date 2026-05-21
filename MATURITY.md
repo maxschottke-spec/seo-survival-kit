@@ -29,7 +29,7 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 | [aaron-he-zhu/seo-geo-claude-skills](https://github.com/aaron-he-zhu/seo-geo-claude-skills) | 1.7k | Mature | 20 skills around keyword research + content writing + technical audits + rank tracking | **Use for ongoing content/keyword work.** |
 | [zubair-trabzada/dataforseo-claude](https://github.com/zubair-trabzada/dataforseo-claude) | 79 | Newer | DataForSEO-focused with 13 skills + 5 subagents | Good if DataForSEO is your main data source. |
 | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | 12.9k | Very mature | Marketing stack (CRO, copy, paid ads, SEO) — broader scope | Use for marketing breadth, not deep SEO. |
-| **[maxschottke-spec/seo-rescue-skills](https://github.com/maxschottke-spec/seo-rescue-skills) (this)** | 0 | **0.1, brand new** | Core-Update recovery framework + outreach-PDF pipeline | **Use when** the situation is recovery / cold-outreach. Complements above. |
+| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | 0 | **0.1, brand new** | Core-Update recovery framework + outreach-PDF pipeline | **Use when** the situation is recovery / cold-outreach. Complements above. |
 
 ## What's actually unique here
 

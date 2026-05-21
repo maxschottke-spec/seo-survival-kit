@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "seo-rescue-skills",
+  "name": "seo-survival-kit",
   "owner": {
     "name": "maxschottke-spec",
     "url": "https://github.com/maxschottke-spec"
@@ -18,7 +18,7 @@
         "url": "https://github.com/maxschottke-spec"
       },
       "category": "marketing",
-      "homepage": "https://github.com/maxschottke-spec/seo-rescue-skills",
+      "homepage": "https://github.com/maxschottke-spec/seo-survival-kit",
       "keywords": [
         "seo",
         "ecommerce",

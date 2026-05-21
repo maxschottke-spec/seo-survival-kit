@@ -76,7 +76,7 @@ This applies to ALL plugins, not just this one. Anthropic's docs are explicit ab
 1. Read the source before installing. This repo is intentionally small (2 skills, 4 scripts, ~1000 lines total).
 2. Pin to a specific git commit if you want reproducibility:
    ```
-   /plugin marketplace add maxschottke-spec/seo-rescue-skills#<commit-sha>
+   /plugin marketplace add maxschottke-spec/seo-survival-kit#<commit-sha>
    ```
 3. Use the `local` installation scope if you only need it in one repo.
 
