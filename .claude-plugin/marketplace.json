@@ -6,13 +6,13 @@
     "url": "https://github.com/maxschottke-spec"
   },
   "metadata": {
-    "description": "SEO rescue, outreach and beginner-audit skills for Claude Code. Three focused skills: a free-tools beginner SEO audit (no paid APIs needed), a 6–12 month Google Core Update recovery playbook, and a polished decision-maker-friendly PDF outreach report (Sistrix + DataForSEO + PSI pipeline)."
+    "description": "Six focused SEO + e-commerce skills for Claude Code, built from real 2026 recovery cases. Includes free-tools beginner audit, post-Core-Update recovery playbook, decision-maker PDF outreach report, channel economics analyzer (Amazon/OTTO/Shop profitability), competitor deep audit (DataForSEO-powered keyword-gap analysis), and PSI weekly cron baseline (automated performance regression detection)."
   },
   "plugins": [
     {
       "name": "seo-rescue",
       "source": "./plugins/seo-rescue",
-      "description": "Three complementary SEO skills built from real 2026 recovery cases — a free-tools beginner audit (Google Search Console + PageSpeed + Lighthouse + manual checks), a post-Core-Update Authority-First recovery framework, and a 10-chapter outreach-ready PDF report generator for non-technical site owners. Complements existing audit-focused skills like claude-seo with a rescue-and-communication angle. Includes paid (Sistrix/DataForSEO) and free-tier workflows.",
+      "description": "Six complementary SEO and e-commerce skills built from real 2026 recovery cases. Covers free-tools beginner audit, post-Core-Update Authority-First recovery, 10-chapter PDF outreach report (Sistrix + DataForSEO + PSI), marketplace channel economics analyzer (Amazon/OTTO/Shop break-even per channel), competitor deep audit with keyword-gap analysis, and PSI weekly cron baseline for performance regression detection. Complements existing audit-focused skills like claude-seo with rescue-framing, decision-maker communication, channel-level financial analysis, and free-tier workflows.",
       "author": {
         "name": "Max Schottke",
         "url": "https://github.com/maxschottke-spec"
@@ -36,7 +36,16 @@
         "free-tools",
         "beginner",
         "lighthouse",
-        "search-console"
+        "search-console",
+        "channel-economics",
+        "marketplace",
+        "amazon",
+        "otto",
+        "competitor-analysis",
+        "keyword-gap",
+        "psi-baseline",
+        "core-web-vitals",
+        "cron"
       ]
     }
   ]

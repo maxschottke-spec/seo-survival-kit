@@ -1,0 +1,33 @@
+{
+  "period_days": 90,
+  "channels": [
+    {
+      "name": "direct-shop",
+      "label": "Own shop",
+      "fee_rate": 0.029,
+      "fee_label": "Payment provider 2.9 %",
+      "currency": "EUR"
+    },
+    {
+      "name": "amazon-de",
+      "label": "Amazon DE",
+      "fee_rate": 0.15,
+      "fee_label": "Referral fee + FBA",
+      "currency": "EUR"
+    },
+    {
+      "name": "otto",
+      "label": "OTTO Marketplace",
+      "fee_rate": 0.11,
+      "fee_label": "Verkaufsprovision",
+      "currency": "EUR"
+    },
+    {
+      "name": "ebay",
+      "label": "eBay",
+      "fee_rate": 0.11,
+      "fee_label": "Final value fee",
+      "currency": "EUR"
+    }
+  ]
+}

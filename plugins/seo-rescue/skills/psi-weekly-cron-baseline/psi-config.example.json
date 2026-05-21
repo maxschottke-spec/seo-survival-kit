@@ -1,0 +1,13 @@
+{
+  "strategies": ["mobile", "desktop"],
+  "categories": ["performance", "seo", "accessibility", "best-practices"],
+  "output_dir": "./psi-history",
+  "alert_threshold_drop": 10,
+  "alert_baseline_weeks": 4,
+  "urls": [
+    { "label": "homepage", "url": "https://example.com/" },
+    { "label": "main-category", "url": "https://example.com/products/" },
+    { "label": "top-product", "url": "https://example.com/products/bestseller/" },
+    { "label": "checkout", "url": "https://example.com/checkout/" }
+  ]
+}

@@ -1,6 +1,6 @@
 # SEO Rescue Skills for Claude Code
 
-> Three focused skills built from real 2026 SEO recovery cases — for the moments when a website is in trouble and the owner doesn't know SEO well enough to fix it themselves.
+> Six focused SEO + e-commerce skills built from real 2026 recovery cases — for the moments when a website is in trouble and the owner doesn't know SEO well enough to fix it themselves.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
@@ -23,7 +23,7 @@ Most SEO Claude Code skills focus on **audits and implementation**. This plugin 
 
 If you're already running [claude-seo](https://github.com/AgriciDaniel/claude-seo) for technical audits, this complements it with the **free-tier entry path**, the **rescue framing**, and the **decision-maker communication layer**.
 
-## The three skills
+## The six skills
 
 ### `seo-audit-free`
 
@@ -72,6 +72,24 @@ End-to-end pipeline that produces a polished A4 PDF SEO snapshot per domain — 
 10. Conclusion + 30/60/90-day action plan (per item: what, why, how, who, cost, expected impact)
 
 PDF is ~1 MB per domain. Full pipeline runs in under 5 minutes per domain.
+
+### `channel-economics-analyzer`
+
+Channel-level P&L calculator for multi-channel e-commerce businesses (Amazon, OTTO, eBay, direct shop). Per channel: revenue, COGS, fees, ad-spend, operating margin, break-even order count. Tells you which channel is profitable and which is bleeding money.
+
+**Use when** you sell across multiple marketplaces and want to know which to scale, hold, or wind down. Output: channel scorecard with traffic-light status and concrete action thresholds.
+
+### `competitor-deep-audit`
+
+DataForSEO-powered competitor analysis. Identifies the **real** organic competitors (not who the owner thinks), then computes keyword-gap-analysis: keywords where competitors rank top-10 but you don't, sorted by opportunity score (search volume × competitor density).
+
+**Use when** planning content roadmaps or doing a new SEO mandate intake. Output: 30–50-item prioritized opportunity list per competitor audit. Cost: ~$0.10–$0.50 per audit.
+
+### `psi-weekly-cron-baseline`
+
+Automated weekly PageSpeed Insights tracking with regression detection. Runs as launchd/systemd/GitHub-Actions cron, stores history as NDJSON, alerts when scores drop > threshold vs N-week baseline. **Free** (uses PSI v5 free quota).
+
+**Use when** you've done performance optimization and want to make sure it sticks — or when third-party plugins/themes have a history of silently breaking performance.
 
 ## Installation
 
