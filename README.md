@@ -13,11 +13,21 @@
 
 ## See it in action
 
-Sample report generated with synthetic data — same layout you get for a real domain:
+### Sample outreach report
+
+Same layout you get for a real domain — decision-maker-friendly, 10 chapters, ~1 MB PDF:
 
 ![Sample SEO Report — Cover & Executive Summary](./examples/screenshots/01-cover-executive-summary.png)
 
-Full sample PDF: [examples/sample-audit.pdf](./examples/sample-audit.pdf) (1 MB, 10 pages)
+Full sample PDF: [examples/sample-audit.pdf](./examples/sample-audit.pdf)
+
+### The use case: extreme Core-Update crash
+
+This is the pattern these skills are built for — years of stable visibility, then a sharp −60% drop in 2-3 weeks after a published Google Core Update. Owner did nothing wrong. Recovery is now a 6–12 month authority-rebuild, not a tech fix:
+
+![Core Update Crash Use Case](./examples/screenshots/02-core-update-crash-case.png)
+
+See [ROADMAP-2026.md](./ROADMAP-2026.md) for documented public cases (HouseFresh, Glenn Gabe 2023-24, Dec 2025 retailer, Retro Dodo) and how Google's 2026 search direction shapes the recovery playbook.
 
 ## What this is
 
