@@ -42,6 +42,53 @@ Datierte Lern-Einträge aus realen PDF-Generierungen. Format: `## YYYY-MM-DD —
 
 ---
 
+## 2026-05-21 — Redirect-CSV case-insensitive Loop-Bug
+
+**Kontext:** Bei der Massenerzeugung von 301-Redirects über das DreiscSeoPro-Plugin in Shopware.
+
+**Befund:** DreiscSeoPro matcht Redirects **case-insensitive**. Wenn Source und Target sich nur in Groß-/Kleinschreibung unterscheiden (z.B. `/Produkt/X` → `/produkt/X`), entsteht ein infinite 301-Loop, der die Seite faktisch unerreichbar macht.
+
+**Konsequenz für die Pipeline:** Vor jeder CSV-Generierung mit Redirects (relevant für Outreach-Berichte die Redirect-Listen empfehlen) ist ein expliziter **Case-Check** Pflicht:
+```js
+if (source.toLowerCase() === target.toLowerCase()) {
+  throw new Error(`Case-only difference creates loop: ${source} -> ${target}`);
+}
+```
+
+Diese Falle gilt für alle Shopware-Redirect-Plugins die case-insensitive arbeiten — nicht nur DreiscSeoPro. **Konsequenz für SHOP-SYSTEMS.md:** Hinweis ist schon drin, könnte aber prominenter werden.
+
+**Quelle:** Verapur DreiscSeoPro Redirect-Setup, Mai 2026.
+
+## 2026-05-21 — CMS-Block-Custom-HTML zerschießt Shopware-Seiten
+
+**Kontext:** Versuch, FAQ-Schema via `cms-block type=text` als Custom-HTML in Shopware-Lattenrost-Pages zu injecten.
+
+**Befund:** Shopware's CMS-Block-Editor (Block-Type "text") **filtert/escapet Custom-HTML** unvorhersehbar. 4 Lattenrost-Pages wurden mit Custom-HTML zerschossen, mussten gerollbackt werden.
+
+**Konsequenz:**
+- **Niemals** Custom-HTML via `cms-block type=text` einbringen
+- Stattdessen: Shopware-native Block-Types nutzen ODER Theme-Twig-Template für Schema-Injection ODER ein spezialisiertes Schema-Plugin (DreiscSeoPro, NetInventors)
+
+**Konsequenz für SHOP-SYSTEMS.md:** Bereits drin als Hinweis bei Shopware, könnte als eigenständiger Warnkasten markiert werden.
+
+**Quelle:** Verapur Lattenrost-Schema-Injection-Versuch 2026-05-21 (Rollback dokumentiert).
+
+## 2026-05-21 — CTR-Rewrites wirken schneller als Authority-Maßnahmen
+
+**Kontext:** Recovery-Tracking 4 Wochen nach Beginn (verapur, post März-Core-Update).
+
+**Befund:** Title-/Meta-Description-Rewrites zeigen messbare CTR-Wirkung auf bestehenden Rankings binnen 1–3 Wochen. Backlink-/Content-Authority-Maßnahmen brauchen 3–4 Monate für erste sichtbare VI-Bewegung.
+
+**Konsequenz:** Im Outreach-Report-Aktionsplan sollte folgende Reihenfolge stehen:
+1. CTR-Hebel (Title, Meta, Snippets) → sofort, in 4 Wochen sichtbar
+2. Authority-Hebel (Content, Backlinks) → mittel-/langfristig
+
+**Konsequenz für SKILL.md:** Bereits implizit drin (sofort > 30 > 60 > 90 Tage), könnte aber expliziter werden ("schneller Sieg vs strukturelle Recovery").
+
+**Quelle:** Verapur Recovery-Tracking Mai 2026.
+
+---
+
 ## Konsolidierte Lessons (aus 3+ Einträgen ins Hauptskill übernommen)
 
 _(noch leer — Einträge werden hierhin verschoben wenn Pattern stabilisiert ist)_
