@@ -26,11 +26,13 @@ Generates a 10-chapter PDF report per domain for non-technical decision-makers. 
 ## Pipeline (4 steps)
 
 ```
-seo-audit-fetch-v2.js  →  /tmp/seo-<slug>-raw.json     (Sistrix + DataForSEO + PSI)
-seo-extract-v2.js      →  /tmp/seo-<slug>-summary.json (KPIs, top keywords, quick wins)
-seo-onpage.js          →  /tmp/seo-onpage.json         (title, H1, schema from local HTML)
+seo-audit-fetch-v2.js  →  ~/.cache/seo-rescue/<slug>-raw.json     (Sistrix + DataForSEO + PSI)
+seo-extract-v2.js      →  ~/.cache/seo-rescue/<slug>-summary.json (KPIs, top keywords, quick wins)
+seo-onpage.js          →  ~/.cache/seo-rescue/seo-onpage.json     (title, H1, schema from local HTML)
 seo-report-gen.js      →  ~/Downloads/SEO-Auswertung-<domain>-<date>.pdf
 ```
+
+Cache directory `~/.cache/seo-rescue/` is created mode `0700` (owner-only). Override with `SEO_CACHE_DIR=/path` if needed.
 
 The scripts in this skill folder are self-contained. Prerequisite: a `.env` file (any path) with:
 
@@ -57,9 +59,11 @@ Recommended path convention: `~/.config/seo-outreach-report/.env` or `./.env` in
    }
    ```
 
-2. Cache the homepage HTML locally for on-page analysis:
+2. Cache the homepage HTML locally for on-page analysis (cache dir is auto-created):
    ```bash
-   curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://example.de/" > /tmp/newslug-home.html
+   CACHE_DIR="${SEO_CACHE_DIR:-$HOME/.cache/seo-rescue}"
+   mkdir -p "$CACHE_DIR" && chmod 700 "$CACHE_DIR"
+   curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://example.de/" > "$CACHE_DIR/newslug-home.html"
    ```
 
 3. Run the pipeline:

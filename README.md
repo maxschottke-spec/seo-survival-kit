@@ -122,11 +122,21 @@ Automated weekly PageSpeed Insights tracking with regression detection. Runs as 
 
 ## Installation
 
+**Recommended — pinned to a tag (reproducible, survives upstream changes):**
+```shell
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.2.0
+/plugin install seo-rescue@seo-survival-kit
+/reload-plugins
+```
+
+Always-latest (less safe — a maintainer-account compromise would propagate on next reload):
 ```shell
 /plugin marketplace add maxschottke-spec/seo-survival-kit
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
+
+See [SECURITY.md](./SECURITY.md#how-to-verify-before-trusting) for how to verify a pinned version before installing.
 
 ## ⚠️ Before you run anything — read these
 

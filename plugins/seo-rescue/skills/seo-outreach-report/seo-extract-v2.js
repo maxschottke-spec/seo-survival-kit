@@ -4,19 +4,22 @@
 // Run: node seo-extract-v2.js [slug,slug,...]
 
 const fs = require('node:fs');
+const { safeSlug, validateConfigTargets, safeReadFile, cachePath, writeFileExclusive } = require('../../lib/safe.js');
 
 const CONFIG_PATH = process.env.SEO_AUDIT_CONFIG || './audit-config.json';
 if (!fs.existsSync(CONFIG_PATH)) { console.error(`Config not found: ${CONFIG_PATH}`); process.exit(1); }
-const CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-const filterSlugs = (process.argv[2] || '').split(',').filter(Boolean);
+const CONFIG = JSON.parse(safeReadFile(CONFIG_PATH));
+validateConfigTargets(CONFIG.targets || []);
+const filterSlugs = (process.argv[2] || '').split(',').filter(Boolean).map(safeSlug);
 const TARGETS = filterSlugs.length
   ? CONFIG.targets.filter(t => filterSlugs.includes(t.slug))
   : CONFIG.targets;
 
 function summarize(t) {
-  const rawPath = `/tmp/seo-${t.slug}-raw.json`;
-  if (!fs.existsSync(rawPath)) { console.error(`Skip ${t.slug}: ${rawPath} missing — run seo-audit-fetch-v2.js first`); return; }
-  const raw = JSON.parse(fs.readFileSync(rawPath, 'utf8'));
+  const slug = safeSlug(t.slug);
+  const rawPath = cachePath(slug, '-raw.json');
+  if (!fs.existsSync(rawPath)) { console.error(`Skip ${slug}: ${rawPath} missing — run seo-audit-fetch-v2.js first`); return; }
+  const raw = JSON.parse(safeReadFile(rawPath));
   const o = { ...t };
 
   // Sistrix VI current
@@ -130,8 +133,10 @@ function summarize(t) {
     };
   }
 
-  fs.writeFileSync(`/tmp/seo-${t.slug}-summary.json`, JSON.stringify(o, null, 2));
-  console.error(`[${t.slug}] VI=${o.vi_current} kw=${o.d4s_kw_total} rd=${o.backlinks.referring_domains} psi-m=${o.psi_mobile?.perf}/${o.psi_mobile?.seo}`);
+  const outPath = cachePath(slug, '-summary.json');
+  try { fs.unlinkSync(outPath); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+  writeFileExclusive(outPath, JSON.stringify(o, null, 2));
+  console.error(`[${slug}] VI=${o.vi_current} kw=${o.d4s_kw_total} rd=${o.backlinks.referring_domains} psi-m=${o.psi_mobile?.perf}/${o.psi_mobile?.seo}`);
 }
 
 for (const t of TARGETS) summarize(t);

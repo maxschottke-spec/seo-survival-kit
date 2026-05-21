@@ -18,7 +18,7 @@ Running 50 outreach audits ≈ $2.50 – $25 plus your Sistrix subscription cost
 
 ## How to keep costs low
 
-1. **Re-use cached data** — the pipeline saves raw JSON to `/tmp/seo-<slug>-raw.json`. If you re-render only the PDF (`seo-report-gen.js`), no API costs.
+1. **Re-use cached data** — the pipeline saves raw JSON to `~/.cache/seo-rescue/<slug>-raw.json` (mode 0700, per-user). If you re-render only the PDF (`seo-report-gen.js`), no API costs.
 2. **Skip Sistrix history** if you only need the current VI — comment out the 18 monthly calls in `seo-audit-fetch-v2.js` if budget is tight.
 3. **Batch domains in one pipeline run** — fixed overhead is the same, marginal cost per domain stays predictable.
 4. **DataForSEO has a free trial** with $1 credit on signup — enough for ~5–20 audits to start.

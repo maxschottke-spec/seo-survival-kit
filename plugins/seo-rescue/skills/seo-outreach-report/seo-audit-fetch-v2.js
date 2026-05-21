@@ -10,6 +10,7 @@
 //   SEO_AUDIT_CONFIG=/path/cfg.json node --env-file=.env ...    # alternate config path
 
 const fs = require('node:fs');
+const { safeSlug, validateConfigTargets, safeReadFile, cachePath, writeFileExclusive } = require('../../lib/safe.js');
 
 const SISTRIX_KEY = process.env.SISTRIX_API_KEY;
 const D4S_LOGIN = process.env.DATAFORSEO_LOGIN;
@@ -21,8 +22,8 @@ if (!fs.existsSync(CONFIG_PATH)) {
   console.error(`Config not found: ${CONFIG_PATH}\nCopy audit-config.example.json to audit-config.json and customize.`);
   process.exit(1);
 }
-const CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-const ALL_TARGETS = CONFIG.targets || [];
+const CONFIG = JSON.parse(safeReadFile(CONFIG_PATH));
+const ALL_TARGETS = validateConfigTargets(CONFIG.targets || []);
 
 const filterSlugs = (process.argv[2] || '').split(',').filter(Boolean);
 const TARGETS = filterSlugs.length
@@ -95,9 +96,12 @@ async function fetchOne(target) {
   out.dataforseo = { ranked: d4sRanked, backlinks: d4sBacklinks, domain_info: d4sDomainInfo, competitors: d4sCompetitors, ref_domains: d4sBacklinkDomains };
   out.psi = { mobile: psiMobile, desktop: psiDesktop };
 
-  const outFile = `/tmp/seo-${target.slug}-raw.json`;
-  fs.writeFileSync(outFile, JSON.stringify(out));
-  console.error(`[${target.slug}] -> ${outFile} (${fs.statSync(outFile).size} bytes)`);
+  const slug = safeSlug(target.slug);
+  const outFile = cachePath(slug, '-raw.json');
+  // Unlink first so a pre-existing symlink can't redirect our write.
+  try { fs.unlinkSync(outFile); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+  writeFileExclusive(outFile, JSON.stringify(out));
+  console.error(`[${slug}] -> ${outFile} (${fs.statSync(outFile).size} bytes)`);
 }
 
 (async () => {
