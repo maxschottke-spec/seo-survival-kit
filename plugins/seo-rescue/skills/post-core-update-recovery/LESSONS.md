@@ -75,6 +75,24 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 
 ---
 
+## 2026-05-22 — AI-Citations als vorgelagerter Recovery-Indikator (DE-Matratzen-Shop)
+
+**Kontext:** 8 Wochen nach March-Core-Update-Hit. Sistrix-VI noch unten (~0.06 vs Pre-Update 0.13), aber Sistrix UI zeigt frische **+22% Trend** + neue AI-Citation-Metriken in der Toolbox.
+
+**Befund:**
+- Klassischer VI hängt hinter der Realität ~3-5 Tage (API vs UI), Recovery-Indikator dort: +22% Trend trotz absoluter Niedrigwerte
+- **AI Citations sind explosiv:** 153 Google AI Mode + 121 Google AI Overviews + 22 ChatGPT = **296 AI-Surface-Erwähnungen** trotz niedrigem klassischen VI
+- 8+ Authority-Cluster-Keywords ranken Pos 1 ("matratzenhersteller deutschland", "deutsche matratzenhersteller", "matratzen-hersteller deutschland", "komfortschaum", "normale matratzengröße", etc.)
+- Erste sichtbare Bewegung nach 8 Wochen — Framework sagte 3-4 Monate
+
+**Konsequenz:** Pattern "AI Citations vorgelagerter Indikator" könnte das Recovery-Tracking-Modell erweitern. Hypothese: Google testet im AI Mode neue Authority-Signale, die später in den klassischen Index durchschlagen. **Tracking-Empfehlung für künftige Recoveries:** zusätzlich zu Sistrix-VI auch AI-Citation-Counts (Sistrix-Toolbox-Metrik seit 2026) wöchentlich pullen.
+
+**Konsequenz für SKILL.md:** "Realistische Expectations"-Sektion sollte ergänzt werden um AI-Citations als positiven Frühindikator — wenn die hochgehen, ist der klassische VI 2-3 Monate später dran.
+
+**Quelle:** Verapur Sistrix-Toolbox 2026-05-22 (User-Screenshot der UI).
+
+---
+
 ## Konsolidierte Lessons (aus 3+ Einträgen ins Hauptskill übernommen)
 
 _(noch leer)_
