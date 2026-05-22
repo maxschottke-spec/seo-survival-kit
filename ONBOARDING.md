@@ -73,6 +73,8 @@ Realistic spend: **€0.05 – €0.50 per domain audit** plus your Sistrix subs
 
 ## Step 4 — Set up your `.env` file (2 min)
 
+The instructions below assume macOS or Linux. Windows users: see [Step 4w](#step-4w--windows-equivalent) below.
+
 Copy the template:
 ```bash
 mkdir -p ~/.config/seo-rescue
@@ -89,6 +91,63 @@ GOOGLE_API_KEY=<your-psi-key>
 ```
 
 **Do NOT commit this file to git.** The plugin's `.gitignore` covers it within the repo, but make sure your own working directory's `.gitignore` also ignores `.env`.
+
+### Step 4w — Windows equivalent
+
+PowerShell (run as your normal user, not Administrator):
+
+```powershell
+$env:USERPROFILE | % { New-Item -ItemType Directory -Path "$_\.config\seo-rescue" -Force | Out-Null }
+$src = "$env:USERPROFILE\.claude\plugins\cache\maxschottke-spec-seo-survival-kit\plugins\seo-rescue\skills\seo-outreach-report\.env.example"
+$dst = "$env:USERPROFILE\.config\seo-rescue\.env"
+Copy-Item $src $dst
+
+# ACL: owner-only read/write (Windows equivalent of chmod 600)
+$acl = Get-Acl $dst
+$acl.SetAccessRuleProtection($true, $false)   # disable inheritance, do not copy parent rules
+$me = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+$rule = New-Object Security.AccessControl.FileSystemAccessRule($me, 'FullControl', 'Allow')
+$acl.SetAccessRule($rule)
+Set-Acl $dst $acl
+```
+
+Then edit `%USERPROFILE%\.config\seo-rescue\.env` with the same key=value lines as the macOS/Linux version above.
+
+### Cross-platform env vars for the pipeline scripts
+
+The pipeline scripts use sensible Unix defaults that fall back to env vars on any platform. Set these explicitly on Windows (and override on Linux if your distro deviates):
+
+| Env var | macOS default | Linux default | Windows recommendation |
+|---|---|---|---|
+| `CHROME_PATH` | `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` | `/usr/bin/google-chrome` (or `/usr/bin/chromium`) | `C:\Program Files\Google\Chrome\Application\chrome.exe` |
+| `SEO_CACHE_DIR` | `~/.cache/seo-rescue/` | `~/.cache/seo-rescue/` | `$env:LOCALAPPDATA\seo-rescue\cache` |
+| `SEO_PDF_OUTPUT_DIR` | `~/Downloads/` | `~/Downloads/` | `$env:USERPROFILE\Downloads` |
+| `SEO_AUDIT_CONFIG` | `./audit-config.json` | `./audit-config.json` | `.\audit-config.json` |
+| `PSI_CONFIG` | `./psi-config.json` | `./psi-config.json` | `.\psi-config.json` |
+
+PowerShell export (per-session):
+```powershell
+$env:CHROME_PATH = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+$env:SEO_CACHE_DIR = "$env:LOCALAPPDATA\seo-rescue\cache"
+$env:SEO_PDF_OUTPUT_DIR = "$env:USERPROFILE\Downloads"
+```
+
+PowerShell persistent (per-user):
+```powershell
+[Environment]::SetEnvironmentVariable("CHROME_PATH", "C:\Program Files\Google\Chrome\Application\chrome.exe", "User")
+```
+
+Bash export (`.zshrc` / `.bashrc`):
+```bash
+export CHROME_PATH="/usr/bin/google-chrome"   # Linux
+# macOS uses the default, no export needed
+```
+
+**Cross-platform caveats (verified known limitations):**
+
+- `lib/safe.js` calls `fs.chmodSync(dir, 0o700)` on the cache dir. On Windows this is a no-op — the directory inherits its parent ACL. If you're on a shared Windows box, set ACLs manually on `$env:LOCALAPPDATA\seo-rescue` to your user only (same pattern as the `.env` example above).
+- The PDF output uses `path.join` so separator handling is correct on Windows. The PDF filename never contains backslashes.
+- `psi-weekly-cron-baseline` documents launchd (macOS) and crontab (Linux). On Windows use Task Scheduler — see Microsoft's `schtasks /create` docs.
 
 ## Step 5 — Verify the framework skill works
 
