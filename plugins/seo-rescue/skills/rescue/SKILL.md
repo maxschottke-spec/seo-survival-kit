@@ -1,13 +1,13 @@
 ---
 name: rescue
-description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the seven sub-skills covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, and AI search rescue. Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
+description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the nine sub-skills covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, AI search rescue, AI citations tracker (NEW v0.4 — weekly cron measuring brand citations in ChatGPT/Perplexity/AI Overviews), and GSC deep-dive (NEW v0.4 — one-call Google Search Console API snapshot). Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
 user-invokable: true
 argument-hint: '[subcommand] [domain-or-args]'
 allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.3'
+  version: '0.4.0'
   category: marketing
 ---
 
@@ -28,6 +28,8 @@ This is the entry point for the seo-rescue plugin. It routes to seven specialize
 | `/seo-rescue:rescue competitors <domain>` | DataForSEO competitor + keyword-gap audit (alias for `/seo-rescue:competitor-deep-audit`) |
 | `/seo-rescue:rescue psi-baseline` | Set up weekly PSI cron baseline (alias for `/seo-rescue:psi-weekly-cron-baseline`) |
 | `/seo-rescue:rescue ai-search <domain>` | AI search visibility recovery (alias for `/seo-rescue:ai-search-rescue`) |
+| `/seo-rescue:rescue ai-citations` | Track AI citations weekly (alias for `/seo-rescue:ai-citations-tracker`) |
+| `/seo-rescue:rescue gsc <domain> [days?]` | One-call Google Search Console snapshot (alias for `/seo-rescue:gsc-deep-dive`) |
 | `/seo-rescue:rescue help` | Show this routing table |
 
 ## When to use which

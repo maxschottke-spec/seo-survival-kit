@@ -2,6 +2,42 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] — 2026-05-22
+
+### Added — two new skills (the two leading-indicator + convenience picks from the strategic roadmap)
+
+- **`ai-citations-tracker`** — weekly cron job that fires a configurable brand-mention prompt set against ChatGPT (OpenAI API) and Perplexity (Sonar API), parses each answer for brand vs competitor mentions, and appends NDJSON history for trend analysis. Same architecture pattern as `psi-weekly-cron-baseline`. Default cost: ~$0.10/year of OpenAI credits + Perplexity free tier. Manual workflow documented for Google AI Mode / AI Overviews / Bing Copilot / Claude.ai (no stable public APIs yet). Tracks the leading-indicator pattern from `post-core-update-recovery` LESSONS (2026-05-22 entry: AI citation counts often move 2–6 weeks before classical Sistrix VI recovers).
+- **`gsc-deep-dive`** — one-call Google Search Console API snapshot. Pulls top queries, top pages, query-page pairs, search-appearance breakdown (incl. AI Overview impressions where GSC exposes them), and derives a summary with Quick-Win opportunity counts (pos 11-20 + >100 impressions). Authenticates via service-account JWT (zero npm deps, manual RS256 sign instead of pulling `googleapis`). Removes the manual GSC click-through that is the friction point of every recovery / audit session.
+
+### Added — monetization-funnel surface (docs only)
+
+- **README "Need help running this on your own site?" section** — explicit consulting CTA between Contributors and Status. Three engagement formats (Recovery Audit / Recovery Begleitung retainer / Outreach pipeline setup) with rationale (the maintainer ran the framework on a real Core-Update case, paying for a session = getting context on which patterns apply to your specific situation). Contact via GitHub Discussions or maintainer profile. Calendly link slot reserved.
+
+### Changed
+
+- **`rescue` orchestrator** updated routing table with the two new sub-aliases: `/seo-rescue:rescue ai-citations` and `/seo-rescue:rescue gsc <domain>`.
+- **`plugin.json` + `marketplace.json` descriptions** updated to "Nine SEO skills + orchestrator" with the new slash commands embedded inline for catalog discoverability (same convention as v0.3.1).
+- **All 10 SKILL.md frontmatter `version` lifted to `0.4.0`** (8 existing + 2 new — full alignment with plugin.json).
+
+### Security notes for the new skills
+
+Both new scripts follow the post-Round-1-audit hardening conventions established in v0.3.2:
+
+- API keys env-only (`OPENAI_API_KEY`, `PERPLEXITY_API_KEY`, `GSC_SERVICE_ACCOUNT_JSON`); hard-fail if config file contains a key field.
+- Validate-at-load + trust-at-use for every config field (prompts as string arrays with length cap, competitors as hostname-shaped strings, surfaces as enum allowlist, site identifier with strict regex covering both `sc-domain:` and URL-prefix formats).
+- All AI-surface responses (untrusted!) pass through the same 12-pattern `sanitize()` defense as `seo-onpage.js`. GSC `query` field gets the same treatment (Google indexes attacker-controllable search strings).
+- Hardcoded network destinations only: `api.openai.com`, `api.perplexity.ai`, `oauth2.googleapis.com`, `searchconsole.googleapis.com`, `www.googleapis.com/pagespeedonline/v5`. No SSRF possible from config.
+- NDJSON / JSON output files get `chmod 0o600` on first write (same defense as v0.3.3 L3).
+- Symlink-clobber defense (`lstat` + unlink-if-symlink) on the GSC snapshot output path (same pattern as v0.3.3 L5).
+
+### Upgrade notes
+
+No breaking changes. Existing v0.3.x install commands keep working. The two new skills are opt-in — install + ignore them if you don't need AI-citation tracking or direct GSC access. The README CTA is purely additive.
+
+```
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.0
+```
+
 ## [0.3.3] — 2026-05-22
 
 ### Changed (polish-pass from Round 1 audit's LOW-severity list)
