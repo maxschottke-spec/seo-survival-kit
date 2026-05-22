@@ -128,7 +128,12 @@ for (const t of TARGETS) {
   const html = safeReadFile(file, 50 * 1024 * 1024); // 50 MB cap for raw HTML
   result[slug] = extract(html);
   const r = result[slug];
-  console.error(`[${slug}] title="${r.title}" h1=${r.h1_count} schema=${r.schema_types.join(',')} cms=${r.cms} img=${r.img_total} (no-alt=${r.img_no_alt}) words=${r.word_count}`);
+  // r.title and r.cms are scraped from third-party HTML. sanitize() already
+  // length-caps and pattern-filters them, but CR/LF would still break stderr
+  // log parsing — strip them inline before logging.
+  const safeTitle = String(r.title || '').replace(/[\r\n]/g, ' ');
+  const safeCms = String(r.cms || '').replace(/[\r\n]/g, ' ');
+  console.error(`[${slug}] title="${safeTitle}" h1=${r.h1_count} schema=${r.schema_types.join(',')} cms=${safeCms} img=${r.img_total} (no-alt=${r.img_no_alt}) words=${r.word_count}`);
 }
 const outPath = cachePath('seo-onpage', '.json');
 try { fs.unlinkSync(outPath); } catch (e) { if (e.code !== 'ENOENT') throw e; }

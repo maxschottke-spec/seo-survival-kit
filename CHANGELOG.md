@@ -2,6 +2,21 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.3.3] — 2026-05-22
+
+### Changed (polish-pass from Round 1 audit's LOW-severity list)
+
+- **`lib/safe.js → getCacheDir`** — added an explicit cross-platform note. `fs.chmodSync` is a no-op on NTFS (Windows uses ACLs, not POSIX mode bits); the comment points users at the ONBOARDING PowerShell snippet for the equivalent ACL hardening when running on shared Windows boxes. Behavior unchanged on macOS/Linux.
+- **`psi-fetch.example.js`** — NDJSON history file now `chmod 0o600` on first write (best-effort, no-op on Windows). Previously inherited the default umask (typically `0644 = world-readable`), which leaked per-domain perf history to other local users on shared boxes.
+- **`seo-report-gen.js`** — symlink-clobber defense on the PDF output path. Before Chrome's `--print-to-pdf` writes, an `lstatSync` checks whether `pdfPath` already exists as a symlink. If yes (e.g. an attacker planted `~/Downloads/SEO-Auswertung-foo.pdf -> /etc/something` between runs), it's unlinked first so the next write lands on a real file owned by the running user. ENOENT is the expected path on fresh systems and is ignored.
+- **`competitor-deep-audit.example.js`** — stderr log line stripping CR/LF from `c.domain` (DataForSEO API response) plus a 253-char cap. Defense against log injection if an attacker-controlled SERP entry contained embedded newlines. Low real-world likelihood, free hardening.
+- **`seo-onpage.js`** — same CR/LF strip applied to `r.title` and `r.cms` in the per-target stderr summary. `sanitize()` already length-caps and pattern-filters those fields, but CR/LF wasn't a sanitize() concern — separate fix for log-parsing safety.
+- **`seo-audit-free/SKILL.md`** — security note added at the start of Schritt 4 about writing to `/tmp/` on shared-host environments. Default behavior (Solo-Workstation) is safe; the note shows the `mktemp -d` + `trap rm` pattern for shared-host or server environments.
+
+### Why not v0.4
+
+Each item is a non-functional hardening of code that already worked correctly under normal use. No skill behavior changes, no SKILL.md trigger-phrase changes, no plugin-manifest surface changes. Existing v0.3.2 installs upgrade transparently.
+
 ## [0.3.2] — 2026-05-22
 
 ### Added (security hardening from external audit Round 1 — see SECURITY.md → External security reviews)

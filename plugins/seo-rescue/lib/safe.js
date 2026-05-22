@@ -102,6 +102,14 @@ function mkRunDir(prefix = 'seo-rescue-') {
 // home.html). Replaces world-writable /tmp/. Created with 0700 perms; refused if
 // the path is a symlink (defeats symlink-mounted-dir attacks).
 // Override via SEO_CACHE_DIR env var; default ~/.cache/seo-rescue/.
+//
+// CROSS-PLATFORM NOTE — Windows: fs.chmodSync is a no-op on NTFS (Node ignores
+// the mode argument because POSIX mode bits don't map to ACLs). The mode 0o700
+// passed to mkdirSync + the try/chmodSync are kept for macOS/Linux. On Windows,
+// the cache dir inherits its parent's ACL; if you run on a shared box, set
+// ACLs manually on $env:LOCALAPPDATA\seo-rescue\cache to your user only — see
+// ONBOARDING.md "Cross-platform env vars for the pipeline scripts" for the
+// PowerShell snippet that does this for .env files (same pattern applies here).
 function getCacheDir() {
   const dir = process.env.SEO_CACHE_DIR || path.join(os.homedir(), '.cache', 'seo-rescue');
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });

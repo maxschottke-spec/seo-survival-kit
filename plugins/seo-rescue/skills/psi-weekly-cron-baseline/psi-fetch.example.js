@@ -152,8 +152,16 @@ function baselineFor(history, url, strategy, metricKey, weeksBack) {
     }
   }
 
-  // Append to NDJSON
+  // Append to NDJSON. On first write, the file gets default umask (typically
+  // 0644 = world-readable) which leaks per-domain perf history to other local
+  // users on shared boxes. Force 0600 so only the running user can read it.
+  // chmod is a no-op on Windows (NTFS uses ACLs, not POSIX mode); ACL hardening
+  // there is the user's responsibility — see ONBOARDING.md cross-platform notes.
+  const ndjsonExisted = fs.existsSync(NDJSON);
   fs.appendFileSync(NDJSON, records.map(r => JSON.stringify(r)).join('\n') + '\n');
+  if (!ndjsonExisted) {
+    try { fs.chmodSync(NDJSON, 0o600); } catch {}
+  }
   console.error(`\n✅ Appended ${records.length} rows to ${NDJSON}`);
 
   if (regressions.length) {

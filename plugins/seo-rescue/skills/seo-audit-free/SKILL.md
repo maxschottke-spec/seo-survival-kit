@@ -7,7 +7,7 @@ allowed-tools: [Read, Bash(curl:*), Bash(node:*), Bash(npx lighthouse:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.2'
+  version: '0.3.3'
   category: marketing
 ---
 
@@ -76,6 +76,8 @@ Pflicht-Checks:
 - Keine `5xx` Antworten
 
 ### Schritt 4 — On-Page-Signale aus dem HTML
+
+> **Sicherheits-Hinweis:** Die Beispiele unten schreiben nach `/tmp/`, was auf Shared-Hosts world-writable ist und Symlink-Race-Attacks zulässt. Für Solo-Workstations (typischer Use-Case) ist das unbedenklich. Für Shared-/Server-Umgebungen ersetze `/tmp/` durch `$(mktemp -d)/` oder einen Pfad in deinem eigenen Home: `WORK=$(mktemp -d -t seo-audit-XXXXXX) && trap "rm -rf $WORK" EXIT` am Anfang des Blocks setzen, dann `$WORK/home.html` statt `/tmp/home.html`.
 
 ```bash
 curl -s -A "Mozilla/5.0" https://example.com/ > /tmp/home.html
