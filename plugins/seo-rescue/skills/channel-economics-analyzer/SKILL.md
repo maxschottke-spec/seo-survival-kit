@@ -1,6 +1,6 @@
 ---
 name: channel-economics-analyzer
-description: Use when an e-commerce business sells across multiple channels (own shop, Amazon, OTTO, eBay, Etsy, Zalando, etc.) and wants to know which channel is actually profitable vs which is bleeding money — e.g. "which channel makes money?", "is OTTO/Amazon worth it?", "channel break-even calculation", "marketplace profitability", "Kanal-Ökonomie", "soll ich den Channel zumachen?". Also triggers when ad budget allocation decisions are needed across channels, or when consolidating to fewer channels is being considered.
+description: 'Use when an e-commerce business sells across multiple channels (own shop, Amazon, OTTO, eBay, Etsy, Zalando, etc.) and wants to know which channel is actually profitable vs which is bleeding money — e.g. "which channel makes money?", "is OTTO/Amazon worth it?", "channel break-even calculation", "marketplace profitability", "Kanal-Ökonomie", "soll ich den Channel zumachen?". Also triggers when ad budget allocation decisions are needed across channels, or when consolidating to fewer channels is being considered.'
 ---
 
 # Channel Economics Analyzer
@@ -57,14 +57,15 @@ Healthy channel: margin > 15 %. Risky: 5-15 %. Loss-making: < 5 % or negative.
 
 ### Step 1 — Define channels
 
-Create `channels.json`:
+Create `channels.json` — only the channels you actually sell on. Use the [Channel fee reference table](#channel-fee-reference-table) below for the right `fee_rate` per channel.
+
 ```json
 {
   "period_days": 90,
   "channels": [
     {
       "name": "direct-shop",
-      "label": "Own shop (Shopware/Shopify)",
+      "label": "Own shop (Shopware/Shopify/WooCommerce)",
       "fee_rate": 0.029,
       "fee_label": "Payment provider 2.9 %",
       "currency": "EUR"
@@ -81,6 +82,20 @@ Create `channels.json`:
       "label": "OTTO Marketplace",
       "fee_rate": 0.11,
       "fee_label": "Verkaufsprovision",
+      "currency": "EUR"
+    },
+    {
+      "name": "kaufland",
+      "label": "Kaufland.de",
+      "fee_rate": 0.12,
+      "fee_label": "Kategorie-abhängig 8-15 %",
+      "currency": "EUR"
+    },
+    {
+      "name": "ebay-de",
+      "label": "eBay DE",
+      "fee_rate": 0.11,
+      "fee_label": "Verkaufsprovision + Listing-Fees",
       "currency": "EUR"
     }
   ]
@@ -161,17 +176,150 @@ Decision matrix:
 
 **Anti-pattern:** keeping a loss-making channel "for brand visibility" without a measurable brand ROI proxy.
 
+## Channel fee reference table
+
+Typical fee ranges as of 2026. Always verify against your latest seller agreement — these change at least annually.
+
+### DACH Marketplaces
+
+| Channel | Typical commission | Notes |
+|---------|-------------------:|-------|
+| Amazon DE | 8–15 % (kategorie-abhängig) | + FBA-Fees wenn Fulfillment by Amazon |
+| OTTO | 9–15 % | Auch Service-Gebühr für Versand-Logistik möglich |
+| Kaufland.de (ehem. real.de) | 8–15 % | Stark wachsender Marketplace, Möbel/Garten + 11 % im Schnitt |
+| eBay DE | 8–13 % + Listing-Fees | Auktion vs. Festpreis-Variante macht großen Unterschied |
+| Zalando Partner Program | 18–25 % | Mode-fokussiert, hohe Returns-Rate (40-60 % bei Mode) |
+| About You | 20–25 % | Mode/Lifestyle, eher kuratiert |
+| Galeria.de | 12–18 % | Kaufhof-Erbe, traditionelle Handelsmargen |
+| Avocadostore | 15–20 % | Nachhaltigkeits-Filter, kleinere Reichweite aber höhere Margen |
+| manomano | 15–20 % | DIY/Garten/Bau, B2C + B2B Mix |
+| Limango/Outletcity | 25–35 % | Outlet-Modell, Margen vs. Volumen-Trade |
+| Bonprix / OTTO Group | 15–20 % | Mode/Home, Konzern-spezifische Bedingungen |
+| MyToys / Spielzeug-Marketplaces | 18–25 % | Saisonalität (Q4-Peak) macht Jahresrechnung anders |
+
+### EU Marketplaces (außerhalb DACH)
+
+| Channel | Typical commission | Notes |
+|---------|-------------------:|-------|
+| Bol.com (NL/BE) | 12–17 % + Selektivität | NL/BE Marktführer, deutsche Anbieter willkommen |
+| CDiscount (FR) | 8–15 % + monatliche Subscription | FR-Marktführer #2 nach Amazon |
+| Allegro (PL) | 8–15 % | PL Nr.1, EU-Cross-border attraktiv |
+| Mirakl-powered marketplaces | varies | Mediamarkt, Carrefour, Decathlon nutzen Mirakl |
+| ManoMano FR/IT/ES/UK | 15–20 % | DIY-Pan-EU |
+| Spartoo | 15–20 % | Schuh-Marketplace EU |
+| LightInTheBox / Wish (eu) | 25–40 % | Niedrigpreis-Mass-Market |
+
+### US Marketplaces
+
+| Channel | Typical commission | Notes |
+|---------|-------------------:|-------|
+| Amazon US | 8–15 % | Größter, aber gesättigter Markt |
+| Walmart Marketplace | 6–15 % | Niedrigere Fees als Amazon, aber strenge Performance-Anforderungen |
+| eBay US | 12–15 % + Listing-Fees | Higher than DE due to Promoted Listings pressure |
+| Etsy | 6.5 % + Listing $0.20 + Payment 3 % + Optionale Etsy-Ads | Drei Gebühren, in Wirklichkeit ~13-17 % effektiv |
+| Wayfair | 15–25 % | Möbel-spezifisch, eigenes Drop-Ship-Modell ("CastleGate") |
+| Target Plus | varies, einladungs-basiert | Premium-Channel, kuratiert |
+
+### Social-Commerce-Channels
+
+| Channel | Typical commission | Notes |
+|---------|-------------------:|-------|
+| TikTok Shop DE | 5–8 % + Provision für Creator-Affiliate | EU-Rollout Q4 2024, schnell wachsend bei <€50-Produkten |
+| Instagram Shop / Meta | 5 % | Nur direkter Checkout, sonst Traffic-Treiber zum Direct-Shop |
+| Pinterest Shop | 0 % (für Direct-Listings) | Eher Discovery-Channel, kein eigener Checkout-Komission |
+| YouTube Shopping | 0–10 % (variabel) | Hauptsächlich Affiliate-Hebel über Creator |
+| Live-Commerce (Showroom, ShopShops) | 15–25 % | Im DACH kleine Reichweite, in CN/US wachsend |
+
+### B2B / Wholesale Channels
+
+| Channel | Typical commission | Notes |
+|---------|-------------------:|-------|
+| Alibaba.com (B2B) | 0 % Listing + 5 % Trade Assurance | Globaler B2B-Marketplace, niedrige Stückkosten gefragt |
+| Faire | 25 % first order + 15 % repeat | EU/US Wholesale-Marketplace für Boutiquen |
+| Ankorstore | 12–25 % | EU B2B-Wholesale, Fokus auf Concept-Stores |
+| eBay B2B | 11–13 % | Industrie/Surplus, weniger Konkurrenz als Consumer-eBay |
+| Alibaba/AliExpress for Business | 5–8 % | Wenn du selbst aus CN sourcen lässt |
+
+### Direct-Shop-Channels (kein Marketplace, aber separate Kanäle)
+
+| Channel | Typical "fee" | Notes |
+|---------|-------------------:|-------|
+| Shopify | 2.9 % + €0.30 PSP (Stripe) | Plus Subscription $39-$2000/Monat |
+| Shopware Cloud | 2-3 % PSP + Subscription | Self-hosted = nur PSP-Fee |
+| WooCommerce / WordPress | 2-3 % PSP | Sehr niedrige Fixkosten, aber Hosting/Plugin-Verantwortung |
+| Klarna direct | 2.99 % + €0.39 + 0.5 % cross-border | Plus K1-Fees für Buyer-Financing-Variante |
+| PayPal direct | 2.49 % + €0.35 | Niedriger bei Verkäufer-Volumen >€100k/Mo |
+| Stripe direct | 1.5 % + €0.25 (EU cards) | Niedrigste PSP-Fees für reine Karten-Zahlungen |
+
+### Affiliate / Performance-Channels (extra layer auf jedem Channel)
+
+| Channel | Typical commission you pay | Notes |
+|---------|-------------------:|-------|
+| Awin / TradeDoubler | 5–15 % auf vermittelte Sales | Plus Plattform-Fee von ~30 % auf die Affiliate-Auszahlung |
+| Influencer-Codes | 10–20 % via Code | Plus Sponsoring-Fee fix vor Sale |
+| Google Shopping | CPC ~€0.15–€1.20 (kategorie-abhängig) | Inklusive Margins nur als CPA-äquivalent berechnen |
+| Idealo Direktkauf | 5–8 % | Preisvergleichs-getriebener Channel, dünne Margen typisch |
+| billiger.de / Preisroboter | CPC oder 3–7 % CPA | Ähnlich Idealo, Marken-spezifisch |
+
 ## Common channel-specific gotchas
 
 | Channel | Hidden cost |
 |---------|-------------|
-| Amazon FBA | Storage fees scale with low-velocity SKUs — old inventory eats margin |
-| Amazon advertising | "Sponsored Products" auto-bid burns budget on irrelevant terms — always negative-keyword |
-| OTTO | Returns rate often 2-3× direct shop (sizing mismatches) |
-| eBay | Auction volatility skews per-order margin |
-| Zalando | Heavy commission tier (20-25%) makes most price-aggressive SKUs unprofitable |
-| Etsy | Listing fees + ads + transaction fees stack up — calculate all three |
-| Direct shop | Payment provider fees (Klarna, PayPal) often 2-3% — don't forget |
+| Amazon FBA | Storage fees scale with low-velocity SKUs — old inventory eats margin. Aged-inventory-surcharge nach 6 Monaten verdoppelt sich |
+| Amazon advertising | "Sponsored Products" auto-bid burns budget on irrelevant terms — always negative-keyword. Plus: Brand-Cannibalization (du bewirbst dein eigenes Brand-Keyword teurer als ohne PPC) |
+| OTTO | Returns rate often 2-3× direct shop (sizing mismatches). Plus: "Strafgebühren" für SLA-Verletzungen (verspätete Verarbeitung) |
+| Kaufland.de | Schedule-Compliance strikt — verspätete Lieferung führt zu Account-Suspend |
+| eBay | Auction volatility skews per-order margin. Promoted-Listings sind quasi-erzwungen seit 2024 (ohne kein organischer Traffic) |
+| Zalando | Heavy commission tier (20-25%) makes most price-aggressive SKUs unprofitable. Plus Zalando-Logistik-Pflicht in vielen Kategorien |
+| About You | Hohe Returns durch Mode-Sizing. Marken-Approval-Prozess langwierig |
+| Etsy | Listing fees + ads + transaction fees stack up — calculate all three. Etsy-Offsite-Ads sind 15 % EXTRA Fee bei Sales von Externals |
+| Wayfair | Drop-Ship-Modell heißt: du trägst Inventory-Risk, Wayfair nimmt 15-25 % Cut |
+| TikTok Shop | Returns extrem hoch (Impulse-Buying), Returns-Logistics oft Verkäufer-pflicht |
+| Instagram/Meta Shop | Reach-Algorithmus bevorzugt Reels — statische Posts sehen kaum Sales |
+| Bol.com | Selektive Verifikation — kann Wochen dauern bis Listings live sind |
+| CDiscount | Monatliche Pauschal-Fees ~€40 + Provision, lohnt sich erst ab €1k Umsatz/Monat |
+| Faire (Wholesale) | First-Order-Cut 25 % schreckt viele Boutiquen ab — Repeat-Mechanik einplanen |
+| Alibaba B2B | Trade-Assurance-Pflicht für Bezahlung, sonst hohes Buyer-Default-Risiko |
+| Direct shop | Payment provider fees (Klarna, PayPal) often 2-3% — don't forget. Plus: Currency-Conversion-Fees bei Cross-Border |
+| Idealo Direktkauf | Preis-Race-to-Bottom — wenn du deine Marge senkst, ziehen alle nach |
+| Affiliate (Awin/TradeDoubler) | Last-Cookie-Wins-Attribution oft unfair zu organischem Traffic — über-credited Affiliate-Sales fressen Marge |
+| Google Shopping | CPC-Inflation in saturierten Kategorien (Matratzen, Möbel, Elektronik) — ROAS oft <1 |
+
+## Recommended channel-portfolio templates
+
+Picking which channels to start with depends on your category. Patterns we've seen work:
+
+### E-commerce shop (DACH-fokussiert)
+- Direct-Shop (Anker, höchste Marge)
+- Amazon DE (Reichweite, aber Marge-Killer)
+- 1 weitere DACH-Marketplace (OTTO oder Kaufland je nach Kategorie)
+- Optional: Idealo Direktkauf falls Preis-führend in Kategorie
+
+### Mode/Lifestyle
+- Direct-Shop
+- Zalando Partner ODER About You (nicht beide — kannibalisieren sich)
+- Instagram/TikTok Shop (Social-Commerce-Test)
+- Optional: Etsy (für handmade-Subkategorie)
+
+### Möbel/Home
+- Direct-Shop
+- OTTO (DACH-Standard für Möbel)
+- Kaufland.de (wachsend in Möbel-Kategorie)
+- Wayfair (US/EU-Drop-Ship-Test wenn international skalierbar)
+
+### Niche/Sustainability
+- Direct-Shop
+- Avocadostore (Nachhaltigkeits-Filter)
+- Faire / Ankorstore (B2B-Wholesale an Concept-Stores)
+- Etsy (handmade/customized)
+
+### B2B / Industrie
+- Direct-Shop mit B2B-Bereich (eingeloggte Großhändler-Preise)
+- Alibaba.com (international sourcing-Channel)
+- eBay B2B (Surplus/Restposten)
+- Branchenspezifische Marketplaces (z.B. Conrad B2B, Mercateo)
+
+**Anti-Pattern:** "Wir sind auf allen Marketplaces" — jeder Channel braucht eigene SKU-Pflege, Customer-Service, Returns-Handling. Mehr Channels = mehr Fixkosten. Bei <€500k Jahresumsatz: max 3 Channels gleichzeitig.
 
 ## Real-world anchor data (anonymized 2026)
 
