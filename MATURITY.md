@@ -4,19 +4,20 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 
 ## Where this plugin is today
 
-**Version 0.1.0** — first public release in May 2026.
+**Version 0.3.1** — third stable release after a tight launch + hardening cycle in May 2026.
 
-- ✅ Tested against 4 real domains (mixed e-commerce + news, results anonymized)
-- ✅ Real Core-Update-Recovery case validates the framework
+- ✅ Tested against 4 real domains (mixed e-commerce + news, results anonymized in published LESSONS.md)
+- ✅ Real Core-Update-Recovery pilot case validates the framework
 - ✅ Pipeline scripts run end-to-end in <5 min per domain
 - ✅ MIT license, clean structure
 - ✅ Sample PDF + screenshots in `examples/` (synthetic data, real layout)
 - ✅ Subagent trigger-test green for `seo-outreach-report` (correctly picked over `claude-seo:seo-audit` and `make-pdf`)
 - ✅ agentskills.io compliant — SKILL.md format works in Claude Code / Cursor / Codex / Gemini CLI (cross-agent portability — though only tested in Claude Code so far)
-- ✅ Security hardening v0.1 — safeSlug regex validator, JSON.stringify path quoting, --no-sandbox removed, env-based Chrome path
-- ⚠️ No external contributors yet
-- ⚠️ No automated tests (skills tested via subagent pressure scenarios manually)
-- ⚠️ German-language documentation in some places (Lessons + parts of SKILL.md) — English README and a fully translated SKILL.md planned for 0.2
+- ✅ Security hardening v0.3 — `lib/safe.js` (safeSlug + safeHostname + safeUrl + safeLabel + validateConfigTargets + writeFileExclusive + getCacheDir + cachePath), strict CSP on PDF HTML, `spawnSync` with `shell: false` + array argv, sanitize() against indirect prompt-injection, `allowed-tools` declared per skill, CODEOWNERS + Dependabot + branch protection
+- ✅ Independent external security review 2026-05-22 (see [SECURITY.md → External security reviews](./SECURITY.md#external-security-reviews)) — 1 CRITICAL chain + 4 HIGH + 6 MEDIUM all closed in the v0.3.x security sprint
+- ⚠️ One external collaborator (security reviewer); no external feature-PRs yet
+- ⚠️ No automated tests (skills tested via subagent pressure scenarios manually, plus SAST tools in CI)
+- ⚠️ German-language documentation in some places (Lessons + parts of SKILL.md) — English README and a fully translated SKILL.md planned for 0.4
 - ⚠️ Hardcoded for German/`location_code: 2276` DataForSEO Labs queries — international expansion planned
 
 **Verdict:** Useful for the specific niche it covers. Not a replacement for comprehensive audit suites.
@@ -29,7 +30,7 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 | [aaron-he-zhu/seo-geo-claude-skills](https://github.com/aaron-he-zhu/seo-geo-claude-skills) | 1.7k | Mature | 20 skills around keyword research + content writing + technical audits + rank tracking | **Use for ongoing content/keyword work.** |
 | [zubair-trabzada/dataforseo-claude](https://github.com/zubair-trabzada/dataforseo-claude) | 79 | Newer | DataForSEO-focused with 13 skills + 5 subagents | Good if DataForSEO is your main data source. |
 | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | 12.9k | Very mature | Marketing stack (CRO, copy, paid ads, SEO) — broader scope | Use for marketing breadth, not deep SEO. |
-| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | 0 | **0.1, brand new** | Core-Update recovery framework + outreach-PDF pipeline | **Use when** the situation is recovery / cold-outreach. Complements above. |
+| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.3.1, hardened** | Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking | **Use when** the situation is recovery / cold-outreach / AI-search visibility. Complements above. |
 
 ## What's actually unique here
 
@@ -58,7 +59,7 @@ If your use case is technical audit, **use `claude-seo`**. If your use case is "
 - [x] Visual examples / sample PDFs in `examples/`
 - [ ] 5+ entries in each `LESSONS.md` showing iteration over time
 - [ ] At least one external contributor's PR merged
-- [ ] External security review (paid, scope similar to safe-write-mode v0.2 review — currently self-reviewed only)
+- [x] External security review — completed 2026-05-22 (independent reviewer, gitleaks + trivy + semgrep tool-pass + manual analysis); 1 CRITICAL chain + 4 HIGH + 6 MEDIUM findings, all closed in v0.3.x security sprint
 
 Realistic timeline: **6–12 months to 1.0**.
 

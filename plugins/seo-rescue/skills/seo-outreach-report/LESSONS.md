@@ -57,7 +57,7 @@ if (source.toLowerCase() === target.toLowerCase()) {
 
 Diese Falle gilt für alle Shopware-Redirect-Plugins die case-insensitive arbeiten — nicht nur DreiscSeoPro. **Konsequenz für SHOP-SYSTEMS.md:** Hinweis ist schon drin, könnte aber prominenter werden.
 
-**Quelle:** Verapur DreiscSeoPro Redirect-Setup, Mai 2026.
+**Quelle:** Pilot-Domain DreiscSeoPro Redirect-Setup, Mai 2026 (anonymisiert).
 
 ## 2026-05-21 — CMS-Block-Custom-HTML zerschießt Shopware-Seiten
 
@@ -71,11 +71,11 @@ Diese Falle gilt für alle Shopware-Redirect-Plugins die case-insensitive arbeit
 
 **Konsequenz für SHOP-SYSTEMS.md:** Bereits drin als Hinweis bei Shopware, könnte als eigenständiger Warnkasten markiert werden.
 
-**Quelle:** Verapur Lattenrost-Schema-Injection-Versuch 2026-05-21 (Rollback dokumentiert).
+**Quelle:** Pilot-Domain CMS-Block-Schema-Injection-Versuch 2026-05-21 (Rollback dokumentiert, anonymisiert).
 
 ## 2026-05-21 — CTR-Rewrites wirken schneller als Authority-Maßnahmen
 
-**Kontext:** Recovery-Tracking 4 Wochen nach Beginn (verapur, post März-Core-Update).
+**Kontext:** Recovery-Tracking 4 Wochen nach Beginn (Pilot-Domain, post März-Core-Update).
 
 **Befund:** Title-/Meta-Description-Rewrites zeigen messbare CTR-Wirkung auf bestehenden Rankings binnen 1–3 Wochen. Backlink-/Content-Authority-Maßnahmen brauchen 3–4 Monate für erste sichtbare VI-Bewegung.
 
@@ -85,7 +85,7 @@ Diese Falle gilt für alle Shopware-Redirect-Plugins die case-insensitive arbeit
 
 **Konsequenz für SKILL.md:** Bereits implizit drin (sofort > 30 > 60 > 90 Tage), könnte aber expliziter werden ("schneller Sieg vs strukturelle Recovery").
 
-**Quelle:** Verapur Recovery-Tracking Mai 2026.
+**Quelle:** Pilot-Domain Recovery-Tracking Mai 2026 (anonymisiert).
 
 ---
 

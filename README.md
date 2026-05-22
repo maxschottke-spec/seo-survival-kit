@@ -223,6 +223,6 @@ Open an issue if you want to discuss a larger change before opening a PR.
 
 ## Status & Maturity
 
-Version 0.1 — first public release. Built and tested against real 2026 recovery cases (4 domain audits, 1 extended Core-Update recovery). Expect breaking changes until 1.0.
+Version 0.3.1 — third stable release. Built and tested against real 2026 recovery cases (4 domain audits, 1 extended Core-Update recovery). Survived an independent external security audit (see [SECURITY.md → External security reviews](./SECURITY.md#external-security-reviews)). Expect breaking changes until 1.0.
 
 **Honest comparison** with mature alternatives (claude-seo with 6.9k stars is the reference): see [MATURITY.md](./MATURITY.md). This plugin is **niche complement**, not a replacement.
