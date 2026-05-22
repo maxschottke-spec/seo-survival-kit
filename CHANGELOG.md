@@ -2,6 +2,23 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.3.2] — 2026-05-22
+
+### Changed (marketplace-readiness pass — documentation only, no functional changes)
+
+- **README rewritten** for marketplace-submission tone. Lead-generation framing removed from the "What this is" section and from the previous "Who uses this" emoji-list. The audience-targeting table ("Freelance SEO consultant: outreach-report = lead-gen tool") was replaced with sachliche "When to use" and "When *not* to use" sections plus an explicit YMYL notice.
+- **Public-Beta status prominent**. New status box at the top of the README plus a "Public Beta" badge. Status & Maintenance section at the bottom states the single-maintainer model explicitly (no SLA, no enterprise support, best-effort issue response).
+- **Naming clarification table** added at the top of the README (repository vs. plugin vs. slash-command-prefix) because new users frequently asked "is it `seo-survival-kit` or `seo-rescue`?"
+- **YMYL disclaimer** added to the `seo-outreach-report` SKILL.md and to the rendered PDF disclaimer block. Specifically calls out medical, legal, financial, and regulated-industry domains where action plans should be validated by a domain expert before publication or client delivery.
+- **claude-seo trigger phrase softened.** `seo-outreach-report` SKILL.md description previously said "USE THIS instead of `claude-seo:seo-audit`" — now reads "Complements `claude-seo:seo-audit` when the goal is communication for a non-technical audience rather than technical depth." Same softening for `make-pdf`.
+- **Recovery / AI-citation predictions reframed as observations** rather than predictions. `post-core-update-recovery` "Common outcome: 60-80%" now reads "Recovery outcome in observed cases is in the 50-80% range... observations from a small case-base, not population statistics — treat them as input hypotheses, not predictions." Same softening for `ai-search-rescue` "AI citations lead by 2-6 weeks" claim and `seo-audit-free` "ROI typisch 1-2 gewonnene Mandate" line.
+- **channel-economics-analyzer fee-table disclaimer expanded.** The table now explicitly states the fees are starting estimates from public marketplace documentation and seller-community reports as of Q1 2026, that they vary by category / tier / region / fulfillment setup, and that the user must verify against current seller agreements before drawing business conclusions.
+- **SECURITY.md** updated: pin example uses v0.3.2, explicit single-maintainer / bus-factor-1 section added before "Reporting Security Issues", and the contact path now mentions GitHub's private security advisory feature.
+- **API cost expectation** documented in the `seo-outreach-report` SKILL.md per-run section so users know what they're about to spend before invoking the pipeline.
+- Install commands in README, ONBOARDING, CLAUDE.md updated to `#v0.3.2`.
+
+This is a documentation-only release. No functional code changes, no version-incompatible changes. Existing v0.3.1 installs continue to work; v0.3.2 makes the same plugin's positioning and disclaimers cleaner for marketplace submission and public-beta audience expectations.
+
 ## [0.3.1] — 2026-05-22
 
 ### Changed
