@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "seo-rescue",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Seven SEO skills + orchestrator. Type /seo-rescue:rescue for the routing table, or call sub-skills directly: /seo-rescue:seo-audit-free (free-tier audit), /seo-rescue:post-core-update-recovery (Core Update recovery framework), /seo-rescue:seo-outreach-report (decision-maker PDF via Sistrix+DataForSEO+PSI), /seo-rescue:channel-economics-analyzer (per-channel P&L for 30+ marketplaces), /seo-rescue:competitor-deep-audit (DataForSEO keyword-gap analysis), /seo-rescue:psi-weekly-cron-baseline (automated PSI tracking), /seo-rescue:ai-search-rescue (AI Overviews + ChatGPT + Perplexity citation recovery).",
   "author": {
     "name": "Max Schottke",

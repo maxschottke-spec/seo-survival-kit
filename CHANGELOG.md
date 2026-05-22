@@ -2,6 +2,22 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.3.4] — 2026-05-22
+
+### Added
+
+- **README section "Usage metrics & privacy"** stating the zero-telemetry-by-design position explicitly. Lists the signals that are available (GitHub Stars, Watchers, Issues, Discussions, Traffic API maintainer-side) and the ones that do not exist (no install counter, no invocation analytics, no opt-in tracking switch in any config). Closes the most likely installer question about what the maintainer can and cannot see.
+- **GitHub issue templates** at `.github/ISSUE_TEMPLATE/`:
+  - `config.yml` disables blank issues and routes general questions to GitHub Discussions plus security items to the private security advisory feature.
+  - `bug_report.yml` collects plugin version, Claude Code version, affected skill, reproduction steps, OS, Node version.
+  - `feature_request.yml` collects use case, proposed solution, alternatives, affected skill area.
+  - `usage_feedback.yml` is voluntary — sharing what context the plugin is used in, which skills matter most, what is missing, and (optional) a contact handle for follow-up.
+- The usage_feedback template explicitly notes that issues are public; only what the user is willing to write in a public Discussion should go in. No private feedback channel is added — that would require operating an external form which would itself have its own tracking surface and contradict the zero-telemetry positioning.
+
+### Why this is a patch and not a minor
+
+No new skill, no functional code change, no plugin-manifest restructure. The CHANGELOG entry exists to give installers a clear version anchor for the new feedback infrastructure, and to keep the install commands in the README pin-stable.
+
 ## [0.3.3] — 2026-05-22
 
 ### Changed (polish-pass from Round 1 audit's LOW-severity list)

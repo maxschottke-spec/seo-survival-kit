@@ -6,7 +6,7 @@ This guide gets you from installing the plugin to generating your first decision
 
 In Claude Code, **pinned to a tag** (recommended — see [SECURITY.md](./SECURITY.md#recommended-install-pinned-to-a-tag-or-commit)):
 ```
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.3
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.4
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
