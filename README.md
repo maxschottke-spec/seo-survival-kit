@@ -1,6 +1,6 @@
 # SEO Survival Kit for Claude Code
 
-> Six focused SEO skills built from real 2026 recovery cases — for any website owner who needs to understand what's wrong, what to fix, and how to talk about it to non-technical stakeholders. **E-commerce, publishers, SaaS, services, agencies — same workflow.**
+> Seven focused SEO skills built from real 2026 recovery cases — for any website owner who needs to understand what's wrong, what to fix, and how to talk about it to non-technical stakeholders. **E-commerce, publishers, SaaS, services, agencies — same workflow.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
@@ -52,7 +52,7 @@ If you're already running [claude-seo](https://github.com/AgriciDaniel/claude-se
 
 The skills are domain-type-agnostic. The example data in `examples/` happens to be an e-commerce sample, but the workflow works identically for a B2B SaaS or a news site.
 
-## The six skills
+## The seven skills
 
 ### `seo-audit-free`
 
@@ -120,11 +120,17 @@ Automated weekly PageSpeed Insights tracking with regression detection. Runs as 
 
 **Use when** you've done performance optimization and want to make sure it sticks — or when third-party plugins/themes have a history of silently breaking performance.
 
+### `ai-search-rescue`
+
+Framework for recovering visibility in AI search surfaces — Google AI Overviews, Google AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai search. Different mechanics from classical SERP ranking: you're competing to be the source the LLM cites, not the link the user clicks. Seven optimization tactics (extractable passages, question-shaped headings, source-cited statements, author trust, schema for AI, llms.txt, Wikipedia), a three-layer measurement setup (brand-mention prompt set, GSC AI-traffic filter, AI-crawler logs), and a realistic 6-12 week recovery workflow.
+
+**Use when** organic rankings have recovered but AI Overview citations are still going to competitors, or when a site says "ChatGPT keeps recommending the competitor, never us". One operational finding from real recovery work: AI citations move 2-6 weeks before classical Sistrix VI does, so they're a leading indicator that Authority-First work in `post-core-update-recovery` is actually being recognized.
+
 ## Installation
 
 **Recommended — pinned to a tag (reproducible, survives upstream changes):**
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.2.0
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.0
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```

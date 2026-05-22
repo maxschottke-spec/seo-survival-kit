@@ -6,13 +6,13 @@
     "url": "https://github.com/maxschottke-spec"
   },
   "metadata": {
-    "description": "Six focused SEO + e-commerce skills for Claude Code, built from real 2026 recovery cases. Includes free-tools beginner audit, post-Core-Update recovery playbook, decision-maker PDF outreach report, channel economics analyzer (Amazon/OTTO/Shop profitability), competitor deep audit (DataForSEO-powered keyword-gap analysis), and PSI weekly cron baseline (automated performance regression detection)."
+    "description": "Seven focused SEO + e-commerce skills for Claude Code, built from real 2026 recovery cases. Includes free-tools beginner audit, post-Core-Update recovery playbook, decision-maker PDF outreach report, channel economics analyzer (Amazon/OTTO/Shop profitability), competitor deep audit (DataForSEO-powered keyword-gap analysis), PSI weekly cron baseline (automated performance regression detection), and AI search rescue (Google AI Overviews, AI Mode, ChatGPT, Perplexity citations)."
   },
   "plugins": [
     {
       "name": "seo-rescue",
       "source": "./plugins/seo-rescue",
-      "description": "Six complementary SEO and e-commerce skills built from real 2026 recovery cases. Covers free-tools beginner audit, post-Core-Update Authority-First recovery, 10-chapter PDF outreach report (Sistrix + DataForSEO + PSI), marketplace channel economics analyzer (Amazon/OTTO/Shop break-even per channel), competitor deep audit with keyword-gap analysis, and PSI weekly cron baseline for performance regression detection. Complements existing audit-focused skills like claude-seo with rescue-framing, decision-maker communication, channel-level financial analysis, and free-tier workflows.",
+      "description": "Seven complementary SEO and e-commerce skills built from real 2026 recovery cases. Covers free-tools beginner audit, post-Core-Update Authority-First recovery, 10-chapter PDF outreach report (Sistrix + DataForSEO + PSI), marketplace channel economics analyzer (Amazon/OTTO/Shop break-even per channel), competitor deep audit with keyword-gap analysis, PSI weekly cron baseline for performance regression detection, and AI search rescue framework for Google AI Overviews / AI Mode / ChatGPT / Perplexity citation recovery. Complements existing audit-focused skills like claude-seo with rescue-framing, decision-maker communication, channel-level financial analysis, free-tier workflows, and generative-engine optimization.",
       "author": {
         "name": "Max Schottke",
         "url": "https://github.com/maxschottke-spec"
@@ -45,7 +45,14 @@
         "keyword-gap",
         "psi-baseline",
         "core-web-vitals",
-        "cron"
+        "cron",
+        "ai-search",
+        "ai-overviews",
+        "geo",
+        "generative-engine-optimization",
+        "chatgpt",
+        "perplexity",
+        "llms-txt"
       ]
     }
   ]
