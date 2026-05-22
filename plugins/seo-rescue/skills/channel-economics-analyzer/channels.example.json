@@ -1,9 +1,10 @@
 {
+  "_comment": "Example covering common channel types. Uncomment / copy the entries you actually sell on. See SKILL.md → 'Channel fee reference table' for fee_rate ranges per channel.",
   "period_days": 90,
   "channels": [
     {
       "name": "direct-shop",
-      "label": "Own shop",
+      "label": "Own shop (Shopware/Shopify/WooCommerce)",
       "fee_rate": 0.029,
       "fee_label": "Payment provider 2.9 %",
       "currency": "EUR"
@@ -23,10 +24,116 @@
       "currency": "EUR"
     },
     {
-      "name": "ebay",
-      "label": "eBay",
+      "name": "kaufland",
+      "label": "Kaufland.de",
+      "fee_rate": 0.12,
+      "fee_label": "Kategorie-abhängig 8-15 %",
+      "currency": "EUR"
+    },
+    {
+      "name": "ebay-de",
+      "label": "eBay DE",
       "fee_rate": 0.11,
-      "fee_label": "Final value fee",
+      "fee_label": "Verkaufsprovision + Listing-Fees",
+      "currency": "EUR"
+    },
+    {
+      "_disabled_examples": "uncomment and configure if you sell here",
+      "name": "zalando-partner",
+      "label": "Zalando Partner Program",
+      "fee_rate": 0.22,
+      "fee_label": "18-25 % mode-kategorie-abhängig",
+      "currency": "EUR"
+    },
+    {
+      "name": "about-you",
+      "label": "About You",
+      "fee_rate": 0.22,
+      "fee_label": "20-25 %",
+      "currency": "EUR"
+    },
+    {
+      "name": "manomano",
+      "label": "manomano (DIY/Garten)",
+      "fee_rate": 0.18,
+      "fee_label": "15-20 %",
+      "currency": "EUR"
+    },
+    {
+      "name": "tiktok-shop-de",
+      "label": "TikTok Shop DE",
+      "fee_rate": 0.07,
+      "fee_label": "5-8 % + Creator-Provision",
+      "currency": "EUR"
+    },
+    {
+      "name": "bol-com",
+      "label": "Bol.com (NL/BE)",
+      "fee_rate": 0.14,
+      "fee_label": "12-17 %",
+      "currency": "EUR"
+    },
+    {
+      "name": "cdiscount-fr",
+      "label": "CDiscount (FR)",
+      "fee_rate": 0.12,
+      "fee_label": "8-15 % + monatliche Subscription",
+      "currency": "EUR"
+    },
+    {
+      "name": "etsy",
+      "label": "Etsy",
+      "fee_rate": 0.15,
+      "fee_label": "Effektiv ~13-17 % (Transaction 6.5 % + Listing $0.20 + Payment 3 %)",
+      "currency": "USD"
+    },
+    {
+      "name": "amazon-us",
+      "label": "Amazon US",
+      "fee_rate": 0.13,
+      "fee_label": "8-15 % + FBA",
+      "currency": "USD"
+    },
+    {
+      "name": "walmart-marketplace",
+      "label": "Walmart Marketplace (US)",
+      "fee_rate": 0.10,
+      "fee_label": "6-15 %",
+      "currency": "USD"
+    },
+    {
+      "name": "wayfair",
+      "label": "Wayfair (Drop-Ship)",
+      "fee_rate": 0.20,
+      "fee_label": "15-25 %",
+      "currency": "EUR"
+    },
+    {
+      "name": "faire-wholesale",
+      "label": "Faire (B2B Wholesale)",
+      "fee_rate": 0.18,
+      "fee_label": "25 % first order / 15 % repeat — averaged",
+      "currency": "EUR"
+    },
+    {
+      "name": "ankorstore",
+      "label": "Ankorstore (EU B2B)",
+      "fee_rate": 0.18,
+      "fee_label": "12-25 %",
+      "currency": "EUR"
+    },
+    {
+      "name": "alibaba-b2b",
+      "label": "Alibaba.com (B2B)",
+      "fee_rate": 0.05,
+      "fee_label": "Trade Assurance 5 %",
+      "currency": "USD"
+    },
+    {
+      "name": "idealo-direktkauf",
+      "label": "Idealo Direktkauf",
+      "fee_rate": 0.07,
+      "fee_label": "5-8 %",
       "currency": "EUR"
     }
   ]

@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "seo-rescue",
-  "version": "0.2.0",
-  "description": "SEO rescue skills: post-Core-Update recovery playbook + decision-maker-friendly PDF outreach report.",
+  "version": "0.2.2",
+  "description": "Six SEO skills: free-tier audit, post-Core-Update Authority-First recovery, decision-maker PDF outreach report (Sistrix+DataForSEO+PSI), channel economics, competitor gap analysis, weekly PSI cron baseline.",
   "author": {
     "name": "Max Schottke",
     "url": "https://github.com/maxschottke-spec"
