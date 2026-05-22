@@ -6,7 +6,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
 [![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
-> **Status — Public Beta (v0.3.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.3.2`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+> **Status — Public Beta (v0.3.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.3.3`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 ## Naming at a glance
 
@@ -152,7 +152,7 @@ Framework for recovering visibility in AI search surfaces — Google AI Overview
 
 **Recommended — pinned to a tag (reproducible, survives upstream changes):**
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.2
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.3
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```

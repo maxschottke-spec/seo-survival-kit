@@ -112,5 +112,5 @@ When working with the existing 4 scripts in `seo-outreach-report`:
 
 - Repository: https://github.com/maxschottke-spec/seo-survival-kit
 - Anthropic community marketplace: pending review at claude-plugins-community
-- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.2`
+- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.3`
 - Pilot-domain recovery case (anonymized): see `post-core-update-recovery/LESSONS.md` for the dated lesson entries that source the framework
