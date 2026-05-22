@@ -7,7 +7,7 @@ allowed-tools: [Read, Bash(curl:*), Bash(node:*), Bash(npx lighthouse:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.1'
+  version: '0.3.2'
   category: marketing
 ---
 
@@ -235,4 +235,4 @@ Wenn du folgende Fragen beantworten willst, brauchst du paid APIs:
 - "Wie viele Domains verlinken zu mir, mit welchem Spam-Score?" → DataForSEO Backlinks
 - "Wie schneide ich gegen 6 Konkurrenten im Längsschnitt ab?" → Sistrix mit mehreren Domains
 
-Wenn 2+ dieser Fragen geschäftskritisch sind → Upgrade auf `seo-outreach-report` mit Sistrix + DataForSEO. ROI typisch 1-2 gewonnene Mandate bezahlt die Tools für ein Jahr.
+Wenn 2+ dieser Fragen geschäftskritisch sind, kann ein Upgrade auf den `seo-outreach-report`-Skill mit Sistrix + DataForSEO sinnvoll sein. Ob sich die monatlichen Tool-Kosten rechnen, hängt vom konkreten Anwendungsfall ab — pro Einsatz die Kosten gegen den erwarteten Hebel (z. B. Klarheit für eine Investitionsentscheidung, Onboarding eines Neukunden, Quartals-Status für ein internes Team) prüfen.

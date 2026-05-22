@@ -416,7 +416,11 @@ ${actions.map(a => {
 }).join('')}
 
 <div class="disclaimer">
-<b>Hinweis zu Empfehlungen:</b> Die vorgeschlagenen Maßnahmen, Zeitfenster, Kostenschätzungen und Erwartungswerte basieren auf den zum Stichtag verfügbaren Daten und allgemeinen SEO-Best-Practices. Sie stellen <b>keine verbindliche Geschäftsberatung</b> dar. Vor Investitionsentscheidungen wird eine eigenständige Bewertung empfohlen. Ergebnisse hängen von Umsetzungsqualität, Markt- und Wettbewerbsdynamik sowie Google-Algorithmus-Änderungen ab und können abweichen.
+<b>Hinweis zu Empfehlungen:</b> Die vorgeschlagenen Maßnahmen, Zeitfenster, Kostenschätzungen und Erwartungswerte basieren auf den zum Stichtag verfügbaren Daten und allgemeinen SEO-Best-Practices. Sie stellen <b>keine verbindliche Geschäftsberatung</b> dar. Vor Investitionsentscheidungen wird eine eigenständige Bewertung empfohlen. Ergebnisse hängen von Umsetzungsqualität, Markt- und Wettbewerbsdynamik sowie Google-Algorithmus-Änderungen ab und können abweichen. Kostenangaben in EUR sind typische Spannen aus dem DE-Beratungs-Markt — lokale Marktbedingungen können abweichen.
+<br><br>
+<b>YMYL-Hinweis (Your Money or Your Life):</b> Bei Domains aus den Bereichen Medizin, Gesundheit, Recht, Finanzen oder regulierten Industrien empfehlen wir, den Aktionsplan vor Umsetzung oder Weitergabe von einer fachlich qualifizierten Person prüfen zu lassen. Schema-Empfehlungen (z. B. MedicalBusiness, Physician, Attorney), Author-Authority-Massnahmen und Off-Page-Linkbuilding können in regulierten Branchen mit Werbe- oder Berufsordnungen kollidieren. Diese Auswertung berücksichtigt branchen-spezifische Regulierung nicht.
+<br><br>
+<b>Erstellungswerkzeug:</b> Diese Auswertung wurde mit dem Open-Source-Werkzeug seo-survival-kit (MIT-Lizenz, Public Beta v0.3.x) erstellt. Quellcode und Methodik unter https://github.com/maxschottke-spec/seo-survival-kit.
 </div>
 
 <p class="footer-cite">Daten-Stand: ${new Date().toLocaleDateString('de-DE')}. Quellen: Sistrix API (Sichtbarkeitsindex DE), DataForSEO Labs (SERP-Rankings DE, Backlinks, Wettbewerber), Google PageSpeed Insights v5 (Lab + CrUX). Bewertungen und Empfehlungen basieren auf SEO-Best-Practices Stand ${new Date().toLocaleDateString('de-DE', {month:'long', year:'numeric'})}.</p>

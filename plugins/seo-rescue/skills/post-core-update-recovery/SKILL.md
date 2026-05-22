@@ -7,7 +7,7 @@ allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.1'
+  version: '0.3.2'
   category: marketing
 ---
 
@@ -117,10 +117,10 @@ These are **NOT** the recovery lever — Core Updates don't penalize tech, they 
 
 ## Realistic expectations
 
-- **Recovery starts visibly only after 3–4 months** — Google needs time to re-evaluate authority signals
-- **Full recovery 9–18 months** — rarely faster
-- **Common outcome: 60–80 % of pre-drop visibility recoverable; 100 % rare without structural changes**
-- **Pattern: recovery in jumps, often with the next Core Update**
+- **Visible movement typically starts only after 3–4 months** in the recovery case we observed and in the public Core-Update-recovery cases referenced in `LESSONS.md`. Google needs time to re-evaluate authority signals.
+- **Full recovery usually takes 9–18 months** in the cases referenced. We are not aware of significantly faster recoveries published; if you find one, please contribute the observation back to `LESSONS.md`.
+- **Recovery outcome in observed cases is in the 50–80 % range** of pre-drop visibility. Full recovery to 100 % seems to require structural changes (new content lines, new authority sources), not just optimization of what existed before. These percentages are observations from a small case-base, not population statistics — treat them as input hypotheses, not predictions.
+- **Pattern: recovery comes in jumps**, often timed with the next Core Update rather than gradually.
 
 ## Owner communication
 

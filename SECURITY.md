@@ -106,7 +106,7 @@ This applies to all plugins, not just this one. Anthropic's docs are explicit ab
 
 **Pinned install** (reproducible, recommended for production use):
 ```
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.2.0
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.2
 ```
 or
 ```
@@ -158,11 +158,20 @@ Rules (hard):
 5. No generic best-practice advice. Only fixes for code I have shown you.
 ```
 
+## Maintenance model
+
+This is a single-maintainer open-source project. **There is one person maintaining this plugin.** No team, no SLA, no on-call rotation, no commercial support contract. Issue response is best-effort within a few days. Security issues are prioritized, but the bus-factor is 1.
+
+For installers, this means:
+- **Pin to a tag** so a future inactive-maintainer scenario does not silently degrade your installation.
+- **Read the source.** The plugin is intentionally small (~2,000 lines) and reviewable in under 30 minutes.
+- **Treat all framework recommendations as inputs, not authority.** The SEO-recovery framework, the cost ranges, the timelines — they are observations from one extended recovery case plus four validation audits, not population statistics or contracted deliverables.
+
 ## Reporting security issues
 
 If you find a vulnerability:
-- For non-sensitive items: open a GitHub issue at https://github.com/maxschottke-spec/seo-survival-kit/issues
-- For items that could affect users with the plugin already installed: email the maintainer directly. See the GitHub profile.
+- For non-sensitive items: open a GitHub issue at https://github.com/maxschottke-spec/seo-survival-kit/issues. Apply the protocol from "For external reviewers" above (cite `file:line`, use `[VERIFIED]`/`[PROBABLE]`/`[UNVERIFIED]` labels).
+- For items that could affect users with the plugin already installed: contact the maintainer privately via the GitHub profile at https://github.com/maxschottke-spec (use the "Block or report" → "Contact" path if needed, or open a private security advisory via GitHub's Security tab on this repository).
 
 ## Audit trail
 

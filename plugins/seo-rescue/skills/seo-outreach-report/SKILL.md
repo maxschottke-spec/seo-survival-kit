@@ -1,13 +1,13 @@
 ---
 name: seo-outreach-report
-description: 'Use when generating a polished single-PDF outreach pitch or cold-acquisition document for a third-party domain owner — NOT a technical site audit, but a sales-ready, decision-maker-friendly snapshot in plain language for non-SEO-experts (shop owners, founders, executives). Triggers include "send the owner of X.de an SEO snapshot", "outreach pitch", "cold email PDF for prospect", "generate a report for the owner", "show X.de their SEO status", "make a PDF for non-technical decision maker about their SEO". USE THIS instead of `claude-seo:seo-audit` when the audience is a non-technical decision-maker and the goal is communication, not technical depth. USE THIS instead of `make-pdf` when the input is a domain (not a markdown file) and you need editorial narrative + Sistrix/DataForSEO/PSI data integrated.'
+description: 'Use when generating a polished single-PDF SEO snapshot for a third-party domain owner. The output is a decision-maker-friendly document in plain language for non-SEO-experts (shop owners, founders, executives), not a technical site audit. Triggers include "send the owner of X.de an SEO snapshot", "generate a report for the owner", "show X.de their SEO status", "make a PDF for a non-technical decision maker about their SEO". Complements `claude-seo:seo-audit` when the goal is communication for a non-technical audience rather than technical depth. Complements `make-pdf` when the input is a domain (not a markdown file) and the workflow needs editorial narrative integrated with Sistrix / DataForSEO / PSI data.'
 user-invokable: true
 argument-hint: '[domain | comma-separated-slugs]'
 allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.1'
+  version: '0.3.2'
   category: marketing
 ---
 
@@ -21,15 +21,33 @@ Generates a 10-chapter PDF report per domain for non-technical decision-makers. 
 
 ## When to use
 
-- A shop owner / executive needs SEO clarity
-- Cold outreach to potential clients with a data-driven hook
+- A shop owner / executive needs SEO clarity in plain language
+- Client onboarding or recurring quarterly status update
 - Multi-domain audit for competitive analysis or portfolio review
-- You need a printable, sendable snapshot
+- You need a printable, sendable snapshot for a non-technical reader
 
 **Don't use for:**
 - Deep technical SEO audit (too much detail, wrong audience)
 - Your own domain optimization — work directly with the data, no PDF needed
 - Pure keyword research
+- YMYL domains (medical, legal, financial) without expert review — see YMYL notice below
+
+## YMYL notice
+
+The PDF this skill generates contains a concrete action plan with cost ranges, timelines, and prioritized recommendations. For Your-Money-Your-Life sites (medical / health, legal, financial, regulated industries), have a domain expert review the action plan before publication or client delivery. Examples of recommendations that need expert review in those contexts:
+
+- Author-page suggestions touching credentials, licensing, or chamber-association display
+- Schema-markup recommendations for medical / legal entities (MedicalBusiness, Physician, Attorney) — these have specific data-quality expectations from Google
+- Off-page link-building suggestions that could conflict with industry advertising codes (e.g. medical marketing regulations in DE, US, EU)
+- Cost ranges quoted in EUR are typical for the DE consulting market — verify against your local market before quoting to a client
+
+The plugin treats all sites uniformly at the SEO-mechanics level; it does not validate domain-specific compliance, fiduciary obligations, or industry-specific marketing regulations.
+
+## API cost expectation per run
+
+Default configuration produces ~5 API calls per target domain: 1 Sistrix VI, 1 Sistrix VI overview, 18 monthly VI history points, 1 DataForSEO ranked_keywords, 1 backlinks/summary, 1 domain_rank_overview, 1 competitors_domain, 1 referring_domains, 2 PSI runs (mobile + desktop).
+
+Typical realized cost per domain: 5–50 ct in DataForSEO credits plus 18 Sistrix calls plus 2 PSI calls (free with API key). Multi-domain batches multiply linearly. Before running against many domains, estimate cost first — see COSTS.md.
 
 ## Pipeline (4 steps)
 
