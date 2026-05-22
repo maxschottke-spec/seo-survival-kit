@@ -66,7 +66,13 @@ async function rankedKeywords(domain, limit=500) {
     .slice(0, 8);
 
   console.error(`Real competitors (filtered):`);
-  realComps.forEach((c, i) => console.error(`  ${i+1}. ${c.domain} (intersections=${c.intersections}, etv=${Math.round(c.metrics?.organic?.etv || 0)})`));
+  realComps.forEach((c, i) => {
+    // c.domain comes from the DataForSEO API. Strip CR/LF before logging to
+    // prevent log-injection if an attacker-controlled SERP entry contained
+    // embedded newlines (low likelihood but free defense).
+    const domain = String(c.domain || '').replace(/[\r\n]/g, ' ').slice(0, 253);
+    console.error(`  ${i+1}. ${domain} (intersections=${c.intersections}, etv=${Math.round(c.metrics?.organic?.etv || 0)})`);
+  });
 
   console.error(`\nFetching your ranked keywords...`);
   const yourKws = await rankedKeywords(TARGET, 1000);

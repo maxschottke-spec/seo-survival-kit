@@ -437,6 +437,21 @@ ${actions.map(a => {
   const fileSafeDomain = String(target.domain || slug).replace(/[^a-z0-9.-]/gi, '-');
   const pdfPath = path.join(OUTPUT_DIR, `SEO-Auswertung-${fileSafeDomain.replace(/\./g,'-')}-${new Date().toISOString().slice(0,10)}.pdf`);
 
+  // Defense against symlink-clobber on the output path: if pdfPath already
+  // exists as a symlink (planted by a local attacker between runs), Chrome's
+  // --print-to-pdf would follow it and write to the symlink target (e.g.
+  // ~/Downloads/foo.pdf -> /etc/something). Unlink any pre-existing symlink
+  // so the next write lands on a real file owned by the running user.
+  try {
+    const st = fs.lstatSync(pdfPath);
+    if (st.isSymbolicLink()) {
+      fs.unlinkSync(pdfPath);
+      console.error(`[${slug}] removed pre-existing symlink at ${pdfPath} before render`);
+    }
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+  }
+
   if (!fs.existsSync(CHROME_PATH)) {
     throw new Error(`Chrome not found at ${CHROME_PATH}. Set CHROME_PATH env var to your Chrome binary.`);
   }
