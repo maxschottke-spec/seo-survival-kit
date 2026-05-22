@@ -7,14 +7,20 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # SHA-pinned to defeat compromised-tag attacks. Dependabot keeps these current.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '20'
 
@@ -90,33 +96,30 @@ jobs:
             console.log('✔ All SKILL.md frontmatters parse');
           "
 
+      # find -print0 + while-read avoids shell word-splitting on filenames containing
+      # spaces, quotes, or shell metacharacters — and prevents a hostile PR-supplied
+      # filename like `'); process.exit(99); //.example.json` from breaking the
+      # subsequent `node -e` step via string interpolation.
       - name: Syntax-check all Node.js scripts
         run: |
-          for f in $(find plugins/seo-rescue -name '*.js'); do
+          set -e
+          fail=0
+          while IFS= read -r -d '' f; do
             echo "Checking $f"
-            node --check "$f"
-          done
+            node --check "$f" || fail=1
+          done < <(find plugins/seo-rescue -name '*.js' -print0)
+          [ "$fail" -eq 0 ] || exit 1
           echo "✔ All .js files pass syntax check"
 
       - name: Validate example JSON configs parse
         run: |
-          for f in $(find plugins/seo-rescue -name '*.example.json'); do
+          set -e
+          fail=0
+          while IFS= read -r -d '' f; do
             echo "Checking $f"
-            node -e "JSON.parse(require('fs').readFileSync('$f', 'utf8'))"
-          done
+            # Pass filename via env var, not shell interpolation, so untrusted
+            # filenames can never escape into the node -e source.
+            FILE="$f" node -e "JSON.parse(require('fs').readFileSync(process.env.FILE, 'utf8'))" || fail=1
+          done < <(find plugins/seo-rescue -name '*.example.json' -print0)
+          [ "$fail" -eq 0 ] || exit 1
           echo "✔ All example JSON configs parse"
-
-      - name: Try claude plugin validate (best-effort)
-        continue-on-error: true
-        run: |
-          # Try multiple install methods. If none work, the manual checks above still gate the PR.
-          if curl -fsSL https://docs.claude.com/install.sh -o /tmp/install.sh 2>/dev/null && bash /tmp/install.sh; then
-            export PATH="$HOME/.local/bin:$PATH"
-            if which claude > /dev/null; then
-              echo "Running claude plugin validate as extra check..."
-              claude plugin validate plugins/seo-rescue
-              claude plugin validate .
-            fi
-          else
-            echo "::notice::claude CLI install failed — manual checks above are authoritative"
-          fi
