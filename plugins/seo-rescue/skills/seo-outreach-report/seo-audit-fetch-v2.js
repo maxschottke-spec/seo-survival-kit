@@ -80,9 +80,15 @@ async function fetchOne(target) {
     sistrix('domain.sichtbarkeitsindex', { domain: target.domain, country: 'de' }).catch(e => ({ error: String(e) })),
     sistrix('domain.sichtbarkeitsindex.overview', { domain: target.domain, country: 'de' }).catch(e => ({ error: String(e) })),
     sistrixViHistory(target.domain).catch(e => []),
+    // limit:1000 + SV-desc sampling gives a realistic position distribution.
+    // The previous limit:100 + rank_group asc only returned the best-ranking 100
+    // keywords, which made the position-distribution chart in the PDF show 100 %
+    // of keywords in Top 3 even for domains with thousands of keywords ranking
+    // across all positions. SV-desc means we still see the high-value head terms
+    // first, but we now capture mid-tail rankings too.
     d4sPost('/v3/dataforseo_labs/google/ranked_keywords/live', {
-      target: target.domain, language_code: 'de', location_code: 2276, limit: 100,
-      order_by: ['ranked_serp_element.serp_item.rank_group,asc'],
+      target: target.domain, language_code: 'de', location_code: 2276, limit: 1000,
+      order_by: ['keyword_data.keyword_info.search_volume,desc'],
     }).catch(e => ({ error: String(e) })),
     d4sPost('/v3/backlinks/summary/live', { target: target.domain, internal_list_limit: 10 }).catch(e => ({ error: String(e) })),
     d4sPost('/v3/dataforseo_labs/google/domain_rank_overview/live', { target: target.domain, language_code: 'de', location_code: 2276 }).catch(e => ({ error: String(e) })),

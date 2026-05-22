@@ -46,14 +46,21 @@ function summarize(t) {
   // DataForSEO ranked
   const d4sItems = raw.dataforseo.ranked?.tasks?.[0]?.result?.[0]?.items || [];
   o.d4s_kw_total = raw.dataforseo.ranked?.tasks?.[0]?.result?.[0]?.total_count || d4sItems.length;
-  o.d4s_top_keywords = d4sItems.slice(0, 30).map(it => ({
-    keyword: it.keyword_data?.keyword,
-    position: it.ranked_serp_element?.serp_item?.rank_group,
-    url: it.ranked_serp_element?.serp_item?.url,
-    sv: it.keyword_data?.keyword_info?.search_volume,
-    kd: it.keyword_data?.keyword_properties?.keyword_difficulty,
-    etv: it.ranked_serp_element?.serp_item?.estimated_traffic_volume,
-  }));
+  // Top-15 table in the PDF wants the *best-ranking* keywords. The fetch is now
+  // sorted by SV desc (so the distribution is realistic), so we have to re-sort
+  // locally by position asc to populate the Top-Keywords table.
+  o.d4s_top_keywords = [...d4sItems]
+    .filter(it => it.ranked_serp_element?.serp_item?.rank_group != null)
+    .sort((a, b) => a.ranked_serp_element.serp_item.rank_group - b.ranked_serp_element.serp_item.rank_group)
+    .slice(0, 30)
+    .map(it => ({
+      keyword: it.keyword_data?.keyword,
+      position: it.ranked_serp_element?.serp_item?.rank_group,
+      url: it.ranked_serp_element?.serp_item?.url,
+      sv: it.keyword_data?.keyword_info?.search_volume,
+      kd: it.keyword_data?.keyword_properties?.keyword_difficulty,
+      etv: it.ranked_serp_element?.serp_item?.estimated_traffic_volume,
+    }));
   o.pos_dist = { t3: 0, t10: 0, t20: 0, t50: 0, t100: 0 };
   for (const it of d4sItems) {
     const p = it.ranked_serp_element?.serp_item?.rank_group;
@@ -100,15 +107,25 @@ function summarize(t) {
     first_seen: d.first_seen,
   }));
 
-  // Competitors
+  // Competitors — DataForSEO sometimes includes the target itself as competitor #1
+  // (because the target overlaps 100 % with itself). Filter that out, plus normalize
+  // common www / case variants so we don't accidentally keep it under a different
+  // form. The target is compared to t.domain (which we already validated upstream).
+  const targetNorm = String(t.domain || '').toLowerCase().replace(/^www\./, '');
   const d4sComp = raw.dataforseo.competitors?.tasks?.[0]?.result?.[0]?.items || [];
-  o.d4s_competitors = d4sComp.slice(0, 8).map(c => ({
-    domain: c.domain,
-    etv: c.metrics?.organic?.etv,
-    kw_count: c.metrics?.organic?.count,
-    intersections: c.intersections,
-    avg_position: c.avg_position,
-  }));
+  o.d4s_competitors = d4sComp
+    .filter(c => {
+      const dn = String(c.domain || '').toLowerCase().replace(/^www\./, '');
+      return dn && dn !== targetNorm;
+    })
+    .slice(0, 8)
+    .map(c => ({
+      domain: c.domain,
+      etv: c.metrics?.organic?.etv,
+      kw_count: c.metrics?.organic?.count,
+      intersections: c.intersections,
+      avg_position: c.avg_position,
+    }));
 
   // PSI
   for (const strat of ['mobile', 'desktop']) {
