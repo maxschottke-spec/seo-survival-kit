@@ -8,3 +8,15 @@ node_modules/
 output/
 *.pdf
 !examples/*.pdf
+
+# User-supplied runtime configs (may contain client domains, API keys,
+# narrative drafts). Example files (*.example.json, *.example.js) are
+# checked in as templates; the unsuffixed real files must NEVER be.
+audit-config.json
+psi-config.json
+channels.json
+
+# Working data + cron history written by skills at runtime
+data/
+psi-history/
+*.ndjson

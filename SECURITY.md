@@ -167,3 +167,9 @@ If you find a vulnerability:
 ## Audit trail
 
 This plugin is open-source under MIT. Every change is visible in git history. There are no minified scripts, no obfuscated code, no compiled binaries, no `postinstall` hooks, no `npm install` (the plugin has zero runtime dependencies).
+
+### External security reviews
+
+| Date | Reviewer | Scope | Findings |
+|------|----------|-------|----------|
+| 2026-05-22 | [Jeronzo](https://github.com/kamehamea-art) | Full repo audit: gitleaks + trivy + semgrep tool-pass plus 4 parallel domain-subagent analysis (Injection, Secrets, Deps, Config) | 1 CRITICAL chain, 4 HIGH, 6 MEDIUM, 11 LOW. Drove the v0.3.x security sprint that closed the gitignore-leak surface, the indirect-prompt-injection vector via scraped HTML, the unrestricted skill tool surface, and the CI floating-range supply-chain risk. |

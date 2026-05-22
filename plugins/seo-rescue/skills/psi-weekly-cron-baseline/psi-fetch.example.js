@@ -11,8 +11,19 @@ const CFG_PATH = process.env.PSI_CONFIG || './psi-config.json';
 if (!fs.existsSync(CFG_PATH)) { console.error(`Config not found: ${CFG_PATH}`); process.exit(1); }
 const CFG = JSON.parse(fs.readFileSync(CFG_PATH, 'utf8'));
 
-const API_KEY = process.env.GOOGLE_API_KEY || CFG.api_key;
-if (!API_KEY) { console.error('Missing GOOGLE_API_KEY env var or config.api_key'); process.exit(1); }
+// env-only by design: previously this fell back to CFG.api_key, which combined
+// with an un-ignored psi-config.json made it easy to commit the API key to git.
+// Force env-var usage so the secret cannot live in a tracked file.
+const API_KEY = process.env.GOOGLE_API_KEY;
+if (!API_KEY) {
+  console.error('Missing GOOGLE_API_KEY env var. Set it before running:');
+  console.error('  export GOOGLE_API_KEY=AIza...   # or use a .env loader');
+  process.exit(1);
+}
+if (CFG.api_key) {
+  console.error('Refusing to run: psi-config.json contains api_key. Remove it and use the GOOGLE_API_KEY env var instead.');
+  process.exit(1);
+}
 
 const OUT_DIR = CFG.output_dir || './psi-history';
 fs.mkdirSync(OUT_DIR, { recursive: true });

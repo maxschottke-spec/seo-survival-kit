@@ -3,6 +3,7 @@ name: rescue
 description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the seven sub-skills covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, and AI search rescue. Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
 user-invokable: true
 argument-hint: '[subcommand] [domain-or-args]'
+allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke

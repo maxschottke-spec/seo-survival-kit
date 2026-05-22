@@ -216,6 +216,11 @@ This is a personal skill collection. PRs welcome if you've found real-world impr
 
 Open an issue if you want to discuss a larger change before opening a PR.
 
+## Contributors
+
+- **[Max Schottke](https://github.com/maxschottke-spec)** — maintainer, original skills, plugin packaging
+- **[Jeronzo](https://github.com/kamehamea-art)** — independent security review (audit 2026-05-22 surfaced the data-leak surface, prompt-injection chain, and `allowed-tools` hardening that landed in the v0.3.x security sprint)
+
 ## Status & Maturity
 
 Version 0.1 — first public release. Built and tested against real 2026 recovery cases (4 domain audits, 1 extended Core-Update recovery). Expect breaking changes until 1.0.
