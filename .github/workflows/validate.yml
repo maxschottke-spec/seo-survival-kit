@@ -1,0 +1,122 @@
+name: Validate plugin + marketplace
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install YAML parser
+        run: npm install --no-save --no-package-lock js-yaml@4
+
+      - name: Check plugin manifest exists at required path
+        run: |
+          test -f plugins/seo-rescue/.claude-plugin/plugin.json || (echo "::error::plugin.json missing at plugins/seo-rescue/.claude-plugin/plugin.json (this was the bug in v0.2.0/v0.2.1 — manifest at wrong path)" && exit 1)
+          test -f .claude-plugin/marketplace.json || (echo "::error::marketplace.json missing" && exit 1)
+          echo "✔ Manifest paths OK"
+
+      - name: Validate plugin.json + marketplace.json parse as JSON
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('plugins/seo-rescue/.claude-plugin/plugin.json', 'utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json', 'utf8'))"
+          echo "✔ Manifest JSON valid"
+
+      - name: Validate plugin.json required fields
+        run: |
+          node -e "
+            const p = JSON.parse(require('fs').readFileSync('plugins/seo-rescue/.claude-plugin/plugin.json', 'utf8'));
+            const required = ['name', 'version', 'description'];
+            for (const f of required) {
+              if (!p[f]) { console.error('::error::plugin.json missing required field:', f); process.exit(1); }
+            }
+            console.log('✔ plugin.json has all required fields');
+          "
+
+      - name: Validate marketplace.json references match plugin folders
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const mp = JSON.parse(fs.readFileSync('.claude-plugin/marketplace.json', 'utf8'));
+            for (const plugin of (mp.plugins || [])) {
+              const source = plugin.source;
+              if (!source) { console.error('::error::marketplace plugin missing source:', plugin.name); process.exit(1); }
+              const manifestPath = path.join(source, '.claude-plugin', 'plugin.json');
+              if (!fs.existsSync(manifestPath)) {
+                console.error('::error::marketplace.json references', plugin.name, 'but', manifestPath, 'does not exist');
+                process.exit(1);
+              }
+            }
+            console.log('✔ marketplace.json references resolve');
+          "
+
+      - name: Validate all SKILL.md frontmatters parse as YAML
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const yaml = require('js-yaml');
+            const skillsDir = 'plugins/seo-rescue/skills';
+            let failed = 0;
+            for (const name of fs.readdirSync(skillsDir)) {
+              const f = path.join(skillsDir, name, 'SKILL.md');
+              if (!fs.existsSync(f)) continue;
+              const src = fs.readFileSync(f, 'utf8');
+              const m = src.match(/^---\n([\s\S]*?)\n---/);
+              if (!m) { console.error('::error::no frontmatter in', f); failed++; continue; }
+              try {
+                const fm = yaml.load(m[1]);
+                if (!fm.name) { console.error('::error::frontmatter missing name in', f); failed++; continue; }
+                if (!fm.description) { console.error('::error::frontmatter missing description in', f); failed++; continue; }
+                console.log('✔', name, '— frontmatter OK');
+              } catch (e) {
+                console.error('::error::YAML parse failed for', f, ':', e.message);
+                failed++;
+              }
+            }
+            if (failed) process.exit(1);
+            console.log('✔ All SKILL.md frontmatters parse');
+          "
+
+      - name: Syntax-check all Node.js scripts
+        run: |
+          for f in $(find plugins/seo-rescue -name '*.js'); do
+            echo "Checking $f"
+            node --check "$f"
+          done
+          echo "✔ All .js files pass syntax check"
+
+      - name: Validate example JSON configs parse
+        run: |
+          for f in $(find plugins/seo-rescue -name '*.example.json'); do
+            echo "Checking $f"
+            node -e "JSON.parse(require('fs').readFileSync('$f', 'utf8'))"
+          done
+          echo "✔ All example JSON configs parse"
+
+      - name: Try claude plugin validate (best-effort)
+        continue-on-error: true
+        run: |
+          # Try multiple install methods. If none work, the manual checks above still gate the PR.
+          if curl -fsSL https://docs.claude.com/install.sh -o /tmp/install.sh 2>/dev/null && bash /tmp/install.sh; then
+            export PATH="$HOME/.local/bin:$PATH"
+            if which claude > /dev/null; then
+              echo "Running claude plugin validate as extra check..."
+              claude plugin validate plugins/seo-rescue
+              claude plugin validate .
+            fi
+          else
+            echo "::notice::claude CLI install failed — manual checks above are authoritative"
+          fi
