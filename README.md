@@ -52,6 +52,21 @@ If you're already running [claude-seo](https://github.com/AgriciDaniel/claude-se
 
 The skills are domain-type-agnostic. The example data in `examples/` happens to be an e-commerce sample, but the workflow works identically for a B2B SaaS or a news site.
 
+## Quick Reference
+
+Every skill is reachable as a namespaced slash command. Type `/seo-rescue:rescue` in Claude Code to see the routing table, or call any sub-skill directly.
+
+| Slash command | What it does | Cost |
+|---|---|---|
+| `/seo-rescue:rescue` | Orchestrator + routing table | free |
+| `/seo-rescue:seo-audit-free <domain>` | Free-tier health check (GSC + PSI + Lighthouse + curl) | free |
+| `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
+| `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers (Sistrix + DataForSEO + PSI) | ~$0.05-$0.50 |
+| `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
+| `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10-$0.50 |
+| `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
+| `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery | free |
+
 ## The seven skills
 
 ### `seo-audit-free`

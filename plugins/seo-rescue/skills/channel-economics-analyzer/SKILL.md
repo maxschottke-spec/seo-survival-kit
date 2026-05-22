@@ -1,6 +1,13 @@
 ---
 name: channel-economics-analyzer
 description: 'Use when an e-commerce business sells across multiple channels (own shop, Amazon, OTTO, eBay, Etsy, Zalando, etc.) and wants to know which channel is actually profitable vs which is bleeding money — e.g. "which channel makes money?", "is OTTO/Amazon worth it?", "channel break-even calculation", "marketplace profitability", "Kanal-Ökonomie", "soll ich den Channel zumachen?". Also triggers when ad budget allocation decisions are needed across channels, or when consolidating to fewer channels is being considered.'
+user-invokable: true
+argument-hint: '[channels.json path?]'
+license: MIT
+metadata:
+  author: Max Schottke
+  version: '0.3.0'
+  category: marketing
 ---
 
 # Channel Economics Analyzer

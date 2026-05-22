@@ -1,6 +1,13 @@
 ---
 name: seo-audit-free
 description: 'Use when the user wants a basic SEO health check on a domain WITHOUT paying for any SEO tools — e.g. "kostenloser SEO-Check", "SEO ohne Sistrix", "ich habe nur Google Search Console und nichts anderes", "Anfänger-Audit", "wo fange ich beim SEO an", "billiges SEO" oder als Vorstufe vor dem entscheidet ob die kostenpflichtigen Tools (Sistrix, DataForSEO) sinnvoll sind. Anti-Use: NICHT für tiefere Wettbewerbsanalyse, Sichtbarkeitsverlauf, oder professionelle Outreach-Reports — dafür existiert `seo-outreach-report` mit den paid APIs.'
+user-invokable: true
+argument-hint: '[domain]'
+license: MIT
+metadata:
+  author: Max Schottke
+  version: '0.3.0'
+  category: marketing
 ---
 
 # Beginner SEO Audit — nur kostenlose Tools

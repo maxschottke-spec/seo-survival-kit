@@ -6,11 +6,16 @@ All notable changes to seo-survival-kit are documented here. The format follows 
 
 ### Added
 - New skill `ai-search-rescue` for AI-search visibility recovery (Google AI Overviews, AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai search). Framework includes a measurement layer across the six AI surfaces, seven optimization tactics (extractable passages, question-shaped headings, source-cited statements, author trust, schema for AI, llms.txt, Wikipedia), and a realistic 6-12 week recovery workflow.
+- New orchestrator skill `rescue` at `plugins/seo-rescue/skills/rescue/SKILL.md`. Acts as the entry point for the plugin — type `/seo-rescue:rescue` to see the routing table covering all seven content skills, or use sub-aliases like `/seo-rescue:rescue audit <domain>` to route to a specific sub-skill. Modeled after the pro-grade orchestrator pattern in `claude-seo:seo`.
 - GitHub Actions CI workflow at `.github/workflows/validate.yml` running `claude plugin validate` on the marketplace and plugin on every push and PR, plus syntax-check on all `.js` files and JSON parse-check on config examples. Prevents repeat of the v0.2.0/v0.2.1 un-installable releases.
+- `CLAUDE.md` at repo root with project overview, architecture diagram, release process, security model, and contribution guidelines for working with the codebase.
 - `CHANGELOG.md` (this file) for installer transparency.
+- Quick Reference table at the top of README.md showing every namespaced slash command with one-line description and cost-per-audit.
 
 ### Changed
+- All seven content SKILL.md frontmatters now declare `user-invokable: true`, `argument-hint`, `license: MIT`, and a `metadata` block (`author`, `version`, `category`). Discoverability via Claude Code's autocomplete and downstream catalog tooling improved to match the conventions used by claude-seo.
 - Marketplace metadata updated to reflect seven skills instead of six.
+- Marketplace keywords expanded with `ai-search`, `ai-overviews`, `geo`, `generative-engine-optimization`, `chatgpt`, `perplexity`, `llms-txt`.
 - README skill count updated.
 
 ## [0.2.2] — 2026-05-22

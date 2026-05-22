@@ -1,6 +1,13 @@
 ---
 name: ai-search-rescue
 description: 'Use when a site has lost visibility in AI search surfaces (Google AI Overviews, Google AI Mode, ChatGPT citations, Perplexity citations) or wants to systematically work toward being cited rather than just ranked. Trigger phrases include "AI Overviews recovery", "ChatGPT zitiert uns nicht mehr", "wir sind aus den AI Overviews rausgeflogen", "generative engine optimization", "GEO strategy", "AI search visibility", "warum zitiert AI Overview den Wettbewerber statt uns", "Perplexity-Citations aufbauen". Anti-Use: NICHT für klassische SERP-Rankings — dafür existieren `seo-outreach-report` und `competitor-deep-audit`.'
+user-invokable: true
+argument-hint: '[domain]'
+license: MIT
+metadata:
+  author: Max Schottke
+  version: '0.3.0'
+  category: marketing
 ---
 
 # AI Search Rescue
