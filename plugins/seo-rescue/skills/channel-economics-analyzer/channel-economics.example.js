@@ -4,9 +4,20 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { safeSlug, safeReadFile } = require('../../lib/safe.js');
 
-const CFG = JSON.parse(fs.readFileSync('./channels.json', 'utf8'));
+const CFG = JSON.parse(safeReadFile('./channels.json'));
 const DAYS = CFG.period_days || 90;
+
+// Validate channel names at config-load. A hostile channels.json with
+// name="../../etc/passwd" would otherwise read out-of-CWD via the
+// `./data/${ch.name}-period.csv` interpolation below. safeSlug enforces
+// the same alnum/dash/underscore charset as audit-config target slugs.
+if (!Array.isArray(CFG.channels)) { console.error('channels.json must have channels:[]'); process.exit(1); }
+for (const ch of CFG.channels) {
+  if (!ch || typeof ch !== 'object') { console.error('channels[*] must be an object'); process.exit(1); }
+  safeSlug(ch.name);
+}
 
 function loadCsv(filepath) {
   const lines = fs.readFileSync(filepath, 'utf8').trim().split('\n');

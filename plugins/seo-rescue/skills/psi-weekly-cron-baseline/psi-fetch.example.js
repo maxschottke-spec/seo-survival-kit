@@ -6,6 +6,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { safeUrl, safeLabel } = require('../../lib/safe.js');
 
 const CFG_PATH = process.env.PSI_CONFIG || './psi-config.json';
 if (!fs.existsSync(CFG_PATH)) { console.error(`Config not found: ${CFG_PATH}`); process.exit(1); }
@@ -33,6 +34,52 @@ const STRATEGIES = CFG.strategies || ['mobile', 'desktop'];
 const CATS = CFG.categories || ['performance', 'seo', 'accessibility', 'best-practices'];
 const THRESHOLD = CFG.alert_threshold_drop || 10;
 const BASELINE_WEEKS = CFG.alert_baseline_weeks || 4;
+
+// Validate-at-load + trust-at-use: every config field that flows into a
+// URL, a path, or a control-flow decision is checked once here, so the
+// downstream code can interpolate freely without re-validating.
+//
+// Why this is the right place:
+// - safeUrl blocks non-http(s) schemes + loopback/RFC1918/link-local hosts,
+//   so a hostile psi-config.json cannot use the PSI API as an SSRF proxy
+//   or pivot to cloud-metadata endpoints (169.254.169.254 etc.).
+// - The PSI API ignores unknown category/strategy values silently, so an
+//   allowlist here is purely defensive — but it pins behavior and makes
+//   future code-readers' expectations explicit.
+// - output_dir gets used in fs.mkdirSync + path.join; rejecting absolute
+//   paths and `..` keeps writes confined to the script's CWD.
+if (!Array.isArray(CFG.urls)) { console.error('config.urls must be an array'); process.exit(1); }
+for (const u of CFG.urls) {
+  if (!u || typeof u !== 'object') { console.error('config.urls[*] must be an object'); process.exit(1); }
+  safeUrl(u.url);
+  safeLabel(u.label);
+}
+if (CFG.categories !== undefined) {
+  const VALID_CATS = ['performance', 'seo', 'accessibility', 'best-practices', 'pwa'];
+  if (!Array.isArray(CFG.categories)) { console.error('config.categories must be an array'); process.exit(1); }
+  for (const c of CFG.categories) {
+    if (typeof c !== 'string' || !VALID_CATS.includes(c)) {
+      console.error(`config.categories: unknown value ${JSON.stringify(c)} (allowed: ${VALID_CATS.join(', ')})`);
+      process.exit(1);
+    }
+  }
+}
+if (CFG.strategies !== undefined) {
+  if (!Array.isArray(CFG.strategies)) { console.error('config.strategies must be an array'); process.exit(1); }
+  for (const s of CFG.strategies) {
+    if (s !== 'mobile' && s !== 'desktop') {
+      console.error(`config.strategies: must be "mobile" or "desktop", got ${JSON.stringify(s)}`);
+      process.exit(1);
+    }
+  }
+}
+if (CFG.output_dir !== undefined) {
+  if (typeof CFG.output_dir !== 'string') { console.error('config.output_dir must be a string'); process.exit(1); }
+  if (path.isAbsolute(CFG.output_dir) || CFG.output_dir.includes('..')) {
+    console.error(`config.output_dir: must be a relative path inside CWD (no absolute paths, no ..). Got: ${JSON.stringify(CFG.output_dir)}`);
+    process.exit(1);
+  }
+}
 
 async function psi(url, strategy) {
   const params = new URLSearchParams({ url, strategy, key: API_KEY });
