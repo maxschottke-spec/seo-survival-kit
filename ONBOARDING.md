@@ -22,13 +22,15 @@ Verify:
 ```
 /plugin
 ```
-You should see `seo-rescue` in the Installed tab with all six skills:
+You should see `seo-rescue` in the Installed tab with all eight skills:
+- `rescue` (orchestrator — entry point, type `/seo-rescue:rescue` to see the routing table)
 - `seo-audit-free`
 - `post-core-update-recovery`
 - `seo-outreach-report`
 - `channel-economics-analyzer`
 - `competitor-deep-audit`
 - `psi-weekly-cron-baseline`
+- `ai-search-rescue`
 
 ## Step 2 — Decide if you need the API setup (2 min)
 
