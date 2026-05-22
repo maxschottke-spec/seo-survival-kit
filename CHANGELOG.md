@@ -2,6 +2,37 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.4.1] — 2026-05-22
+
+### Added — cross-platform exports
+
+New `exports/` directory with the framework-only skills in platform-agnostic Markdown, plus per-platform install snippets:
+
+- **`exports/skills/seo-rescue-overview.md`** — top-level routing + framework index (replaces the Claude-Code-specific `/seo-rescue:rescue` orchestrator for non-Claude tools)
+- **`exports/skills/post-core-update-recovery.md`** — diagnose tree + 4-phase Authority-First recovery plan, Claude-frontmatter stripped
+- **`exports/skills/ai-search-rescue.md`** — 7 tactics + 3-layer measurement for AI Overview / ChatGPT / Perplexity citation visibility, Claude-frontmatter stripped
+- **`exports/README.md`** — per-platform install guides for Cursor (`.cursor/rules/*.mdc`), OpenAI Custom GPT (Instructions + Knowledge files), Gemini CLI (`GEMINI.md`), Aider (`CONVENTIONS.md`), Continue.dev (config.json docs), Codex (`AGENTS.md`), plus a generic-Markdown fallback for any other LLM
+
+### Why this matters
+
+The MATURITY.md "agentskills.io compliant — works in Cursor / Codex / Gemini CLI" claim was only true for the **pure-Markdown framework skills**, and only if the user manually stripped the Claude-specific frontmatter. This release makes that automatic: paste the right file into the right place and the framework loads.
+
+### Scope
+
+Only the three pure-Markdown framework skills are exported. The seven script-backed skills (`seo-audit-free`, `seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`) remain Claude-Code-specific because their SKILL.md routing depends on Claude Code's slash-command + `allowed-tools` conventions. The underlying Node scripts in each skill folder are platform-agnostic — `exports/README.md` documents how to run them directly with `node` on any system.
+
+### Planned next
+
+`v0.5.x` will add an MCP server wrapper exposing each script-backed skill as an MCP tool — real cross-LLM portability (Cursor, Codex, Continue, Aider, Claude Desktop, Goose, n8n) instead of just framework-knowledge portability.
+
+### Changed
+
+- `plugin.json` + 10 × SKILL.md frontmatter `version` bumped 0.4.0 → 0.4.1
+- README / ONBOARDING / CLAUDE / SECURITY install commands bumped to `#v0.4.1`
+- MATURITY version line bumped to 0.4.1
+
+No code, skill behavior, or trigger-phrase changes vs v0.4.0.
+
 ## [0.4.0] — 2026-05-22
 
 ### Added — two new skills (the two leading-indicator + convenience picks from the strategic roadmap)

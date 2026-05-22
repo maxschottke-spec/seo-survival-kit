@@ -4,7 +4,7 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 
 ## Where this plugin is today
 
-**Version 0.4.0** — fifth stable release in the May 2026 launch + hardening cycle, after the LOW-severity polish pass.
+**Version 0.4.1** — fifth stable release in the May 2026 launch + hardening cycle, after the LOW-severity polish pass.
 
 - ✅ Tested against 4 real domains (mixed e-commerce + news, results anonymized in published LESSONS.md)
 - ✅ Real Core-Update-Recovery pilot case validates the framework — see usage section below

@@ -6,7 +6,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
 [![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
-> **Status — Public Beta (v0.4.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.4.0`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+> **Status — Public Beta (v0.4.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.4.1`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 ## Naming at a glance
 
@@ -154,7 +154,7 @@ Framework for recovering visibility in AI search surfaces — Google AI Overview
 
 **Recommended — pinned to a tag (reproducible, survives upstream changes):**
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.0
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.1
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
@@ -167,6 +167,10 @@ Always-latest (less safe — a maintainer-account compromise would propagate on 
 ```
 
 See [SECURITY.md](./SECURITY.md#how-to-verify-before-trusting) for how to verify a pinned version before installing.
+
+### Using the framework outside Claude Code
+
+The three pure-Markdown framework skills (`rescue`, `post-core-update-recovery`, `ai-search-rescue`) are also available as platform-agnostic Markdown in [`exports/`](./exports/) — with install snippets for Cursor, OpenAI Custom GPT, Gemini CLI, Aider, Continue.dev, and Codex. Script-backed skills remain Claude-Code-specific; full multi-LLM support via an MCP server wrapper is planned for v0.5.x.
 
 ## ⚠️ Before you run anything — read these
 
