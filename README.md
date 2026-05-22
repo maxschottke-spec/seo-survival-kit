@@ -6,7 +6,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
 [![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
-> **Status — Public Beta (v0.3.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.3.3`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+> **Status — Public Beta (v0.3.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.3.4`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 ## Naming at a glance
 
@@ -152,7 +152,7 @@ Framework for recovering visibility in AI search surfaces — Google AI Overview
 
 **Recommended — pinned to a tag (reproducible, survives upstream changes):**
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.3
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.4
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
@@ -210,6 +210,28 @@ Each skill has a `LESSONS.md` file. As you use the skills and encounter new patt
 ## License
 
 MIT — see [LICENSE](./LICENSE).
+
+## Usage metrics & privacy
+
+This plugin contains zero telemetry. No tracking requests, no phone-home, no install-counter, no analytics in any of the scripts. All network calls are documented in [SECURITY.md](./SECURITY.md#network-access) and go only to the three external APIs the skills explicitly use (Sistrix, DataForSEO, Google PageSpeed Insights). You can verify this in the source: the entire plugin is roughly 2,000 lines and reviewable in under 30 minutes.
+
+That means there is also no central counter that tells the maintainer how many people use this plugin or which skills they invoke. The only signals available are:
+
+- **GitHub Stars** — visible publicly. If you find the plugin useful, a star is the simplest way to signal it.
+- **GitHub Watchers / Subscribers** — visible publicly. Lets you receive release notifications.
+- **GitHub Issues** — public, also serves as a feedback channel. See the issue templates: bug report, feature request, usage feedback.
+- **GitHub Discussions** (if enabled on the repo) — for "I tried this, here is what worked or did not work" conversations.
+- **GitHub Traffic API** — the maintainer sees a rolling 14-day window of view and clone counts. Clones are a rough proxy for `/plugin marketplace add` installations because Claude Code installs the plugin by cloning the repository. Clones are not aggregated historically and do not identify individual users; GitHub returns only the aggregate count plus number of unique IPs in the 14-day window.
+
+There are currently no official install or invocation metrics from the Claude Code marketplace itself. The marketplace catalog is a public JSON file in a GitHub repository, and installations happen as git clone operations without a tracking backend. If Anthropic publishes plugin-level metrics in the future, this section will be updated.
+
+If you use this plugin in a project or with a client and want to give feedback:
+
+- Star the repo if it was helpful
+- Open an issue if you found a bug, want a feature, or want to share a use case (see issue templates)
+- Comment in a Discussion if you want to share what you built without filing a formal issue
+
+We will never reach out, send a survey, or contact you in any way unless you initiate the conversation. There is no email list, no embedded analytics, no opt-in tracking switch buried in the config.
 
 ## Security & external reviewers
 
