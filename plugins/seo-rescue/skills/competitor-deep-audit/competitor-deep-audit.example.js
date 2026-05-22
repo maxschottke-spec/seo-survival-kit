@@ -5,9 +5,17 @@
 // Run: node --env-file=.env competitor-deep-audit.example.js <your-domain>
 
 const fs = require('node:fs');
+const { safeHostname } = require('../../lib/safe.js');
 
+// Validate-at-load: TARGET flows into the DataForSEO request body AND into
+// the output filename stem below (`./${stem}.json`). Without this check,
+// `node competitor-deep-audit.example.js /tmp/poc` would write outside CWD,
+// and a tab-character or NUL in the domain would break downstream parsers.
+// safeHostname enforces a strict RFC1123 hostname charset — slashes,
+// protocols, paths, and whitespace are all rejected.
 const TARGET = process.argv[2];
 if (!TARGET) { console.error('Usage: node competitor-deep-audit.example.js <your-domain>'); process.exit(1); }
+safeHostname(TARGET);
 
 const D4S_LOGIN = process.env.DATAFORSEO_LOGIN;
 const D4S_PASS = process.env.DATAFORSEO_PASSWORD;

@@ -24,8 +24,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install YAML parser
-        run: npm install --no-save --no-package-lock js-yaml@4
+      # No `npm install` step. The previous version pulled js-yaml@4 with a
+      # floating range on every PR run, which meant a compromised upstream
+      # could land in the validation gate. We only need to check three things
+      # in the frontmatter (name, description, allowed-tools exist) — a regex
+      # per field is enough, and keeps the workflow's runtime supply chain to
+      # the two SHA-pinned actions above.
 
       - name: Check plugin manifest exists at required path
         run: |
@@ -68,32 +72,34 @@ jobs:
             console.log('✔ marketplace.json references resolve');
           "
 
-      - name: Validate all SKILL.md frontmatters parse as YAML
+      - name: Validate all SKILL.md frontmatters have required fields
         run: |
           node -e "
             const fs = require('fs');
             const path = require('path');
-            const yaml = require('js-yaml');
             const skillsDir = 'plugins/seo-rescue/skills';
+            // Required fields. allowed-tools is enforced to prevent regression of
+            // the M5 finding (full session tool surface inherited by every skill).
+            const REQUIRED = ['name', 'description', 'allowed-tools'];
+            const hasField = (yamlText, key) => new RegExp('^' + key.replace(/[-]/g, '[-]') + ':\\\\s+\\\\S', 'm').test(yamlText);
             let failed = 0;
             for (const name of fs.readdirSync(skillsDir)) {
               const f = path.join(skillsDir, name, 'SKILL.md');
               if (!fs.existsSync(f)) continue;
               const src = fs.readFileSync(f, 'utf8');
-              const m = src.match(/^---\n([\s\S]*?)\n---/);
+              const m = src.match(/^---\\n([\\s\\S]*?)\\n---/);
               if (!m) { console.error('::error::no frontmatter in', f); failed++; continue; }
-              try {
-                const fm = yaml.load(m[1]);
-                if (!fm.name) { console.error('::error::frontmatter missing name in', f); failed++; continue; }
-                if (!fm.description) { console.error('::error::frontmatter missing description in', f); failed++; continue; }
-                console.log('✔', name, '— frontmatter OK');
-              } catch (e) {
-                console.error('::error::YAML parse failed for', f, ':', e.message);
+              const fm = m[1];
+              const missing = REQUIRED.filter(k => !hasField(fm, k));
+              if (missing.length) {
+                console.error('::error::', f, '— missing required frontmatter field(s):', missing.join(', '));
                 failed++;
+                continue;
               }
+              console.log('✔', name, '— frontmatter has', REQUIRED.join(', '));
             }
             if (failed) process.exit(1);
-            console.log('✔ All SKILL.md frontmatters parse');
+            console.log('✔ All SKILL.md frontmatters have required fields');
           "
 
       # find -print0 + while-read avoids shell word-splitting on filenames containing
