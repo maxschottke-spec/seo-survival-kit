@@ -199,6 +199,14 @@ Each skill has a `LESSONS.md` file. As you use the skills and encounter new patt
 
 MIT — see [LICENSE](./LICENSE).
 
+## Security & external reviewers
+
+Full threat model and verification steps: [SECURITY.md](./SECURITY.md).
+
+If you're reviewing the plugin — independently, as a collaborator, or with LLM assistance — see [SECURITY.md → For external reviewers](./SECURITY.md#for-external-reviewers). It defines a short reporting protocol (`[VERIFIED]` / `[PROBABLE]` / `[UNVERIFIED]` labels, mandatory `file:line` citations, false-positive guidance for the bundled `skill-security-auditor`, and a copy-paste system prompt for free-tier/sandboxed LLM assistants).
+
+To report a vulnerability: open a [GitHub issue](https://github.com/maxschottke-spec/seo-survival-kit/issues) for non-sensitive items, or email the maintainer directly for items that could affect installed users.
+
 ## Contributing
 
 This is a personal skill collection. PRs welcome if you've found real-world improvements, especially:
