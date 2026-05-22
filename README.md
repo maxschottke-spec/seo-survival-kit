@@ -1,12 +1,12 @@
 # SEO Survival Kit for Claude Code
 
-> Seven Claude Code skills for SEO diagnosis and recovery workflows. Built and validated during one extended e-commerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
+> Nine Claude Code skills for SEO diagnosis and recovery workflows. Built and validated during one extended e-commerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
 [![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
-> **Status — Public Beta (v0.3.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.3.3`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+> **Status — Public Beta (v0.4.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.4.0`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 ## Naming at a glance
 
@@ -22,7 +22,7 @@ The mixed naming is intentional (marketplace is the brand, plugin is the technic
 
 ## What's new
 
-- **7 skills** covering free-tier audit → recovery framework → outreach reports → channel economics → competitor gaps → automated PSI tracking → AI-search visibility recovery.
+- **9 skills** covering free-tier audit → recovery framework → outreach reports → channel economics → competitor gaps → automated PSI tracking → AI-search visibility recovery → AI-citations weekly tracker → one-call GSC API snapshot.
 - **Independent security audit** by [Jeronzo](https://github.com/kamehamea-art) on 2026-05-22 surfaced and drove fixes for one CRITICAL chain, 4 HIGH, 6 MEDIUM, 11 LOW issues. See [SECURITY.md](./SECURITY.md#external-security-reviews) for the audit summary.
 - **Smoke-tested** on 10 diverse domains across 7 categories (e-commerce, news, SaaS, comparison, content/UGC, services, travel). Methodology in [MATURITY.md](./MATURITY.md).
 
@@ -72,9 +72,11 @@ Every skill is reachable as a namespaced slash command. Type `/seo-rescue:rescue
 | `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
 | `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10-$0.50 |
 | `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
-| `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery | free |
+| `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery (framework) | free |
+| `/seo-rescue:ai-citations-tracker` | **NEW v0.4** — weekly cron tracking brand citations in ChatGPT + Perplexity (NDJSON history) | ~$0.10/year |
+| `/seo-rescue:gsc-deep-dive <domain> [days?]` | **NEW v0.4** — one-call Google Search Console snapshot (queries + pages + coverage + CrUX) | free |
 
-## The seven skills
+## The nine skills
 
 ### `seo-audit-free`
 
@@ -152,7 +154,7 @@ Framework for recovering visibility in AI search surfaces — Google AI Overview
 
 **Recommended — pinned to a tag (reproducible, survives upstream changes):**
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.3
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.0
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
@@ -232,6 +234,24 @@ Open an issue if you want to discuss a larger change before opening a PR.
 
 - **[Max Schottke](https://github.com/maxschottke-spec)** — maintainer, original skills, plugin packaging
 - **[Jeronzo](https://github.com/kamehamea-art)** — independent security review (audit 2026-05-22 surfaced the data-leak surface, prompt-injection chain, and `allowed-tools` hardening that landed in the v0.3.x security sprint)
+
+## Need help running this on your own site?
+
+The plugin is MIT and self-serve — you can run everything in this repo yourself for ~€0.05–€0.50 per audit plus a Sistrix subscription (see [COSTS.md](./COSTS.md)).
+
+If you'd rather have someone with operational experience walk you through it on your specific case (Core-Update hit, AI-search visibility loss, multi-marketplace channel-economics, cold-outreach pipeline setup), the maintainer offers paid engagements:
+
+| Engagement | What you get | Typical scope |
+|---|---|---|
+| **Recovery Audit (fixed)** | Full diagnose-PDF + 60-min strategy call + 4-phase 6-12 month plan | One domain, one Core-Update or AI-search problem |
+| **Recovery Begleitung (retainer)** | Monthly reviews, plan adjustments, prioritization help | 3-6 months, weekly to bi-weekly cadence |
+| **Outreach pipeline setup** | Configured pipeline + first 5 PDFs + handoff | One-time, for agencies that want decision-maker deliverables |
+
+Contact: open a [Discussion](https://github.com/maxschottke-spec/seo-survival-kit/discussions) or reach the maintainer via the email on the [GitHub profile](https://github.com/maxschottke-spec). Calendly link will land here once the public beta period stabilises.
+
+**Why hire the maintainer?** Because the framework comes from one specific recovery case (a mid-size DE e-commerce shop hit by the March 2026 Core Update) that is still in active recovery. The patterns in [LESSONS.md](./plugins/seo-rescue/skills/post-core-update-recovery/LESSONS.md) are observations from that work — paying for a session means getting context on *which* observations apply to your situation and *which* don't.
+
+This is optional. The plugin works fine without it.
 
 ## Status & maintenance
 
