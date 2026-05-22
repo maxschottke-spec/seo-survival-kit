@@ -4,7 +4,34 @@ All notable changes to seo-survival-kit are documented here. The format follows 
 
 ## [0.3.2] — 2026-05-22
 
-### Changed (marketplace-readiness pass — documentation only, no functional changes)
+### Added (security hardening from external audit Round 1 — see SECURITY.md → External security reviews)
+
+- **`lib/safe.js` new helpers** — `safeHostname` (strict RFC1123 hostname charset), `safeUrl` (URL.parse + http(s)-only + SSRF guard against loopback / RFC1918 / link-local incl. **169.254.169.254 cloud-metadata** / .local / IPv6 ::1), `safeLabel` (string + 200-char length cap). All three smoke-tested across 16 cases.
+- **`validateConfigTargets` now covers `domain` + `host` + `label`** (previously only validated `slug`). Hostile audit-config can no longer flow unvalidated hostnames / URLs / labels into URL paths, HTML/PDF output, and filenames.
+- **`sanitize()` helper in `seo-onpage.js`** — defense against indirect prompt injection via scraped third-party HTML. Type-coerces non-strings, length-caps every field (title 300, meta 500, headings 200, schema 64), pattern-matches 12 imperative-injection forms and redacts matches. Tested adversarially against 10 attack strings + 7 legitimate marketing phrases — 17/17 pass (negative-lookahead on `system prompt(?![a-z])` avoids redacting "system prompts you to…").
+- **`allowed-tools` declared on every SKILL.md** — bounds the blast radius of any prompt-injection chain. Pure-Markdown framework skills get `[Read, Grep, Glob]`; script-runners get `[Read, Write, Bash(node:*), Bash(curl:*)]`; psi-weekly-cron extends with `Bash(launchctl:*), Bash(crontab:*)`; seo-audit-free extends with `Bash(npx lighthouse:*)`.
+- **Routing-safety section in `rescue/SKILL.md`** — codifies that sub-skill routing decisions must come from the *initial user message*, never from tool-output content (scraped HTML, API responses, file contents). Closes the orchestrator-injection vector.
+- **Untrusted-input section in `seo-outreach-report/SKILL.md`** — explicit threat-model documentation for installers and reviewers.
+- **For-external-reviewers section in `SECURITY.md`** — anti-hallucination guardrails (`[VERIFIED]` / `[PROBABLE]` / `[UNVERIFIED]` labels, mandatory `file:line` citations, false-positive guidance for the bundled skill-security-auditor, copy-paste system prompt for free-tier/sandboxed LLM assistants).
+- **External security reviews table in `SECURITY.md`** — Round 1 (external reviewer) and Round 2 (maintainer-driven senior-engineering + marketplace audit) both documented with scope and verdict.
+- **Cross-platform env-var reference in `ONBOARDING.md`** — explicit table covering `CHROME_PATH`, `SEO_CACHE_DIR`, `SEO_PDF_OUTPUT_DIR`, `SEO_AUDIT_CONFIG`, `PSI_CONFIG` per-OS defaults + recommended overrides. Step 4w added with the PowerShell equivalent of `mkdir + cp + chmod 600` (including the NTFS ACL incantation for owner-only access).
+- **Contributors section in `README.md`** crediting the external security reviewer.
+- **`.github/dependabot.yml`** — weekly updates for the `github-actions` ecosystem.
+- **`.github/CODEOWNERS`** — owner `@maxschottke-spec` on every path, explicit ownership of `/.github/`, both `.claude-plugin/` folders, `/lib/`, and `/SECURITY.md`.
+- **Branch protection on `main`** — required status check (`validate`), required PR review (1 approval, code-owner-required), conversation-resolution required, no force-push, no deletion.
+- **GitHub repo features** — `dependabot_security_updates` enabled, vulnerability alerts enabled (secret scanning and push-protection were already on).
+
+### Changed (functional)
+
+- **`.gitignore` expanded** to cover user-supplied runtime configs (`audit-config.json`, `psi-config.json`, `channels.json`) plus runtime working dirs (`data/`, `psi-history/`, `*.ndjson`). Previously, an installer following the example files' instruction to "copy to audit-config.json (gitignored)" would silently commit client domains, slugs, and editorial narrative to their fork's git history.
+- **PSI `api_key` is now env-only.** `psi-fetch.example.js` previously fell back to `CFG.api_key` from `psi-config.json` if no env var was set. Combined with the gitignore gap this was a trivial path to commit a Google API key. Script now hard-fails if `api_key` is present in the config.
+- **`psi-fetch.example.js` SSRF + config-input allowlist.** URLs go through `safeUrl` (loopback / RFC1918 / cloud-metadata blocked), `categories[]` allowlisted to the 5 PSI categories, `strategies[]` allowlisted to `mobile / desktop`, `output_dir` must be a relative path without `..` traversal. PSI can no longer be used as an SSRF proxy or pivot to cloud-metadata endpoints.
+- **`channel-economics.example.js` path-traversal fix.** `./data/${ch.name}-period.csv` interpolation now safe-by-construction: `ch.name` passes through `safeSlug` at config-load.
+- **`competitor-deep-audit.example.js` TARGET validation.** `process.argv[2]` is now `safeHostname`-validated before any network call or `writeFileSync`. `node competitor-deep-audit.example.js /tmp/poc` no longer writes outside CWD.
+- **CI workflow hardening (`.github/workflows/validate.yml`).** SHA-pinned `actions/checkout` and `actions/setup-node`, top-level `permissions: contents: read`, `persist-credentials: false` on checkout, `find -print0 | while IFS= read -r -d ''` instead of `for f in $(find …)` (closes a CI-bypass vector where a malicious PR could supply a filename like `'); process.exit(99); //.example.json`). Filenames now pass through `FILE` env var, not shell interpolation.
+- **`js-yaml@4` dependency removed from CI.** Replaced with an inline regex frontmatter validator. CI runtime supply chain is now bounded to the two SHA-pinned actions. `allowed-tools` is now a *required* frontmatter field so the per-skill hardening cannot regress silently.
+
+### Changed (marketplace-readiness pass — non-functional)
 
 - **README rewritten** for marketplace-submission tone. Lead-generation framing removed from the "What this is" section and from the previous "Who uses this" emoji-list. The audience-targeting table ("Freelance SEO consultant: outreach-report = lead-gen tool") was replaced with sachliche "When to use" and "When *not* to use" sections plus an explicit YMYL notice.
 - **Public-Beta status prominent**. New status box at the top of the README plus a "Public Beta" badge. Status & Maintenance section at the bottom states the single-maintainer model explicitly (no SLA, no enterprise support, best-effort issue response).
