@@ -2,6 +2,31 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] — 2026-05-22
+
+### Added (new skill — minor version bump per SemVer because new functionality)
+
+- **New skill `subscription-monetization-audit`** for diagnosing revenue gaps in subscription / recurring-revenue businesses (news paywalls, SaaS-light, membership platforms, e-commerce with subscription tier). Two analysis modes:
+  - **Outside-In mode** — detection from the public website (paywall structure, tier visibility, ad-network density, AI-shopping signals, newsletter prominence, event/affiliate/donation CTAs, cancel-flow accessibility).
+  - **Inside-Out mode** — optional CSV import from Stripe / Chargebee / Recurly / Shopify Subscriptions / custom dashboards. Generic CSV format with 10 required columns and 6 optional columns. Computes MRR, ARR, ARPU, churn 30 / 60 / 90 day, cohort retention, plan distribution, CLV per plan, pending cancellations + MRR at risk, win-back-pool size, payment-provider distribution, country distribution.
+- **Five-lever monetization playbook** with each lever sized by Inside-Out data (or industry-typical benchmarks in Outside-In mode) and anchored on a real-market vorbild:
+  1. Premium-Tier introduction (Welt Plus / Bild Plus / NYT pattern)
+  2. Conversion-Pool activation from active-non-subscribers
+  3. Win-Back of churned subscribers still active on site
+  4. B2B Adjacency / Professional Newsletter (Politico Pro / Tagesspiegel Background / FT Confidential pattern)
+  5. Live Events / Conferences (Axios / Stratechery pattern)
+- **Two bonus levers**: overdue invoice collection (sofort-cash hebel), ad-stack optimization (where ads coexist with subscriptions).
+- **Negative-trend discipline rule**: before applying any conversion-lever, if signup trend is declining month-over-month, the underlying cause of the decline must be diagnosed and addressed first.
+- **Premium-Tier-ARPU goal calculator**: surfaces the most common subscription-business mistake of treating subscriber-count as the only growth lever when blended-ARPU achieves the same ARR goal with less acquisition risk.
+- **CSV-import script** (`csv-import.example.js`) plus example CSV (`csv-import.example.csv`) with synthetic data covering yearly / monthly / weekly billing, active / canceled / pending statuses, payment-provider and country fields.
+- **Orchestrator updated** (`rescue/SKILL.md`) with new routing entry `/seo-rescue:rescue subs [domain | --csv path]`.
+- **README "The eight skills" section** with new entry. Quick Reference table extended to 8 rows.
+- **`marketplace.json` and `plugin.json` descriptions** updated to mention all eight skills.
+
+### Why minor bump (0.4.0)
+
+New skill = new functionality surface = minor version increment per SemVer. No breaking changes to existing skills, no plugin-manifest restructure. Existing v0.3.x installs upgrade transparently and gain the new skill. The previous 0.3.x line was three patch releases on the same skill surface (security hardening + documentation polish); a new skill warrants the minor bump.
+
 ## [0.3.3] — 2026-05-22
 
 ### Changed (polish-pass from Round 1 audit's LOW-severity list)

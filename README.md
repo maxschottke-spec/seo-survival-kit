@@ -1,12 +1,12 @@
 # SEO Survival Kit for Claude Code
 
-> Seven Claude Code skills for SEO diagnosis and recovery workflows. Built and validated during one extended e-commerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
+> Eight Claude Code skills for SEO diagnosis, recovery, and subscription-monetization workflows. Built and validated during one extended e-commerce Core-Update recovery in spring 2026 plus follow-on monetization-gap analysis. Open-source, MIT, zero runtime dependencies.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
 [![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
-> **Status — Public Beta (v0.3.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.3.2`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+> **Status — Public Beta (v0.4.x).** Breaking changes possible between minor versions until v1.0. Pin to a tag (`#v0.4.0`) for reproducible installs. Two early tags (v0.2.0, v0.2.1) were yanked because the plugin manifest was at the wrong path — they were never actually installable. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 ## Naming at a glance
 
@@ -22,7 +22,7 @@ The mixed naming is intentional (marketplace is the brand, plugin is the technic
 
 ## What's new
 
-- **7 skills** covering free-tier audit → recovery framework → outreach reports → channel economics → competitor gaps → automated PSI tracking → AI-search visibility recovery.
+- **8 skills** covering free-tier audit → recovery framework → outreach reports → channel economics → competitor gaps → automated PSI tracking → AI-search visibility recovery → subscription monetization audit.
 - **Independent security audit** by [Jeronzo](https://github.com/kamehamea-art) on 2026-05-22 surfaced and drove fixes for one CRITICAL chain, 4 HIGH, 6 MEDIUM, 11 LOW issues. See [SECURITY.md](./SECURITY.md#external-security-reviews) for the audit summary.
 - **Smoke-tested** on 10 diverse domains across 7 categories (e-commerce, news, SaaS, comparison, content/UGC, services, travel). Methodology in [MATURITY.md](./MATURITY.md).
 
@@ -73,8 +73,9 @@ Every skill is reachable as a namespaced slash command. Type `/seo-rescue:rescue
 | `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10-$0.50 |
 | `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
 | `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery | free |
+| `/seo-rescue:subscription-monetization-audit [domain \| --csv]` | 5-lever recurring-revenue playbook, optional Stripe/Chargebee CSV import | free |
 
-## The seven skills
+## The eight skills
 
 ### `seo-audit-free`
 
@@ -148,11 +149,17 @@ Framework for recovering visibility in AI search surfaces — Google AI Overview
 
 **Use when** organic rankings have recovered but AI Overview citations are still going to competitors, or when a site says "ChatGPT keeps recommending the competitor, never us". One operational finding from real recovery work: AI citations move 2-6 weeks before classical Sistrix VI does, so they're a leading indicator that Authority-First work in `post-core-update-recovery` is actually being recognized.
 
+### `subscription-monetization-audit`
+
+Five-lever monetization playbook for subscription / recurring-revenue businesses (news paywalls, SaaS-light, membership platforms, e-commerce with subscription tier). Combines outside-in detection from the public site (paywall structure, tier visibility, ad-network density, AI-shopping signals) with optional inside-out import of a Stripe / Chargebee / Recurly CSV export for MRR, ARPU, churn, cohort retention, and plan distribution. The five standard levers (Premium-Tier introduction, Conversion-Pool activation, Win-Back of churned subscribers, B2B-Adjacency Newsletter, Live-Events) each have real-market vorbild documentation (Welt+, Politico Pro, Axios, Substack, Krautreporter) and a default sizing formula. Two bonus levers (overdue invoice collection, ad-stack optimization) for additional cash recovery.
+
+**Use when** a subscription business has stagnant or declining MRR, when the team needs to identify ARPU-lift options (typically Premium-Tier), or for an investor / board workshop where the question is "where does the next 50-100k EUR per month come from". Anti-use: pure transactional e-commerce (use `channel-economics-analyzer`), B2B Enterprise SaaS with custom pricing (different playbook), pre-revenue startups (skill assumes an existing subscription base).
+
 ## Installation
 
 **Recommended — pinned to a tag (reproducible, survives upstream changes):**
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.2
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.0
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```

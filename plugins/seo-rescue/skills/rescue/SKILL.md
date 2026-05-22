@@ -1,19 +1,19 @@
 ---
 name: rescue
-description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the seven sub-skills covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, and AI search rescue. Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
+description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the eight sub-skills covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, AI search rescue, and subscription monetization audit. Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
 user-invokable: true
 argument-hint: '[subcommand] [domain-or-args]'
 allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.3'
+  version: '0.4.0'
   category: marketing
 ---
 
 # SEO Rescue: Orchestrator
 
-This is the entry point for the seo-rescue plugin. It routes to seven specialized sub-skills, each callable directly via its namespaced slash command.
+This is the entry point for the seo-rescue plugin. It routes to eight specialized sub-skills, each callable directly via its namespaced slash command.
 
 **Invocation:** `/seo-rescue:rescue [subcommand] [args]` to route here, or call any sub-skill directly via `/seo-rescue:<skill-name>`.
 
@@ -28,6 +28,7 @@ This is the entry point for the seo-rescue plugin. It routes to seven specialize
 | `/seo-rescue:rescue competitors <domain>` | DataForSEO competitor + keyword-gap audit (alias for `/seo-rescue:competitor-deep-audit`) |
 | `/seo-rescue:rescue psi-baseline` | Set up weekly PSI cron baseline (alias for `/seo-rescue:psi-weekly-cron-baseline`) |
 | `/seo-rescue:rescue ai-search <domain>` | AI search visibility recovery (alias for `/seo-rescue:ai-search-rescue`) |
+| `/seo-rescue:rescue subs [domain \| --csv path]` | Subscription monetization audit with optional CSV import (alias for `/seo-rescue:subscription-monetization-audit`) |
 | `/seo-rescue:rescue help` | Show this routing table |
 
 ## When to use which
@@ -90,6 +91,9 @@ Automated weekly PageSpeed Insights tracking with regression detection. launchd/
 
 ### `/seo-rescue:ai-search-rescue [domain]`
 AI search visibility framework for Google AI Overviews, AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai search. Three-layer measurement (brand-mention prompts × 6 surfaces, GSC AI-traffic filter, AI-crawler logs) plus seven optimization tactics. Realistic 6–12 week recovery workflow. AI citations are a leading indicator for Authority-First Core-Update recovery.
+
+### `/seo-rescue:subscription-monetization-audit [domain | --csv path]`
+Subscription / recurring-revenue business monetization audit. Two modes: Outside-In (paywall structure, tier visibility, ad density, AI-shopping signals from the public site) or Inside-Out (CSV import from Stripe / Chargebee / Recurly / Shopify Subscriptions exports for MRR, ARPU, churn, cohort retention, plan distribution). Output is a five-lever monetization playbook (Premium-Tier, Conversion-Pool, Win-Back, B2B-Adjacency, Live-Events) plus two bonus levers (overdue invoices, ad-stack), each sized against industry benchmarks or your actual numbers. Vorbild data from Substack, Springer / Burda / Madsack, Politico, Axios.
 
 ## Plugin info
 
