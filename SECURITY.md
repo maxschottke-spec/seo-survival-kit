@@ -122,6 +122,42 @@ Pinning means a future compromise of the maintainer's GitHub account (or an unin
 3. Run the smoke test in a sandbox first — use a fresh user account or `SEO_CACHE_DIR=/tmp/sandbox-cache SEO_PDF_OUTPUT_DIR=/tmp/sandbox-out`.
 4. Run with reduced env exposure: pass only the env vars the script needs (`SISTRIX_API_KEY`, `DATAFORSEO_LOGIN`, `DATAFORSEO_PASSWORD`, `GOOGLE_API_KEY`), nothing else.
 
+## For external reviewers
+
+If you're reviewing this plugin (independently, as a collaborator, or with LLM assistance in any tier), please follow these reporting rules. They exist because pattern-matching tools (including the bundled `skill-security-auditor`) produce false positives, and because LLM assistants without verified access to this repo will sometimes fabricate file paths, function names, or CVE numbers that sound plausible but don't exist.
+
+### Reporting protocol
+
+1. **Every finding cites `file:line`.** No `file:line`, no finding. If you can't point to the exact location, downgrade to a question in the PR thread instead of a security issue.
+2. **Three confidence labels — pick one explicitly:**
+   - `[VERIFIED]` — code read AND reproduced (PoC, or concrete input that triggers the behavior)
+   - `[PROBABLE]` — code read, pattern matched, but not reproduced
+   - `[UNVERIFIED]` — pattern match or intuition only, no code read
+3. **If you couldn't `grep` it, it doesn't exist.** No invented helper functions, no invented APIs, no invented config keys. "I don't know" beats "I think".
+4. **The bundled auditor has false positives.** For example, `regex.exec(html)` matches the auditor's `[CODE-EXEC]` pattern but is a RegExp method, not `eval()`. `spawnSync` with `shell: false` + array argv matches `[CMD-INJECT]` but is the recommended safe form. Verify by reading the actual code before filing.
+5. **No generic best-practice advice.** This repo has no `package.json`, no runtime dependencies, no postinstall, no telemetry — so suggestions like "run npm audit" or "add a Content-Security-Policy header" don't apply. File issues only for fixes specific to code that exists in this repo.
+
+### LLM-assistant system prompt (copy-paste)
+
+If you use a free-tier or sandboxed LLM (no repo access, no shell, no internet) to help with the review, prepend this to your prompt so the assistant defaults to the same protocol:
+
+```
+You are helping me review an open-source plugin (~2,000 LOC, MIT, zero runtime deps).
+You do NOT have access to the repo, the shell, or the internet — only what I paste.
+
+Rules (hard):
+1. Every finding must cite file:line from the code I paste. No file:line, no finding.
+2. Use exactly three labels: [VERIFIED] (you read the code and reproduced it),
+   [PROBABLE] (you read the code, pattern matched, did not reproduce),
+   [UNVERIFIED] (pattern match only).
+3. If a function, API, file path, or config key is not in the code I pasted,
+   it does not exist. Do not invent it. "I don't know" beats "I think".
+4. Pattern-matching auditors have false positives (e.g. regex.exec() vs eval(),
+   spawnSync with shell:false vs CMD-INJECT). Verify by reading the actual code
+   I pasted before flagging.
+5. No generic best-practice advice. Only fixes for code I have shown you.
+```
+
 ## Reporting security issues
 
 If you find a vulnerability:
