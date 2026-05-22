@@ -145,7 +145,7 @@ Framework for recovering visibility in AI search surfaces — Google AI Overview
 
 **Recommended — pinned to a tag (reproducible, survives upstream changes):**
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.0
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.1
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```

@@ -2,6 +2,11 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.3.1] — 2026-05-22
+
+### Changed
+- Plugin and marketplace descriptions now embed the namespaced slash commands inline. Catalog browsers see the full command surface (`/seo-rescue:rescue`, `/seo-rescue:seo-audit-free [domain]`, `/seo-rescue:post-core-update-recovery [domain]`, `/seo-rescue:seo-outreach-report [domain]`, `/seo-rescue:channel-economics-analyzer`, `/seo-rescue:competitor-deep-audit [domain]`, `/seo-rescue:psi-weekly-cron-baseline`, `/seo-rescue:ai-search-rescue [domain]`) directly in the listing without having to click through. README, ONBOARDING, and LAUNCH pack install commands updated to `#v0.3.1`.
+
 ## [0.3.0] — 2026-05-22
 
 ### Added
