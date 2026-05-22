@@ -4,21 +4,35 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 
 ## Where this plugin is today
 
-**Version 0.3.1** — third stable release after a tight launch + hardening cycle in May 2026.
+**Version 0.3.2** — fourth stable release in the May 2026 launch + hardening cycle.
 
 - ✅ Tested against 4 real domains (mixed e-commerce + news, results anonymized in published LESSONS.md)
-- ✅ Real Core-Update-Recovery pilot case validates the framework
+- ✅ Real Core-Update-Recovery pilot case validates the framework — see usage section below
 - ✅ Pipeline scripts run end-to-end in <5 min per domain
 - ✅ MIT license, clean structure
 - ✅ Sample PDF + screenshots in `examples/` (synthetic data, real layout)
 - ✅ Subagent trigger-test green for `seo-outreach-report` (correctly picked over `claude-seo:seo-audit` and `make-pdf`)
 - ✅ agentskills.io compliant — SKILL.md format works in Claude Code / Cursor / Codex / Gemini CLI (cross-agent portability — though only tested in Claude Code so far)
+- ✅ Cross-platform docs (macOS / Linux / Windows env-var reference in ONBOARDING.md)
 - ✅ Security hardening v0.3 — `lib/safe.js` (safeSlug + safeHostname + safeUrl + safeLabel + validateConfigTargets + writeFileExclusive + getCacheDir + cachePath), strict CSP on PDF HTML, `spawnSync` with `shell: false` + array argv, sanitize() against indirect prompt-injection, `allowed-tools` declared per skill, CODEOWNERS + Dependabot + branch protection
-- ✅ Independent external security review 2026-05-22 (see [SECURITY.md → External security reviews](./SECURITY.md#external-security-reviews)) — 1 CRITICAL chain + 4 HIGH + 6 MEDIUM all closed in the v0.3.x security sprint
+- ✅ Two independent security review rounds completed 2026-05-22 (see [SECURITY.md → External security reviews](./SECURITY.md#external-security-reviews)):
+  - Round 1 (external reviewer): 1 CRITICAL chain + 4 HIGH + 6 MEDIUM — all closed in the v0.3.x security sprint
+  - Round 2 (maintainer-driven senior-engineering + marketplace-reviewer audit): gitleaks + trufflehog + semgrep clean; 2 P1 marketplace items flagged + closed; verdict **SAFE TO PUBLISH**
 - ⚠️ One external collaborator (security reviewer); no external feature-PRs yet
 - ⚠️ No automated tests (skills tested via subagent pressure scenarios manually, plus SAST tools in CI)
 - ⚠️ German-language documentation in some places (Lessons + parts of SKILL.md) — English README and a fully translated SKILL.md planned for 0.4
 - ⚠️ Hardcoded for German/`location_code: 2276` DataForSEO Labs queries — international expansion planned
+
+## Already in production use
+
+This is a working tool driving real Core-Update recovery decisions on a live e-commerce domain (the pilot domain, anonymized in published LESSONS.md). It is not a research prototype:
+
+- **Active recovery case** — driving recovery decisions on a mid-sized DE e-commerce shop hit by the March 2026 Google Core Update. Pipeline outputs (Sistrix VI traces, GSC click diffs, AI-citation counts) inform weekly recovery prioritization. Multiple dated lesson entries in `post-core-update-recovery/LESSONS.md` and `seo-outreach-report/LESSONS.md` document what worked and what didn't.
+- **Cold-outreach use** — the decision-maker PDF format from `seo-outreach-report` has been generated for real prospects, not just synthetic examples. The 10-chapter layout, the language register, and the action-plan template all reflect feedback from actual non-technical recipients.
+- **Operating since** — the pipeline scripts (then under different filenames) have been in regular use since March 2026 on the maintainer's daily SEO workflow. The plugin packaging just made them shareable.
+- **Self-improving via LESSONS.md** — each new pattern observed in real use gets a dated entry. After three confirmations, it moves into the main SKILL.md. This is the mechanism that took the framework from "ad-hoc memos" to "documented playbook".
+
+What this is **not** yet: production-grade in the sense of having external users, an SLA, or a support contract. The plugin is in **public beta** (single-maintainer, best-effort response, see the Status section of [README.md](./README.md)).
 
 **Verdict:** Useful for the specific niche it covers. Not a replacement for comprehensive audit suites.
 
