@@ -130,6 +130,22 @@ Full sample: [examples/sample-audit.pdf](./examples/sample-audit.pdf). The use-c
 - You need 4-week magic recovery. The framework is explicit about 6-12 month horizons for Core Update damage.
 - You need production-grade guarantees, SLAs, or enterprise contracts. Public beta, single-maintainer.
 
+## Use-case fit
+
+This system is currently strongest for ecommerce/D2C recovery workflows, especially when SEO data can be evaluated against revenue, margin, inventory, returns, conversion, and paid-media context.
+
+| Website type | Fit | Notes |
+|---|---|---|
+| Ecommerce / D2C | Core fit | Strongest current use case. Product, category, margin, inventory, return and conversion data make recovery decisions more reliable. |
+| Lead generation / B2B | Good fit with adaptation | Replace product revenue with lead quality, pipeline, CPL and sales-cycle data. |
+| SaaS | Good fit with adaptation | Use signup, activation, demo, trial and pipeline metrics instead of shop revenue. |
+| Local service | Partial fit | Works when calls, forms, location pages and lead quality can be measured reliably. |
+| Publisher / News | Special case | Requires freshness, topical authority, Discover/News visibility and ad/affiliate revenue logic. Not the current core model. |
+| Affiliate / Comparison | Partial fit | Needs EPC, merchant mix, SERP intent and monetization quality. |
+| YMYL / regulated content | Caution | Requires stricter evidence standards and additional expert/legal review where applicable. |
+
+The framework should not be treated as a universal SEO automation system. Each website type needs its own business-signal layer.
+
 ## YMYL notice
 
 For Your-Money-Your-Life sites (medical, legal, financial, regulated), have a domain expert review the action plan before client delivery. The framework treats sites uniformly at the SEO-mechanics level; it does not validate domain-specific compliance.
