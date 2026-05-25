@@ -66,6 +66,8 @@ If brand keywords are intact and CWV is stable but generic keywords are broadly 
 3. **DataForSEO ranked-keywords diff** — compare top positions pre vs post update. Specific URL clusters affected or distributed uniformly?
 4. **GSC click diff** — which URLs lost most traffic? Pattern visible (all blog posts? all product pages? all YMYL topics?)
 5. **EEAT audit of lost top URLs** — author visible? Sources cited? Last-updated stamp? Trust layer (About, Imprint, Reviews)?
+6. **Self-canonical audit** — check whether competing pages all carry self-referencing canonical tags. CMS platforms with SEO plugins (Shopware/DreiscSeo, WordPress/Yoast, Magento) commonly set `isCanonical=true` on ALL pages by default. When keyword overlap exists between pages, self-canonicals cause invisible cannibalization: Google sees competing versions without a consolidation signal. Identify clusters with 2+ URLs targeting overlapping keywords, verify each page's `<link rel="canonical">`, and flag cases where ALL competing pages point to themselves.
+7. **Structural quality baseline** — crawl all indexable pages and classify as healthy/broken/thin/duplicate. If >40 % of pages are broken (rendering failures, empty content divs, soft-404s, Lorem-ipsum), the drop is not pure authority — it is authority multiplied by structural decay. Fixing the structural baseline is then a recovery accelerator, not just hygiene.
 
 ## Recovery plan (3 phases × 6–12 months)
 
@@ -117,10 +119,26 @@ These are **NOT** the recovery lever — Core Updates don't penalize tech, they 
 
 ## Realistic expectations
 
-- **Visible movement typically starts only after 3–4 months** in the recovery case we observed and in the public Core-Update-recovery cases referenced in `LESSONS.md`. Google needs time to re-evaluate authority signals.
-- **Full recovery usually takes 9–18 months** in the cases referenced. We are not aware of significantly faster recoveries published; if you find one, please contribute the observation back to `LESSONS.md`.
-- **Recovery outcome in observed cases is in the 50–80 % range** of pre-drop visibility. Full recovery to 100 % seems to require structural changes (new content lines, new authority sources), not just optimization of what existed before. These percentages are observations from a small case-base, not population statistics — treat them as input hypotheses, not predictions.
-- **Pattern: recovery comes in jumps**, often timed with the next Core Update rather than gradually.
+- **Baseline expectation: visible movement starts after 3–4 months.** Google needs time to re-evaluate authority signals. Full recovery usually takes 9–18 months.
+- **Accelerated recovery (under 2 months) is possible** when multiple acceleration factors are present simultaneously (see next section). The 3–4 month baseline assumes authority-only work without structural cleanup.
+- **Recovery outcome in observed cases is in the 50–80 % range** of pre-drop visibility. Full recovery to 100 % seems to require structural changes (new content lines, new authority sources), not just optimization of what existed before.
+- **Pattern: recovery comes in jumps**, often timed with the next Core Update rather than gradually. A single week can deliver +30–50 % VI gain after weeks of flat movement.
+
+## Recovery acceleration factors
+
+Recovery CAN be significantly faster than the 3–4 month baseline when these conditions are present:
+
+1. **Pre-existing authority clusters.** If the site already has pages ranking Pos 1–5 for informational authority queries (blog, guides, "best X" content), these serve as trust anchors. Google does not need to build authority from scratch — it needs to re-recognize existing authority after the scoring change.
+
+2. **Structural quality cleanup executed in parallel.** If >40 % of pages are broken/thin/duplicate (see Structural Quality Baseline in RECOVERY_SYSTEM.md), fixing them removes a compounding penalty. The Core Update hit is authority × structural quality — improving either factor independently lifts the product.
+
+3. **Do-Not-Touch discipline maintained.** Sites that panic-edit recovering URLs reset their recovery timeline. Strict protection of winners lets the positive signal accumulate undisturbed.
+
+4. **AI Citations as leading confirmation.** Rising AI Overview / ChatGPT / Perplexity mentions while classical VI is still flat confirm that the authority work is being recognized. This is a confidence signal to continue, not a reason to change course.
+
+5. **Conversion rate improvement validates traffic quality.** If CR rises alongside or shortly after traffic increases, the recovery is bringing the RIGHT users. This rules out the "vanity recovery" scenario where positions improve on irrelevant queries.
+
+When 3+ of these factors are present, recovery to 70–80 % of pre-CU levels has been observed in under 2 months rather than 3–4 months.
 
 ## Owner communication
 

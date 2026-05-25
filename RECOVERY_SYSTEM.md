@@ -117,6 +117,37 @@ Recovery does not always follow the sequence linearly. A site can be at Stage 4 
 
 ---
 
+## 4a. Structural Quality Baseline
+
+Core Update drops are often framed as pure authority problems. Operational evidence shows they are frequently **authority × structural quality** — the drop is compounded by the proportion of broken, thin, or duplicate pages on the site.
+
+### The multiplier effect
+
+A site with 90 % healthy pages hit by a Core Update loses authority signal on those pages individually. A site with 40 % healthy pages loses authority AND sends a site-wide quality signal that amplifies the per-page loss. Google's quality raters and crawlers encounter broken pages, empty content divs, rendering failures, and duplicates — each one reduces the site's overall trust floor.
+
+### How to measure
+
+Crawl all indexable pages (Screaming Frog, Sitebulb, or manual curl audit) and classify each as:
+
+- **Healthy**: renders correctly, has substantive content (>300 words for content pages, valid product data for product pages), no rendering errors
+- **Broken**: HTTP 500, rendering failure (empty content divs with correct CMS source), soft-404 (page loads but shows no meaningful content)
+- **Thin**: <150 words of unique content, auto-generated placeholder text, Lorem ipsum
+- **Duplicate**: self-canonical but shares >80 % content with another indexed page on the same domain
+
+### Thresholds
+
+| Healthy % | Classification | Recovery implication |
+|---|---|---|
+| >80 % | Clean | Authority-only recovery plan applies |
+| 60–80 % | Moderate structural debt | Fix broken/thin pages in parallel with Phase A authority work; expect faster recovery than authority-only |
+| <60 % | Severe structural debt | Structural cleanup is a recovery accelerator, not just hygiene. Prioritize fixing broken pages before investing in new content. Recovery timeline shortens materially when structural baseline improves |
+
+### Operational pattern
+
+In observed cases, a site with ~35 % healthy pages (~65 % broken/thin/duplicate) showed ~70 % VI recovery in under 2 months when structural cleanup ran in parallel with authority work — significantly faster than the 3–4 month baseline for authority-only recovery. The structural fixes did not cause the recovery but removed the multiplier that was suppressing it.
+
+---
+
 ## 5. Recovery Risk Engine
 
 The Recovery Risk Engine prevents destructive changes during recovery by detecting recovering URLs, flagging proposed edits that would touch them, and surfacing the risk to the operator. It is the runtime expression of the Do-Not-Touch principle.

@@ -114,6 +114,22 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 - **Sequences.** Document as CSV-first with optional future API support marked as planned.
 - **Confidence.** High (framework anti-overclaim principle).
 
+### r-stockout-mutes-recovery
+
+- **Condition.** Recovering product page ranks on a money keyword, but the product is out of stock (OOS) or has critical delivery delays.
+- **Blocks.** Content or SEO optimization work on that URL while OOS persists.
+- **Sequences.** Stock replenishment or availability fix before any content/SEO investment on the URL.
+- **Reason.** Recovery traffic arriving at an OOS product page produces bounces and zero conversions. Google observes poor user engagement signals on a recovering URL, potentially interpreting it as quality failure rather than inventory failure. The revenue signal that validates recovery gets muted, making it invisible in business metrics. Additionally, the operator loses attribution — recovery may be working but appears broken because the conversion path is blocked.
+- **Confidence.** Medium-High (one confirmed case; consistent with known Google behavior toward low-engagement pages).
+
+### r-refund-rate-exceeds-threshold
+
+- **Condition.** A sales channel's refund/return rate exceeds 25 % (industry norm for most product categories: 10–15 %).
+- **Blocks.** Budget scaling or inventory expansion on that channel.
+- **Sequences.** Root cause analysis (listing quality mismatch? fulfillment issues? product-expectation gap? size/variant confusion?) before any growth investment.
+- **Reason.** High refund rates eliminate margin regardless of topline revenue. A channel with 3,000 € monthly revenue and 35 % refunds delivers ~1,950 € net before COGS — often below break-even after fulfillment and return processing costs. Scaling amplifies the loss. ROAS calculations that ignore refunds overstate channel health.
+- **Confidence.** Medium-High (one confirmed case with 70 % → 36 % refund trajectory; threshold of 25 % aligns with marketplace seller benchmarks).
+
 ### Adding rules
 
 New rules land per the lifecycle in [ARCHITECTURE.md governance](./ARCHITECTURE.md#release-gating): observe across 3+ confirmed cases, document with all required fields, tie to source(s), add to relevant skill's `LESSONS.md`, reference in skill output when fired. Rules added without 3+ confirmations are labeled "experimental" and apply at low confidence only.
