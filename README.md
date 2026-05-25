@@ -138,6 +138,8 @@ For Your-Money-Your-Life sites (medical, legal, financial, regulated), have a do
 
 Skills were built from one extended Core-Update recovery case (mid-size DE ecommerce shop, March/April 2026 update window) and validated against four additional real-world domain audits in May 2026. Patterns in skill `LESSONS.md` files are observations from this case base, not population statistics — treat as starting hypotheses to test in your own context.
 
+The open repo is a first-pass methodology and decision-support layer. It helps identify recovery signals, risky changes, protected URLs, winner/loser patterns, missing data, and validation steps. It is not the same as a calibrated recovery engagement that brings private business context into the decision. Deeper recovery work needs data the open repo does not see: GSC/SISTRIX history, shop revenue, margin, returns, inventory, paid-media context, implementation history, competitive context, and operator review to weigh conflicting signals.
+
 ## Need help running this on your own site?
 
 The plugin is MIT and self-serve. If you'd rather have someone with operational experience walk you through it on your specific case, the maintainer offers paid engagements:
