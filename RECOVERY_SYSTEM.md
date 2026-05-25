@@ -82,6 +82,30 @@ Specific carefully-scoped changes are acceptable on protected URLs:
 - Adding internal links INTO the page from related content (additive only)
 - Improving Core Web Vitals (image compression, deferring non-critical scripts) without changing visible layout
 - Fixing accessibility issues (alt text, color contrast) without changing main-content text
+- Pure cosmetic CSS changes (colors, fonts, spacing, borders, shadows, hover states, button styling) that do not alter content visibility, HTML structure, or above-the-fold content order
+
+### Styling changes during recovery — clarification
+
+A common operator question during recovery: "Can I restyle the site?" The answer depends on what "restyle" means:
+
+**Green (safe, no SEO impact):**
+- CSS-only changes: colors, typography, spacing, border-radius, shadows, animations
+- Button and form styling, hover/focus states
+- Header/footer visual design (navigation links unchanged)
+- Mobile responsive adjustments that keep all content visible
+
+**Yellow (verify before deploying):**
+- Changes that move above-the-fold content lower (e.g., large hero banner pushing product content down)
+- Accordion/tab patterns that hide text content by default (Google may devalue hidden content)
+- Layout shifts that affect CLS (images without explicit dimensions, late-loading elements)
+
+**Red (treat as template change, Do-Not-Touch applies):**
+- `display:none` or `visibility:hidden` on content that was previously visible and indexed
+- Changing heading hierarchy (H1/H2/H3 restructuring)
+- Removing semantic HTML elements (nav, article, section) in favor of generic divs
+- Template changes that alter the rendered HTML structure (not just its appearance)
+
+**Deployment pattern:** When restyling during recovery, deploy to 2-3 non-critical pages first. Monitor for one week (CLS regression, crawl errors, position changes). Then roll out sitewide. This limits blast radius if something goes wrong.
 
 ### How long Do-Not-Touch lasts
 
