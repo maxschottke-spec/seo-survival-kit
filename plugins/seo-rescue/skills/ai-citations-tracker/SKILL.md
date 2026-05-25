@@ -175,4 +175,4 @@ The numbers are most useful **week-over-week**, not absolute — citation models
 - **First useful trend:** after 4-6 weekly runs (4-6 weeks)
 - **Cost:** OpenAI ~$0.10/year + Perplexity ~$0 (free tier) for 20 prompts × 2 surfaces × 52 weeks
 - **Surfaces covered:** ChatGPT + Perplexity automatically; rest manual but documented
-- **False positives:** ~5-10% — brand variants can match unrelated text (e.g. "Matze" matching "matze-matratze.de" *and* a competitor's product name "Matze"). Tune `brand_variants` carefully; review `answer_excerpt` field weekly for the first month.
+- **False positives:** ~5-10% — brand variants can match unrelated text (e.g. a short brand token like "Aero" matching both `aero-mattress.test` *and* a competitor's product name "Aero"). Tune `brand_variants` carefully; review `answer_excerpt` field weekly for the first month.

@@ -55,12 +55,17 @@ Per run, the script writes a single JSON file containing:
 ### 1. GCP setup (one-time)
 
 a. Go to [console.cloud.google.com](https://console.cloud.google.com), create or select a project.
+
+> **Do not use a Google AI Studio default project.** If your project ID looks like `gen-lang-client-XXXXXXXXXX`, that is an auto-generated AI Studio scratchpad project. Service accounts created in those projects often fail with "Email not found" when you later try to add them to Search Console in Step 2, because the AI Studio identity path is not the same as a regular GCP project. Create a fresh project from the Cloud Console project selector instead — any name works.
+
 b. Library → enable **Google Search Console API** (also called "Search Console API").
 c. Library → enable **PageSpeed Insights API** (for the CrUX cross-reference).
 d. IAM & Admin → Service Accounts → Create:
    - Name: `seo-rescue-gsc`
    - Role: none needed at GCP level
 e. On the new service account → Keys → Add Key → JSON. Save the downloaded JSON file securely. Treat it like a password — see security model below.
+
+> **If Step 2 fails with "Email not found"** despite waiting 12+ hours: the most likely cause is that the service account was created in an AI Studio default project (see warning above). Recreate in a fresh standard GCP project. Reported in [#26](https://github.com/maxschottke-spec/seo-survival-kit/issues/26).
 
 ### 2. Grant the service account access to your GSC property
 
@@ -107,7 +112,7 @@ GSC supports two property types — make sure your config matches what's verifie
 
 | Property type | Format in config | Example |
 |---------------|------------------|---------|
-| Domain property | `sc-domain:example.com` | `sc-domain:matze-matratze.de` |
+| Domain property | `sc-domain:example.com` | `sc-domain:example-mattress-shop.test` |
 | URL-prefix property | `https://<host>/` (trailing slash matters) | `https://www.example.com/` |
 
 Mixing these up is the #1 first-run error. If the API returns `Forbidden` despite a freshly added service account, check the format.

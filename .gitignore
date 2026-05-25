@@ -15,8 +15,39 @@ output/
 audit-config.json
 psi-config.json
 channels.json
+gsc-config.json
+ai-citations-config.json
 
 # Working data + cron history written by skills at runtime
 data/
 psi-history/
+gsc-history/
+ai-citations-history/
 *.ndjson
+
+# Private project material — never check in. Anything under these paths is
+# user-local context (real client data, anonymized lesson drafts, exports).
+# Documented in CLIENT_DATA_POLICY.md, REDACTION.md, PRIVATE_EXPERIENCE_LAYER.md.
+private/
+client-data/
+real-data/
+lessons/private/
+case-notes/private/
+local-notes/
+tokens/
+credentials/
+exports/private/
+
+# Per-user / per-repo profile + preferences (v0.5 adaptive onboarding).
+# Schema in USER_PROFILE_SCHEMA.md; the local file must never be committed.
+.growth-survival-kit/
+.seo-survival-kit/
+
+# Raw SEO data exports — SISTRIX, GSC, ranking trackers.
+# Documented in DATA_CONTRACTS.md.
+sistrix-exports/
+gsc-exports/
+*_sistrix*.csv
+*_visibility*.csv
+*_keywords*.csv
+*_ranking*.csv
