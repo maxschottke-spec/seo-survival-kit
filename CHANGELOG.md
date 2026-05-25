@@ -26,7 +26,7 @@ This release does not change runtime behavior. It reaches canonical-source-of-tr
 #### Fixed
 
 - `plugins/seo-rescue/skills/gsc-deep-dive/SKILL.md` Step 1a now warns explicitly against using Google AI Studio default projects (project IDs matching `gen-lang-client-XXXXXXXXXX`); these service accounts hit "Email not found" when added to GSC even after 12+ hours of propagation. Addresses real-user issue [#26](https://github.com/maxschottke-spec/seo-survival-kit/issues/26).
-- `plugins/seo-rescue/skills/gsc-deep-dive/SKILL.md` example domain reference replaced from `matze-matratze.de` to reserved-TLD `example-mattress-shop.test`.
+- `plugins/seo-rescue/skills/gsc-deep-dive/SKILL.md` private example-domain reference replaced with reserved-TLD example per redaction policy.
 - `plugins/seo-rescue/skills/ai-citations-tracker/SKILL.md` brand-variant false-positive example updated to reserved-TLD `aero-mattress.test`.
 
 #### Deferred to v0.5.5 (separate PR)
