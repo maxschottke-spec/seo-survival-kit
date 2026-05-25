@@ -161,7 +161,7 @@ The framework's operational finding is that AI Overview citations and ChatGPT/Pe
 Recovery does not progress uniformly across all keyword clusters. A site can be Stage 5 on its brand/authority cluster while Stage 1 on a competitive commercial cluster. The Monday check should output a stage classification **per keyword cluster**, not just a single global stage.
 
 Cluster identification:
-- Group keywords by the ranking URL's topic area (e.g., "mattress sizes", "mattress firmness", "brand terms", "material guides")
+- Group keywords by the ranking URL's topic area (e.g., "brand terms", "authority guides", "product variants", "product features", "long-tail terms")
 - If URL-type classification is available, group by URL type (category, product, blog, brand)
 - Assign each cluster its own stage independently
 
@@ -169,10 +169,10 @@ Output format per cluster:
 
 | Cluster | Stage | Key signal | Top keyword | Position | Trend |
 |---|---|---|---|---|---|
-| Brand terms | Stage 5 | Revenue follows | "brand name" | Pos 2 | Stable |
-| Authority guides | Stage 4 | Pos 1–5 on 8 KWs | "hersteller deutschland" | Pos 1 | Rising |
-| Product sizes | Stage 2 | Entering Top 20 | "product-type size-variant" | Pos 19 | New |
-| Long-tail variants | Stage 1 | Pos 40–90 test positions | various | Pos 40–90 | Volatile |
+| Brand terms | Stage 5 | Revenue follows | brand-anchor query | Pos 2 | Stable |
+| Authority guides | Stage 4 | Pos 1–5 on multiple guide queries | informational anchor query | Pos 1 | Rising |
+| Product variants | Stage 2 | Entering Top 20 | variant-specifier query | Pos 19 | New |
+| Long-tail terms | Stage 1 | Pos 40–90 test positions | various | Pos 40–90 | Volatile |
 
 The global stage classification remains as the minimum stage across commercially important clusters, or the weighted average if the operator prefers. The per-cluster view prevents the misleading conclusion that "recovery is at Stage X" when different parts of the site are at very different stages.
 

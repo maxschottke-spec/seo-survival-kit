@@ -120,7 +120,7 @@ These are **NOT** the recovery lever — Core Updates don't penalize tech, they 
 ## Realistic expectations
 
 - **Baseline expectation: visible movement starts after 3–4 months.** Google needs time to re-evaluate authority signals. Full recovery usually takes 9–18 months.
-- **Accelerated recovery (under 2 months) is possible** when multiple acceleration factors are present simultaneously (see next section). The 3–4 month baseline assumes authority-only work without structural cleanup.
+- **Accelerated recovery is possible** when multiple acceleration factors are present simultaneously (see next section). The 3–4 month baseline assumes authority-only work without structural cleanup.
 - **Recovery outcome in observed cases is in the 50–80 % range** of pre-drop visibility. Full recovery to 100 % seems to require structural changes (new content lines, new authority sources), not just optimization of what existed before.
 - **Pattern: recovery comes in jumps**, often timed with the next Core Update rather than gradually. A single week can deliver +30–50 % VI gain after weeks of flat movement.
 
@@ -138,7 +138,7 @@ Recovery CAN be significantly faster than the 3–4 month baseline when these co
 
 5. **Conversion rate improvement validates traffic quality.** If CR rises alongside or shortly after traffic increases, the recovery is bringing the RIGHT users. This rules out the "vanity recovery" scenario where positions improve on irrelevant queries.
 
-When 3+ of these factors are present, recovery to 70–80 % of pre-CU levels has been observed in under 2 months rather than 3–4 months.
+When 3+ of these factors are present, recovery has been observed to proceed materially faster than the baseline. Specific outcomes are case-dependent.
 
 ## Owner communication
 

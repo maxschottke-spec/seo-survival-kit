@@ -121,6 +121,8 @@ Recovery does not always follow the sequence linearly. A site can be at Stage 4 
 
 Core Update drops are often framed as pure authority problems. Operational evidence shows they are frequently **authority × structural quality** — the drop is compounded by the proportion of broken, thin, or duplicate pages on the site.
 
+This is a methodology pattern that the operator applies externally through a crawl, manual audit, or third-party tooling; seo-survival-kit does not currently include an automated structural-quality crawler.
+
 ### The multiplier effect
 
 A site with 90 % healthy pages hit by a Core Update loses authority signal on those pages individually. A site with 40 % healthy pages loses authority AND sends a site-wide quality signal that amplifies the per-page loss. Google's quality raters and crawlers encounter broken pages, empty content divs, rendering failures, and duplicates — each one reduces the site's overall trust floor.
@@ -144,7 +146,7 @@ Crawl all indexable pages (Screaming Frog, Sitebulb, or manual curl audit) and c
 
 ### Operational pattern
 
-In observed cases, a site with ~35 % healthy pages (~65 % broken/thin/duplicate) showed ~70 % VI recovery in under 2 months when structural cleanup ran in parallel with authority work — significantly faster than the 3–4 month baseline for authority-only recovery. The structural fixes did not cause the recovery but removed the multiplier that was suppressing it.
+In observed cases with severe structural debt (>50 % non-healthy pages), recovery has been materially faster when structural cleanup ran in parallel with authority work. The structural fixes did not cause the recovery but removed the multiplier that was suppressing it. Specific timelines and recovery percentages are case-dependent and should be documented in engagement-specific private playbooks.
 
 ---
 
