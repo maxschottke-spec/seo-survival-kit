@@ -134,7 +134,7 @@ A release tag cannot be pushed without:
 
 - `claude plugin validate plugins/seo-rescue` passing locally
 - `claude plugin validate .` passing locally
-- Privacy scan passing (no real-client identifiers, no `verapur`, no `matze-matratze`, no credential patterns)
+- Privacy scan passing (no real-client identifiers, no private brand-domain references, no credential patterns)
 - Anti-overclaim grep clear of new unjustified absolutes
 - CHANGELOG.md entry exists for the version
 

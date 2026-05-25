@@ -22,7 +22,7 @@ Scope:
 - [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) workflow specification (skill implementation in v0.5.1)
 - README, CLAUDE, MATURITY reconciled: skill count fixed to 10, version status updated to v0.5-dev, ecommerce/D2C positioning, anti-overclaim wording
 - `.gitignore` extended for private data paths
-- Public `matze-matratze.de` references in SKILL.md files replaced with reserved-TLD example domains
+- Private brand-domain references in SKILL.md files replaced with reserved-TLD example domains per redaction policy
 - `gsc-deep-dive` SKILL.md gets explicit Google AI Studio default-project warning addressing real-user issue [#26](https://github.com/maxschottke-spec/seo-survival-kit/issues/26)
 
 Not in this PR (deliberately deferred):
