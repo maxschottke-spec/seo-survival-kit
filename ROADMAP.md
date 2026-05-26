@@ -10,9 +10,9 @@ Ten skills (one orchestrator plus nine sub-skills). Cross-platform exports for C
 
 See [CHANGELOG.md](./CHANGELOG.md) for the per-release history.
 
-## v0.5.0-dev (this PR)
+## v0.5.0 (shipped)
 
-Architecture consolidation. No new runtime skills. Documentation reaches canonical-source-of-truth state in [ARCHITECTURE.md](./ARCHITECTURE.md).
+Architecture consolidation. No new runtime skills. Documentation reached canonical-source-of-truth state in [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 Scope:
 
@@ -20,7 +20,7 @@ Scope:
 - [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) for recovery operational detail: six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase recovery sequencing
 - [DECISION_ENGINE.md](./DECISION_ENGINE.md) for decision logic: decision rules catalog, evidence weighting, data quality layer, profitability signals, prioritization, sequencing constraints, cross-channel signals, channel conflict resolution
 - [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) workflow specification (skill implementation in v0.5.1)
-- README, CLAUDE, MATURITY reconciled: skill count fixed to 10, version status updated to v0.5-dev, ecommerce/D2C positioning, anti-overclaim wording
+- README, CLAUDE, MATURITY reconciled: skill count fixed to 10, version status updated to v0.5.0 shipped / v0.5.1 in flight, ecommerce/D2C positioning, anti-overclaim wording
 - `.gitignore` extended for private data paths
 - Private brand-domain references in SKILL.md files replaced with reserved-TLD example domains per redaction policy
 - `gsc-deep-dive` SKILL.md gets explicit Google AI Studio default-project warning addressing real-user issue [#26](https://github.com/maxschottke-spec/seo-survival-kit/issues/26)

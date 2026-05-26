@@ -2,11 +2,11 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased] — v0.5.0-dev
+## [0.5.0] — 2026-05-26
 
 ### Architecture consolidation
 
-This release does not change runtime behavior. It reaches canonical-source-of-truth state for the documentation. Skill set remains the same 10 (1 orchestrator + 9 sub-skills).
+This release does not change runtime behavior. It reaches canonical-source-of-truth state for the documentation. Skill set remains the same 10 (1 orchestrator + 9 sub-skills). Plugin manifest, per-skill `version:` frontmatter, and install pin lines (`/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.0`) bumped from `0.4.1` to `0.5.0` at release time.
 
 #### Added
 
