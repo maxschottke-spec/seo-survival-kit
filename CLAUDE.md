@@ -2,7 +2,9 @@
 
 ## What this repository is
 
-seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles seven SEO skills built from real e-commerce recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit.
+seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **ten skills (one orchestrator plus nine sub-skills)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit.
+
+Positioning: **Recovery Operating System for Ecommerce/D2C**. Recovery-first, decision-first, profit-aware, risk-aware. The framework supports operators making recovery and growth decisions; execution belongs to the operator's team, agency, or contractors. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the canonical source of truth.
 
 ## Architecture
 
@@ -16,24 +18,33 @@ seo-survival-kit/
 ├── plugins/
 │   └── seo-rescue/
 │       ├── .claude-plugin/
-│       │   └── plugin.json           # Plugin manifest (the path matters — see CHANGELOG v0.2.2)
+│       │   └── plugin.json           # Plugin manifest (path matters — see CHANGELOG v0.2.2)
 │       ├── lib/
-│       │   └── safe.js               # Shared safety primitives (safeSlug, safeReadFile, cachePath)
-│       └── skills/
-│           ├── rescue/SKILL.md       # Orchestrator + routing table
-│           ├── seo-audit-free/SKILL.md
-│           ├── post-core-update-recovery/SKILL.md
-│           ├── seo-outreach-report/  # Skill + 4 Node.js scripts + .env.example
+│       │   └── safe.js               # Shared safety primitives
+│       └── skills/                   # 10 skills (1 orchestrator + 9 sub-skills)
+│           ├── rescue/                       # Orchestrator + routing table
+│           ├── seo-audit-free/
+│           ├── post-core-update-recovery/
+│           ├── seo-outreach-report/          # SKILL.md + 4 Node.js scripts + .env.example
 │           ├── channel-economics-analyzer/
 │           ├── competitor-deep-audit/
 │           ├── psi-weekly-cron-baseline/
-│           └── ai-search-rescue/SKILL.md
-├── CHANGELOG.md                      # Per-release notes (KeepAChangelog format)
-├── SECURITY.md                       # Threat model + verification steps for installers
+│           ├── ai-search-rescue/
+│           ├── ai-citations-tracker/         # v0.4 addition: weekly cron AI surface tracker
+│           └── gsc-deep-dive/                # v0.4 addition: one-call GSC API snapshot
+├── exports/                          # Platform-agnostic Markdown copies (Cursor / Custom GPT / Gemini / Aider / Codex)
+├── examples/                         # Sample PDF + screenshots (synthetic data)
+├── ARCHITECTURE.md                   # Canonical source of truth (vision, positioning, modules, governance, privacy)
+├── RECOVERY_SYSTEM.md                # Recovery operational detail
+├── DECISION_ENGINE.md                # Decision rules, prioritization, sequencing, cross-channel signals
+├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Weekly workflow specification (skill ships in v0.5.1)
+├── ROADMAP.md                        # Version-by-version product plan
+├── ROADMAP-2026.md                   # Google search future-watch (separate from product roadmap)
+├── CHANGELOG.md                      # Per-release notes
+├── SECURITY.md                       # Threat model + verification steps
 ├── COSTS.md                          # Per-audit API cost breakdown
 ├── MATURITY.md                       # Honest comparison with mature alternatives
 ├── ONBOARDING.md                     # 15-minute first-PDF walkthrough
-├── ROADMAP-2026.md                   # Strategic positioning for 2026 search shift
 └── README.md                         # Entry point with Quick Reference table
 ```
 
@@ -114,3 +125,15 @@ When working with the existing 4 scripts in `seo-outreach-report`:
 - Anthropic community marketplace: pending review at claude-plugins-community
 - Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.1`
 - Pilot-domain recovery case (anonymized): see `post-core-update-recovery/LESSONS.md` for the dated lesson entries that source the framework
+
+## Canonical doc map
+
+When working on this repository, the source-of-truth docs are:
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — vision, positioning, modules, governance, privacy, adaptive onboarding, knowledge layer, plugin architecture, compatibility, what is NOT implemented
+- [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) — six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase recovery sequencing
+- [DECISION_ENGINE.md](./DECISION_ENGINE.md) — decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals
+- [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow (skill ships in v0.5.1)
+- [ROADMAP.md](./ROADMAP.md) — version-by-version product plan
+
+Anti-bloat rule for new top-level docs: a new doc must pass the standalone test (own workflow / own inputs / own outputs / own user interaction / meaningful implementation complexity / independent future evolution). Otherwise it becomes a section in one of the existing docs.

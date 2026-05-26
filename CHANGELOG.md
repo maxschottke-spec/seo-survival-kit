@@ -2,6 +2,44 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased] — v0.5.0-dev
+
+### Architecture consolidation
+
+This release does not change runtime behavior. It reaches canonical-source-of-truth state for the documentation. Skill set remains the same 10 (1 orchestrator + 9 sub-skills).
+
+#### Added
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — canonical source of truth: vision, ecommerce/D2C positioning, system shape (diagnostic/decision/workflow layers), skill registry, governance and lifecycle, privacy and client-data posture (private experience layer with pattern maturity model), adaptive user onboarding, knowledge layer with four-level evidence weighting, plugin architecture, compatibility with adjacent tools, versioning and release process, what is intentionally not implemented
+- [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) — six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection rules and at-risk classification, Winner/Loser Neutralization detection and severity, URL Recovery Analysis with per-type recommendations, Recovery Signal Score with twelve factors, five-phase recovery sequencing (R1 Protect → R2 Stabilize → R3 Improve internal links → R4 Fix intent conflicts → R5 Selective consolidation)
+- [DECISION_ENGINE.md](./DECISION_ENGINE.md) — decision-first manifesto, codified decision rules (`r-margin-unknown-no-scale`, `r-roas-positive-margin-negative`, `r-sistrix-vi-flat-money-keywords-recovered`, `r-money-keywords-top3-protect`, `r-ai-citations-leading-indicator`, and others), evidence weighting at four levels, data quality layer with four dimensions, profitability signals as first-class concern, five-class prioritization (Immediate / Medium / Monitor only / Risky / False), sequencing constraints across phases, cross-channel signal integration patterns
+- [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow specification (runnable skill ships in v0.5.1)
+- [ROADMAP.md](./ROADMAP.md) — version-by-version product plan, distinct from ROADMAP-2026.md (future-watch document)
+
+#### Changed
+
+- README repositioned around ecommerce/D2C Recovery OS wedge. Skill-count corrected from "Nine" to "Ten skills (1 orchestrator + 9 sub-skills)". Status section updated from v0.3.x to v0.4.1 shipped / v0.5-dev in flight. Doc map added.
+- CLAUDE.md architecture tree updated to include `ai-citations-tracker`, `gsc-deep-dive`, `exports/`, and the new top-level docs. Skill count corrected from "seven SEO skills" to ten.
+- MATURITY.md version row updated to reflect v0.4.1 shipped + v0.5-dev in flight. Positioning paragraph added.
+- `.gitignore` extended for private data paths: `private/`, `client-data/`, `real-data/`, `exports/private/`, `lessons/private/`, `case-notes/private/`, `local-notes/`, `tokens/`, `credentials/`, `sistrix-exports/`, `gsc-exports/`, `*_sistrix*.csv`, `*_visibility*.csv`, `*_keywords*.csv`, `*_ranking*.csv`, `.growth-survival-kit/`, `.seo-survival-kit/`, `gsc-config.json`, `ai-citations-config.json`, `gsc-history/`, `ai-citations-history/`
+
+#### Fixed
+
+- `plugins/seo-rescue/skills/gsc-deep-dive/SKILL.md` Step 1a now warns explicitly against using Google AI Studio default projects (project IDs matching `gen-lang-client-XXXXXXXXXX`); these service accounts hit "Email not found" when added to GSC even after 12+ hours of propagation. Addresses real-user issue [#26](https://github.com/maxschottke-spec/seo-survival-kit/issues/26).
+- `plugins/seo-rescue/skills/gsc-deep-dive/SKILL.md` private example-domain reference replaced with reserved-TLD example per redaction policy.
+- `plugins/seo-rescue/skills/ai-citations-tracker/SKILL.md` brand-variant false-positive example updated to reserved-TLD `aero-mattress.test`.
+
+#### Deferred to v0.5.5 (separate PR)
+
+- Commercial Model documentation: agency model, decision-first agency principles, service model stages, productized offer hypotheses with pricing logic, Fiverr Interface positioning and planned commands, buyer-objection log schema, GTM experiment template, implementation partner model. Kept separate from v0.5 technical architecture for review clarity.
+
+#### Deferred to v0.6+
+
+- Runnable SISTRIX Monday Recovery Check skill (v0.5.1)
+- Revenue Rescue runtime (v0.6)
+- Safe updater implementation (v0.6); v0.5 documents the design only
+- Test fixtures, expected-output assertions, evaluation rubric (v0.6+)
+
 ## [0.4.1] — 2026-05-22
 
 ### Added — cross-platform exports
