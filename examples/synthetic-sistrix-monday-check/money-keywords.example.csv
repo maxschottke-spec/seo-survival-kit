@@ -1,0 +1,12 @@
+keyword,intent,priority,notes
+office chair ergonomic 27 inch,transactional,high,Flagship product - exact-spec long-tail
+office chair ergonomic,transactional,high,Category head term
+office chair lumbar support,transactional,high,Health-USP-aligned
+ergonomic desk chair black,transactional,medium,Color-variant LP
+mesh office chair,transactional,medium,Material-variant LP
+high back office chair,transactional,medium,Type-variant LP
+adjustable office chair,transactional,medium,Feature variant
+desk chair,transactional,high,Broad category - high volume
+office chair under 300,transactional,medium,Price-tier variant
+example-furniture-shop,navigational,high,Brand defense - must hold Pos 1
+example-furniture-shop reviews,navigational,medium,Reputation surface

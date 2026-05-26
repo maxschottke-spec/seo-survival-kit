@@ -1,6 +1,6 @@
 ---
 name: rescue
-description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the nine sub-skills covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, AI search rescue, AI citations tracker (NEW v0.4 — weekly cron measuring brand citations in ChatGPT/Perplexity/AI Overviews), and GSC deep-dive (NEW v0.4 — one-call Google Search Console API snapshot). Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
+description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the ten sub-skills covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, AI search rescue, AI citations tracker (v0.4 — weekly cron measuring brand citations in ChatGPT/Perplexity/AI Overviews), GSC deep-dive (v0.4 — one-call Google Search Console API snapshot), and SISTRIX Monday recovery check (NEW v0.5.1 — CSV-first weekly recovery review producing a 17-section structured report). Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
 user-invokable: true
 argument-hint: '[subcommand] [domain-or-args]'
 allowed-tools: [Read, Grep, Glob]
@@ -13,7 +13,7 @@ metadata:
 
 # SEO Rescue: Orchestrator
 
-This is the entry point for the seo-rescue plugin. It routes to seven specialized sub-skills, each callable directly via its namespaced slash command.
+This is the entry point for the seo-rescue plugin. It routes to ten specialized sub-skills, each callable directly via its namespaced slash command.
 
 **Invocation:** `/seo-rescue:rescue [subcommand] [args]` to route here, or call any sub-skill directly via `/seo-rescue:<skill-name>`.
 
@@ -30,6 +30,7 @@ This is the entry point for the seo-rescue plugin. It routes to seven specialize
 | `/seo-rescue:rescue ai-search <domain>` | AI search visibility recovery (alias for `/seo-rescue:ai-search-rescue`) |
 | `/seo-rescue:rescue ai-citations` | Track AI citations weekly (alias for `/seo-rescue:ai-citations-tracker`) |
 | `/seo-rescue:rescue gsc <domain> [days?]` | One-call Google Search Console snapshot (alias for `/seo-rescue:gsc-deep-dive`) |
+| `/seo-rescue:rescue monday <current-csv> <previous-csv> [domain?]` | CSV-first weekly recovery review (alias for `/seo-rescue:sistrix-monday-recovery-check`) |
 | `/seo-rescue:rescue help` | Show this routing table |
 
 ## When to use which
@@ -93,12 +94,15 @@ Automated weekly PageSpeed Insights tracking with regression detection. launchd/
 ### `/seo-rescue:ai-search-rescue [domain]`
 AI search visibility framework for Google AI Overviews, AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai search. Three-layer measurement (brand-mention prompts × 6 surfaces, GSC AI-traffic filter, AI-crawler logs) plus seven optimization tactics. Realistic 6–12 week recovery workflow. AI citations are a leading indicator for Authority-First Core-Update recovery.
 
+### `/seo-rescue:sistrix-monday-recovery-check <current-csv> <previous-csv> [domain?] [money-keywords-csv?]`
+CSV-first weekly recovery review during an active Core-Update recovery. No SISTRIX API key required. Reads current + previous SISTRIX keyword exports and produces a 17-section structured report: visibility-index interpretation, Top-100/50/20/10/5/3 recovery distribution, winner/loser neutralization, money-keyword protection list, URL-level recovery table, per-cluster recovery stage (0-5), Recovery Signal Score (0-100), optional GSC cross-check, optional conversion-rate validation, one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate), explicit What-Not-To-Touch guard, next-7-day plan. Methodology in [SISTRIX_MONDAY_RECOVERY_CHECK.md](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md).
+
 ## Plugin info
 
 - **Plugin name:** `seo-rescue`
 - **Marketplace:** `seo-survival-kit`
 - **Repo:** https://github.com/maxschottke-spec/seo-survival-kit
-- **Latest installable version:** v0.3.0
+- **Latest installable version:** v0.5.0
 - **License:** MIT
 - **Dependencies:** zero npm packages
 - **Validation:** `claude plugin validate plugins/seo-rescue` passes
@@ -135,6 +139,9 @@ AI search visibility framework for Google AI Overviews, AI Mode, ChatGPT, Perple
 | `competitor-deep-audit` | ~$0.10–$0.50 | 5 min |
 | `psi-weekly-cron-baseline` | $0 (PSI free quota) | 30 min setup |
 | `ai-search-rescue` | $0 | 30 min initial setup, ongoing weekly |
+| `ai-citations-tracker` | ~$0 (OpenAI ~$0.10/yr, Perplexity free tier) | 30 min setup, ongoing weekly |
+| `gsc-deep-dive` | $0 (GSC + PSI free quotas) | 15-20 min setup, then 1 call |
+| `sistrix-monday-recovery-check` | $0 (CSV-only, no API calls) | 1-2 min per Monday once exports exist |
 
 ## Related plugins
 
