@@ -4,7 +4,7 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 
 ## Where this plugin is today
 
-**Version 0.4.1** (shipped) — fifth stable release in the May 2026 launch + hardening cycle, after the LOW-severity polish pass. **v0.5.0-dev** in flight on the `feature/seo-first-growth-system-v05` branch: architecture consolidation, no new runtime skills, doc structure reaches canonical-source-of-truth state in [ARCHITECTURE.md](./ARCHITECTURE.md).
+**Version 0.5.0** (shipped) — sixth release in the May 2026 launch + hardening cycle. Architecture consolidation: doc structure reached canonical-source-of-truth state in [ARCHITECTURE.md](./ARCHITECTURE.md). No new runtime skills and no change to runtime behavior relative to v0.4.1. **v0.5.1 in flight:** runnable SISTRIX Monday Recovery Check skill matching the specification in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md).
 
 **Positioning.** Recovery Operating System for Ecommerce/D2C. Recovery-first, decision-first, profit-aware, risk-aware. Complements technical-audit suites like `claude-seo`; does not replace them. The framework supports decisions; execution belongs to the operator's team, agency, or contractors.
 
@@ -46,7 +46,7 @@ What this is **not** yet: production-grade in the sense of having external users
 | [aaron-he-zhu/seo-geo-claude-skills](https://github.com/aaron-he-zhu/seo-geo-claude-skills) | 1.7k | Mature | 20 skills around keyword research + content writing + technical audits + rank tracking | **Use for ongoing content/keyword work.** |
 | [zubair-trabzada/dataforseo-claude](https://github.com/zubair-trabzada/dataforseo-claude) | 79 | Newer | DataForSEO-focused with 13 skills + 5 subagents | Good if DataForSEO is your main data source. |
 | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | 12.9k | Very mature | Marketing stack (CRO, copy, paid ads, SEO) — broader scope | Use for marketing breadth, not deep SEO. |
-| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.4.1 shipped, v0.5-dev in flight, hardened** | Recovery Operating System for ecommerce/D2C: Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking, GSC deep dive, AI citation tracking, decision/sequencing layer (v0.5 docs) | **Use when** the situation is recovery / cold-outreach / AI-search visibility / cross-channel decision support for ecommerce. Complements technical-audit plugins. |
+| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.5.0 shipped, v0.5.1 in flight, hardened** | Recovery Operating System for ecommerce/D2C: Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking, GSC deep dive, AI citation tracking, decision/sequencing layer (v0.5 docs) | **Use when** the situation is recovery / cold-outreach / AI-search visibility / cross-channel decision support for ecommerce. Complements technical-audit plugins. |
 
 ## What's actually unique here
 

@@ -84,7 +84,7 @@ Skills do not implement the decision layer themselves. They feed it. The user in
 
 ## 4. Modules and skill registry
 
-### Active modules (v0.4.1)
+### Active modules (v0.5.0)
 
 **seo-rescue.** The current installable plugin. Ten skills (one routing orchestrator plus nine sub-skills). Stable. The wedge.
 
@@ -263,7 +263,7 @@ Prevention is much cheaper. The `scripts/privacy-scan.sh` stub (v0.5 doc, v0.6 i
 
 ## 6. Adaptive user onboarding (planned, v0.6+)
 
-**Planned for v0.6+.** This section is a specification, not a description of current runtime behavior. None of the questions, profile schema, modes, or intent-router rules below are implemented in v0.4.1. They describe what the adaptive onboarding will look like when it ships in v0.6+. For current v0.4.1 behavior, skills run with sensible defaults without an onboarding flow.
+**Planned for v0.6+.** This section is a specification, not a description of current runtime behavior. None of the questions, profile schema, modes, or intent-router rules below are implemented in v0.5.0. They describe what the adaptive onboarding will look like when it ships in v0.6+. For current v0.5.0 behavior, skills run with sensible defaults without an onboarding flow.
 
 The planned framework asks what the operator wants to achieve before running anything. The answers shape workflow defaults, output format, and privacy mode.
 

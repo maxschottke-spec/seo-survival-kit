@@ -123,7 +123,7 @@ When working with the existing 4 scripts in `seo-outreach-report`:
 
 - Repository: https://github.com/maxschottke-spec/seo-survival-kit
 - Anthropic community marketplace: pending review at claude-plugins-community
-- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.1`
+- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.0`
 - Pilot-domain recovery case (anonymized): see `post-core-update-recovery/LESSONS.md` for the dated lesson entries that source the framework
 
 ## Canonical doc map

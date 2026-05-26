@@ -2,7 +2,7 @@
 
 Operational methodology for SEO recovery within the [Recovery Operating System](./ARCHITECTURE.md). This document defines what an operator does during SEO recovery: how decisions get made, what gets protected, what does not get touched, how risk is evaluated, and how time windows shape conclusions. The aim is operator-grade methodology, not a feature list.
 
-> **Status note (v0.4.1).** This document is methodology specification. Sections 5 (Recovery Risk Engine), 6 (Risk Matrix), 7 (Money Keyword Protection), 8 (Winner/Loser Neutralization), 9 (URL Recovery Analysis), 10 (Recovery Signal Score), and 12 (Time-based Recovery Logic) describe behavior intended for the planned `sistrix-monday-recovery-check` skill (v0.5.1) and subsequent skill versions. **They are not implemented as runtime in v0.4.1.** Existing v0.4.1 skills (10 listed in [ARCHITECTURE.md §4](./ARCHITECTURE.md#4-modules-and-skill-registry)) follow the methodology in concept but do not emit the structured outputs described here. Apply the methodology manually by reading these sections; runnable skill ships in v0.5.1 per [ROADMAP.md](./ROADMAP.md).
+> **Status note (v0.5.0).** This document is methodology specification. Sections 5 (Recovery Risk Engine), 6 (Risk Matrix), 7 (Money Keyword Protection), 8 (Winner/Loser Neutralization), 9 (URL Recovery Analysis), 10 (Recovery Signal Score), and 12 (Time-based Recovery Logic) describe behavior intended for the planned `sistrix-monday-recovery-check` skill (v0.5.1) and subsequent skill versions. **They are not implemented as runtime in v0.5.0.** Existing v0.5.0 skills (10 listed in [ARCHITECTURE.md §4](./ARCHITECTURE.md#4-modules-and-skill-registry)) follow the methodology in concept but do not emit the structured outputs described here. Apply the methodology manually by reading these sections; runnable skill ships in v0.5.1 per [ROADMAP.md](./ROADMAP.md).
 
 Companion docs: [ARCHITECTURE.md](./ARCHITECTURE.md) for system shape, [DECISION_ENGINE.md](./DECISION_ENGINE.md) for the decision rules consumed here, [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) for the weekly workflow that exercises this methodology.
 
@@ -438,7 +438,7 @@ If the operator provided a list of URLs changed since the previous export, the f
 
 ## 10. Recovery Signal Score
 
-**Planned for v0.5.1.** The Score is the output of the planned `sistrix-monday-recovery-check` skill. No v0.4.1 skill computes it. The factor list, weights, and calculation below are the specification.
+**Planned for v0.5.1.** The Score is the output of the planned `sistrix-monday-recovery-check` skill. No v0.5.0 skill computes it. The factor list, weights, and calculation below are the specification.
 
 Composite 0-100 score summarizing strength of recovery signal from a SISTRIX Monday comparison.
 
