@@ -304,8 +304,8 @@ The recommended action would be `Protect`. The Recovery Signal Score would be in
 
 A synthetic example folder ships at `examples/synthetic-sistrix-monday-check/`. The example uses:
 
-- Domain: `example-mattress-shop.test`
-- Important keyword: `taschenfederkernmatratze 90x200`
+- Domain: `example-furniture-shop.test`
+- Important keyword: `office chair ergonomic 27 inch`
 - Scenario: current position 2, previous position 18, 200+ keywords returned, visibility index flat, some head terms lost, GSC impressions rising, clicks not yet fully recovered
 
 All data is synthetic. No real company names, no real exports, no real revenue numbers. The README in that folder shows the input CSV shape and the expected output Markdown.
@@ -322,7 +322,7 @@ Files to protect per [.gitignore](./.gitignore):
 
 The skill writes its output to a gitignored directory by default (`./output/sistrix-monday-checks/<sanitized-domain>-<YYYY-MM-DD>.md`).
 
-When the user runs the skill in `private-local-data` or `sensitive-client-data` mode per [PRIVACY_MODES.md](./PRIVACY_MODES.md), the output filename is further hashed and the path is mode-0700.
+When the user runs the skill in private-local-data or sensitive-client-data mode (see [ARCHITECTURE.md §5](./ARCHITECTURE.md#5-privacy-and-client-data) for the privacy posture), the output filename is further hashed and the path is mode-0700.
 
 ## What this skill does not do
 

@@ -389,9 +389,11 @@ It does not integrate with CRM, marketing automation, or dashboard platforms.
 
 ---
 
-## 11. Integration with skills and workflows
+## 11. Planned output contract (v0.6+)
 
-Every skill output includes the engine's decision-layer wrapper:
+**Planned for v0.6+.** The v0.4.1 skills (10 in `plugins/seo-rescue/skills/`) do not currently emit a structured decision-layer wrapper. This section specifies the output contract that the planned Decision Engine integration will produce when skills are revised to feed the engine in v0.6+. Treat the list below as the target shape, not as a description of current skill outputs.
+
+The planned skill output will include the engine's decision-layer wrapper:
 
 - Selected user mode and reason
 - Assumptions the engine is making

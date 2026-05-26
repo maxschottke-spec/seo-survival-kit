@@ -41,22 +41,22 @@ Recovery-first decision intelligence for ecommerce and D2C. Most SEO tools answe
 
 The split is intentional (marketplace is the brand, plugin is the technical handle).
 
-## The ten skills
+## The ten skills (1 orchestrator + 9 specialized sub-skills)
 
-Every skill is reachable as a namespaced slash command. Type `/seo-rescue:rescue` to see the routing table, or call any sub-skill directly.
+Every skill is reachable as a namespaced slash command. The orchestrator (`rescue`) routes to the right sub-skill; each sub-skill can also be called directly.
 
-| Slash command | What it does | Cost |
-|---|---|---|
-| `/seo-rescue:rescue` | Orchestrator + routing table | free |
-| `/seo-rescue:seo-audit-free <domain>` | Free-tier health check (GSC + PSI + Lighthouse + curl) | free |
-| `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
-| `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers (Sistrix + DataForSEO + PSI) | ~$0.05-$0.50 |
-| `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
-| `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10-$0.50 |
-| `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
-| `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery (framework) | free |
-| `/seo-rescue:ai-citations-tracker` | Weekly cron tracking brand citations in ChatGPT + Perplexity (NDJSON history) | ~$0.10/year |
-| `/seo-rescue:gsc-deep-dive <domain> [days?]` | One-call Google Search Console snapshot (queries + pages + coverage + CrUX) | free |
+| Type | Slash command | What it does | Cost |
+|---|---|---|---|
+| Orchestrator | `/seo-rescue:rescue` | Routing table — points at the right sub-skill | free |
+| Sub-skill | `/seo-rescue:seo-audit-free <domain>` | Free-tier health check (GSC + PSI + Lighthouse + curl) | free |
+| Sub-skill | `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
+| Sub-skill | `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers (Sistrix + DataForSEO + PSI) | ~$0.05-$0.50 |
+| Sub-skill | `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
+| Sub-skill | `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10-$0.50 |
+| Sub-skill | `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
+| Sub-skill | `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery (framework) | free |
+| Sub-skill | `/seo-rescue:ai-citations-tracker` | Weekly cron tracking brand citations in ChatGPT + Perplexity (NDJSON history) | ~$0.10/year |
+| Sub-skill | `/seo-rescue:gsc-deep-dive <domain> [days?]` | One-call Google Search Console snapshot (queries + pages + coverage + CrUX) | free |
 
 Skill-level detail: see [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 

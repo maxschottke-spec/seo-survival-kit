@@ -2,6 +2,8 @@
 
 Operational methodology for SEO recovery within the [Recovery Operating System](./ARCHITECTURE.md). This document defines what an operator does during SEO recovery: how decisions get made, what gets protected, what does not get touched, how risk is evaluated, and how time windows shape conclusions. The aim is operator-grade methodology, not a feature list.
 
+> **Status note (v0.4.1).** This document is methodology specification. Sections 5 (Recovery Risk Engine), 6 (Risk Matrix), 7 (Money Keyword Protection), 8 (Winner/Loser Neutralization), 9 (URL Recovery Analysis), 10 (Recovery Signal Score), and 12 (Time-based Recovery Logic) describe behavior intended for the planned `sistrix-monday-recovery-check` skill (v0.5.1) and subsequent skill versions. **They are not implemented as runtime in v0.4.1.** Existing v0.4.1 skills (10 listed in [ARCHITECTURE.md §4](./ARCHITECTURE.md#4-modules-and-skill-registry)) follow the methodology in concept but do not emit the structured outputs described here. Apply the methodology manually by reading these sections; runnable skill ships in v0.5.1 per [ROADMAP.md](./ROADMAP.md).
+
 Companion docs: [ARCHITECTURE.md](./ARCHITECTURE.md) for system shape, [DECISION_ENGINE.md](./DECISION_ENGINE.md) for the decision rules consumed here, [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) for the weekly workflow that exercises this methodology.
 
 ---
@@ -192,13 +194,13 @@ The Recovery Risk Engine prevents destructive changes during recovery by detecti
 
 Per section 3 Do-Not-Touch principle. Warnings are loud and explicit, with the affected URLs and the recovery state spelled out, so the operator decides knowing the cost.
 
-### Trigger conditions
+### Trigger conditions (planned)
 
-The Recovery Risk Engine is on by default during:
+**Planned for v0.5.1+ when the `sistrix-monday-recovery-check` skill ships.** The Recovery Risk Engine will be on by default during:
 
 - The 90 days following a detected Core Update impact
-- Any session where the SISTRIX Monday Recovery Check produced a Recovery Signal Score above 40
-- Any session where the user profile's `intent.current_task` is `recover-from-traffic-drop`
+- Any session where the SISTRIX Monday Recovery Check produces a Recovery Signal Score above 40
+- Any session where the user profile's `intent.current_task` is `recover-from-traffic-drop` (profile schema also planned for v0.6+ per ARCHITECTURE.md §6)
 
 It can be toggled off explicitly when the operator confirms the recovery is established (Stage 5 sustained for 30+ days).
 
@@ -255,14 +257,14 @@ A money keyword is a keyword where a ranking improvement directly translates to 
 
 ### What counts as a money keyword
 
-- Product or category keyword with commercial intent ("taschenfederkernmatratze 90x200", "running shoes nike air zoom")
-- Size or specification combined with product type ("matratze 140x200")
+- Product or category keyword with commercial intent ("running shoes nike air zoom", "wireless headphones noise cancelling")
+- Size or specification combined with product type ("monitor 27 inch 4k", "office chair ergonomic")
 - Brand combined with product ("apple macbook pro 14")
 - Comparison or buying-intent terms ("test", "vergleich", "beste", "kaufen")
 - Local intent for local businesses
 - High-intent transactional queries with a clear conversion path on the ranking URL
 
-A keyword can have high search volume without being a money keyword. Informational terms ("was ist eine taschenfederkernmatratze") often dwarf transactional terms in volume but convert at a fraction of the rate.
+A keyword can have high search volume without being a money keyword. Informational terms ("what is an ergonomic office chair") often dwarf transactional terms in volume but convert at a fraction of the rate.
 
 ### Where the money keyword list comes from
 
@@ -435,6 +437,8 @@ If the operator provided a list of URLs changed since the previous export, the f
 ---
 
 ## 10. Recovery Signal Score
+
+**Planned for v0.5.1.** The Score is the output of the planned `sistrix-monday-recovery-check` skill. No v0.4.1 skill computes it. The factor list, weights, and calculation below are the specification.
 
 Composite 0-100 score summarizing strength of recovery signal from a SISTRIX Monday comparison.
 
