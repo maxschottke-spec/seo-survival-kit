@@ -57,7 +57,12 @@ Every skill is reachable as a namespaced slash command. The orchestrator (`rescu
 | Sub-skill | `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery (framework) | free |
 | Sub-skill | `/seo-rescue:ai-citations-tracker` | Weekly cron tracking brand citations in ChatGPT + Perplexity (NDJSON history) | ~$0.10/year |
 | Sub-skill | `/seo-rescue:gsc-deep-dive <domain> [days?]` | One-call Google Search Console snapshot (queries + pages + coverage + CrUX) | free |
-| Sub-skill | `/seo-rescue:sistrix-monday-recovery-check <current-csv> <previous-csv> [domain?]` | CSV-first weekly recovery review — 17-section structured report (visibility-index interpretation, Top-N delta, winner/loser neutralization, money-keyword protection, URL recovery, per-cluster stage, Recovery Signal Score, recommended action) | free |
+| Sub-skill | `/seo-rescue:sistrix-monday-recovery-check <current-csv> <previous-csv> [domain?]` | CSV-first weekly recovery review — 17-section structured report | free |
+| Command | `/seo-rescue:recovery-diagnose <domain>` | Core Update diagnosis via Sistrix + DataForSEO MCP (with CSV fallbacks) | ~$0.05–$0.50 |
+| Command | `/seo-rescue:recovery-crawl <domain>` | Screaming Frog crawl + severity-classified issue extraction | free |
+| Command | `/seo-rescue:recovery-plan <domain>` | Prioritized 30/60/90-day action plan with Do-Not-Touch + human approval gate | free |
+| Command | `/seo-rescue:recovery-monitor <domain>` | Weekly tracking with deterministic 0-100 recovery score | free |
+| Command | `/seo-rescue:recovery-full <domain>` | Full workflow: diagnose → crawl → plan → monitor | ~$0.05–$0.50 |
 
 Skill-level detail: see [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 
