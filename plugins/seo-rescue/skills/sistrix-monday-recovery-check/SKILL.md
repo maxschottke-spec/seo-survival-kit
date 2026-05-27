@@ -1,13 +1,13 @@
 ---
 name: sistrix-monday-recovery-check
-description: 'Use during an active SEO recovery for the recurring Monday-morning structured review. CSV-first; no SISTRIX API key required. Takes the current and previous week SISTRIX keyword exports and produces a fixed-shape Monday Check report: visibility-index interpretation, Top-100/50/20/10/5/3 recovery distribution, winner/loser neutralization, money-keyword protection list, URL-level recovery table, per-cluster recovery stage (0-5), Recovery Signal Score (0-100), optional GSC cross-check, conversion-rate validation layer when CR data is supplied, plus one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate) with an explicit What-Not-To-Touch guard. Triggers from "Monday recovery check", "SISTRIX recovery review", "weekly Monday SEO ritual", "compare this Monday SISTRIX to last Monday", "is the visibility index lagging behind ranking gains", "winner-loser neutralization check", "are my money keywords protected". Methodology and full output contract in SISTRIX_MONDAY_RECOVERY_CHECK.md; operational detail in RECOVERY_SYSTEM.md sections 4-10; decision-rule references in DECISION_ENGINE.md.'
+description: 'CSV-first weekly recovery review during an active SEO recovery. No SISTRIX API key required. Compares current and previous SISTRIX keyword exports and produces a structured Monday Check report with Recovery Signal Score, per-cluster recovery stage, winner/loser neutralization analysis, money-keyword protection list, URL-level recovery table, optional GSC cross-check, optional conversion-rate validation, and one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate) with an explicit What-Not-To-Touch guard for winning URLs. Triggers from "Monday recovery check", "SISTRIX recovery review", "weekly Monday SEO ritual", "compare this Monday SISTRIX to last Monday", "is the visibility index lagging behind ranking gains", "winner-loser neutralization check", "are my money keywords protected". Full output contract in SISTRIX_MONDAY_RECOVERY_CHECK.md; operational detail in RECOVERY_SYSTEM.md sections 4-10.'
 user-invokable: true
 argument-hint: '[current-csv] [previous-csv] [domain?] [money-keywords-csv?]'
 allowed-tools: [Read, Write, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.0'
+  version: '0.5.1-dev'
   category: marketing
 ---
 
@@ -17,7 +17,7 @@ metadata:
 
 During an active SEO recovery, every Monday the operator asks the same questions: did rankings recover, are money keywords holding, are winners and losers offsetting each other, is the visibility index lagging behind actual ranking gains. Without structure, the answer is ad-hoc and biased toward whatever the operator opens first in the SISTRIX UI.
 
-This skill turns the Monday review into a fixed 15-section report so the same questions get answered consistently week over week. The full methodology lives in [SISTRIX_MONDAY_RECOVERY_CHECK.md](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md) (canonical spec) and [RECOVERY_SYSTEM.md](../../../../RECOVERY_SYSTEM.md) (operational detail for sections 4-10). This SKILL.md is the runnable skill that executes that workflow against the operator's CSV exports.
+This skill turns the Monday review into a fixed 17-section report so the same questions get answered consistently week over week. The full methodology lives in [SISTRIX_MONDAY_RECOVERY_CHECK.md](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md) (canonical spec) and [RECOVERY_SYSTEM.md](../../../../RECOVERY_SYSTEM.md) (operational detail for sections 4-10). This SKILL.md is the runnable skill that executes that workflow against the operator's CSV exports.
 
 ## When to use
 
@@ -66,7 +66,7 @@ This is a pure-Markdown framework skill. Claude reads the two CSVs via the Read 
 
 1. Read the current-week CSV. Detect column names. Build a normalized keyword table: `{keyword, position, url, search_volume, intent?, previous_position?}`.
 2. Read the previous-week CSV. Same normalization. Build the same shape.
-3. If either CSV has fewer than ~20 rows, warn the operator that the sample may be too small for reliable Winner/Loser analysis and offer to continue anyway.
+3. If either CSV has fewer than ~50 rows, warn the operator that the sample may be too small for reliable Winner/Loser analysis (real recovery tracking should use the full SISTRIX export, typically several hundred to several thousand keywords) and offer to continue anyway.
 4. Build the keyword-keyed merge: `keywords_both = current ∩ previous`, `keywords_returned = current \ previous`, `keywords_lost = previous \ current`.
 
 ### Step 2 — Visibility Index interpretation
@@ -154,7 +154,7 @@ If the operator provided a GSC export covering the same period (queries + pages 
 - GSC impressions rise but clicks do not → snippets or SERP features may be compressing CTR
 - GSC clicks rise but SISTRIX index flat → trust click data for revenue, SISTRIX for competitive position
 
-If [[gsc-deep-dive]] data is present (`gsc-history/<domain>-<date>.json`), use it directly. Otherwise prompt the operator to supply a manual GSC CSV export.
+If [[gsc-deep-dive]] data is present (`gsc-history/<sanitized-site>-<YYYY-MM-DD>.json` — same filename pattern `gsc-deep-dive` writes), use it directly. Otherwise prompt the operator to supply a manual GSC CSV export.
 
 ### Step 10 — Conversion-rate validation layer (optional)
 
@@ -223,6 +223,8 @@ A single Markdown file at `./output/sistrix-monday-checks/<sanitized-domain>-<YY
 
 Inputs that were not provided are marked `(not provided)` in the relevant section rather than skipped silently. The structure stays constant week-over-week so the operator can diff Monday-to-Monday.
 
+**Domain sanitization rule** (applies to `<sanitized-domain>` and to the `<sanitized-site>` placeholder this skill consumes from `gsc-deep-dive`): the domain is lowercased; allowed characters are `[a-z0-9.-]`; leading dots are stripped; path separators (`/`, `\`), null bytes, and `..` sequences are rejected. A domain that fails sanitization aborts the run rather than falling back to a default. This applies whether Claude derives the filename via Read/Write tools or whether a future helper script computes it via `safeSlug()` in `plugins/seo-rescue/lib/safe.js`.
+
 ## Privacy
 
 The CSVs the operator feeds in stay on the operator's machine. The skill writes its output to a gitignored directory by default. Files protected by [.gitignore](../../../../.gitignore):
@@ -230,12 +232,15 @@ The CSVs the operator feeds in stay on the operator's machine. The skill writes 
 - `sistrix-exports/`
 - `gsc-exports/`
 - `*_sistrix*.csv`
-- `*_keywords*.csv`
+- `*_keywords*.csv` (underscore form)
+- `money-keywords*.csv` and `*-keywords*.csv` (hyphen form — covers the example filename used in the path-argument section above)
 - `*_visibility*.csv`
 - `*_ranking*.csv`
-- `output/sistrix-monday-checks/`
+- `output/` (covers `output/sistrix-monday-checks/` and any other skill that writes to this tree)
 
-If the operator is running in a sensitive-client-data mode (see [ARCHITECTURE.md §5](../../../../ARCHITECTURE.md#5-privacy-and-client-data)), the output filename is hashed and the path is mode-0700. The default `output/` directory should be added to `.gitignore` before the first run if it is not already covered.
+Synthetic `.example.csv` files inside `examples/` are explicitly allow-listed via a negation rule in `.gitignore` so contributors can ship demonstration data without it being shadowed by the keyword-list rules above.
+
+If the operator is running in a sensitive-client-data mode (see [ARCHITECTURE.md §5](../../../../ARCHITECTURE.md#5-privacy-and-client-data)), the output filename is hashed and the path is mode-0700. If you run this skill in a fork or derived repository, verify the `output/` rule is present in your `.gitignore` before the first run.
 
 ## What this skill does not do
 
@@ -248,7 +253,7 @@ If the operator is running in a sensitive-client-data mode (see [ARCHITECTURE.md
 ## Related skills
 
 - [[post-core-update-recovery]] — the initial diagnostic that decides whether the situation is a Core-Update pattern at all. Run this before starting weekly Monday checks.
-- [[gsc-deep-dive]] — the GSC cross-check data source if the operator has GSC API access configured. The Monday check reads `gsc-history/<domain>-*.json` directly when present.
+- [[gsc-deep-dive]] — the GSC cross-check data source if the operator has GSC API access configured. The Monday check reads `gsc-history/<sanitized-site>-*.json` directly when present (same filename pattern that skill writes).
 - [[psi-weekly-cron-baseline]] — the technical-health weekly pulse that runs alongside the Monday ranking pulse.
 - [[ai-citations-tracker]] — AI citations are the leading-indicator companion. AI mentions often move 2-6 weeks before classical SISTRIX VI does, which is the operational reason the Monday check ships per-cluster Stage classification rather than a single global stage.
 - [[seo-outreach-report]] — the 10-chapter PDF deliverable. The Monday check feeds the recovery section.

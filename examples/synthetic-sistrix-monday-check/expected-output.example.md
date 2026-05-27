@@ -1,6 +1,6 @@
 # SISTRIX Monday Recovery Check — example-furniture-shop.test
 
-**Date:** 2026-05-26 · **Comparison period:** 2026-05-19 → 2026-05-26 (7 days) · **Skill version:** 0.5.0
+**Date:** 2026-05-26 · **Comparison period:** 2026-05-19 → 2026-05-26 (7 days) · **Skill version:** 0.5.1-dev
 
 ## 1. Executive Summary
 
