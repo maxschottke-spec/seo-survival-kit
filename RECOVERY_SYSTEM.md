@@ -174,6 +174,16 @@ Crawl all indexable pages (Screaming Frog, Sitebulb, or manual curl audit) and c
 
 In observed cases with severe structural debt (>50 % non-healthy pages), recovery has been materially faster when structural cleanup ran in parallel with authority work. The structural fixes did not cause the recovery but removed the multiplier that was suppressing it. Specific timelines and recovery percentages are case-dependent and should be documented in engagement-specific private playbooks.
 
+### Recovery velocity observation
+
+In one observed case, ~95 % recovery to pre-update average visibility was achieved in under 8 weeks — roughly half the 3–4 month baseline expectation. The ranking distribution during this recovery showed a characteristic pattern:
+
+- **Page 1 rankings** recovered from ~11 % to ~15 % (pre-update: ~22 %)
+- **Page 5+ rankings grew significantly** (from ~17 % to ~32 %), indicating Google was testing many new positions simultaneously
+- **Blog/editorial pages carried the recovery** at 6–8x more clicks per URL than category/product pages, confirming that pre-existing authority content serves as the trust anchor
+
+This pattern suggests that when a site has strong editorial authority content that survived the Core Update, the recovery propagates FROM that content outward to commercial pages via internal link signals. The editorial content acts as a trust bridge. Operators should protect these trust-anchor pages with the highest Do-Not-Touch priority and use them as internal-link sources to commercial pages that need to recover.
+
 ---
 
 ## 5. Recovery Risk Engine
@@ -246,6 +256,27 @@ Practical risk framework. Every proposed action during recovery gets scored on s
 | Add a review snippet (Trustpilot widget) to recovering product URL | Medium | Stage 4 (low) | Reversible | Medium | Low | Single URL | **Yellow** |
 | Change canonical on a URL with rising impressions | High | Stage 2-3 (high) | Reversible | Weak | High | Single URL | **Black-flag** |
 | Add a new supporting article in the topic cluster | Low | Stage 4-5 (low) | Reversible | Medium | Low | New URL | **Green** |
+| Switch 5+ category pages to new CMS templates in one day | High | Stage 3-4 (medium) | Reversible with work | Medium | High | Multi-URL | **Red** |
+| Deploy content to a shared CMS layout (affects multiple categories) | High | Any | Reversible | Weak | High | Sitewide | **Black-flag** |
+
+### Batch-change velocity rule
+
+During active recovery, limit URL changes to 3–5 per day. CMS template switches (changing which layout a category uses) count as high-impact changes because Google sees a different rendered HTML structure on the same URL — even if the text content is unchanged.
+
+Observed pattern: switching 5 category pages to new dedicated CMS layouts in a single day during Stage 3-4 recovery caused a same-day live visibility drop of ~11 %. The weekly trend remained positive, and the drop corrected within days, but the intraday signal was measurable and avoidable.
+
+If a batch of changes is necessary, spread them across 3–5 days with monitoring between each batch. Prepare a rollback script before starting. Monitor live visibility (if the SEO tool supports intraday checks) after each batch.
+
+### Shared CMS layout trap
+
+In CMS platforms that allow multiple categories to share a single layout/template (Shopware "Shopping Experiences", WordPress shared page templates), adding a content block to the shared layout deploys that content to ALL categories using it — not just the intended one. This creates instant duplicate content across multiple URLs.
+
+Before adding content blocks to any CMS page:
+1. Query how many categories/pages use that CMS layout
+2. If more than one: create a dedicated layout for the target category first, reassign it, then add content
+3. Known high-risk layouts in Shopware: the "Standard Kategorie-Layout" (often 20–50+ categories) and any layout named generically ("Default", "Standard", "Product List")
+
+This trap is particularly dangerous during recovery because the duplicated content may appear on high-ranking pages (observed: content intended for a secondary category appeared on a #1-ranking page for several hours before detection).
 
 The matrix is not a substitute for operator judgment. It is a forced-pause mechanism that makes the operator state the risk before acting.
 

@@ -130,6 +130,36 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 - **Reason.** High refund rates eliminate margin regardless of topline revenue. A channel with 3,000 € monthly revenue and 35 % refunds delivers ~1,950 € net before COGS — often below break-even after fulfillment and return processing costs. Scaling amplifies the loss. ROAS calculations that ignore refunds overstate channel health.
 - **Confidence.** Medium-High (one confirmed case; threshold aligns with marketplace seller benchmarks).
 
+### r-batch-change-velocity-cap
+
+- **Condition.** Operator plans to change more than 5 URLs in a single day during active recovery (Stage 1–4).
+- **Blocks.** Executing all changes on the same day.
+- **Sequences.** Spread changes across 3–5 days. CMS template switches count as high-impact changes. Monitor live visibility between batches.
+- **Reason.** Observed pattern: 13 URL changes + 5 CMS template switches in a single day during Stage 3-4 recovery caused an 11 % same-day live visibility drop. The weekly trend remained positive and the drop corrected within days, but the intraday signal was measurable and avoidable. Each CMS template switch changes the rendered HTML structure on the same URL — Google treats this as a page-level change even when text content is identical.
+- **Confidence.** Medium (one confirmed case; consistent with known Google behavior during re-evaluation periods).
+
+### r-shared-cms-layout-content-block
+
+- **Condition.** Operator plans to add a content block to a CMS page/layout that is shared by multiple categories or URLs.
+- **Blocks.** Adding the content block to the shared layout.
+- **Sequences.** First create a dedicated layout for the target category, reassign it, then add content to the dedicated layout.
+- **Reason.** In CMS platforms that allow layout sharing (Shopware "Shopping Experiences", WordPress shared templates), a content block added to a shared layout deploys to ALL pages using that layout — not just the intended one. Observed: content intended for a secondary category appeared on a #1-ranking page and 5 other unrelated categories for several hours before detection. This creates instant duplicate content and can corrupt ranking signals on high-value pages.
+- **Confidence.** High (one confirmed case with immediate visible impact; platform behavior is deterministic, not probabilistic).
+
+### r-blog-authority-carries-recovery
+
+- **Condition.** During recovery, blog/editorial pages deliver 5x+ more clicks per URL than category/product pages.
+- **Sequences.** Protect blog pages with Do-Not-Touch. Use blog authority to bridge trust to category pages via internal links (blog → category). Do not restructure, move, or merge blog content during recovery.
+- **Reason.** Observed pattern: 24 blog URLs delivered 6.5 clicks/URL average while 335 category/product URLs delivered 0.8 clicks/URL. Blog pages retained authority through the Core Update while category pages lost it. The blog serves as the trust anchor for recovery — internal links from blog to category transfer this trust signal.
+- **Confidence.** Medium-High (one confirmed case; consistent with Core Update authority-preservation pattern where editorially strong content survives while thin commercial content drops).
+
+### r-high-impressions-low-ctr-page2
+
+- **Condition.** A page has >1,000 monthly impressions but <0.5 % CTR, positioned on page 2 (positions 11–20).
+- **Sequences.** Investigate before optimizing. Check: (a) is the meta title/description compelling? (b) is the ranking URL the correct intent-match for the query? (c) is a SERP feature (AI Overview, Shopping carousel) compressing organic CTR? Only after diagnosis: optimize meta description for CTR, or add content depth to push from page 2 to page 1.
+- **Reason.** High impressions with near-zero CTR on page 2 is a recovery-phase signal: Google is testing the page for relevance but users aren't clicking. The page needs either a position improvement (to reach above-fold visibility) or a snippet improvement (to compete for clicks at current position). Premature content changes can disrupt the testing phase.
+- **Confidence.** Medium (one confirmed case with 2,000+ impressions at 0.2 % CTR on a page-2 position).
+
 ### Adding rules
 
 New rules land per the lifecycle in [ARCHITECTURE.md governance](./ARCHITECTURE.md#release-gating): observe across 3+ confirmed cases, document with all required fields, tie to source(s), add to relevant skill's `LESSONS.md`, reference in skill output when fired. Rules added without 3+ confirmations are labeled "experimental" and apply at low confidence only.
