@@ -20,3 +20,11 @@ Reference data for Core Update correlation checks in `recovery-diagnose`.
 
 Add new Core Updates as Google announces them. Check the Google Search Status Dashboard:
 https://status.search.google.com/products/rGHU1u7kqx6rbY6IYDM6/
+
+## Freshness Policy
+
+- This list must be updated at least monthly.
+- If the file's last modification date is older than 90 days, no `high` Core Update correlation may be claimed.
+- In that case, `core_update_correlation` must be set to `unknown` or at most `low`.
+- If no trustworthy data is available, no Core Update diagnosis may be asserted.
+- Commands that reference this file must check its modification date before using it for correlation.
