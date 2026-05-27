@@ -1,0 +1,4 @@
+Address,Status Code,Redirect URL,Inlinks
+https://www.example.com/topper/180x200/,404,,12
+https://www.example.com/alte-seite/,301,https://www.example.com/matratzen/,8
+https://www.example.com/produkt-xyz/,404,,3
