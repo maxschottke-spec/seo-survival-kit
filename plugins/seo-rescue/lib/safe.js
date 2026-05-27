@@ -171,6 +171,69 @@ function normalizeDomain(input) {
   };
 }
 
+function ensureDomainDir(slug) {
+  safeSlug(slug);
+  const dir = path.join(getCacheDir(), slug);
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  try { fs.chmodSync(dir, 0o700); } catch {}
+  const st = fs.lstatSync(dir);
+  if (st.isSymbolicLink()) {
+    throw new Error(`Domain cache dir must not be a symlink: ${dir}`);
+  }
+  return dir;
+}
+
+function safeLstat(p) {
+  try { return fs.lstatSync(p); } catch { return null; }
+}
+
+function acquireLock(domainDir, timeoutMs = 30000) {
+  const lockPath = path.join(domainDir, '.lock');
+  const deadline = Date.now() + timeoutMs;
+  while (true) {
+    try {
+      const fd = fs.openSync(lockPath, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL, 0o600);
+      fs.writeFileSync(fd, String(process.pid));
+      fs.closeSync(fd);
+      return lockPath;
+    } catch (e) {
+      if (e.code === 'EEXIST') {
+        if (Date.now() >= deadline) {
+          throw new Error(`acquireLock: timeout after ${timeoutMs}ms — another command may be running for this domain. Lock: ${lockPath}`);
+        }
+        require('node:child_process').execSync('sleep 0.1', { stdio: 'ignore' });
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
+function releaseLock(lockPath) {
+  try { fs.unlinkSync(lockPath); } catch {}
+}
+
+function atomicWriteJSON(filePath, data) {
+  const st = safeLstat(filePath);
+  if (st && st.isSymbolicLink()) {
+    throw new Error(`atomicWriteJSON: target is a symlink: ${filePath}`);
+  }
+  const tmpPath = filePath + '.tmp';
+  const json = JSON.stringify(data, null, 2) + '\n';
+  fs.writeFileSync(tmpPath, json, { mode: 0o600 });
+  fs.renameSync(tmpPath, filePath);
+}
+
+function appendNDJSON(filePath, entry) {
+  const st = safeLstat(filePath);
+  if (st && st.isSymbolicLink()) {
+    throw new Error(`appendNDJSON: target is a symlink: ${filePath}`);
+  }
+  const line = JSON.stringify(entry) + '\n';
+  const fd = fs.openSync(filePath, fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_WRONLY, 0o600);
+  try { fs.writeFileSync(fd, line); } finally { fs.closeSync(fd); }
+}
+
 module.exports = {
   safeSlug,
   safeHostname,
@@ -183,4 +246,9 @@ module.exports = {
   getCacheDir,
   cachePath,
   normalizeDomain,
+  ensureDomainDir,
+  acquireLock,
+  releaseLock,
+  atomicWriteJSON,
+  appendNDJSON,
 };
