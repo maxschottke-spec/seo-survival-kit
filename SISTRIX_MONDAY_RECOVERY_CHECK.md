@@ -97,6 +97,14 @@ For both exports, compute:
 
 Surface the delta as a table. The Top 3 and Top 10 deltas are the most operationally meaningful during recovery.
 
+Additionally, track the **ranking distribution by SERP page** (page 1 = positions 1-10, page 2 = 11-20, etc.). During recovery, a characteristic pattern emerges:
+
+- **Page 1 share recovers gradually** (e.g., 11 % → 15 %, recovering toward pre-update ~22 %)
+- **Page 5+ share grows significantly** (e.g., 17 % → 32 %) as Google tests many new positions simultaneously
+- This "testing phase" expansion on pages 5-10 is a **positive leading indicator** — it means Google is re-evaluating the site broadly, which precedes the consolidation into pages 1-2
+
+When the page 5+ share peaks and then starts declining while page 1-2 share grows, the recovery is consolidating. Do not panic when page 5+ grows — it is the precursor to the next stage of recovery.
+
 ### 3. Winner / loser neutralization
 
 Identify whether many small or mid-sized gains are being offset by a few large losses. See [RECOVERY_SYSTEM.md section 8](./RECOVERY_SYSTEM.md#8-winnerloser-neutralization) for the detection logic.

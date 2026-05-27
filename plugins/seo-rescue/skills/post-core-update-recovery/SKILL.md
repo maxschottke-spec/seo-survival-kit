@@ -121,8 +121,9 @@ These are **NOT** the recovery lever — Core Updates don't penalize tech, they 
 
 - **Baseline expectation: visible movement starts after 3–4 months.** Google needs time to re-evaluate authority signals. Full recovery usually takes 9–18 months.
 - **Accelerated recovery is possible** when multiple acceleration factors are present simultaneously (see next section). The 3–4 month baseline assumes authority-only work without structural cleanup.
-- **Recovery outcome in observed cases is in the 50–80 % range** of pre-drop visibility. Full recovery to 100 % seems to require structural changes (new content lines, new authority sources), not just optimization of what existed before.
+- **Recovery outcome can reach 90–95 % of pre-drop average** when acceleration factors are present. Full recovery to pre-drop peak typically requires structural changes (new content lines, new authority sources), not just optimization of what existed before.
 - **Pattern: recovery comes in jumps**, often timed with the next Core Update rather than gradually. A single week can deliver +30–50 % VI gain after weeks of flat movement.
+- **Operational risk during recovery: batch-change velocity.** Do not change more than 3–5 URLs per day during active recovery. CMS template switches (changing which layout a page uses) count as high-impact changes. Observed: 13 URL changes in one day caused an 11 % same-day visibility dip that corrected within days but was avoidable. See RECOVERY_SYSTEM.md for the velocity rule.
 
 ## Recovery acceleration factors
 
