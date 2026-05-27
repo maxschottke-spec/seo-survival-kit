@@ -72,7 +72,7 @@ function determinePhase(score, baseline) {
 function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings, errors) {
   const dir = ensureDomainDir(slug);
   const historyPath = path.join(dir, 'history.ndjson');
-  const lockPath = acquireLock(dir);
+  const lock = acquireLock(dir, 'recovery-monitor');
   try {
     const lastEntry = getLastEntry(historyPath);
     const baseline = getBaseline(dir);
@@ -104,7 +104,7 @@ function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings,
     appendNDJSON(historyPath, entry);
     return { entry, lastEntry };
   } finally {
-    releaseLock(lockPath);
+    releaseLock(lock);
   }
 }
 

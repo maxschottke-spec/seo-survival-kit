@@ -47,7 +47,7 @@ function buildSummary(issues) {
 
 function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warnings, errors) {
   const dir = ensureDomainDir(slug);
-  const lockPath = acquireLock(dir);
+  const lock = acquireLock(dir, 'recovery-crawl');
   try {
     const issues = classifyIssues(rawIssues);
     const summary = buildSummary(issues);
@@ -68,7 +68,7 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
     atomicWriteJSON(path.join(dir, 'issues.json'), output);
     return output;
   } finally {
-    releaseLock(lockPath);
+    releaseLock(lock);
   }
 }
 

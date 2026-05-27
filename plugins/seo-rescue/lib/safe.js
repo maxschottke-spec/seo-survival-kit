@@ -17,6 +17,7 @@ const SLUG_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
 const HOSTNAME_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
 const LABEL_MAX = 200;
 const DEFAULT_MAX_BYTES = 10 * 1024 * 1024;
+const STALE_LOCK_TTL_MS = 10 * 60 * 1000;
 
 function safeSlug(s) {
   if (typeof s !== 'string' || !SLUG_RE.test(s)) {
@@ -183,21 +184,33 @@ function ensureDomainDir(slug) {
   return dir;
 }
 
+const ensureSafeDomainDir = ensureDomainDir;
+
 function safeLstat(p) {
   try { return fs.lstatSync(p); } catch { return null; }
 }
 
-function acquireLock(domainDir, timeoutMs = 30000) {
+function acquireLock(domainDir, command = 'unknown', timeoutMs = 30000) {
   const lockPath = path.join(domainDir, '.lock');
+  const token = Math.random().toString(36).slice(2, 10);
   const deadline = Date.now() + timeoutMs;
   while (true) {
     try {
       const fd = fs.openSync(lockPath, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL, 0o600);
-      fs.writeFileSync(fd, String(process.pid));
+      const lockData = JSON.stringify({ pid: process.pid, timestamp: new Date().toISOString(), command, token });
+      fs.writeFileSync(fd, lockData);
       fs.closeSync(fd);
-      return lockPath;
+      return { path: lockPath, token };
     } catch (e) {
       if (e.code === 'EEXIST') {
+        // Check for stale lock
+        try {
+          const st = fs.statSync(lockPath);
+          if (Date.now() - st.mtimeMs > STALE_LOCK_TTL_MS) {
+            fs.unlinkSync(lockPath);
+            continue;
+          }
+        } catch {}
         if (Date.now() >= deadline) {
           throw new Error(`acquireLock: timeout after ${timeoutMs}ms — another command may be running for this domain. Lock: ${lockPath}`);
         }
@@ -209,8 +222,17 @@ function acquireLock(domainDir, timeoutMs = 30000) {
   }
 }
 
-function releaseLock(lockPath) {
-  try { fs.unlinkSync(lockPath); } catch {}
+function releaseLock(lock) {
+  if (!lock || !lock.path) return;
+  try {
+    const content = fs.readFileSync(lock.path, 'utf8');
+    const data = JSON.parse(content);
+    if (data.token === lock.token) {
+      fs.unlinkSync(lock.path);
+    }
+  } catch {
+    // Lock file may already be removed
+  }
 }
 
 function atomicWriteJSON(filePath, data) {
@@ -218,7 +240,7 @@ function atomicWriteJSON(filePath, data) {
   if (st && st.isSymbolicLink()) {
     throw new Error(`atomicWriteJSON: target is a symlink: ${filePath}`);
   }
-  const tmpPath = filePath + '.tmp';
+  const tmpPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
   const json = JSON.stringify(data, null, 2) + '\n';
   fs.writeFileSync(tmpPath, json, { mode: 0o600 });
   fs.renameSync(tmpPath, filePath);
@@ -231,6 +253,70 @@ function appendNDJSON(filePath, entry) {
   }
   const line = JSON.stringify(entry) + '\n';
   const fd = fs.openSync(filePath, fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_WRONLY, 0o600);
+  try { fs.writeFileSync(fd, line); } finally { fs.closeSync(fd); }
+}
+
+function generateRunId() {
+  const now = new Date();
+  const pad = (n, l = 2) => String(n).padStart(l, '0');
+  const date = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+  const time = `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  const rand = Math.random().toString(36).slice(2, 8);
+  return `${date}-${time}-${rand}`;
+}
+
+function safeReadJSON(filePath) {
+  const content = safeReadFile(filePath);
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    throw new Error(`safeReadJSON: invalid JSON in ${filePath}: ${e.message}`);
+  }
+}
+
+function safeReadLatestImport(dir, patterns) {
+  if (!fs.existsSync(dir)) return null;
+  const st = fs.lstatSync(dir);
+  if (st.isSymbolicLink()) throw new Error(`safeReadLatestImport: dir is a symlink: ${dir}`);
+  let newest = null;
+  let newestMtime = 0;
+  for (const pattern of patterns) {
+    const files = fs.readdirSync(dir).filter(f => {
+      if (pattern instanceof RegExp) return pattern.test(f);
+      return f === pattern || f.endsWith(pattern);
+    });
+    for (const f of files) {
+      const fp = path.join(dir, f);
+      const fst = fs.statSync(fp);
+      if (fst.isFile() && fst.mtimeMs > newestMtime) {
+        newest = fp;
+        newestMtime = fst.mtimeMs;
+      }
+    }
+  }
+  return newest;
+}
+
+const SECRET_ENV_KEYS = ['SISTRIX_API_KEY', 'DATAFORSEO_LOGIN', 'DATAFORSEO_PASSWORD', 'GOOGLE_API_KEY'];
+
+function maskSecrets(value) {
+  if (typeof value !== 'string') return String(value);
+  let masked = value;
+  for (const key of SECRET_ENV_KEYS) {
+    const val = process.env[key];
+    if (val && val.length > 4) {
+      masked = masked.split(val).join(`${key}=***${val.slice(-4)}`);
+    }
+  }
+  return masked;
+}
+
+function safeLog(domainDir, runId, message) {
+  const logPath = path.join(domainDir, 'run.log');
+  const st = safeLstat(logPath);
+  if (st && st.isSymbolicLink()) return;
+  const line = `[${new Date().toISOString()}] [${runId}] ${maskSecrets(message)}\n`;
+  const fd = fs.openSync(logPath, fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_WRONLY, 0o600);
   try { fs.writeFileSync(fd, line); } finally { fs.closeSync(fd); }
 }
 
@@ -247,8 +333,15 @@ module.exports = {
   cachePath,
   normalizeDomain,
   ensureDomainDir,
+  ensureSafeDomainDir,
   acquireLock,
   releaseLock,
   atomicWriteJSON,
   appendNDJSON,
+  generateRunId,
+  safeReadJSON,
+  safeReadLatestImport,
+  maskSecrets,
+  safeLog,
+  STALE_LOCK_TTL_MS,
 };
