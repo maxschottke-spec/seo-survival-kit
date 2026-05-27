@@ -3,8 +3,14 @@
   "$id": "befund.schema.json",
   "title": "Recovery Diagnose Befund",
   "type": "object",
-  "required": ["status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors"],
+  "required": ["schema_version", "run_id", "data_quality", "confidence", "providers_used", "missing_capabilities", "status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors"],
   "properties": {
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "run_id": { "type": "string", "pattern": "^\\d{8}-\\d{6}-[a-z0-9]+$" },
+    "data_quality": { "type": "string", "enum": ["good", "partial", "poor"] },
+    "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+    "providers_used": { "type": "array", "items": { "type": "string" } },
+    "missing_capabilities": { "type": "array", "items": { "type": "string" } },
     "status": { "type": "string", "enum": ["complete", "partial", "failed"] },
     "input_domain": { "type": "string" },
     "domain": { "type": "string" },
@@ -13,6 +19,18 @@
     "timestamp": { "type": "string", "format": "date-time" },
     "warnings": { "type": "array", "items": { "type": "string" } },
     "errors": { "type": "array", "items": { "type": "string" } },
+    "source_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "source"],
+        "properties": {
+          "field": { "type": "string" },
+          "source": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    },
     "vi_current": { "type": ["number", "null"] },
     "vi_peak": { "type": ["number", "null"] },
     "vi_drop_pct": { "type": ["number", "null"] },

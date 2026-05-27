@@ -3,8 +3,16 @@
   "$id": "action-plan.schema.json",
   "title": "Recovery Action Plan",
   "type": "object",
-  "required": ["status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors", "current_phase", "actions"],
+  "required": ["schema_version", "run_id", "data_quality", "confidence", "providers_used", "missing_capabilities", "requires_human_approval", "implementation_status", "status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors", "current_phase", "actions"],
   "properties": {
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "run_id": { "type": "string", "pattern": "^\\d{8}-\\d{6}-[a-z0-9]+$" },
+    "data_quality": { "type": "string", "enum": ["good", "partial", "poor"] },
+    "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+    "providers_used": { "type": "array", "items": { "type": "string" } },
+    "missing_capabilities": { "type": "array", "items": { "type": "string" } },
+    "requires_human_approval": { "type": "boolean", "const": true },
+    "implementation_status": { "type": "string", "enum": ["proposed"] },
     "status": { "type": "string", "enum": ["complete", "partial", "failed"] },
     "input_domain": { "type": "string" },
     "domain": { "type": "string" },
@@ -43,7 +51,8 @@
           "affected_urls": { "type": "integer" },
           "inlinks_recovered": { "type": "integer" },
           "source_issue": { "type": "string" },
-          "batch_limit": { "type": "string" }
+          "batch_limit": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } }
         }
       }
     },

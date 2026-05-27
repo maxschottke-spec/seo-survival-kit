@@ -4,8 +4,14 @@
   "title": "Recovery Monitor History Entry",
   "description": "One line in history.ndjson. Each line is an independent JSON object.",
   "type": "object",
-  "required": ["status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors", "score", "phase"],
+  "required": ["schema_version", "run_id", "data_quality", "confidence", "providers_used", "missing_capabilities", "status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors", "score", "phase"],
   "properties": {
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "run_id": { "type": "string", "pattern": "^\\d{8}-\\d{6}-[a-z0-9]+$" },
+    "data_quality": { "type": "string", "enum": ["good", "partial", "poor"] },
+    "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+    "providers_used": { "type": "array", "items": { "type": "string" } },
+    "missing_capabilities": { "type": "array", "items": { "type": "string" } },
     "status": { "type": "string", "enum": ["complete", "partial", "failed"] },
     "input_domain": { "type": "string" },
     "domain": { "type": "string" },
@@ -16,12 +22,23 @@
     "errors": { "type": "array", "items": { "type": "string" } },
     "vi": { "type": ["number", "null"] },
     "vi_delta_pct": { "type": ["number", "null"] },
-    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
     "phase": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
     "keywords_t10": { "type": ["integer", "null"] },
     "keywords_t10_delta": { "type": ["integer", "null"] },
     "top_losers_recovered": { "type": ["integer", "null"] },
     "issues_open": { "type": ["integer", "null"] },
-    "issues_fixed": { "type": ["integer", "null"] }
+    "issues_fixed": { "type": ["integer", "null"] },
+    "issue_data_fresh": { "type": "boolean" },
+    "component_scores": {
+      "type": "object",
+      "properties": {
+        "vi_trend_score": { "type": ["number", "null"] },
+        "keyword_stability_score": { "type": ["number", "null"] },
+        "quick_win_score": { "type": ["number", "null"] },
+        "issue_reduction_score": { "type": ["number", "null"] },
+        "backlink_quality_score": { "type": ["number", "null"] }
+      }
+    }
   }
 }
