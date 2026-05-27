@@ -1,11 +1,14 @@
 'use strict';
 const path = require('node:path');
+const { parseArgs } = require('node:util');
+
 const {
   normalizeDomain,
   ensureDomainDir,
   acquireLock,
   releaseLock,
   atomicWriteJSON,
+  generateRunId,
 } = require('../lib/safe.js');
 
 const SEVERITY_MAP = {
@@ -17,6 +20,17 @@ const SEVERITY_MAP = {
   missing_meta_description: { default: 'low', upgrade: () => null },
   orphan_page: { default: 'medium', upgrade: () => null },
 };
+
+function parseCLI() {
+  const { values } = parseArgs({
+    options: {
+      domain: { type: 'string' },
+      'cache-dir': { type: 'string' },
+    },
+    strict: false,
+  });
+  return values;
+}
 
 function classifyIssues(rawIssues) {
   return rawIssues.map(issue => {
@@ -45,14 +59,17 @@ function buildSummary(issues) {
   return summary;
 }
 
-function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warnings, errors) {
+function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warnings, errors, options = {}) {
   const dir = ensureDomainDir(slug);
   const lock = acquireLock(dir, 'recovery-crawl');
   try {
     const issues = classifyIssues(rawIssues);
     const summary = buildSummary(issues);
     const status = errors.length > 0 ? 'failed' : warnings.length > 0 ? 'partial' : 'complete';
+    const dataQuality = options.localCrawlerUsed ? 'poor' : (options.crawlerProvider === 'manual_csv' ? 'partial' : 'good');
     const output = {
+      schema_version: '1.0.0',
+      run_id: options.runId || generateRunId(),
       status,
       input_domain: inputDomain,
       domain,
@@ -61,7 +78,16 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
       timestamp: new Date().toISOString(),
       warnings,
       errors,
-      crawled_urls: crawledUrls,
+      data_quality: dataQuality,
+      confidence: dataQuality === 'good' ? 'high' : dataQuality === 'partial' ? 'medium' : 'low',
+      providers_used: options.providersUsed || [],
+      missing_capabilities: options.missingCapabilities || [],
+      crawl_limit: options.crawlLimit || 500,
+      crawled_internal_html_urls: crawledUrls,
+      exported_rows_total: options.exportedRowsTotal || crawledUrls,
+      raw_exports_used: options.rawExportsUsed || [],
+      crawler_provider: options.crawlerProvider || 'unknown',
+      local_crawler_used: options.localCrawlerUsed || false,
       issues,
       summary,
     };
@@ -72,4 +98,23 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
   }
 }
 
-module.exports = { classifyIssues, buildSummary, writeIssuesJSON, SEVERITY_MAP };
+if (require.main === module) {
+  const args = parseCLI();
+  if (!args.domain) {
+    console.error('Usage: node recovery-crawl.js --domain <domain> [--cache-dir <path>]');
+    process.exit(2);
+  }
+  try {
+    const { domain, slug } = normalizeDomain(args.domain);
+    // Read raw exports from cache dir
+    const cacheDir = args['cache-dir'] || ensureDomainDir(slug);
+    // This CLI entry point expects raw data to already be in crawl/raw/ or imports/crawl/
+    console.log(JSON.stringify({ domain, slug, cacheDir, message: 'Ready for crawl data processing' }));
+    process.exit(0);
+  } catch (e) {
+    console.error(e.message);
+    process.exit(e.message.includes('Lock') ? 3 : 1);
+  }
+}
+
+module.exports = { classifyIssues, buildSummary, writeIssuesJSON, SEVERITY_MAP, parseCLI };
