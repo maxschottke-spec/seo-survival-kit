@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "history.schema.json",
+  "title": "Recovery Monitor History Entry",
+  "description": "One line in history.ndjson. Each line is an independent JSON object.",
+  "type": "object",
+  "required": ["status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors", "score", "phase"],
+  "properties": {
+    "status": { "type": "string", "enum": ["complete", "partial", "failed"] },
+    "input_domain": { "type": "string" },
+    "domain": { "type": "string" },
+    "canonical_domain": { "type": ["string", "null"] },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "vi": { "type": ["number", "null"] },
+    "vi_delta_pct": { "type": ["number", "null"] },
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "phase": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
+    "keywords_t10": { "type": ["integer", "null"] },
+    "keywords_t10_delta": { "type": ["integer", "null"] },
+    "top_losers_recovered": { "type": ["integer", "null"] },
+    "issues_open": { "type": ["integer", "null"] },
+    "issues_fixed": { "type": ["integer", "null"] }
+  }
+}

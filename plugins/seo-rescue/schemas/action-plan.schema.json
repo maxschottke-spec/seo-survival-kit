@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "action-plan.schema.json",
+  "title": "Recovery Action Plan",
+  "type": "object",
+  "required": ["status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors", "current_phase", "actions"],
+  "properties": {
+    "status": { "type": "string", "enum": ["complete", "partial", "failed"] },
+    "input_domain": { "type": "string" },
+    "domain": { "type": "string" },
+    "canonical_domain": { "type": ["string", "null"] },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "current_phase": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
+    "next_phase_criteria": { "type": "string" },
+    "do_not_touch": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["keyword", "position", "reason"],
+        "properties": {
+          "keyword": { "type": "string" },
+          "position": { "type": "integer" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["priority", "timeline", "action", "type", "risk", "impact", "effort"],
+        "properties": {
+          "priority": { "type": "integer", "minimum": 1 },
+          "timeline": { "type": "string" },
+          "action": { "type": "string" },
+          "type": { "type": "string" },
+          "risk": { "type": "string", "enum": ["green", "yellow", "red", "black"] },
+          "impact": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+          "effort": { "type": "string", "enum": ["low", "medium", "high"] },
+          "affected_urls": { "type": "integer" },
+          "inlinks_recovered": { "type": "integer" },
+          "source_issue": { "type": "string" },
+          "batch_limit": { "type": "string" }
+        }
+      }
+    },
+    "expected_impact": {
+      "type": "object",
+      "properties": {
+        "vi_recovery_pct": { "type": "string" },
+        "timeline_weeks": { "type": "string" },
+        "confidence": { "type": "string", "enum": ["high", "medium", "low"] }
+      }
+    }
+  }
+}

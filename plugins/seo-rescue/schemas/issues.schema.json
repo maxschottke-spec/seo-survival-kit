@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "issues.schema.json",
+  "title": "Recovery Crawl Issues",
+  "type": "object",
+  "required": ["status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors", "crawled_urls", "issues", "summary"],
+  "properties": {
+    "status": { "type": "string", "enum": ["complete", "partial", "failed"] },
+    "input_domain": { "type": "string" },
+    "domain": { "type": "string" },
+    "canonical_domain": { "type": ["string", "null"] },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "crawled_urls": { "type": "integer", "minimum": 0 },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "severity", "count"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["broken_internal_link", "redirect_chain", "non_indexable_canonical", "missing_h1", "duplicate_h1", "missing_meta_description", "orphan_page"]
+          },
+          "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+          "count": { "type": "integer", "minimum": 0 },
+          "affected_urls": { "type": ["integer", "array"] },
+          "details": { "type": "array" }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["critical", "high", "medium", "low", "total_issues"],
+      "properties": {
+        "critical": { "type": "integer" },
+        "high": { "type": "integer" },
+        "medium": { "type": "integer" },
+        "low": { "type": "integer" },
+        "total_issues": { "type": "integer" }
+      }
+    }
+  }
+}

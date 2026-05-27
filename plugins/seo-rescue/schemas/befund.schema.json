@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "befund.schema.json",
+  "title": "Recovery Diagnose Befund",
+  "type": "object",
+  "required": ["status", "input_domain", "domain", "canonical_domain", "slug", "timestamp", "warnings", "errors"],
+  "properties": {
+    "status": { "type": "string", "enum": ["complete", "partial", "failed"] },
+    "input_domain": { "type": "string" },
+    "domain": { "type": "string" },
+    "canonical_domain": { "type": ["string", "null"] },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "vi_current": { "type": ["number", "null"] },
+    "vi_peak": { "type": ["number", "null"] },
+    "vi_drop_pct": { "type": ["number", "null"] },
+    "vi_trend_4w_pct": { "type": ["number", "null"] },
+    "vi_trend_12w_pct": { "type": ["number", "null"] },
+    "core_update_correlation": { "type": "string", "enum": ["high", "medium", "low", "none"] },
+    "core_update_name": { "type": ["string", "null"] },
+    "keywords_total": { "type": ["integer", "null"] },
+    "position_distribution": {
+      "type": ["object", "null"],
+      "properties": {
+        "t3": { "type": "integer" },
+        "t10": { "type": "integer" },
+        "t20": { "type": "integer" },
+        "t50": { "type": "integer" },
+        "t100": { "type": "integer" }
+      }
+    },
+    "quick_wins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["keyword", "position", "volume"],
+        "properties": {
+          "keyword": { "type": "string" },
+          "position": { "type": "integer" },
+          "volume": { "type": "integer" },
+          "intent": { "type": "string" }
+        }
+      }
+    },
+    "top_losers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["keyword", "position_before", "position_after", "volume"],
+        "properties": {
+          "keyword": { "type": "string" },
+          "position_before": { "type": "integer" },
+          "position_after": { "type": "integer" },
+          "volume": { "type": "integer" }
+        }
+      }
+    },
+    "backlink_profile": {
+      "type": ["object", "null"],
+      "properties": {
+        "referring_domains": { "type": "integer" },
+        "total_backlinks": { "type": "integer" },
+        "dofollow_pct": { "type": "number" },
+        "nofollow_pct": { "type": "number" },
+        "spam_score": { "type": "number" },
+        "broken_backlinks": { "type": "integer" }
+      }
+    },
+    "diagnosis": { "type": "string", "enum": ["core-update", "technical", "content", "mixed", "healthy"] },
+    "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+    "recovery_stage_estimate": { "type": ["string", "null"], "enum": ["R1", "R2", "R3", "R4", "R5", null] },
+    "summary_de": { "type": "string" }
+  }
+}
