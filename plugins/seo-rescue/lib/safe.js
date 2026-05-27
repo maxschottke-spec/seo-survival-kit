@@ -138,6 +138,39 @@ function writeFileExclusive(p, data) {
   try { fs.writeFileSync(fd, data); } finally { fs.closeSync(fd); }
 }
 
+// Normalizes domain input for recovery commands. Accepts bare hostnames, URLs
+// with http/https, and paths/queries (stripped). www. is NOT stripped —
+// www.example.com and example.com are treated as distinct domains.
+// Returns { input_domain, domain, canonical_domain, slug }.
+function normalizeDomain(input) {
+  if (typeof input !== 'string' || input.trim() === '') {
+    throw new Error('normalizeDomain: input must be a non-empty string');
+  }
+  const raw = input.trim();
+  let hostname;
+  if (/^https?:\/\//i.test(raw)) {
+    let u;
+    try { u = new URL(raw); } catch {
+      throw new Error(`normalizeDomain: failed to parse URL: ${JSON.stringify(raw)}`);
+    }
+    hostname = u.hostname;
+  } else {
+    hostname = raw.split('/')[0].split('?')[0].split('#')[0];
+  }
+  hostname = hostname.toLowerCase().replace(/\.$/, '');
+  if (!HOSTNAME_RE.test(hostname)) {
+    throw new Error(`normalizeDomain: invalid hostname: ${JSON.stringify(hostname)}`);
+  }
+  const slug = hostname.replace(/\./g, '-');
+  safeSlug(slug);
+  return {
+    input_domain: raw,
+    domain: hostname,
+    canonical_domain: null,
+    slug,
+  };
+}
+
 module.exports = {
   safeSlug,
   safeHostname,
@@ -149,4 +182,5 @@ module.exports = {
   writeFileExclusive,
   getCacheDir,
   cachePath,
+  normalizeDomain,
 };
