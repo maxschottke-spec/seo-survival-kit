@@ -8,6 +8,53 @@ Automatische Diagnose einer Domain: Core-Update-Betroffenheit pruefen, VI-Drop q
 
 `/seo-rescue:recovery-diagnose <domain>`
 
+## Input-Kontrakt
+
+| Feld | Quelle | Pflicht |
+|------|--------|---------|
+| `domain` | CLI-Argument | ja |
+
+Normalisierung gemaess Schritt 1 des Ablaufs. `www.` wird NICHT entfernt.
+
+## Capabilities
+
+| Capability | Pflicht/Optional | Verwendung |
+|-----------|-----------------|-----------|
+| `visibility_history` | optional | VI-Trend berechnen, Core-Update-Korrelation |
+| `keyword_rankings` | optional | Quick-Wins, Top-Losers, Position-Distribution |
+| `backlink_summary` | optional | Backlink-Profil, Spam-Score |
+| `core_update_dates` | optional | Korrelation mit Drop-Timing |
+| `serp_snapshot` | optional | Intent-Klassifikation fuer Keywords |
+
+## Bevorzugte Provider
+
+- **visibility_history**: Sistrix MCP (`SISTRIX_API_KEY`)
+- **keyword_rankings**: DataForSEO MCP
+- **backlink_summary**: DataForSEO MCP (`backlinks/summary/live`)
+- **core_update_dates**: `../../references/CORE_UPDATES.md`
+- **serp_snapshot**: DataForSEO MCP (`serp/google/organic/live`)
+
+## Fallback-Provider
+
+### Paid Fallbacks (wenn Primaeranbieter nicht verfuegbar)
+
+| Capability | Paid Fallback |
+|-----------|--------------|
+| `visibility_history` | Semrush, Ahrefs, Xovi, Searchmetrics, SE Ranking (manueller CSV-Export) |
+| `keyword_rankings` | Semrush, Ahrefs, SE Ranking (manueller CSV-Export) |
+| `backlink_summary` | Ahrefs, Majestic, Moz (manueller Export) |
+
+### Free / Lokale Fallbacks
+
+| Capability | Free/Lokal Fallback |
+|-----------|-------------------|
+| `visibility_history` | GSC CSV-Export (Performance-Report, 16 Monate) |
+| `keyword_rankings` | Manuelle Keyword-CSV aus GSC oder eigener Tabelle |
+| `backlink_summary` | Manuelle Backlink-CSV aus Google Search Console (Links-Report) |
+| `core_update_dates` | `../../references/CORE_UPDATES.md` (kein Netzwerk noetig) |
+
+CSV-Importe werden unter `~/.cache/seo-rescue/{slug}/imports/` erwartet.
+
 ## Ablauf
 
 ### Schritt 1: Domain normalisieren
@@ -40,7 +87,17 @@ node -e "const { ensureDomainDir } = require('./plugins/seo-rescue/lib/safe.js')
 
 Ersetze `{slug}` durch den in Schritt 1 ermittelten Slug. Das Verzeichnis wird mit Modus 0700 angelegt (nur der aktuelle User hat Zugriff). Falls das Verzeichnis ein Symlink ist, Abbruch mit Status `failed`.
 
-### Schritt 3: Sistrix VI abrufen
+### Schritt 3: Run-ID generieren
+
+Generiere eine eindeutige Run-ID fuer diesen Lauf:
+
+```bash
+node -e "const { randomUUID } = require('crypto'); console.log('diag-' + randomUUID().slice(0,8) + '-' + Date.now())"
+```
+
+Speichere die Run-ID als `run_id`. Sie wird im Output-Schema mitgefuehrt.
+
+### Schritt 4: Sistrix VI abrufen
 
 Pruefe ob ein Sistrix API Key verfuegbar ist (Environment-Variable `SISTRIX_API_KEY` oder `.env`-Datei im Projekt-Root).
 
@@ -58,13 +115,18 @@ Rufe folgende Endpoints auf:
    - Berechne: `vi_trend_4w_pct` (Prozentaenderung letzte 4 Wochen)
    - Berechne: `vi_trend_12w_pct` (Prozentaenderung letzte 12 Wochen)
 
-**Falls Sistrix NICHT verfuegbar:**
+**Falls Sistrix NICHT verfuegbar — GSC-CSV-Fallback:**
 
-Warnung in `warnings` Array eintragen: `"Sistrix API nicht erreichbar — VI-Daten fehlen"`.
-Setze `vi_current`, `vi_peak`, `vi_drop_pct`, `vi_trend_4w_pct`, `vi_trend_12w_pct` auf `null`.
-Weiter mit Schritt 4.
+Pruefe ob `~/.cache/seo-rescue/{slug}/imports/gsc-performance.csv` existiert. Falls ja:
+- Leite VI-Proxy aus `clicks`-Spalte ab (kein echter VI, daher `vi_current = null`, aber `source_notes` eintragen)
+- Eintragen in `source_notes`: `"VI aus GSC-CSV approx (klick-basiert, kein echter Sistrix-VI)"`
 
-### Schritt 4: DataForSEO MCP — Keyword-Analyse
+Falls kein CSV-Import vorhanden:
+- Warnung in `warnings` Array eintragen: `"Sistrix API nicht erreichbar — VI-Daten fehlen, kein Import-Fallback gefunden"`
+- Setze `vi_current`, `vi_peak`, `vi_drop_pct`, `vi_trend_4w_pct`, `vi_trend_12w_pct` auf `null`
+- Weiter mit Schritt 5.
+
+### Schritt 5: DataForSEO MCP — Keyword-Analyse
 
 Rufe ueber DataForSEO MCP auf.
 
@@ -93,16 +155,24 @@ Rufe ueber DataForSEO MCP auf.
   - `intent`: falls vorhanden aus DataForSEO-Daten, sonst `"unknown"`
 - `top_losers` — falls DataForSEO historische Positions-Daten liefert: Keywords mit groesstem negativem Positions-Delta (position nach minus position vorher, aufsteigend sortiert = groesste Verluste zuerst), maximal 10 Eintraege. Falls keine historischen Daten: leeres Array.
 
-**Falls DataForSEO MCP nicht verfuegbar:**
+**Falls DataForSEO MCP nicht verfuegbar — CSV-Fallback:**
 
-Fehler in `errors` Array eintragen: `"DataForSEO MCP nicht verfuegbar — Keyword-Diagnose nicht moeglich"`.
-Diagnose kann ohne Keyword-Daten nicht erstellt werden. Status = `failed`, Abbruch.
+Pruefe ob `~/.cache/seo-rescue/{slug}/imports/keywords.csv` existiert. Falls ja:
+- Lade Keyword-Daten aus CSV (erwartete Spalten: `keyword`, `position`, `volume`)
+- Eintragen in `source_notes`: `"Keyword-Daten aus manueller CSV, kein DataForSEO-Live-Abruf"`
+- Status = `partial` (nicht `failed`)
+
+Falls kein CSV-Import vorhanden:
+- Warnung in `warnings` Array eintragen: `"DataForSEO MCP nicht verfuegbar — Keyword-Daten fehlen"`
+- `keywords_total`, `position_distribution`, `quick_wins`, `top_losers` auf `null` bzw. leere Arrays setzen
+- Status wird spaeter auf `partial` gesetzt (nicht `failed` — Diagnose kann mit reinen VI-Daten fortgesetzt werden)
+- Weiter mit Schritt 6.
 
 **Falls Endpoint leere Daten liefert:**
 
-Warnung eintragen. Felder auf `null` bzw. leere Arrays setzen. Weiter mit Schritt 5.
+Warnung eintragen. Felder auf `null` bzw. leere Arrays setzen. Weiter mit Schritt 6.
 
-### Schritt 5: DataForSEO MCP — Backlink-Profil
+### Schritt 6: DataForSEO MCP — Backlink-Profil
 
 **Endpoint:** `backlinks/summary/live`
 
@@ -115,12 +185,12 @@ Warnung eintragen. Felder auf `null` bzw. leere Arrays setzen. Weiter mit Schrit
 
 ```json
 {
-  "referring_domains": <integer>,
-  "total_backlinks": <integer>,
-  "dofollow_pct": <number 0-100>,
-  "nofollow_pct": <number 0-100>,
-  "spam_score": <number 0-100>,
-  "broken_backlinks": <integer>
+  "referring_domains": "<integer>",
+  "total_backlinks": "<integer>",
+  "dofollow_pct": "<number 0-100>",
+  "nofollow_pct": "<number 0-100>",
+  "spam_score": "<number 0-100>",
+  "broken_backlinks": "<integer>"
 }
 ```
 
@@ -128,11 +198,18 @@ Berechne `dofollow_pct` und `nofollow_pct` falls nicht direkt geliefert:
 - `dofollow_pct = (dofollow_count / total_backlinks) * 100`
 - `nofollow_pct = (nofollow_count / total_backlinks) * 100`
 
-**Falls Endpoint nicht verfuegbar oder leere Daten:**
+Hinweis: Die Beispielwerte im Output-Schema (`dofollow_pct: 42`, `nofollow_pct: 58`) sind illustrativ und nicht normativ — die tatsaechlichen Werte kommen aus dem API-Aufruf.
 
-Warnung eintragen. `backlink_profile` auf `null` setzen. Weiter mit Schritt 6.
+**Falls Endpoint nicht verfuegbar — CSV-Fallback:**
 
-### Schritt 6: DataForSEO MCP — Domain-Autoritaet
+Pruefe ob `~/.cache/seo-rescue/{slug}/imports/backlinks.csv` existiert. Falls ja:
+- Lade Backlink-Daten aus CSV
+- Eintragen in `source_notes`: `"Backlink-Daten aus manueller CSV (z.B. GSC Links-Report)"`
+
+Falls kein CSV-Import vorhanden:
+- Warnung eintragen. `backlink_profile` auf `null` setzen. Weiter mit Schritt 7.
+
+### Schritt 7: DataForSEO MCP — Domain-Autoritaet
 
 **Endpoint:** `domain_rank_overview/live`
 
@@ -143,11 +220,17 @@ Warnung eintragen. `backlink_profile` auf `null` setzen. Weiter mit Schritt 6.
 
 Extrahiere `domain_rank` (falls vorhanden) und ergaenze damit die `backlink_profile`-Sektion oder fuege es als separates Feld hinzu. Falls der Endpoint nicht verfuegbar ist: Warnung, weiter ohne Domain-Rank.
 
-### Schritt 7: Core-Update-Korrelation
+### Schritt 8: Core-Update-Korrelation
 
 Lies `../../references/CORE_UPDATES.md` fuer die Datumsliste bekannter Google Core Updates.
 
-**Korrelations-Logik:**
+**Aktualitaetspruefung:**
+
+Pruefe das Datei-Aenderungsdatum von `CORE_UPDATES.md`. Falls aelter als 90 Tage:
+- Eintragen in `warnings`: `"CORE_UPDATES.md ist aelter als 90 Tage — Core-Update-Korrelation maximal 'low' oder 'unknown'"`
+- Setze `core_update_correlation` auf maximal `"low"` (kein `"medium"` oder `"high"` bei veraltetem Referenz-File)
+
+**Korrelations-Logik (nur wenn CORE_UPDATES.md aktuell):**
 
 Bestimme den Zeitpunkt des groessten VI-Drops (falls VI-Daten vorhanden). Pruefe fuer jedes bekannte Core Update:
 
@@ -158,11 +241,11 @@ Bestimme den Zeitpunkt des groessten VI-Drops (falls VI-Daten vorhanden). Pruefe
 
 **Falls keine VI-Daten verfuegbar (Sistrix fehlt):**
 
-Setze `core_update_correlation = "none"` und `core_update_name = null`. Warnung eintragen.
+Setze `core_update_correlation = "unknown"` und `core_update_name = null`. Warnung eintragen.
 
 **Nimm das am staerksten korrelierende Update** (hoechste Korrelation, bei Gleichstand das juengste). Setze `core_update_name` entsprechend.
 
-### Schritt 8: Diagnosis-Klassifikation
+### Schritt 9: Diagnosis-Klassifikation
 
 Bestimme `diagnosis` und `severity` basierend auf allen gesammelten Daten.
 
@@ -208,7 +291,7 @@ Schreibe 2–4 Saetze auf Deutsch, die die wichtigsten Befund-Punkte zusammenfas
 - Wichtigste Keyword-Beobachtung
 - Naechste empfohlene Massnahme
 
-### Schritt 9: Befund schreiben
+### Schritt 10: Befund schreiben
 
 Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.json`.
 
@@ -216,7 +299,13 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
 
 ```json
 {
-  "status": "complete" | "partial" | "failed",
+  "schema_version": "2.0",
+  "run_id": "<diag-xxxxxxxx-timestamp>",
+  "status": "complete | partial | failed",
+  "data_quality": "good | partial | poor",
+  "confidence": "high | medium | low | none",
+  "providers_used": ["sistrix", "dataforseo", "core_updates_md"],
+  "missing_capabilities": ["keyword_rankings"],
   "input_domain": "<original user input>",
   "domain": "<normalisierte domain>",
   "canonical_domain": null,
@@ -224,30 +313,59 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
   "timestamp": "<ISO-8601-datetime>",
   "warnings": [],
   "errors": [],
-  "vi_current": <number|null>,
-  "vi_peak": <number|null>,
-  "vi_drop_pct": <number|null>,
-  "vi_trend_4w_pct": <number|null>,
-  "vi_trend_12w_pct": <number|null>,
-  "core_update_correlation": "high" | "medium" | "low" | "none",
+  "source_notes": [],
+  "vi_current": "<number|null>",
+  "vi_peak": "<number|null>",
+  "vi_drop_pct": "<number|null>",
+  "vi_trend_4w_pct": "<number|null>",
+  "vi_trend_12w_pct": "<number|null>",
+  "core_update_correlation": "high | medium | low | none | unknown",
   "core_update_name": "<string|null>",
-  "keywords_total": <integer|null>,
-  "position_distribution": { "t3": int, "t10": int, "t20": int, "t50": int, "t100": int } | null,
-  "quick_wins": [...],
-  "top_losers": [...],
-  "backlink_profile": { ... } | null,
-  "diagnosis": "core-update" | "technical" | "content" | "mixed" | "healthy",
-  "severity": "critical" | "high" | "medium" | "low",
-  "recovery_stage_estimate": "R1" | "R2" | "R3" | "R4" | "R5" | null,
+  "keywords_total": "<integer|null>",
+  "position_distribution": { "t3": 0, "t10": 0, "t20": 0, "t50": 0, "t100": 0 },
+  "quick_wins": [],
+  "top_losers": [],
+  "backlink_profile": {
+    "referring_domains": 320,
+    "total_backlinks": 1840,
+    "dofollow_pct": 42,
+    "nofollow_pct": 58,
+    "spam_score": 12,
+    "broken_backlinks": 14
+  },
+  "diagnosis": "core-update | technical | content | mixed | healthy",
+  "severity": "critical | high | medium | low",
+  "recovery_stage_estimate": "R1 | R2 | R3 | R4 | R5 | null",
   "summary_de": "<deutschsprachige Zusammenfassung>"
 }
 ```
 
+Hinweis: `backlink_profile`-Beispielwerte sind illustrativ. Tatsaechliche Werte kommen aus dem API-Aufruf oder CSV-Import.
+
 **Status-Regeln:**
 
 - `"complete"` — alle Kernfelder befuellt (Sistrix + DataForSEO vorhanden)
-- `"partial"` — mindestens Keyword-Daten vorhanden, aber ein oder mehrere optionale Datenquellen fehlen (z.B. Sistrix)
-- `"failed"` — DataForSEO MCP nicht verfuegbar oder Domain nicht aufloesbar; Abbruch, kein Befund
+- `"partial"` — mindestens eine Datenquelle verfuegbar (z.B. nur VI, nur Keywords, oder nur CSV-Imports); Diagnose eingeschraenkt moeglich
+- `"failed"` — KEINE Datenquelle verfuegbar (weder Sistrix noch DataForSEO MCP noch CSV-Imports); Abbruch
+
+Hinweis: DataForSEO MCP nicht verfuegbar fuehrt zu `"partial"` (nicht `"failed"`), wenn GSC-CSV oder andere Imports vorhanden sind. Erst wenn gaenzlich keine alternative Datenquelle existiert, ist der Status `"failed"`.
+
+**Data-Quality-Regeln:**
+
+| Wert | Bedingung |
+|------|-----------|
+| `"good"` | Alle Capabilities frisch und vollstaendig befuellt (Sistrix + DataForSEO live) |
+| `"partial"` | Mindestens eine Capability fehlt oder kommt aus CSV-Fallback |
+| `"poor"` | Nur Free/Lokal-Daten (GSC-CSV oder manuelle CSVs); keine Live-API-Daten |
+
+**Confidence-Regeln:**
+
+| Wert | Bedingung |
+|------|-----------|
+| `"high"` | `data_quality = "good"` und Diagnosis eindeutig |
+| `"medium"` | `data_quality = "partial"` oder Diagnosis ambivalent |
+| `"low"` | `data_quality = "poor"` oder widersprueche zwischen Datenquellen |
+| `"none"` | Keine verwertbaren Daten |
 
 **Atomares Schreiben via `safe.js`:**
 
@@ -271,15 +389,42 @@ Ersetze `{slug}` durch den ermittelten Slug und `BEFUND_OBJECT` durch das vollst
 
 `~/.cache/seo-rescue/{slug}/befund.json`
 
+## Output-Schema
+
+```json
+{
+  "schema_version": "2.0",
+  "run_id": "diag-a1b2c3d4-1716820000000",
+  "status": "partial",
+  "data_quality": "partial",
+  "confidence": "medium",
+  "providers_used": ["sistrix"],
+  "missing_capabilities": ["keyword_rankings", "backlink_summary"],
+  "source_notes": ["VI aus Sistrix live", "Keyword-Daten fehlen — DataForSEO MCP nicht erreichbar, kein CSV-Import gefunden"],
+  "domain": "example.com",
+  "vi_current": 0.108,
+  "vi_peak": 0.215,
+  "vi_drop_pct": -49.8,
+  "core_update_correlation": "high",
+  "core_update_name": "March 2024 Core Update",
+  "diagnosis": "core-update",
+  "severity": "critical",
+  "recovery_stage_estimate": "R2",
+  "summary_de": "Die Domain verzeichnete einen VI-Drop von 49.8% korrelierend mit dem March 2024 Core Update. ..."
+}
+```
+
 ## Ausgabe an den User
 
 Nach erfolgreichem Schreiben des Befunds, gib folgende Informationen aus:
 
 1. **Status-Zeile:** `[recovery-diagnose] {domain} — Status: {status} | Severity: {severity} | Diagnose: {diagnosis}`
-2. **VI-Summary** (falls verfuegbar): `VI: {vi_current} (Peak: {vi_peak}, Drop: {vi_drop_pct}%)`
-3. **Core-Update-Korrelation:** `Core Update: {core_update_name} ({core_update_correlation})`
-4. **Keywords:** `Rankende Keywords: {keywords_total} | Quick Wins: {quick_wins.length}`
-5. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
+2. **Datenqualitaet:** `Datenqualitaet: {data_quality} | Confidence: {confidence}`
+3. **VI-Summary** (falls verfuegbar): `VI: {vi_current} (Peak: {vi_peak}, Drop: {vi_drop_pct}%)`
+4. **Core-Update-Korrelation:** `Core Update: {core_update_name} ({core_update_correlation})`
+5. **Keywords:** `Rankende Keywords: {keywords_total} | Quick Wins: {quick_wins.length}`
+6. **Fehlende Capabilities** (falls vorhanden): `Fehlende Daten: {missing_capabilities.join(', ')}`
+7. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
    - `core-update` → `/seo-rescue:post-core-update-recovery`
    - `technical` → `/seo-rescue:seo-audit-free`
    - `content` → `/seo-rescue:recovery-plan`
@@ -290,13 +435,17 @@ Nach erfolgreichem Schreiben des Befunds, gib folgende Informationen aus:
 
 | Fehler | Verhalten | Status |
 |--------|-----------|--------|
-| Sistrix API nicht erreichbar | Warnung eintragen, weiter ohne VI-Daten. `vi_current/vi_peak/vi_drop_pct` = `null`. | `partial` |
-| DataForSEO MCP nicht verfuegbar | Fehler eintragen, Diagnose nicht moeglich. Abbruch. | `failed` |
+| Sistrix API nicht erreichbar, kein CSV-Import | Warnung eintragen, weiter ohne VI-Daten. `vi_current/vi_peak/vi_drop_pct` = `null`. | `partial` |
+| Sistrix API nicht erreichbar, GSC-CSV vorhanden | Warnung + source_note eintragen, weiter mit CSV-Proxy. | `partial` |
+| DataForSEO MCP nicht verfuegbar, kein CSV-Import | Warnung eintragen. Keyword-Felder = `null`. Diagnose eingeschraenkt. | `partial` |
+| DataForSEO MCP nicht verfuegbar, keywords.csv vorhanden | Warnung + source_note, weiter mit CSV. | `partial` |
+| ALLE Datenquellen nicht verfuegbar (keine API, kein CSV) | Fehler eintragen, Abbruch. | `failed` |
 | DataForSEO Endpoint liefert leere Daten | Warnung eintragen, betroffenes Feld = `null` oder leeres Array. | `partial` |
 | Domain nicht aufloesbar oder leerer Input | Fehler eintragen, Abbruch. | `failed` |
 | `safeSlug()` schlaegt fehl (ungueltige Zeichen) | Fehler eintragen, Abbruch. Hinweis an User: Domain-Format ueberpruefen. | `failed` |
 | Lock nicht erwerbbar (Timeout 30s) | Fehler eintragen, Abbruch. Hinweis: anderer Command laeuft moeglicherweise fuer diese Domain. | `failed` |
 | Befund-Datei existiert bereits | Ueberschreiben via `atomicWriteJSON` ist immer erlaubt (idempotent). | — |
+| CORE_UPDATES.md aelter als 90 Tage | Warnung, core_update_correlation maximal "low". | `partial` |
 
 ## Validierungsregeln
 
@@ -309,8 +458,33 @@ Pruefe vor dem Schreiben:
 - `severity` muss exakt einer der Werte sein: `critical | high | medium | low`
 - `slug` muss dem Pattern `^[a-z0-9][a-z0-9_-]{0,63}$` entsprechen
 - `timestamp` muss ein gueltiges ISO-8601-Datum mit Uhrzeit sein
+- `schema_version` muss `"2.0"` sein
+- `run_id` muss gesetzt und non-empty sein
+- `data_quality` muss exakt einer sein von: `good | partial | poor`
+- `confidence` muss exakt einer sein von: `high | medium | low | none`
+- `providers_used` muss ein Array sein (darf leer sein wenn status = failed)
+- `missing_capabilities` muss ein Array sein
 
 Bei einem Validierungsfehler: Warnung eintragen und Wert auf den naechsten gueltigen Wert korrigieren (z.B. negative t3 auf 0 setzen) oder Abbruch wenn Korrektur nicht moeglich.
+
+## Graceful-Degradation-Regeln
+
+| Szenario | Verhalten |
+|---------|-----------|
+| Kein VI (Sistrix fehlt, kein CSV) | `vi_current/vi_peak/vi_drop_pct/vi_trend_*` = `null`; `data_quality` max `"partial"` |
+| Keine Keywords (DataForSEO fehlt, kein CSV) | `keywords_total = null`, `quick_wins = []`, `top_losers = []`; `data_quality` max `"partial"` |
+| Kein Backlink-Profil | `backlink_profile = null`; kein Abbruch |
+| Alle Capabilities fehlen | `status = "failed"`, `data_quality = "poor"`, `confidence = "none"` |
+| Nur GSC-CSV als Quelle | `data_quality = "poor"`, `confidence = "low"` |
+| CORE_UPDATES.md veraltet (> 90 Tage) | `core_update_correlation` max `"low"` oder `"unknown"` |
+
+## Datenqualitaetsregeln
+
+- `"good"`: VI aus Sistrix live + Keywords aus DataForSEO live + CORE_UPDATES.md aktuell
+- `"partial"`: Mindestens eine Capability kommt aus CSV-Fallback ODER eine Capability fehlt vollstaendig
+- `"poor"`: Nur Free/Lokal-Daten (keine Live-API-Daten); alle Recommendations mit entsprechendem Vorbehalt versehen
+
+Bei `data_quality = "poor"`: Keine aggressiven Empfehlungen. Jede Handlungsempfehlung muss explizit auf die eingeschraenkte Datenlage hinweisen.
 
 ## Referenzen
 
