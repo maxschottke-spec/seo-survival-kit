@@ -126,7 +126,7 @@ Scope:
 - Updater validation in CI
 - Privacy scan in CI
 - 5+ entries in each LESSONS.md
-- At least one external contributor PR merged besides security collaborator
+- At least one external contributor PR landed (reviewed; merged at maintainer discretion) besides security collaborator
 - DE hardcoding (`location_code: 2276`) lifted to user-configurable
 
 ## Post-v1.0 (hypothesis only)
