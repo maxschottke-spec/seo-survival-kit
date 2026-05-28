@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SEO Change Budget",
+  "description": "Pre-execution change plan with risk budget tracking. v1.1.0 adds Shopware/DreiscSeo pre-check requirements and DACH medical compliance.",
+  "type": "object",
+  "required": ["schema_version", "mode", "change_budget", "planned_changes", "total_risk_points", "budget_remaining", "stop_required"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.1.0" },
+    "run_id": { "type": "string" },
+    "domain": { "type": "string" },
+    "mode": {
+      "type": "string",
+      "enum": ["audit_only", "micro_fix", "low_risk_fix", "controlled_recovery", "emergency_rollback", "high_risk_requires_approval"]
+    },
+    "change_budget": { "type": "integer", "minimum": 0 },
+    "planned_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "change_category", "target", "description", "risk_points_base", "risk_points_final", "data_sources", "confidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["redirect", "category_status", "product_status", "cms_slot", "internal_link", "anchor_text", "plugin_config", "canonical", "h1", "template", "cache", "other"]
+          },
+          "change_category": {
+            "type": "string",
+            "enum": ["structural", "repair_hygiene", "emergency_stabilization"],
+            "description": "Structural changes have 3-5 URL/day limits; repair_hygiene allows up to 10; emergency_stabilization up to 30 risk points"
+          },
+          "target": { "type": "string" },
+          "description": { "type": "string" },
+          "risk_points_base": { "type": "integer", "minimum": 0 },
+          "multipliers": { "type": "array", "items": { "type": "string" } },
+          "risk_points_final": { "type": "integer", "minimum": 0 },
+          "data_sources": { "type": "array", "items": { "type": "string" } },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "rollback_method": { "type": "string" },
+          "requires_explicit_approval": { "type": "boolean" },
+          "requires_pre_check_for_duplicate_foreignkey_in_channel": {
+            "type": "boolean",
+            "description": "Mandatory true for all seo-url PATCH/POST operations"
+          },
+          "seo_url_precheck": {
+            "type": "object",
+            "properties": {
+              "foreignKey": { "type": "string" },
+              "routeName": { "type": "string" },
+              "salesChannelId": { "type": "string" },
+              "languageId": { "type": "string" },
+              "active_non_deleted_entries": { "type": "integer" },
+              "collision_detected": { "type": "boolean" }
+            }
+          },
+          "requires_dreiscseo_redirect_precheck": {
+            "type": "boolean",
+            "description": "Mandatory true for category/product deactivations"
+          },
+          "dreiscseo_precheck": {
+            "type": "object",
+            "properties": {
+              "redirects_from_url": { "type": "array" },
+              "redirects_to_url": { "type": "array" },
+              "would_create_301_to_404": { "type": "boolean" },
+              "affected_redirect_ids": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "requires_cms_slot_snapshot": {
+            "type": "boolean",
+            "description": "Mandatory true for cms-slot PATCH operations"
+          },
+          "snapshot_paths": {
+            "type": "object",
+            "properties": {
+              "before_path": { "type": "string" },
+              "after_path": { "type": "string" }
+            }
+          },
+          "compliance_review": {
+            "type": "string",
+            "enum": ["none", "recommended", "required"]
+          },
+          "medical_terms_detected": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "term": { "type": "string" },
+                "risk_tier": { "type": "string", "enum": ["high", "medium", "low"] },
+                "target_substantiates": { "type": ["boolean", "string"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "total_risk_points": { "type": "integer", "minimum": 0 },
+    "budget_remaining": { "type": "integer" },
+    "stop_required": { "type": "boolean" },
+    "stop_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": [
+          "broad_batch_approval_invalid",
+          "budget_exceeded",
+          "more_than_5_urls_without_batch_plan",
+          "more_than_3_links_per_blog_post",
+          "shopware_seo_url_foreignkey_collision",
+          "dreiscseo_precheck_missing",
+          "dreiscseo_would_create_301_to_404",
+          "cms_slot_snapshot_missing",
+          "medical_term_high_risk_unsubstantiated",
+          "live_test_404_after_change",
+          "redirect_chain_to_404"
+        ]
+      }
+    },
+    "requires_explicit_approval": { "type": "boolean" },
+    "approval_phrase_required": { "type": "boolean" },
+    "approval_validation": {
+      "type": "object",
+      "properties": {
+        "approval_text": { "type": "string" },
+        "is_valid": { "type": "boolean" },
+        "matched_elements": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["number", "type", "risk_points", "urls", "plan_reference", "permission"]
+          }
+        },
+        "missing_elements": { "type": "array", "items": { "type": "string" } },
+        "reason": { "type": "string" }
+      }
+    },
+    "post_change_checks": { "type": "array", "items": { "type": "string" } }
+  }
+}
