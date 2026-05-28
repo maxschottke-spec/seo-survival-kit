@@ -72,7 +72,7 @@ Service-account auth requires the service-account email to be **added as a User*
 
 ## 4. Token race during parallel fetchers
 
-When multiple parallel calls trigger an OAuth refresh, Google rotates the first refresh response and invalidates subsequent racing calls. The Verapur recovery pipeline solves this by maintaining a module-global token cache with an in-flight refresh promise that subsequent callers await rather than triggering their own refresh.
+When multiple parallel calls trigger an OAuth refresh, Google rotates the first refresh response and invalidates subsequent racing calls. The originating recovery case pipeline solves this by maintaining a module-global token cache with an in-flight refresh promise that subsequent callers await rather than triggering their own refresh.
 
 Pattern (pseudo-code):
 
