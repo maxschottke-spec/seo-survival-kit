@@ -1,3 +1,8 @@
+---
+description: "Automatic domain diagnosis: Core Update impact, VI drop, keyword losses, backlink profile."
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
+---
+
 # Recovery Diagnose
 
 ## Zweck

@@ -1,6 +1,6 @@
 # SEO Change Governor
 
-Claude must not execute unbounded live changes. Every session starts in `audit_only` mode with zero change budget. Updated with practice feedback from real Shopware recovery operations.
+Claude must not execute unbounded live changes. Every session starts in `audit_only` mode with zero change budget. Updated with practice feedback from real Shopware recovery operations and the Settlement Gate hard block.
 
 ## Modes
 
@@ -14,6 +14,36 @@ Claude must not execute unbounded live changes. Every session starts in `audit_o
 | `high_risk_requires_approval` | 0 | Plan only, no execution without explicit per-change approval |
 
 Default: `audit_only`. Mode escalation requires explicit user instruction naming the mode or budget.
+
+## Settlement Gate behavior
+
+When a Settlement Gate is active (`settlement_gate_active = true` — see `references/SEO_SETTLEMENT_GATE.md`), mode availability collapses to a hard subset:
+
+| Mode | Status during gate |
+|---|---|
+| `audit_only` | Allowed, 0 budget points |
+| `emergency_rollback` | Allowed, up to 30 points, stabilization only — no new optimization in same run |
+| `micro_fix` | **Blocked**, unless a verified Technical Emergency per SEO_SETTLEMENT_GATE.md section 7.A |
+| `low_risk_fix` | **Blocked** |
+| `controlled_recovery` | **Blocked** |
+| `structural_change` | **Blocked** |
+| `high_risk_requires_approval` | **Blocked** (plan-only is permitted in `audit_only`) |
+
+Stop reason `settlement_gate_active` must be emitted when a blocked mode is attempted.
+
+### Reserve bleibt Reserve
+
+**Unused change budget does not roll forward as permission for additional work.** A week in which 1 of 7 points was spent does not authorize 6 more points in the next week.
+
+The formal rule, mirrored verbatim from `SEO_SETTLEMENT_GATE.md` section 11:
+
+> Ungenutztes CG-Budget ist kein Umsetzungsauftrag. Es darf nicht spontan für weitere SEO-Änderungen verwendet werden. Jede zusätzliche Maßnahme braucht nach Gate-Ende einen neuen Change Plan, eigene Risikopunkte, Datenbasis, Rollback-Plan und explizite Freigabe.
+
+If the operator uses pressure phrases that imply unused budget is permission ("wir haben ja noch Budget übrig", "lass uns die Reserve nutzen", "noch schnell ein paar kleine Fixes", "falls Zeit"), Claude must respond:
+
+> **nicht ohne neuen Change Plan und explizite Freigabe**
+
+and stop. Stop reason: `unused_budget_is_not_permission`.
 
 ## Change Type Classification
 
@@ -195,6 +225,9 @@ Claude must immediately stop when:
 18. **NEW**: Category/product deactivation without `dreiscseo_precheck`
 19. **NEW**: CMS-Slot PATCH without before/after snapshot
 20. **NEW**: New High-Risk medical term being introduced as anchor without substantiation
+21. **NEW**: `settlement_gate_active = true` and attempted mode is not in `allowed_modes` (audit_only, emergency_rollback) without an Explicit Emergency Approval per `SEO_SETTLEMENT_GATE.md` section 7
+22. **NEW**: Attempt to spend unused budget as permission (the "Reserve bleibt Reserve" rule). Phrases like "Budget übrig", "Reserve nutzen", "noch schnell", "falls Zeit", "weitere kleine Fixes" trigger this stop
+23. **NEW**: Operator pressure phrases ("sollen wir noch optimieren?", "mach weiter", "warum sind Klicks niedrig?", "lass Titles ändern", "noch Links setzen", "alles fixen", "was kann ich noch machen?") arrive during an active Settlement Gate and no Technical Emergency / new data signal is present
 
 ### Stop Output Format
 
@@ -268,8 +301,10 @@ Claude must immediately stop when:
 
 ## See Also
 
-- `references/SAFE_LIVE_CHANGE_RULES.md` — Approval validation
+- `references/SEO_SETTLEMENT_GATE.md` — Settlement Gate definition, exceptions, unlock criteria
+- `references/SAFE_LIVE_CHANGE_RULES.md` — Approval validation, standard gate response
 - `references/SHOPWARE_SEO_PATTERNS.md` — seo-url collision details
 - `references/DREISCSEO_PATTERNS.md` — DreiscSeo redirect layer
 - `references/DACH_MEDICAL_SEO_TERMS.md` — Medical term risk tiers
 - `references/SEO_CHANGE_HISTORY.md` — NDJSON logging requirements
+- `schemas/recovery-gate.schema.json` — Gate state object schema

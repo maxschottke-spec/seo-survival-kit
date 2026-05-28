@@ -1,3 +1,8 @@
+---
+description: "Full recovery workflow: diagnose -> crawl -> plan -> monitor. Respects Change Governor mode."
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
+---
+
 # Recovery Full Workflow
 
 ## Zweck
@@ -9,6 +14,59 @@ Verkettung aller vier Recovery-Commands in einem Durchlauf. Ein Befehl fuer den 
 Keine Live-Aenderungen ohne expliziten Modus + Budget + Freigabe. Bei breiten Instruktionen wie "alles", "mach alles", "ALLESS": **Hard Stop** per `SEO_CHANGE_GOVERNOR.md`.
 
 Vor jedem Write: Change Plan ausgeben. Nach jedem Write: Live QA + `change-history.ndjson` Eintrag. Budget-Tracking ueber die gesamte Session. `recovery-audit` muss VOR der ersten Schreiboperation laufen wenn `change-history.ndjson` existiert.
+
+## Settlement-Gate-Verhalten (Pflicht)
+
+Wenn `~/.cache/seo-rescue/{slug}/recovery-gate.json` mit `settlement_gate_active: true` existiert:
+
+- `recovery-full` darf **keine** Live-Aenderungen vorschlagen oder durchfuehren
+- `recovery-full` darf nur folgende Schritte ausfuehren:
+  - Diagnose (read-only)
+  - Crawl (read-only)
+  - Audit (read-only)
+  - Monitoring-Render (read-only)
+  - Re-Evaluation-Report
+  - Ticketliste fuer Rico / Entwicklung
+  - **Plan-After-Gate-Dokument** anstelle eines normalen Action-Plans
+
+### Wenn der User trotzdem Live-Aenderungen fordert
+
+- Stop mit Begruendung
+- Keine Ausfuehrung
+- Konkrete Unlock-Kriterien aus `SEO_SETTLEMENT_GATE.md` section 9 nennen
+- Standard Settlement-Gate Response aus `SAFE_LIVE_CHANGE_RULES.md` ausgeben
+- Hinweis auf `next_allowed_review_date` aus dem Gate-Objekt
+
+### Plan-After-Gate-Dokument
+
+Statt eines normalen Action-Plans erzeugt `recovery-full` bei aktivem Gate ein Plan-After-Gate-Dokument:
+
+```json
+{
+  "type": "plan_after_gate",
+  "settlement_gate_active": true,
+  "live_changes_allowed": false,
+  "next_allowed_review_date": "...",
+  "prepared_now": [
+    "schema_drafts",
+    "title_drafts",
+    "rico_briefings",
+    "rollback_plans"
+  ],
+  "deferred_until_unlock": [
+    "title_rewrites",
+    "internal_link_additions",
+    "cms_slot_patches",
+    "category_deactivations"
+  ],
+  "unlock_criteria_status": {
+    "time": "not_met|met",
+    "data": "not_met|partial|met",
+    "stability": "not_met|partial|met",
+    "decision": "not_met|met"
+  }
+}
+```
 
 ## Trigger
 
@@ -185,4 +243,9 @@ Alle `warnings` und `errors` aus den Sub-Commands werden gesammelt und am Ende i
 - `commands/recovery-crawl.md` — Schritt 3
 - `commands/recovery-plan.md` — Schritt 4
 - `commands/recovery-monitor.md` — Schritt 5
+- `commands/recovery-audit.md` — Pre-Write-Audit-Pflicht
+- `references/SEO_SETTLEMENT_GATE.md` — Gate-Definition, Plan-After-Gate
+- `references/SEO_CHANGE_GOVERNOR.md` — Reserve bleibt Reserve
+- `references/SAFE_LIVE_CHANGE_RULES.md` — Standard Settlement-Gate Response
+- `schemas/recovery-gate.schema.json` — Gate-State
 - `lib/safe.js` — `normalizeDomain()`

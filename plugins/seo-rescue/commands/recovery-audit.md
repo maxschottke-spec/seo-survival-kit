@@ -1,3 +1,8 @@
+---
+description: "Audit all SEO changes made to a domain within a given period. Read-only audit_only mode."
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
+---
+
 # recovery-audit
 
 Audit all SEO changes made to a domain within a given period. Read-only command — always `audit_only` mode, change budget 0.
@@ -81,6 +86,61 @@ The audit must record for every detected change:
 - **Medical/compliance term flags**
 - Recommendations (keep / observe / fix / rollback / dev_ticket)
 
+## Settlement Gate Detection
+
+The audit must detect:
+
+- **Last Major Batch** — most recent session that crossed the trigger thresholds in `references/SEO_SETTLEMENT_GATE.md` section 3
+- **Number of changes** in that batch
+- **Change Budget consumed** — total risk points across the batch
+- **Settlement Gate Status** — active / ended / never_triggered
+- **Current Unlock Level** — `blocked | partial | open` per `schemas/recovery-gate.schema.json`
+- Whether any further live changes are currently permitted
+
+If the audit detects a Major Batch that was not previously logged with `triggered_settlement_gate: true`, it must:
+
+1. Compute `started_at`, `minimum_until`, `recommended_until`
+2. Write `~/.cache/seo-rescue/{slug}/recovery-gate.json` with `settlement_gate_active: true` and back-dated values
+3. Append a `gate_activated` event to the gate's `gate_history`
+4. Emit a finding `gate_activated_retroactively` with severity `high`
+
+The audit output must include a `settlement_gate` block:
+
+```json
+{
+  "settlement_gate": {
+    "active": true,
+    "started_at": "2026-05-27T19:43:00Z",
+    "minimum_until": "2026-06-02T00:00:00Z",
+    "recommended_until": "2026-06-06T00:00:00Z",
+    "unlock_status": "blocked",
+    "missing_unlock_criteria": [
+      "time_minimum_until_passed",
+      "gsc_post_batch_pull",
+      "screaming_frog_post_batch_crawl",
+      "re_evaluation_report_written"
+    ],
+    "allowed_now": [
+      "read_only_analysis",
+      "rollback_plan",
+      "schema_draft",
+      "briefing"
+    ],
+    "blocked_now": [
+      "title_rewrite",
+      "new_internal_links",
+      "cms_slot_patch",
+      "category_deactivation",
+      "linkblock_reduction"
+    ],
+    "next_allowed_review_date": "2026-06-06",
+    "retroactively_activated": false
+  }
+}
+```
+
+This block is required even when no Settlement Gate is active. In that case all flags are `false` / `null` / `"never_triggered"` and the audit explicitly records that no Major Batch was detected in the period.
+
 ## Output
 
 ```
@@ -113,6 +173,7 @@ Per `schemas/seo-change-audit.schema.json`:
 - `monitoring_plan` (post-audit monitoring schedule)
 - `rollback_matrix` (per-change rollback methods)
 - `summary` (aggregate statistics)
+- `settlement_gate` (Settlement-Gate-Status-Block per `schemas/recovery-gate.schema.json`)
 
 ## Integration with Other Commands
 
@@ -126,4 +187,6 @@ Per `schemas/seo-change-audit.schema.json`:
 - `references/SEO_CHANGE_HISTORY.md` — NDJSON logging spec
 - `references/SHOPWARE_SEO_PATTERNS.md` — Shopware-specific reconstruction patterns
 - `references/DREISCSEO_PATTERNS.md` — DreiscSeo redirect audit patterns
+- `references/SEO_SETTLEMENT_GATE.md` — Settlement Gate, Major Batch trigger thresholds, unlock criteria
 - `schemas/seo-change-audit.schema.json` — Output JSON Schema
+- `schemas/recovery-gate.schema.json` — Gate state schema

@@ -665,9 +665,27 @@ The framework's decision memory tracks "what was the action, when was it done, w
 
 ---
 
+## 12a. Settlement Gate · Hard block after a Major Batch
+
+The post-action stabilization periods in section 12 describe **default operator discipline**. When a session exceeds the Major Batch thresholds defined in `references/SEO_SETTLEMENT_GATE.md` (more than 10 SEO-relevant changes, more than 5 URL/redirect/category operations, more than 10 internal links changed, two or more category deactivations, plugin config with sitewide effect, CMS-slot batch across multiple blogposts, template/canonical/H1 multi-page fix, any change that produced a 404 / 301→404 / API 500 / reactivation, or a DACH medical/legal risk anchor change), the discipline is **enforced rather than recommended**.
+
+A Settlement Gate activates automatically:
+
+- **Minimum 5 days** before any non-emergency live operation
+- **7 days** during active recovery (default)
+- **10-14 days** before evaluating CTR / title / content / link batch effects
+
+During the gate, only `audit_only` and `emergency_rollback` modes are available. New live optimization is blocked regardless of operator pressure. Low GSC click counts during the gate are the expected state, not a trigger to act.
+
+The gate ends only when **all** unlock criteria are met: time minimum passed, two refreshed data sources, no new stability defects, a Re-Evaluation report written, a new Change Plan with explicit approval. Time alone is never sufficient.
+
+Operationally, the gate is the codified version of every post-batch stabilization period in section 12, applied as a hard rule because operator self-discipline alone has not been sufficient in practice. See `references/SEO_SETTLEMENT_GATE.md` for the full definition, exceptions (technical emergency, rollback/stabilization, explicit emergency approval), and unlock criteria.
+
+---
+
 ## 13. What this recovery methodology does not do
 
-It does not block edits. Warnings are loud and explicit; the operator decides.
+It does not block edits **by default**, except when a Settlement Gate is active (section 12a / `references/SEO_SETTLEMENT_GATE.md`). Outside of an active gate, warnings are loud and explicit; the operator decides.
 
 It does not predict ranking outcomes of specific edits.
 

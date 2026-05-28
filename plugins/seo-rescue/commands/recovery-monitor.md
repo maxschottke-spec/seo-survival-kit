@@ -1,3 +1,8 @@
+---
+description: "Weekly recovery tracking with VI, keyword data, and Change History effect tracking."
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
+---
+
 # Recovery Monitor
 
 ## Zweck
@@ -215,8 +220,75 @@ Wichtig: Falls keine aktuellen Daten vorhanden sind (alle Quellen nicht erreichb
 | `issue_data_fresh = false` | `issue_reduction = null`; aus Score-Gewichten herausrechnen |
 | Erste Messung (kein Baseline) | `quick_win_progress = null`; aus Score herausrechnen |
 
+## Change History Integration
+
+`recovery-monitor` integriert die Change-History (`change-history.ndjson`) um den Effekt von Live-Aenderungen zu messen. Diese Integration ist read-only — der Monitor schreibt nicht in die Change-History.
+
+### Lese-Pfad
+
+```
+~/.cache/seo-rescue/{slug}/change-history.ndjson
+~/.cache/seo-rescue/{slug}/snapshots/cms-slots/*.json (read-only references)
+```
+
+### Was der Monitor mit Change-History tut
+
+1. **Effekt-Tracking pro Change**: Fuer jeden Change-Eintrag mit `decision: "observe"` oder `decision: "keep"` aus den letzten 28 Tagen, prueft der Monitor ob der erwartete Effekt eingetreten ist.
+
+2. **Effekt-Metriken**:
+   - URL-Status live nach 7d / 14d / 28d (sollte konsistent mit `post_checks` sein)
+   - Keyword-Bewegung der betroffenen URL (DataForSEO ranked_keywords delta)
+   - Click/Impression-Trend (GSC, falls verfuegbar)
+   - Inlink-Anzahl-Trend (Screaming Frog, falls neuer Crawl vorhanden)
+
+3. **Anomalie-Erkennung**:
+   - Wenn eine Change live ist aber URL plotzlich 404 zeigt → `unexpected_revert` Anomaly
+   - Wenn ein 301 plotzlich 200 zeigt (Redirect verloren) → `redirect_lost` Anomaly
+   - Wenn Canonical sich aendert → `canonical_drift` Anomaly
+   - Wenn ein deaktivierter DreiscSeo Redirect wieder aktiv wird → `dreiscseo_reactivated` Anomaly
+
+4. **Audit-Gap-Erkennung**:
+   - Wenn change-history.ndjson fehlt → flagge im Monitor-Eintrag `change_history_present: false`
+   - Wenn neue Aenderungen sichtbar via API updatedAt aber nicht in change-history → `audit_gap: untracked_change`
+
+### Monitor-Output-Erweiterung
+
+```json
+{
+  "change_effects": [
+    {
+      "change_id": "change-001",
+      "url": "/affected-url/",
+      "days_since_change": 7,
+      "expected_status": 301,
+      "current_status": 301,
+      "effect_observed": "consistent_with_plan",
+      "anomalies": []
+    }
+  ],
+  "audit_health": {
+    "change_history_present": true,
+    "total_tracked_changes_28d": 12,
+    "untracked_changes_detected": 0,
+    "anomalies_detected": 0
+  }
+}
+```
+
+### Trigger fuer Rollback-Empfehlung
+
+Der Monitor empfiehlt einen Rollback, wenn:
+- Eine Change live ist UND eine Anomaly entdeckt wurde
+- Die URL hat seit der Change Keyword-Verluste >20% (DataForSEO)
+- Die URL hat seit der Change Click-Verluste >20% (GSC)
+- Die URL zeigt unerwartete Status-Codes
+
+Der Monitor schreibt selbst nichts zurueck — er flagged nur. Rollback bleibt eine manuelle Operator-Entscheidung mit explizitem Approval per `SAFE_LIVE_CHANGE_RULES.md`.
+
 ## Referenzen
 
 - `scripts/recovery-monitor.js` — Score-Berechnung + Delta-Report; deterministischer Score-Algorithmus
 - `schemas/history.schema.json` — Output-Schema
-- `lib/safe.js` — `normalizeDomain()`, `safeSlug()`, `ensureDomainDir()`, `acquireLock()`, `releaseLock()`, `atomicWriteJSON()`
+- `references/SEO_CHANGE_HISTORY.md` — Change-History NDJSON Format
+- `references/SEO_CHANGE_GOVERNOR.md` — Governance Rules
+- `lib/safe.js` — `normalizeDomain()`, `safeSlug()`, `ensureDomainDir()`, `acquireLock()`, `releaseLock()`, `atomicWriteJSON()`, `readChangeHistory()` (neu)

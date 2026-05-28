@@ -1,14 +1,63 @@
+---
+description: "Generate prioritized action plan from diagnosis and crawl issues with Change Governor risk points."
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
+---
+
 # Recovery Plan
 
 ## Zweck
 
-Aus Diagnose-Befund und Crawl-Issues einen priorisierten, phasengerechten Action-Plan ableiten. Beruecksichtigt Recovery-Phase, Do-Not-Touch-Prinzip und Batch-Change-Limits. Der Plan setzt keine SEO-Aenderungen automatisch um. Er dient der menschlichen Freigabe.
+Aus Diagnose-Befund und Crawl-Issues einen priorisierten, phasengerechten Action-Plan ableiten. Beruecksichtigt Recovery-Phase, Do-Not-Touch-Prinzip, Batch-Change-Limits und (sofern aktiv) den Settlement Gate. Der Plan setzt keine SEO-Aenderungen automatisch um. Er dient der menschlichen Freigabe.
 
 ## Change Governance
 
 Mode: `audit_only`. Change Budget: 0. Keine Live-Shop-Writes.
 
-Jede geplante Aenderung muss als Change Plan mit Risikopunkten ausgegeben werden (Format: `change-budget.schema.json`). Der Plan referenziert `SEO_CHANGE_GOVERNOR.md` fuer die Punkteberechnung. Human Approval Gate per `SAFE_LIVE_CHANGE_RULES.md`.
+Jede geplante Aenderung muss als Change Plan mit Risikopunkten ausgegeben werden (Format: `change-budget.schema.json`). Der Plan referenziert `SEO_CHANGE_GOVERNOR.md` fuer die Punkteberechnung. Human Approval Gate per `SAFE_LIVE_CHANGE_RULES.md`. Settlement-Gate-Pruefung pro `SEO_SETTLEMENT_GATE.md`.
+
+## Settlement Gate Pre-Check (Pflicht vor Planung)
+
+Vor jeder Planung muss geprueft werden:
+
+1. **Gibt es einen aktiven Settlement Gate?** — Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`. Falls Datei existiert und `settlement_gate_active = true`: weiter mit Schritt 2. Sonst: normaler Planungs-Ablauf.
+2. **Wann war der letzte Major Batch?** — Aus `change-history.ndjson` letzten Eintrag mit `triggered_settlement_gate: true` lesen.
+3. **Gibt es Re-Evaluation-Daten?** — Mindestens 2 von: GSC-Pull nach `started_at`, SF-Crawl nach `started_at`, Live-HTTP-Checks, DataForSEO-Snapshot, Sistrix-Signal, Backlink-Audit.
+4. **Sind Unlock-Kriterien erfuellt?** — Per `SEO_SETTLEMENT_GATE.md` section 9: time, data, stability, decision.
+
+### Verhalten bei aktivem Gate
+
+Wenn `settlement_gate_active = true`:
+
+- **Keine Live-Planung.** Plan wird als Read-only Roadmap erzeugt.
+- Massnahmen werden in vier Buckets eingeordnet:
+  - `allowed_during_gate` — Audit, Pulls, Briefings, Rollback-Drafts
+  - `blocked_until_re_eval` — alles was Live-Writes braucht, ohne Notfall
+  - `emergency_only` — nur unter `SEO_SETTLEMENT_GATE.md` section 7.A oder 7.B
+  - `prepare_now_execute_later` — Schema-Drafts, Title-Drafts, Rico-Tickets — Vorbereitung erlaubt, Live-Push verboten
+- `requires_human_approval: true` bleibt gesetzt, aber `live_changes_allowed: false`.
+- `next_allowed_review_date` aus dem Gate-Objekt uebernehmen.
+
+### Pflichtfelder im Output bei aktivem Gate
+
+```json
+{
+  "settlement_gate_active": true,
+  "live_changes_allowed": false,
+  "next_allowed_review_date": "2026-06-06",
+  "allowed_now": [
+    "act-001 (audit)",
+    "act-002 (rico-briefing)"
+  ],
+  "blocked_now": [
+    "act-003 (title-rewrite — blocked_until_re_eval)",
+    "act-004 (cms-slot-patch — blocked_until_re_eval)"
+  ],
+  "emergency_exceptions": [],
+  "reason": "major_batch_settlement_window"
+}
+```
+
+Wenn der User auf Live-Aenderung waehrend Gate drueckt, **muss** Claude die Standard-Settlement-Gate-Antwort aus `SAFE_LIVE_CHANGE_RULES.md` ausgeben und stoppen. Ungenutztes Budget aus vorherigen Wochen darf nicht als Freigabe interpretiert werden ("Reserve bleibt Reserve").
 
 ## Trigger
 
@@ -251,4 +300,8 @@ Nach erfolgreichem Schreiben des Plans, gib folgende Informationen aus:
 
 - `references/RECOVERY_SYSTEM.md` — Phasen R1–R5, Risk Matrix, Do-Not-Touch, Batch-Change-Limits
 - `references/DECISION_ENGINE.md` — Priorisierung, Evidence-Weighting, Profitabilitaetssignale
+- `references/SEO_SETTLEMENT_GATE.md` — Settlement-Gate-Definition, Exceptions, Unlock-Kriterien
+- `references/SEO_CHANGE_GOVERNOR.md` — Reserve bleibt Reserve, Hard-Stops
+- `references/SAFE_LIVE_CHANGE_RULES.md` — Standard Settlement-Gate Response
 - `schemas/action-plan.schema.json` — Output-Schema
+- `schemas/recovery-gate.schema.json` — Gate-State-Schema

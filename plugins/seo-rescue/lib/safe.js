@@ -320,6 +320,204 @@ function safeLog(domainDir, runId, message) {
   try { fs.writeFileSync(fd, line); } finally { fs.closeSync(fd); }
 }
 
+// ---------------------------------------------------------------------------
+// SEO Change Governor primitives (v1.1.0)
+// See references/SEO_CHANGE_GOVERNOR.md, SEO_CHANGE_HISTORY.md, SAFE_LIVE_CHANGE_RULES.md
+// ---------------------------------------------------------------------------
+
+const CHANGE_HISTORY_SCHEMA_VERSION = '1.1.0';
+
+// Validation elements for approval text
+const APPROVAL_ELEMENTS = ['number', 'type', 'risk_points', 'urls', 'plan_reference', 'permission'];
+
+// Broad batch trigger phrases (full Hard Stop)
+const BROAD_APPROVAL_TRIGGERS = [
+  'alles', 'mach', 'weiter', 'ja', 'alless',
+  'passt', 'ok', 'go', 'mach den rest',
+  'alles fixen', 'alles patchen', 'mach du alles',
+  'ja alles', 'los gehts',
+];
+
+// appendChangeHistory(slug, entry) — appends a change-log entry to NDJSON.
+// Validates required fields per change-log-entry.schema.json v1.1.0.
+// Returns the timestamp written.
+function appendChangeHistory(slug, entry) {
+  safeSlug(slug);
+  if (!entry || typeof entry !== 'object') {
+    throw new Error('appendChangeHistory: entry must be an object');
+  }
+  const required = ['run_id', 'change_id', 'domain', 'actor', 'mode',
+    'change_type', 'change_category', 'entity_system', 'url',
+    'risk_points_final', 'confidence', 'decision'];
+  for (const f of required) {
+    if (entry[f] === undefined || entry[f] === null) {
+      throw new Error(`appendChangeHistory: missing required field "${f}"`);
+    }
+  }
+  const enriched = {
+    schema_version: CHANGE_HISTORY_SCHEMA_VERSION,
+    timestamp: new Date().toISOString(),
+    ...entry,
+  };
+  const dir = ensureSafeDomainDir(slug);
+  const filePath = path.join(dir, 'change-history.ndjson');
+  appendNDJSON(filePath, enriched);
+  return enriched.timestamp;
+}
+
+// validateApproval(approvalText, planContext) — validates if user approval is specific
+// enough to authorize the planned changes. Returns { is_valid, matched_elements,
+// missing_elements, reason }. Pattern-based: looks for plan-referencing elements.
+function validateApproval(approvalText, planContext) {
+  if (typeof approvalText !== 'string') {
+    return { is_valid: false, matched_elements: [], missing_elements: APPROVAL_ELEMENTS,
+      reason: 'approval_text must be a string' };
+  }
+  const normalized = approvalText.trim().toLowerCase();
+
+  // Hard Stop: broad batch triggers
+  for (const trigger of BROAD_APPROVAL_TRIGGERS) {
+    if (normalized === trigger || normalized === `"${trigger}"`) {
+      return { is_valid: false, matched_elements: [], missing_elements: APPROVAL_ELEMENTS,
+        reason: 'Broad batch trigger phrase; explicit plan reference required' };
+    }
+  }
+
+  const matched = [];
+  // number: digit or German number word with quantifier
+  if (/\b(\d+|ein(e[nr]?)?|eine?|zwei|drei|vier|fuenf|fünf|sechs|sieben|acht|neun|zehn)\b/.test(normalized)) {
+    matched.push('number');
+  }
+  // type: change types mentioned
+  if (/\b(redirect|anchor|fix|deaktiv|katego|canonical|link|patch|backlink|micro|cms|h1)/i.test(normalized)) {
+    matched.push('type');
+  }
+  // risk_points / risk reference
+  if (/\b(punkt|risk|risiko|budget|risikopunkt)/i.test(normalized)) {
+    matched.push('risk_points');
+  }
+  // urls / cluster reference
+  if (/\b(url|seite|page|cluster|kategorie|category|blog\/)/i.test(normalized) || /\/[a-z0-9-]+/i.test(normalized)) {
+    matched.push('urls');
+  }
+  // plan reference
+  if (/\b(plan|change plan|diesen|dieser|diese|genau|jetzt|hier)/i.test(normalized)) {
+    matched.push('plan_reference');
+  }
+  // permission
+  if (/\b(fuehre|führe|mach|execute|ja(?!\s*$)|okay|freigegeben|deaktivier|bestätig|bestaetig|geht klar)/i.test(normalized)) {
+    matched.push('permission');
+  }
+
+  const missing = APPROVAL_ELEMENTS.filter(e => !matched.includes(e));
+  const isValid = matched.length >= 3;
+  return {
+    is_valid: isValid,
+    matched_elements: matched,
+    missing_elements: missing,
+    reason: isValid
+      ? 'Three or more validation elements present; approval accepted'
+      : `Only ${matched.length} of 6 elements present; need at least 3`,
+  };
+}
+
+// writeSnapshot(slug, kind, entityId, data, when) — writes a before/after snapshot
+// for cms-slot or any entity. Used by CMS-Slot PATCHes to satisfy audit-safe rules
+// because Shopware does not reliably return updatedAt for cms-slot writes.
+// when: 'before' | 'after'. Returns the absolute path written.
+function writeSnapshot(slug, kind, entityId, data, when) {
+  safeSlug(slug);
+  if (when !== 'before' && when !== 'after') {
+    throw new Error(`writeSnapshot: when must be 'before' or 'after', got ${when}`);
+  }
+  if (!entityId || typeof entityId !== 'string') {
+    throw new Error('writeSnapshot: entityId required');
+  }
+  const safeKind = String(kind).replace(/[^a-z0-9_-]/gi, '');
+  const safeEntity = String(entityId).replace(/[^a-z0-9_-]/gi, '');
+  if (!safeKind || !safeEntity) {
+    throw new Error('writeSnapshot: kind and entityId must yield safe identifiers');
+  }
+  const dir = ensureSafeDomainDir(slug);
+  const snapDir = path.join(dir, 'snapshots', safeKind);
+  fs.mkdirSync(snapDir, { recursive: true, mode: 0o700 });
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `${safeEntity}-${ts}-${when}.json`;
+  const filePath = path.join(snapDir, filename);
+  writeFileExclusive(filePath, JSON.stringify(data, null, 2));
+  return filePath;
+}
+
+// checkSeoUrlCollision(entries, foreignKey, salesChannelId, languageId, routeName)
+// Checks Shopware seo-url entries for the undocumented constraint:
+// max 1 non-deleted entry per foreignKey/channel/language/route context.
+// Input: array of seo-url entry objects (from Shopware API search).
+// Returns { active_non_deleted_entries, collision_detected, colliding_ids }.
+function checkSeoUrlCollision(entries, foreignKey, salesChannelId, languageId, routeName) {
+  if (!Array.isArray(entries)) {
+    throw new Error('checkSeoUrlCollision: entries must be an array');
+  }
+  const matching = entries.filter(e =>
+    e && e.foreignKey === foreignKey &&
+    e.salesChannelId === salesChannelId &&
+    e.languageId === languageId &&
+    e.routeName === routeName &&
+    e.isDeleted === false
+  );
+  return {
+    active_non_deleted_entries: matching.length,
+    collision_detected: matching.length > 1,
+    colliding_ids: matching.length > 1 ? matching.map(e => e.id) : [],
+  };
+}
+
+// checkDreiscSeoPrecheck(redirects, urlSlug)
+// Checks DreiscSeo redirects for chain-risk patterns before category/product
+// deactivation. Returns { redirects_from_url, redirects_to_url,
+// would_create_301_to_404, affected_redirect_ids }.
+// Note: DreiscSeo matches case-insensitively; comparisons normalize case.
+function checkDreiscSeoPrecheck(redirects, urlSlug) {
+  if (!Array.isArray(redirects)) {
+    throw new Error('checkDreiscSeoPrecheck: redirects must be an array');
+  }
+  if (typeof urlSlug !== 'string' || !urlSlug) {
+    throw new Error('checkDreiscSeoPrecheck: urlSlug required');
+  }
+  const normalize = (s) => String(s || '').toLowerCase().replace(/^\/+|\/+$/g, '');
+  const targetNorm = normalize(urlSlug);
+  const fromUrl = redirects.filter(r =>
+    r && r.active === true && normalize(r.sourcePath) === targetNorm
+  );
+  const toUrl = redirects.filter(r =>
+    r && r.active === true && normalize(r.redirectPath) === targetNorm
+  );
+  const wouldChain = toUrl.length > 0; // any active redirect pointing here = chain risk
+  return {
+    redirects_from_url: fromUrl.map(r => ({ id: r.id, target: r.redirectPath })),
+    redirects_to_url: toUrl.map(r => ({ id: r.id, source: r.sourcePath })),
+    would_create_301_to_404: wouldChain,
+    affected_redirect_ids: toUrl.map(r => r.id),
+  };
+}
+
+// readChangeHistory(slug) — reads change-history.ndjson and returns parsed entries.
+// Returns [] if file does not exist. Skips invalid lines silently.
+// Uses ensureSafeDomainDir to match the path used by appendChangeHistory.
+function readChangeHistory(slug) {
+  safeSlug(slug);
+  const baseDir = getCacheDir();
+  const filePath = path.join(baseDir, slug, 'change-history.ndjson');
+  if (!fs.existsSync(filePath)) return [];
+  const content = fs.readFileSync(filePath, 'utf8');
+  const entries = [];
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try { entries.push(JSON.parse(trimmed)); } catch { /* skip invalid */ }
+  }
+  return entries;
+}
+
 module.exports = {
   safeSlug,
   safeHostname,
@@ -344,4 +542,14 @@ module.exports = {
   maskSecrets,
   safeLog,
   STALE_LOCK_TTL_MS,
+  // SEO Change Governor primitives (v1.1.0)
+  appendChangeHistory,
+  validateApproval,
+  writeSnapshot,
+  checkSeoUrlCollision,
+  checkDreiscSeoPrecheck,
+  readChangeHistory,
+  CHANGE_HISTORY_SCHEMA_VERSION,
+  APPROVAL_ELEMENTS,
+  BROAD_APPROVAL_TRIGGERS,
 };

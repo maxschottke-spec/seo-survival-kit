@@ -126,6 +126,67 @@
 **Ursache:** Shopware Base-Theme rendert den Navigations-Canonical (Root-Category = Homepage) UND das Blog-Plugin rendert den korrekten Blog-Canonical.
 **Fix:** Twig-Block `{% block layout_head_canonical %}` im Theme fuer Blog-Detail-Seiten ueberschreiben. Nicht ueber API fixbar.
 
+### Why Claude refuses new SEO changes
+
+**Symptom:** Claude antwortet "Settlement Gate aktiv. Ich mache keine neuen Live-SEO-Optimierungen, weil der letzte Major Batch noch nicht belastbar ausgewertet ist." obwohl der User Live-Aenderungen will.
+
+**Ursache:** In `~/.cache/seo-rescue/{slug}/recovery-gate.json` ist `settlement_gate_active: true`. Der letzte Major Batch (siehe `references/SEO_SETTLEMENT_GATE.md` section 3) hat das Settlement-Gate aktiviert. Solange das Gate aktiv ist, sind nur `audit_only` und `emergency_rollback` Modi erlaubt.
+
+**Warum das so ist:**
+
+- GSC hat 2-3 Tage Lag, brauchbare Klick-Delta-Auswertung braucht 7-10 Tage
+- Sistrix VI aktualisiert woechentlich, API-Tier limitiert
+- Google's Re-Crawl-/Re-Index-Zyklen fuer Redirects, Deaktivierungen, CMS-Aenderungen brauchen 5-14 Tage
+- Eine zweite Aenderungswelle waehrend dieses Fensters macht Ursache-Wirkung fuer beide Wellen unauswertbar
+- "Revert and re-add" innerhalb 14 Tage triggert oft ein Penalty-Signal
+- Niedrige GSC-Klicks waehrend des Gate-Fensters sind der erwartete Zustand, kein Trigger zu handeln
+
+**Was Claude waehrend des Gates erlaubt:**
+
+- Read-only Crawls, GSC-/Sistrix-/DataForSEO-Pulls
+- Live-HTTP-Checks (Status, Canonical, Robots)
+- Schema-Drafts (lokal, kein Live-Push)
+- Rico-/Entwickler-Briefings
+- Monitoring-Dashboards, QA-Reports
+- Rollback-Plan-Drafts
+- Ticket-Erstellung
+- Repo-Datei-Aenderungen
+- Backlink-Audits
+
+**Was Claude waehrend des Gates blockiert:**
+
+- Neue Title-Rewrites
+- Neue interne Links
+- Linkblock-Reduktionen
+- Content-Aenderungen
+- Neue Kategorie-Deaktivierungen
+- Neue Redirect-Experimente
+- Neue Canonical-Konsolidierungen
+- Neue Plugin-Config-Aenderungen
+- Template-/H1-Fixes (ohne Notfall)
+- AIO-/Content-Passage-Optimierungen live
+- "Noch schnell"-Fixes
+
+**Loesung wenn Aenderung wirklich noetig ist:**
+
+- **Technical Emergency** (`SEO_SETTLEMENT_GATE.md` section 7.A): Live 404 auf wichtiger Seite, 301→404, noindex auf wichtiger Seite, kaputtes Canonical, robots blockiert, Rich-Result-Markup verifiziert falsch, Shopware/API-State-Widerspruch
+- **Rollback/Stabilisierung** (`SEO_SETTLEMENT_GATE.md` section 7.B): Reaktivierung versehentlich deaktivierter URL, Deaktivierung eines 301→404-Redirects, Anchor-Entschaerfung bei medizinisch/rechtlich riskantem Begriff
+- **Explicit Emergency Approval** (`SEO_SETTLEMENT_GATE.md` section 7.C): Mit Change Plan + Risikopunkten + Datenbasis + Rollback + Live-QA + expliziter Freigabe
+
+**Loesung wenn nichts davon zutrifft:**
+
+Warten. Re-Evaluation am `next_allowed_review_date` aus dem Gate-Objekt. Unlock-Kriterien aus section 9 erfuellen: Zeit + Daten + Stabilitaet + Decision.
+
+### "Reserve nutzen" / "Budget übrig" Pressure-Stop
+
+**Symptom:** Claude stoppt und antwortet "nicht ohne neuen Change Plan und explizite Freigabe", obwohl Budget rechnerisch nicht erschoepft ist.
+
+**Ursache:** Der User hat Pressure-Phrasen genutzt: "Budget übrig", "Reserve nutzen", "noch schnell", "falls Zeit", "weitere kleine Fixes". Diese sind explizit als Stop-Trigger in `SEO_CHANGE_GOVERNOR.md` Hard Stop Rule #22 + `SAFE_LIVE_CHANGE_RULES.md` "Unused-Budget Pressure" registriert.
+
+**Hintergrund:** Ungenutztes CG-Budget ist **kein Umsetzungsauftrag**. Das Per-Cycle-Cap ist nicht das Per-Cycle-Minimum. Reserve bleibt Reserve. Jede zusaetzliche Massnahme braucht einen neuen Change Plan, eigene Risikopunkte, Datenbasis, Rollback-Plan und explizite Freigabe.
+
+**Loesung:** Wenn die Massnahme legitim ist, neuen Change Plan mit konkreten URLs, Typ, Risikopunkten erstellen und explizite Freigabe per `SAFE_LIVE_CHANGE_RULES.md` Format einholen.
+
 ## Output-Felder interpretieren
 
 ### warnings

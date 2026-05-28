@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SEO Change Budget",
-  "description": "Pre-execution change plan with risk budget tracking. v1.1.0 adds Shopware/DreiscSeo pre-check requirements and DACH medical compliance.",
+  "description": "Pre-execution change plan with risk budget tracking. v1.2.0 adds Settlement Gate awareness on top of v1.1.0 Shopware/DreiscSeo pre-check requirements and DACH medical compliance.",
   "type": "object",
   "required": ["schema_version", "mode", "change_budget", "planned_changes", "total_risk_points", "budget_remaining", "stop_required"],
   "properties": {
-    "schema_version": { "type": "string", "const": "1.1.0" },
+    "schema_version": { "type": "string", "const": "1.2.0" },
     "run_id": { "type": "string" },
     "domain": { "type": "string" },
     "mode": {
@@ -113,9 +113,48 @@
           "cms_slot_snapshot_missing",
           "medical_term_high_risk_unsubstantiated",
           "live_test_404_after_change",
-          "redirect_chain_to_404"
+          "redirect_chain_to_404",
+          "settlement_gate_active",
+          "settlement_gate_override_not_approved",
+          "unused_budget_is_not_permission"
         ]
       }
+    },
+    "settlement_gate_active": {
+      "type": "boolean",
+      "description": "True when a Settlement Gate is active for this domain. When true, only audit_only and emergency_rollback modes may be planned. See references/SEO_SETTLEMENT_GATE.md."
+    },
+    "settlement_gate_override_requested": {
+      "type": "boolean",
+      "description": "True when this Change Plan attempts to bypass an active Settlement Gate via section 7.C of SEO_SETTLEMENT_GATE.md."
+    },
+    "settlement_gate_override_allowed": {
+      "type": "boolean",
+      "description": "True when the override request meets section 7.C requirements: technical_emergency or rollback_stabilization or explicit_emergency_approval with all required fields present."
+    },
+    "override_reason": {
+      "type": "string",
+      "description": "Stated reason for the override request. Required when settlement_gate_override_requested is true."
+    },
+    "override_type": {
+      "type": "string",
+      "enum": ["technical_emergency", "rollback_stabilization", "explicit_emergency_approval"],
+      "description": "Which exception class from SEO_SETTLEMENT_GATE.md section 7 the override falls under."
+    },
+    "unlock_status": {
+      "type": "string",
+      "enum": ["blocked", "partial", "open"],
+      "description": "Mirror of recovery-gate.schema.json unlock_status at the time this plan was generated. blocked = plan must be audit_only or emergency_rollback only."
+    },
+    "unused_budget_handling": {
+      "type": "string",
+      "enum": ["forfeit", "carry_forward_after_unlock", "carry_forward_with_new_change_plan"],
+      "default": "forfeit",
+      "description": "Defines how unused points from this plan window are handled. Default and required during Settlement Gate: forfeit. Unused budget is never permission for additional work in the same window."
+    },
+    "reserve_bleibt_reserve_acknowledged": {
+      "type": "boolean",
+      "description": "Explicit acknowledgement that unused budget will not be spent without a new Change Plan and explicit approval. Must be true when a Settlement Gate is active."
     },
     "requires_explicit_approval": { "type": "boolean" },
     "approval_phrase_required": { "type": "boolean" },

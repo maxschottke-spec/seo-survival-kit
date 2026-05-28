@@ -147,8 +147,56 @@ After every live write:
 
 Exceeding these limits requires explicit batch approval naming the count and acknowledging the higher risk.
 
+## Settlement Gate · Operator-Pressure Response
+
+While a Settlement Gate is active (see `references/SEO_SETTLEMENT_GATE.md`), the operator will at some point apply pressure to resume live optimization. The pressure usually arrives as one of these phrases:
+
+- "sollen wir noch optimieren?"
+- "mach weiter"
+- "warum sind Klicks niedrig?"
+- "lass Titles ändern"
+- "noch Links setzen"
+- "alles fixen"
+- "ALLESS"
+- "was kann ich noch machen?"
+- "wir haben ja noch Budget übrig"
+- "lass uns die Reserve nutzen"
+- "noch schnell ein paar kleine Fixes"
+- "falls wir Zeit haben"
+- "weitere kleine Fixes"
+
+Before any other response, Claude **must** run this internal check:
+
+1. Is the Settlement Gate active?
+2. Is this a verified Technical Emergency per `SEO_SETTLEMENT_GATE.md` section 7.A?
+3. Are there new, post-batch, source-confirmed data signals that change the picture since the gate started?
+4. Would the proposed action conflate cause-and-effect with the in-flight batch?
+
+If (1) = yes, (2) = no, (3) = no, and (4) = yes — then **no new live SEO optimization may be planned or executed**.
+
+Low GSC click counts during the gate window are **not** a sufficient signal to override the gate. They are the expected state during settlement.
+
+### Standard Settlement-Gate Response
+
+When the internal check above fails, Claude must answer **verbatim**:
+
+> Settlement Gate aktiv. Ich mache keine neuen Live-SEO-Optimierungen, weil der letzte Major Batch noch nicht belastbar ausgewertet ist. Erlaubt sind jetzt nur Monitoring, Datenpulls, QA, Briefings und Rollback-Vorbereitung. Neue Live-Maßnahmen erst nach Re-Evaluation mit GSC/Crawl/Rankingdaten oder bei technischem Notfall.
+
+Followed by the current gate's `allowed_actions` list and the next allowed review date.
+
+### Unused-Budget Pressure
+
+If the operator argues from leftover budget — phrases such as "Budget übrig", "Reserve nutzen", "noch schnell", "falls Zeit", "weitere kleine Fixes" — Claude must reply:
+
+> **nicht ohne neuen Change Plan und explizite Freigabe**
+
+and stop. Stop reason: `unused_budget_is_not_permission`.
+
+The "Reserve bleibt Reserve" rule from `SEO_SETTLEMENT_GATE.md` section 11 is canonical: unused CG budget is never an implicit authorization for additional work.
+
 ## See Also
 
+- `references/SEO_SETTLEMENT_GATE.md` — Settlement Gate definition, exceptions, unlock criteria
 - `references/SEO_CHANGE_GOVERNOR.md` — Risk point system and hard stop rules
 - `references/SHOPWARE_SEO_PATTERNS.md` — seo-url collision pre-check
 - `references/DREISCSEO_PATTERNS.md` — DreiscSeo redirect pre-check

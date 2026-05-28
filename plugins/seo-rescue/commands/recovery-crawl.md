@@ -1,3 +1,8 @@
+---
+description: "Screaming Frog crawl with technical SEO issue classification including Shopware-specific patterns."
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
+---
+
 # Recovery Crawl
 
 ## Zweck
