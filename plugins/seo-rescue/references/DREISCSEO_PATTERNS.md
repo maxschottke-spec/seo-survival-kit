@@ -4,7 +4,7 @@ DreiscSeo Pro is a separate redirect layer in Shopware 6 with its own entity (`d
 
 ## Why This Matters
 
-In real recovery operations, 301 -> 404 chains were traced to DreiscSeo redirects, not Shopware `seo_url` entries. The `seo_url` table showed `isDeleted: true` for the source URL, but live HTTP returned 301 because DreiscSeo was still active.
+In observed recovery cases, 301 -> 404 chains were traced to DreiscSeo redirects, not Shopware `seo_url` entries. The `seo_url` table showed `isDeleted: true` for the source URL, but live HTTP returned 301 because DreiscSeo was still active.
 
 **Operational rule**: Never deactivate a category without checking the DreiscSeo redirect table first.
 
