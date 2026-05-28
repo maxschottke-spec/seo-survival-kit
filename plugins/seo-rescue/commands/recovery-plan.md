@@ -4,6 +4,12 @@
 
 Aus Diagnose-Befund und Crawl-Issues einen priorisierten, phasengerechten Action-Plan ableiten. Beruecksichtigt Recovery-Phase, Do-Not-Touch-Prinzip und Batch-Change-Limits. Der Plan setzt keine SEO-Aenderungen automatisch um. Er dient der menschlichen Freigabe.
 
+## Change Governance
+
+Mode: `audit_only`. Change Budget: 0. Keine Live-Shop-Writes.
+
+Jede geplante Aenderung muss als Change Plan mit Risikopunkten ausgegeben werden (Format: `change-budget.schema.json`). Der Plan referenziert `SEO_CHANGE_GOVERNOR.md` fuer die Punkteberechnung. Human Approval Gate per `SAFE_LIVE_CHANGE_RULES.md`.
+
 ## Trigger
 
 `/seo-rescue:recovery-plan <domain>`

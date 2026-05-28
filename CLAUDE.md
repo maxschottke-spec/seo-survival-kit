@@ -147,6 +147,42 @@ When working with the existing 4 scripts in `seo-outreach-report`:
 - All `writeFileSync` of cache files goes through `writeFileExclusive()` (O_EXCL, drops symlink targets)
 - All subprocess calls use `spawnSync(cmd, [args], { shell: false })` — never `execSync` with a string
 
+## SEO Recovery Operating Rules
+
+These rules are derived from real recovery operations and apply to all commands that touch live shops.
+
+### Defensive Recovery
+
+- SEO recovery is defensive. Every change can make things worse.
+- Sequence: Diagnose -> Crawl -> Plan -> (Approval) -> Execute -> QA -> Monitor. Never skip steps.
+- No mass changes live without review. Use the Change Governor (`references/SEO_CHANGE_GOVERNOR.md`).
+- No second wave of changes until the first wave has been measured (minimum 7 days GSC data).
+
+### Live Change Discipline
+
+- Every live change requires: source, target, before/after state, live HTTP check, canonical check, robots/indexability check, rollback plan.
+- After a change is live, immediately QA. No further optimization until QA passes.
+- If QA fails (404, broken chain, wrong canonical): stop all further changes and stabilize.
+
+### Shopware Specifics
+
+- Never trust only the seo-url table. Always verify with a live HTTP check. See `references/SHOPWARE_SEO_PATTERNS.md`.
+- DreiscSeo redirects are a separate system. Check both seo-url AND dreisc-seo-redirect before deactivating categories.
+- Shopware's seo-url API has an undocumented constraint: max one non-deleted redirect per foreignKey per channel. API 500 = this constraint.
+
+### Data Source Discipline
+
+- Every important claim needs a source and confidence level. See `references/PROVIDER_CAPABILITIES.md`.
+- DataForSEO, Sistrix, and Screaming Frog are strong sources but not ground truth. Live HTTP and GSC are ground truth.
+- When data is weak or contradictory: report `partial + low confidence` instead of false certainty.
+- Backlink data from a single provider may be incomplete. Cross-check when counts seem off.
+
+### Medical/Legal Compliance
+
+- Handle medical and health-related terms carefully for mattress/sleep products.
+- Do not use terms like "orthopaedisch", "heilend", "medizinisch empfohlen" in anchor texts or content without substantiation on the target page.
+- Flag medical terms for review. Prefer neutral alternatives (e.g., "ergonomisch" instead of "orthopaedisch").
+
 ## Related resources
 
 - Repository: https://github.com/maxschottke-spec/seo-survival-kit

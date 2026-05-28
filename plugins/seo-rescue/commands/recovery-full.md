@@ -4,6 +4,12 @@
 
 Verkettung aller vier Recovery-Commands in einem Durchlauf. Ein Befehl fuer den vollstaendigen Recovery-Workflow von Diagnose bis Monitoring-Setup. Alle Schritte teilen eine gemeinsame `run_id` fuer end-to-end Traceability.
 
+## Change Governance
+
+Keine Live-Aenderungen ohne expliziten Modus + Budget + Freigabe. Bei breiten Instruktionen wie "alles", "mach alles", "ALLESS": **Hard Stop** per `SEO_CHANGE_GOVERNOR.md`.
+
+Vor jedem Write: Change Plan ausgeben. Nach jedem Write: Live QA + `change-history.ndjson` Eintrag. Budget-Tracking ueber die gesamte Session. `recovery-audit` muss VOR der ersten Schreiboperation laufen wenn `change-history.ndjson` existiert.
+
 ## Trigger
 
 `/seo-rescue:recovery-full <domain>`

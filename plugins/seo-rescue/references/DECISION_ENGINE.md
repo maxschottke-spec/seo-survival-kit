@@ -450,3 +450,61 @@ The format is consistent across skills so operators can read across them without
 - **v1.0**: stable engine, tests + fixtures + expected-output assertions, breaking changes only at major version.
 
 Post-v1.0: more decision rules accrue as the case library grows; the engine itself stabilizes.
+
+---
+
+## Operational Decision Patterns (from live recovery)
+
+These patterns were codified from real Shopware ecommerce recovery operations. They complement the abstract decision rules above with concrete if/then logic.
+
+### Redirect Decisions
+
+| Condition | Decision | Confidence |
+|---|---|---|
+| Source is 404, target is 200 + self-canonical + index,follow + thematically exact | **Set 301** | high |
+| Source is 404, 0 products, 0 inlinks, 0 backlinks, no rankings | **Leave as 404** | high |
+| Source is 404, has external backlinks, no clean redirect target available | **Dev ticket** (manual redirect needed) | high |
+| Redirect attempt fails (API 500, wrong slug) and source was previously live | **Reactivate** source as fallback | high |
+| Redirect target is 301 itself (chain) | **Do not redirect** — find the final 200 target | high |
+| Redirect target is thematically wrong (e.g., Product A -> Category B (different vertical/intent)) | **Accept temporarily** if source has <5 inlinks and 0 backlinks. Otherwise: dev ticket | medium |
+| DreiscSeo redirect and seo-url redirect conflict | **DreiscSeo wins** at runtime. Deactivate DreiscSeo entry if it causes 301->404 | high |
+
+### Internal Link Decisions
+
+| Condition | Decision |
+|---|---|
+| Target is 200, self-canonical, index,follow | Link allowed |
+| Target is 301 | **Do not link** — link to the final 200 target instead |
+| Target is 404 or noindex | **Do not link** |
+| Anchor is exact-match keyword | Acceptable for internal e-commerce links (category names). Flag if >50% of links in a block are exact-match |
+| Anchor contains medical term (orthopaedisch, Skoliose, Bandscheibenvorfall) | **Flag for review**. Use neutral alternative if target page does not substantiate the claim |
+| More than 3 new links in one blog post in one session | Requires explicit approval per Change Governor |
+| More than 10 links in one `<ul>` block | **Risk**: Google may classify as boilerplate. Recommend distributing into body text |
+
+### Category Deactivation Decisions
+
+| Check | Required Before Deactivation |
+|---|---|
+| Product count | Must be 0 |
+| Keyword rankings | Must be Pos 50+ or none |
+| Internal inlinks | Must be <5 (or sitewide navigation only) |
+| External backlinks | Must be 0 |
+| DreiscSeo redirects pointing TO this URL | Must be deactivated first |
+| 404 vs 301 decision | Document whether clean 404 or 301 to parent/sibling |
+
+### Backlink Verification
+
+DataForSEO backlink data should not be the sole source:
+- If DataForSEO shows 0 total backlinks but 291 referring domains: the data is inconsistent. Mark as `needs_verification`.
+- Cross-check with: GSC Links report, Ahrefs, Semrush, Sistrix Links, or Majestic.
+- When in doubt, assume backlinks exist and do not deactivate or redirect without checking.
+
+### Priority Sequencing
+
+1. Technical indexation bugs (broken canonicals, 301->404 chains, noindex on important pages) — fix FIRST
+2. H1/meta/redirect fixes on existing pages — fix SECOND
+3. Internal link improvements — THIRD (after technical fixes are live)
+4. Content expansion — FOURTH (after link improvements are measured)
+5. Backlink outreach — ONGOING, but not a blocker for steps 1-4
+
+**Rule**: No second wave of changes before the first wave has GSC data (minimum 7 days). Monitoring before optimization.

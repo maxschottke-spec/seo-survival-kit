@@ -332,8 +332,30 @@ Pruefe vor dem Schreiben via `writeIssuesJSON`:
 
 Bei `data_quality = "poor"`: Expliziter Hinweis an den User, dass Issues-Liste auf manuellen Daten basiert und moeglicherweise unvollstaendig ist.
 
+## Shopware-spezifische Crawl-Patterns
+
+Bei Shopware-Shops muessen zusaetzlich folgende Patterns erkannt und klassifiziert werden. Siehe `references/SHOPWARE_SEO_PATTERNS.md` fuer Details.
+
+### Hoch-Risiko Klassifikationen
+
+| Pattern | Severity | Erklaerung |
+|---|---|---|
+| 301 -> 404 Kette | **high** | DreiscSeo-Redirect zeigt auf deaktivierte Kategorie. Schlimmer als reiner 404 weil Googlebot extra Crawl-Budget verbraucht. |
+| Doppelte Canonical (2x `<link rel="canonical">`) | **critical/high** | Shopware Blog-Template-Bug: zwei widersprüchliche Canonical-Tags. Kann Recovery blockieren. |
+| seo-url `isDeleted:false` aber live 404 | **high** | Shopware URL-Resolver findet den Eintrag nicht (falscher Slug, Sales-Channel, oder foreignKey-Kollision). |
+| Kategorie `active:false` mit >10 Inlinks | **medium** | Interne Links zeigen auf 404. Crawl-Budget-Verschwendung. |
+| Kategorie `active:true` mit 0 Produkten + indexierbar | **medium** | Google indexiert eine leere Seite. Qualitaetssignal negativ. |
+
+### Verifikationsregeln
+
+- Nach jedem Crawl: seo-url Zustand mit Live HTTP abgleichen. Wenn widersprüchlich: als `shopware_url_resolver_conflict` Issue klassifizieren.
+- DreiscSeo Redirect-Tabelle separat abfragen (`/dreisc-seo-redirect`). Aktive Redirects, die auf deaktivierte Kategorien zeigen = `dreisc_301_404_chain`.
+- Blog-Seiten mit mehr als einem `<link rel="canonical">` = `duplicate_canonical_blog` Issue mit Severity `critical` wenn die Seite Top-10 Rankings hat.
+
 ## Referenzen
 
 - `scripts/recovery-crawl.js` — Issue-Klassifikation + atomares Schreiben via `writeIssuesJSON()`; lokaler Minimal-Crawler
 - `schemas/issues.schema.json` — vollstaendiges JSON-Schema des Output-Objekts
 - `lib/safe.js` — `normalizeDomain()`, `safeSlug()`, `ensureDomainDir()`, `acquireLock()`, `releaseLock()`, `atomicWriteJSON()`
+- `references/SHOPWARE_SEO_PATTERNS.md` — Shopware-spezifische URL-Resolver-Patterns, DreiscSeo-Verhalten, Blog-Canonical-Trap
+- `references/PROVIDER_CAPABILITIES.md` — Was jedes Tool kann und nicht kann

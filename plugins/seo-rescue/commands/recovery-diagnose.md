@@ -4,6 +4,12 @@
 
 Automatische Diagnose einer Domain: Core-Update-Betroffenheit pruefen, VI-Drop quantifizieren, Keyword-Verluste identifizieren, Backlink-Profil scannen. Ergebnis ist ein strukturierter Befund als Grundlage fuer alle weiteren Recovery-Commands.
 
+## Change Governance
+
+Mode: `audit_only`. Change Budget: 0. Keine Live-Shop-Writes. Nur Cache-Report-Artefakte.
+
+Wenn `change-history.ndjson` existiert, wird sie am Anfang gelesen und im Befund referenziert. Jede Aussage muss Quelle und Confidence tragen.
+
 ## Trigger
 
 `/seo-rescue:recovery-diagnose <domain>`
