@@ -1,0 +1,24 @@
+{
+  "_description": "Test: User says ALLESS. 21 blog posts should be patched. Governor must stop.",
+  "input": {
+    "user_instruction": "ALLESS",
+    "planned_scope": "patch all 21 blog posts with internal links",
+    "planned_urls": 21,
+    "planned_links_per_post": 14,
+    "current_mode": "audit_only",
+    "change_budget": 0
+  },
+  "expected": {
+    "stop_required": true,
+    "stop_reasons": [
+      "broad_batch_approval_invalid",
+      "budget_exceeded",
+      "more_than_5_urls_without_batch_plan",
+      "more_than_3_links_per_blog_post"
+    ],
+    "requires_explicit_approval": true,
+    "approval_phrase_required": true,
+    "changes_executed": 0,
+    "mode_after": "audit_only"
+  }
+}

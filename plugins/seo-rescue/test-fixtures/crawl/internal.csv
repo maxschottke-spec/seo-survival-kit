@@ -1,0 +1,6 @@
+Address,Status Code,Content Type,Indexability,Title 1,Meta Description 1,H1-1,Canonical Link Element 1,Word Count
+https://www.example.com/,200,text/html,Indexable,Example Matratzen Shop,Matratzen online kaufen,Willkommen bei Example,https://www.example.com/,450
+https://www.example.com/matratzen/,200,text/html,Indexable,Matratzen kaufen,Alle Matratzen im Ueberblick,Matratzen,https://www.example.com/matratzen/,320
+https://www.example.com/matratzen/140x200/,200,text/html,Indexable,Matratze 140x200,Matratze 140x200 kaufen,Matratze 140x200,https://www.example.com/matratzen/140x200/,280
+https://www.example.com/topper/180x200/,404,text/html,Non-Indexable,,,,0
+https://www.example.com/alte-seite/,301,text/html,Non-Indexable,,,,0
