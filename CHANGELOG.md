@@ -2,6 +2,23 @@
 
 All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased] — v0.5.1-dev
+
+### Added
+
+- **New runnable skill: `sistrix-monday-recovery-check`** ([SKILL.md](./plugins/seo-rescue/skills/sistrix-monday-recovery-check/SKILL.md)) — CSV-first weekly recovery review during an active SEO recovery. No SISTRIX API key required. Reads current and previous SISTRIX keyword exports (optionally a money-keyword list, optionally a GSC export, optionally CR data) and emits a fixed 17-section structured report: visibility-index interpretation, Top-100/50/20/10/5/3 recovery distribution, winner/loser neutralization, money-keyword protection table, URL-level recovery table, per-cluster recovery stage (0-5), Recovery Signal Score (0-100), optional GSC cross-check, optional conversion-rate validation, one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate), explicit What-Not-To-Touch guard, next-7-day monitoring plan, next-Monday checklist, confidence level, data limitations. Methodology specification in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md); operational detail in [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) sections 4-10.
+- Synthetic example folder [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) with the input SISTRIX CSV shape (current week + previous week + money-keyword list) and the expected output Markdown. All data uses the RFC 2606 reserved `.test` TLD. The example demonstrates the Winner/Loser neutralization pattern: product-cluster recovery alongside informational-guide losses leaving the VI flat.
+
+### Changed
+
+- Skill count is now eleven (one orchestrator plus ten sub-skills). [README.md](./README.md), [CLAUDE.md](./CLAUDE.md), and the orchestrator [`rescue/SKILL.md`](./plugins/seo-rescue/skills/rescue/SKILL.md) updated accordingly. Quick Reference tables and sub-skill summaries updated.
+- `rescue/SKILL.md` Quick Reference table adds the `/seo-rescue:rescue monday` alias. Cost summary table extended with rows for `ai-citations-tracker`, `gsc-deep-dive`, and `sistrix-monday-recovery-check`. Latest installable version footer updated from a stale v0.3.0 to v0.5.0.
+
+### Deferred to a later v0.5.x
+
+- Optional Node.js helper script for deterministic CSV parsing + Recovery Signal Score computation. v0.5.1 ships as a pure-Markdown framework skill — Claude reads the CSVs via the Read tool and applies the methodology. The helper script would let the same workflow run in batch / cron mode and is the natural v0.5.2 follow-up if usage proves the demand.
+- ARCHITECTURE.md skill registry and MATURITY.md comparison-table skill-count cosmetic updates land at v0.5.1 release alongside the manifest version bump.
+
 ## [0.5.0] — 2026-05-26
 
 ### Architecture consolidation

@@ -51,3 +51,10 @@ gsc-exports/
 *_visibility*.csv
 *_keywords*.csv
 *_ranking*.csv
+# Hyphen variants of the keyword-list naming (audit 2026-05-27 PR #37):
+# `money-keywords.csv` is the documented operator filename and does not match
+# the underscore form above. Synthetic `.example.csv` files in examples/ are
+# explicitly allow-listed below.
+money-keywords*.csv
+*-keywords*.csv
+!**/examples/**/*.example.csv

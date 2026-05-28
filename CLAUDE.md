@@ -2,7 +2,7 @@
 
 ## What this repository is
 
-seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **ten skills (one orchestrator plus nine sub-skills)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit.
+seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **eleven skills (one orchestrator plus ten sub-skills)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit.
 
 Positioning: **Recovery Operating System for Ecommerce/D2C**. Recovery-first, decision-first, profit-aware, risk-aware. The framework supports operators making recovery and growth decisions; execution belongs to the operator's team, agency, or contractors. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the canonical source of truth.
 
@@ -21,7 +21,7 @@ seo-survival-kit/
 │       │   └── plugin.json           # Plugin manifest (path matters — see CHANGELOG v0.2.2)
 │       ├── lib/
 │       │   └── safe.js               # Shared safety primitives
-│       └── skills/                   # 10 skills (1 orchestrator + 9 sub-skills)
+│       └── skills/                   # 11 skills (1 orchestrator + 10 sub-skills)
 │           ├── rescue/                       # Orchestrator + routing table
 │           ├── seo-audit-free/
 │           ├── post-core-update-recovery/
@@ -31,7 +31,8 @@ seo-survival-kit/
 │           ├── psi-weekly-cron-baseline/
 │           ├── ai-search-rescue/
 │           ├── ai-citations-tracker/         # v0.4 addition: weekly cron AI surface tracker
-│           └── gsc-deep-dive/                # v0.4 addition: one-call GSC API snapshot
+│           ├── gsc-deep-dive/                # v0.4 addition: one-call GSC API snapshot
+│           └── sistrix-monday-recovery-check/  # v0.5.1 addition: CSV-first weekly recovery review
 ├── exports/                          # Platform-agnostic Markdown copies (Cursor / Custom GPT / Gemini / Aider / Codex)
 ├── examples/                         # Sample PDF + screenshots (synthetic data)
 ├── ARCHITECTURE.md                   # Canonical source of truth (vision, positioning, modules, governance, privacy)

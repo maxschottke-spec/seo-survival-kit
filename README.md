@@ -1,6 +1,6 @@
 # SEO Survival Kit for Claude Code
 
-> Recovery Operating System for Ecommerce/D2C. Ten Claude Code skills (one orchestrator + nine sub-skills) for SEO diagnosis, Core Update recovery, AI search visibility, decision-maker reporting, and channel economics. Built and validated during real ecommerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
+> Recovery Operating System for Ecommerce/D2C. Eleven Claude Code skills (one orchestrator + ten sub-skills) for SEO diagnosis, Core Update recovery, AI search visibility, decision-maker reporting, channel economics, and weekly recovery review. Built and validated during real ecommerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
@@ -41,7 +41,7 @@ Recovery-first decision intelligence for ecommerce and D2C. Most SEO tools answe
 
 The split is intentional (marketplace is the brand, plugin is the technical handle).
 
-## The ten skills (1 orchestrator + 9 specialized sub-skills)
+## The eleven skills (1 orchestrator + 10 specialized sub-skills)
 
 Every skill is reachable as a namespaced slash command. The orchestrator (`rescue`) routes to the right sub-skill; each sub-skill can also be called directly.
 
@@ -57,6 +57,7 @@ Every skill is reachable as a namespaced slash command. The orchestrator (`rescu
 | Sub-skill | `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery (framework) | free |
 | Sub-skill | `/seo-rescue:ai-citations-tracker` | Weekly cron tracking brand citations in ChatGPT + Perplexity (NDJSON history) | ~$0.10/year |
 | Sub-skill | `/seo-rescue:gsc-deep-dive <domain> [days?]` | One-call Google Search Console snapshot (queries + pages + coverage + CrUX) | free |
+| Sub-skill | `/seo-rescue:sistrix-monday-recovery-check <current-csv> <previous-csv> [domain?]` | CSV-first weekly recovery review — 17-section structured report (visibility-index interpretation, Top-N delta, winner/loser neutralization, money-keyword protection, URL recovery, per-cluster stage, Recovery Signal Score, recommended action) | free |
 
 Skill-level detail: see [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 
@@ -67,7 +68,7 @@ Skill-level detail: see [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Canonical source of truth: vision, positioning, system shape, modules, governance, privacy, adaptive onboarding, knowledge layer, what is NOT implemented |
 | [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) | Six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase sequencing |
 | [DECISION_ENGINE.md](./DECISION_ENGINE.md) | Decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals |
-| [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) | Weekly CSV-first workflow specification (skill ships in v0.5.1) |
+| [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) | Weekly CSV-first workflow specification — runnable skill at [`plugins/seo-rescue/skills/sistrix-monday-recovery-check/`](./plugins/seo-rescue/skills/sistrix-monday-recovery-check/) (v0.5.1-dev) with synthetic example at [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) |
 | [ROADMAP.md](./ROADMAP.md) | Version-by-version product plan |
 | [ROADMAP-2026.md](./ROADMAP-2026.md) | Google search future-watch (separate from product roadmap) |
 
