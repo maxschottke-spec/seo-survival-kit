@@ -1,5 +1,5 @@
 {
-  "_description": "Shopware seo-url patterns from real recovery: multiple entries, slug mismatches, channel conflicts, deleted states",
+  "_description": "Shopware seo-url patterns illustrating multiple-entries, slug-mismatch, channel-conflict and deleted-state cases (synthetic fixture, generic vocabulary)",
   "entries": [
     {
       "_case": "Working redirect: deleted entry PATCHed to redirect to active category",
