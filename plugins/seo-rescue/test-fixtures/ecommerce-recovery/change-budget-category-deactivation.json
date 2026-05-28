@@ -1,0 +1,31 @@
+{
+  "_description": "Test: Category deactivation without product/keyword/inlink/backlink data. Must stop.",
+  "input": {
+    "user_instruction": "Deaktiviere die EmptyCategory-Kategorie",
+    "planned_changes": [
+      {
+        "id": "cat-001",
+        "type": "category_status",
+        "target": "/empty-category-A/",
+        "description": "Deactivate category",
+        "risk_points_base": 3,
+        "multipliers": ["live_no_staging"],
+        "risk_points_final": 6
+      }
+    ],
+    "pre_checks": {
+      "product_count": null,
+      "keywords": null,
+      "inlinks": null,
+      "backlinks": null
+    },
+    "current_mode": "low_risk_fix",
+    "change_budget": 10
+  },
+  "expected": {
+    "stop_required": true,
+    "stop_reasons": ["category_deactivation_without_product_keyword_inlink_backlink_check"],
+    "requires_explicit_approval": true,
+    "recommendation": "First check product count, keywords, inlinks, backlinks. Then re-plan with full data."
+  }
+}

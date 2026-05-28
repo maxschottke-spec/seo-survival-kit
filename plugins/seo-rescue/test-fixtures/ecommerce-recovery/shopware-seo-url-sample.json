@@ -1,0 +1,63 @@
+{
+  "_description": "Shopware seo-url patterns from real recovery: multiple entries, slug mismatches, channel conflicts, deleted states",
+  "entries": [
+    {
+      "_case": "Working redirect: deleted entry PATCHed to redirect to active category",
+      "id": "sample-001",
+      "seoPathInfo": "product-itemn-category-variant-90x200/",
+      "foreignKey": "cf5e2369-category-variant-category",
+      "pathInfo": "/navigation/cf5e2369-category-variant-category",
+      "routeName": "frontend.navigation.page",
+      "salesChannelId": "e4bf3aa9-live-storefront",
+      "languageId": "2fbb5fe2-de",
+      "isDeleted": false,
+      "isCanonical": false,
+      "isModified": true,
+      "live_result": {"http_status": 301, "redirect_target": "/ParentCategory-T/", "final_status": 200}
+    },
+    {
+      "_case": "Failed redirect: API 500 because another entry already points to same foreignKey",
+      "id": "sample-002",
+      "seoPathInfo": "Product-Variant-Standard-Medium-A/",
+      "foreignKey": "d6c9eb8e-tfk-product-itemn",
+      "pathInfo": "/navigation/d6c9eb8e-tfk-product-itemn",
+      "routeName": "frontend.navigation.page",
+      "salesChannelId": "e4bf3aa9-live-storefront",
+      "isDeleted": false,
+      "isCanonical": false,
+      "isModified": true,
+      "live_result": {"http_status": 404, "error": "seo-url entry exists but Shopware does not resolve it"},
+      "api_error": "HTTP 500 on initial PATCH - undocumented unique constraint on foreignKey per channel"
+    },
+    {
+      "_case": "Wrong slug: PATCH succeeded but URL still 404 because slug doesnt match request path",
+      "id": "sample-003",
+      "seoPathInfo": "product-itemn1/ProblemSolutionPage-A-Variant/",
+      "foreignKey": "4c44e279-strong-problem-solutionen",
+      "salesChannelId": "e4bf3aa9-live-storefront",
+      "isDeleted": false,
+      "isModified": true,
+      "live_result": {"http_status": 404, "note": "User requests /Welche-product-item-bei-R./ but seo-url slug is product-itemn1/Welche-.../ - different prefix, no match"}
+    },
+    {
+      "_case": "Channel conflict: entry exists in headless API channel, not live storefront",
+      "id": "sample-004",
+      "seoPathInfo": "Product-Variant-Standard-Medium-A/101233-180200H3",
+      "foreignKey": "afb96a9e-product",
+      "salesChannelId": "018e34f4-headless-api",
+      "isDeleted": false,
+      "isCanonical": true,
+      "live_result": {"http_status": 404, "note": "Entry is in headless channel, live storefront cannot see it"}
+    },
+    {
+      "_case": "Deactivated category: seo-url isDeleted true, category active false",
+      "id": "sample-005",
+      "seoPathInfo": "empty-category-A/",
+      "foreignKey": "0192c3af-empty-category",
+      "salesChannelId": "e4bf3aa9-live-storefront",
+      "isDeleted": true,
+      "isCanonical": true,
+      "live_result": {"http_status": 404, "category_active": false, "product_count": 0}
+    }
+  ]
+}

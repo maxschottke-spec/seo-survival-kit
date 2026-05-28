@@ -1,0 +1,25 @@
+{
+  "_description": "Test: Informal German approval with concrete plan reference. Must be accepted.",
+  "input": {
+    "shown_plan": {
+      "planned_changes": 3,
+      "change_types": ["redirect", "redirect", "redirect"],
+      "total_risk_points": 6,
+      "urls": ["/url-a/", "/url-b/", "/url-c/"]
+    },
+    "user_approval_text": "Ja, mach genau die 3 Redirects mit 6 Punkten."
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_elements": ["number", "type", "risk_points", "permission"],
+    "missing_elements": [],
+    "reason": "Three or more validation elements present; approval accepted"
+  },
+  "additional_valid_examples": [
+    "Okay, fuehre diesen Change Plan mit 2 Anchor-Fixes aus.",
+    "Freigegeben: die 3 DreiscSeo-Ketten deaktivieren, keine weiteren Aenderungen.",
+    "Mach die eine Anchor-Aenderung, sonst nichts.",
+    "Ja, nur diesen Micro-Fix ausfuehren.",
+    "Deaktiviere die 8 leeren Kategorien (0 Produkte), ich kenne die Folgen."
+  ]
+}

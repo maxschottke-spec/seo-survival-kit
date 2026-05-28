@@ -1,0 +1,41 @@
+{
+  "_description": "DreiscSeo redirect patterns: 301->404 chains, active/inactive, case-sensitivity trap",
+  "entries": [
+    {
+      "_case": "301->404 chain: DreiscSeo redirect points to a deactivated category",
+      "id": "dreisc-001",
+      "sourcePath": "guenstiges-empty-category-A/",
+      "redirectPath": "empty-category-A/",
+      "redirectHttpStatusCode": "301",
+      "active": true,
+      "live_result": {
+        "source_status": 301,
+        "redirect_target": "/empty-category-A/",
+        "target_status": 404,
+        "chain": "301 -> 404"
+      },
+      "fix": "PATCH active:false on this DreiscSeo entry"
+    },
+    {
+      "_case": "Fixed: DreiscSeo redirect deactivated to break 301->404 chain",
+      "id": "dreisc-002",
+      "sourcePath": "guenstiger-empty-category-C/",
+      "redirectPath": "empty-category-C/",
+      "redirectHttpStatusCode": "301",
+      "active": false,
+      "live_result": {
+        "source_status": 404,
+        "note": "Clean 404 after DreiscSeo deactivation"
+      }
+    },
+    {
+      "_case": "TRAP: Case-insensitive redirect loop. DO NOT create redirects where source and target differ only in case",
+      "id": "dreisc-003",
+      "sourcePath": "blog/article-name/",
+      "redirectPath": "Blog/article-name/",
+      "redirectHttpStatusCode": "301",
+      "active": false,
+      "note": "DreiscSeo matches case-insensitively. Source 'blog/' matches target 'Blog/' = infinite 301 loop. Fix via Nginx, not DreiscSeo."
+    }
+  ]
+}
