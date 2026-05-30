@@ -206,3 +206,28 @@ Welche Daten-Capabilities nicht verfuegbar waren. Hilft einzuschaetzen, welche A
 - `good` + `high`: Alle wichtigen Daten frisch und vollstaendig
 - `partial` + `medium`: Nutzbar, aber einzelne Aspekte fehlen
 - `poor` + `low`: Nur Minimal-Daten, Ergebnis stark eingeschraenkt
+
+## "Hypothese intern konsistent, extern falsch"
+
+**Symptom:** Eine AI-generierte Diagnose ist logisch geschlossen, mit klarer Mechanik, gestützt durch Open-Source-Code-Lesen einer Komponente im Stack. Der Fix-Plan wird detailliert ausgearbeitet. Bei lokaler Verifikation durch den Operator (oder Entwickler) stellt sich heraus: die Komponente ist tatsächlich beteiligt, aber nicht der Verursacher der beobachteten Wirkung. Eine andere Komponente, oft kommerziell und Closed-Source, sitzt im selben Override- oder Subscriber-Chain und produziert das eigentliche Symptom.
+
+**Ursache:** AI-Diagnose kann nur sehen, was öffentlich einsehbar ist (Live-HTML, Open-Source-Repos, Crawl-Output, dokumentierte API-States). Wenn ein Closed-Source-Plugin oder ein lokales Theme-Override im selben Render-Chain sitzt und das beobachtete Symptom produziert, ist die AI strukturell blind dafür. Die Hypothese kann jedes verfügbare Open-Source-Detail korrekt einordnen und trotzdem die falsche Komponente als Verursacher benennen.
+
+**Beispiel-Pattern (originating recovery case, Mai 2026):** D2C-Shop verliert 79 % seiner 28-Tage-Klicks an einen Plugin-Bug. AI identifiziert ein Open-Source-Blog-Plugin als wahrscheinlichen Verursacher auf Basis einer einsehbaren Block-Override-Mechanik, baut einen Theme-Override-Fix-Plan. Operator-Developer inspiziert die installierten Plugin-Files am Server, findet die tatsächliche Quelle in einem kommerziellen Closed-Source-SEO-Plugin, das im Template-Inheritance-Chain zwischen dem Open-Source-Plugin und dem Shopware-Core sitzt. Die ursprüngliche Hypothese war intern konsistent (Code im Open-Source-Plugin existiert und kann die Doppelung triggern) und extern falsch in der Attribution (die Doppelung wird vom Plugin dahinter erzeugt, nicht vom Open-Source-Plugin selbst).
+
+**Diagnose-Regel:** Vor jedem Live-Fix muss die Hypothese den Hypothesis Verification Gate auf Status `verified` durchlaufen (siehe `references/HYPOTHESIS_VERIFICATION_GATE.md`). Open-Source-Code-Lesen alleine ist weak-tier verification und erlaubt höchstens `likely`. Strong-tier verification erfordert einen direkten Zugriff auf den installierten Stack: Server-File-Inspect, Live-API-State-Read, GSC-URL-Inspection, Staging-Reproduction, oder explizite Operator/Developer-Bestätigung.
+
+**Lösung:**
+
+1. Den AI-generierten Fix-Plan als Hypothese mit Status `likely` markieren, nicht als `verified` behandeln, auch wenn er logisch geschlossen wirkt
+2. Mindestens eine alternative Hypothese formulieren (z.B.: welche anderen Komponenten in derselben Override-Chain könnten den Effekt produzieren?)
+3. Operator-Direktzugriff einholen: installierte Plugin-Files inspizieren, nicht nur die Upstream-Repos
+4. Erst nach `verified` durch strong-tier Verifikation Fix-Plan in Change Plan überführen
+5. Fix-Scope strikt an die verifizierte Komponente binden; nicht aufweiten auf Komponenten die "vermutlich auch betroffen sind"
+
+**Quervorbeugung:** Diese Failure-Mode tritt besonders häufig auf bei Plugin-Stacks mit gemischten Open-Source- und Closed-Source-Komponenten in derselben Template-Inheritance- oder Subscriber-Chain (typisch in Shopware, WordPress, Magento, Drupal). Bei reinem Open-Source-Stack ist das Risiko geringer, weil die AI alle Override-Chains einsehen kann. Bei reinem Closed-Source-Stack ist es offensichtlich, dass externe AI-Forensik nicht ausreicht — die Trap liegt im Mischfall, wo AI eine Komponente komplett lesen kann und übersehen wird, dass eine andere Komponente daneben das gleiche Symptom auch produzieren könnte.
+
+**Verwandte Patterns:**
+
+- "Plugin-Install triggert latenten Bug in unverwandter Komponente" — siehe `feedback_post_plugin_install_seo_pre_post_crawl` und `SAFE_LIVE_CHANGE_RULES.md` section "Plugin-Install / Cache-Rebuild Pre-/Post-Crawl Rule"
+- "Verified-Scope Expansion" — wenn ein Fix für eine URL verifiziert ist, ist er nicht automatisch für ähnliche URLs verifiziert. Siehe `HYPOTHESIS_VERIFICATION_GATE.md` Hard Stop 25 in `SEO_CHANGE_GOVERNOR.md`

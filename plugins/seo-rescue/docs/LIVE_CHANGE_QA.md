@@ -115,3 +115,29 @@ For CTR / title / content / internal-link work, the **10-day click evaluation wi
 When GSC clicks drop after a Major Batch, the default operator instinct is to act. The Settlement Gate codifies the discipline of not acting: low clicks during the gate window are the expected state, not a signal. Acting on them risks treating noise as signal and conflating the batch's effect with the new action's effect, leaving the operator unable to attribute either.
 
 See `references/SEO_SETTLEMENT_GATE.md` sections 7 (Exceptions), 9 (Unlock Criteria), and 10 (Operator-Pressure Response) for the full handling.
+
+## Pre-Fix Verification Checklist
+
+Before any planned change moves from approved plan to live deploy, this checklist must be true. Cite the corresponding hypothesis entry from `schemas/hypothesis-verification.schema.json` in your run output.
+
+- [ ] Observed effect is measurable and grounded in real data (not just a feeling or a single screenshot)
+- [ ] At least one alternative hypothesis was explicitly considered and ruled out, with the verification source that ruled it out
+- [ ] At least one strong-tier verification source has confirmed the cause on the operator's specific stack (direct API state read, server file inspection, GSC URL Inspection, staging reproduction, operator/developer review)
+- [ ] Open-source code reading alone is not the only verification source for a hypothesis affecting commercial / closed-source components
+- [ ] The fix scope (`fix_scope.affected_urls`, `fix_scope.affected_components`) is strictly bounded by what was verified, not generalized
+- [ ] Smallest reversible change that addresses the verified cause has been identified
+- [ ] Rollback method is defined and has been verified locally or on staging
+- [ ] Monitoring plan covers stage 1 (T+0..24h), stage 2 (T+3d), stage 3 (T+7d), stage 4 (T+14d)
+- [ ] If Settlement Gate is active, override justification is documented per `SEO_SETTLEMENT_GATE.md` section 7 and `hypothesis-verification.schema.json#settlement_gate_override`
+- [ ] Operator approval per `SAFE_LIVE_CHANGE_RULES.md` cites the verified hypothesis ID, the fix scope, and the rollback method explicitly
+
+A checklist item that is not true is a blocker. The default operator response under blocker conditions is: do not deploy, return to fix-planning, document what verification step is missing.
+
+## Post-Fix QA additions for verified-hypothesis fixes
+
+In addition to the standard post-deploy QA from sections above, fixes deployed against a `verified` hypothesis must:
+
+- Re-snapshot the source of truth that produced the `verified` status. If a server file inspection produced verification, re-check the same file after deploy to confirm the change is in place. If GSC URL Inspection produced verification, re-run the inspection for the affected URL.
+- Cross-check the bounded `fix_scope` on a sample of the affected URLs (canonical count, indexability, schema presence, robots) and on a sample of explicitly out-of-scope URLs to confirm the fix did not cascade.
+- Run the functional checks for any third-party components in the same template inheritance chain or override chain as the fixed component. The fix targets a specific cause; it must not silently degrade unrelated functions of the same plugin or theme.
+- Append a status transition to `status_history` in the hypothesis entry: `verified → fixed`, with timestamp and the post-deploy QA artifact reference.

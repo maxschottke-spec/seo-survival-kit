@@ -195,6 +195,41 @@ Bewerte jede Massnahme mit Recovery-Risiko:
 
 **Hinweis:** Bei `data_quality = "poor"` in den Eingabedaten keine Aktionen mit `risk = "green"` setzen.
 
+### Schritt 8a: Hypothesis Verification Gate
+
+Bevor eine Massnahme in den ausfuehrbaren Plan-Teil aufgenommen wird (`live_changes_allowed: true`), muss die zugrundeliegende Root-Cause-Hypothese den Status `verified` oder `fixed` haben, gemaess `references/HYPOTHESIS_VERIFICATION_GATE.md` und `schemas/hypothesis-verification.schema.json`.
+
+Regelwerk:
+
+- Jede geplante Massnahme im Output-Feld `planned_changes[]` muss ein `hypothesis_id`-Feld haben, das auf einen Eintrag im `hypothesis_registry` der zugehoerigen `recovery-audit`-Output verweist
+- Der referenzierte Hypothesen-Eintrag muss `hypothesis_status` in `verified` oder `fixed` haben
+- Bei `hypothesis_status` in `suspected` oder `likely` wird die Massnahme in `prepare_now_execute_later` segregiert, **nicht** in `allowed_now`
+- Bei `hypothesis_status = verified` aber `fix_scope` aus dem Hypothesen-Eintrag ueberschritten (z.B. mehr URLs in `planned_changes[]` als in `fix_scope.affected_urls`): die ueberzaehligen URLs werden auf `prepare_now_execute_later` zurueckgesetzt mit Stop-Reason `fix_scope_expansion`
+- Bei verweistem `hypothesis_id`, der im `hypothesis_registry` nicht existiert: Hard Stop mit Stop-Reason `hypothesis_not_in_registry`
+- Bei Massnahme ohne `hypothesis_id`: Hard Stop mit Stop-Reason `hypothesis_id_missing`
+
+Output-Feld pro Massnahme:
+
+```json
+{
+  "hypothesis_id": "hvg-<short-slug>",
+  "hypothesis_status_snapshot": "verified|fixed",
+  "fix_scope_match": true,
+  "verified_by_source_tier": "strongest|strong"
+}
+```
+
+Top-Level-Output-Feld:
+
+```json
+"hypothesis_verification_gate": {
+  "all_planned_changes_verified": true,
+  "below_verified_count": 0,
+  "scope_expansions_blocked": [],
+  "missing_hypothesis_ids": []
+}
+```
+
 ### Schritt 9: Human Approval Gate
 
 Jeder generierte Plan benoetigt explizite menschliche Freigabe vor der Umsetzung.

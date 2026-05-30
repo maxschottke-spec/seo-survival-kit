@@ -174,6 +174,20 @@ Per `schemas/seo-change-audit.schema.json`:
 - `rollback_matrix` (per-change rollback methods)
 - `summary` (aggregate statistics)
 - `settlement_gate` (Settlement-Gate-Status-Block per `schemas/recovery-gate.schema.json`)
+- `hypothesis_registry` (Array of hypothesis entries per `schemas/hypothesis-verification.schema.json`, one per identified root cause; mandatory for any change in `changes[]` or `unverified_changes[]` that has a cause attribution)
+
+## Hypothesis Verification Gate
+
+The audit must emit a `hypothesis_registry` array. For every cause attribution that the audit identifies (whether to a successful change, a failed change, or an open risk), the registry contains a hypothesis entry per `schemas/hypothesis-verification.schema.json`.
+
+The audit itself does not move a hypothesis to `verified` — it only records the status it observes. Specifically:
+
+- If the audit finds a change in `changes[]` with a documented cause-attribution but no strong-tier verification source, the hypothesis is recorded as `likely` regardless of whether the change appeared to succeed
+- If the audit finds a change with strong-tier verification (file inspect, API state, GSC URL Inspection, staging reproduction, operator/developer review) cited in the change log, the hypothesis is recorded as `verified` or `fixed` depending on post-deploy state
+- If the audit finds an `unverified_change` (change occurred but cause unclear), the hypothesis is recorded as `suspected` with the observed evidence noted
+- If a change in `changes[]` was deployed without any hypothesis verification at all, the audit must add an `audit_gap` entry of severity `high` with marker `hypothesis_verification_missing`
+
+This registry feeds downstream commands: `recovery-plan` reads it to determine which planned actions reference verified causes (and are therefore live-fix-eligible) versus which reference suspected/likely causes (which must remain in fix-planning state only).
 
 ## Integration with Other Commands
 
@@ -188,5 +202,7 @@ Per `schemas/seo-change-audit.schema.json`:
 - `references/SHOPWARE_SEO_PATTERNS.md` — Shopware-specific reconstruction patterns
 - `references/DREISCSEO_PATTERNS.md` — DreiscSeo redirect audit patterns
 - `references/SEO_SETTLEMENT_GATE.md` — Settlement Gate, Major Batch trigger thresholds, unlock criteria
+- `references/HYPOTHESIS_VERIFICATION_GATE.md` — Hypothesis verification status definitions and verification source hierarchy
 - `schemas/seo-change-audit.schema.json` — Output JSON Schema
 - `schemas/recovery-gate.schema.json` — Gate state schema
+- `schemas/hypothesis-verification.schema.json` — Hypothesis registry entry schema

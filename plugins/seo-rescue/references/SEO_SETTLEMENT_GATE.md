@@ -345,6 +345,28 @@ Formal statement (mirrored verbatim in `SEO_CHANGE_GOVERNOR.md`):
 
 ---
 
+## 11.A Interaction with the Hypothesis Verification Gate
+
+Settlement Gate and Hypothesis Verification Gate operate as independent layers. A live action must pass both. There are three meaningful combinations:
+
+| Settlement Gate | Hypothesis Verification Gate | Outcome |
+|---|---|---|
+| inactive | `verified` or `fixed` | Live action permitted, subject to Change Governor budget |
+| inactive | `suspected` or `likely` | **Blocked by HVG** regardless of Settlement Gate status |
+| active | `verified` or `fixed` | **Blocked by Settlement Gate** unless 7.A Technical Emergency or 7.C Explicit Emergency Approval applies; the verified hypothesis does not override Settlement Gate |
+| active | `suspected` or `likely` | **Blocked by both gates** |
+
+A `verified` hypothesis during an active Settlement Gate is the classic case where an operator may consider a Settlement Gate override under 7.A or 7.C. The override is permitted only if:
+
+1. The hypothesis is genuinely `verified` (not stretched from `likely`) per `HYPOTHESIS_VERIFICATION_GATE.md`
+2. The fix scope strictly matches the verified scope
+3. The operator's approval per `SAFE_LIVE_CHANGE_RULES.md` cites both gates explicitly
+4. The override is documented in `settlement_gate_override` of the hypothesis entry
+
+The originating recovery case in May 2026 used exactly this path: a `verified` hypothesis (developer file-inspect plus live HTML cross-check), Settlement Gate active, operator override decision documented, fix scope strictly matched to verified component, post-deploy QA passed, monitoring scheduled. This is the operational pattern that the two-gate combination is designed to support.
+
+---
+
 ## 12. Interaction with the recovery commands
 
 | Command | Gate-aware behavior |

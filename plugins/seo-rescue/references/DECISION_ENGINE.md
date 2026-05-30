@@ -190,6 +190,20 @@ Four levels of source quality. Higher levels produce higher-confidence recommend
 
 A recommendation that cannot reach at least medium confidence is presented as a hypothesis, not a recommendation. The engine deliberately avoids confident statements built on weak evidence.
 
+### Hypothesis verification overlay
+
+Evidence-weighting governs what the engine recommends. The Hypothesis Verification Gate (see `references/HYPOTHESIS_VERIFICATION_GATE.md`) governs whether a recommendation may be executed live. The two layers are independent.
+
+A medium-confidence recommendation built from Level B sources may still be at hypothesis status `suspected` if it has not been verified against the operator's specific stack. The engine emits the recommendation; the gate blocks the live execution until verification occurs.
+
+Mapping between evidence levels and hypothesis verification:
+
+- **Level A or strong-tier verification source** (direct API state, server file, GSC URL Inspection, staging, developer/operator inspection) → hypothesis may reach `verified`
+- **Level B or medium-tier verification source** (cross-checked live HTML, crawl signals, third-party tool output specific to the URL) → hypothesis at most `likely`, requires escalation to a strong-tier source for `verified`
+- **Level C or weak-tier verification source** (pattern match, AI reasoning chain, timing correlation, open-source code reading alone) → hypothesis at most `suspected`
+
+Multiple weak-tier sources do not aggregate into `verified`. They aggregate into `likely` if they cross-confirm in independent dimensions, but the strong-tier verification step is still required before any live action.
+
 ### Source quality vs author authority
 
 Sources are rated, not authors. A respected practitioner publishing a blog post without methodology is Level C. The same practitioner publishing a case study with before/after data is Level B. The same practitioner contributing to platform documentation is Level A. This prevents over-weighting any single voice.

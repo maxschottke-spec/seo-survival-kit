@@ -194,6 +194,25 @@ and stop. Stop reason: `unused_budget_is_not_permission`.
 
 The "Reserve bleibt Reserve" rule from `SEO_SETTLEMENT_GATE.md` section 11 is canonical: unused CG budget is never an implicit authorization for additional work.
 
+### Plugin-Install / Cache-Rebuild Pre-/Post-Crawl Rule
+
+Every plugin install, activation, deactivation, upgrade, or forced theme/cache rebuild on a live shop requires a paired crawl: one immediately before the action, one immediately after (allowing ≥ 60 seconds for cache propagation). Both crawls must capture at minimum:
+
+- Canonical count per URL and canonical href values
+- Indexability status (`Indexierbar` / `Canonicalised` / `Noindex`)
+- H1 presence and uniqueness
+- Schema.org structured-data presence and validity
+- HTTP status and internal 4xx/5xx counts
+- Meta robots directives
+
+Diff the two crawls. Any new conflicts (new duplicate canonicals, new missing H1, new 4xx/5xx, flipped indexability, new redirect chains, broken structured data) is a stop-the-line event. No further changes until the conflict is understood. If the conflict cannot be reverted in ≤ 5 minutes, escalate to the operator before continuing.
+
+This rule is **strictly enforced during active Recovery Windows**. During recovery, every plugin-action additionally requires written approval and a `change-log-entry` reference to the paired Pre-/Post-Crawl artifacts.
+
+Reason: plugin-host applications (Shopware, WordPress, Magento) lazily evaluate template chains and meta-loader subscribers. A plugin code path that has been latent for months can suddenly materialize when a cache rebuild re-evaluates the render context — often triggered by an unrelated plugin install. Detecting the new conflict at action time (minutes) prevents the same conflict from being detected at Google-impact time (days to weeks).
+
+Practical example (originating recovery case, May 2026): three plugins were installed in a single batch on a Shopware live shop. The cache rebuild that followed activated a latent dormant canonical-injection bug in a separately installed blog plugin (installed 19 months earlier, dormant the entire time). The bug was not detected until 7 days later via a routine GSC decline analysis, by which time 79 % of the 28-day click loss had already accumulated. A post-install crawl at action time would have caught the new doubled-canonical state inside the first minute.
+
 ## See Also
 
 - `references/SEO_SETTLEMENT_GATE.md` — Settlement Gate definition, exceptions, unlock criteria

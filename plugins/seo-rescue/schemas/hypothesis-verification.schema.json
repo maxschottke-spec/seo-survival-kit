@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/maxschottke-spec/seo-survival-kit/plugins/seo-rescue/schemas/hypothesis-verification.schema.json",
+  "title": "Hypothesis Verification Gate Entry",
+  "description": "Tracks the verification status of a root-cause hypothesis in an SEO recovery operation. Live-fix actions are only permitted when status is 'verified' or 'fixed'. See references/HYPOTHESIS_VERIFICATION_GATE.md for the full concept.",
+  "type": "object",
+  "required": [
+    "hypothesis_id",
+    "hypothesis_status",
+    "hypothesis",
+    "observed_effect",
+    "supporting_evidence",
+    "source_of_truth_checked",
+    "excluded_alternatives",
+    "verified_by",
+    "live_fix_allowed",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "hypothesis_id": {
+      "type": "string",
+      "pattern": "^hvg-[a-z0-9-]+$",
+      "description": "Stable identifier for this hypothesis entry. Format: hvg-<short-slug>."
+    },
+    "hypothesis_status": {
+      "type": "string",
+      "enum": ["suspected", "likely", "verified", "fixed", "monitored"],
+      "description": "Current verification status. Live fixes are only permitted at 'verified' or 'fixed'."
+    },
+    "hypothesis": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 500,
+      "description": "Concise statement of the suspected cause and mechanism. Should answer 'what produces the observed effect, by what mechanism'."
+    },
+    "observed_effect": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 500,
+      "description": "What is the actual symptom being explained? Should be measurable and grounded in real data."
+    },
+    "supporting_evidence": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["source", "observation", "strength"],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "live_html",
+              "screaming_frog_crawl",
+              "gsc_url_inspection",
+              "gsc_search_analytics",
+              "shopware_admin_api",
+              "wordpress_rest_api",
+              "magento_api",
+              "server_file_inspect",
+              "staging_reproduction",
+              "developer_review",
+              "operator_review",
+              "open_source_code_read",
+              "third_party_tool_dataforseo",
+              "third_party_tool_sistrix",
+              "third_party_tool_clarity",
+              "third_party_tool_ga4",
+              "pattern_match",
+              "timing_correlation",
+              "ai_reasoning",
+              "other"
+            ],
+            "description": "Verification source type. See HYPOTHESIS_VERIFICATION_GATE.md for the strength hierarchy."
+          },
+          "observation": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 1000,
+            "description": "What was observed from this source that supports the hypothesis."
+          },
+          "strength": {
+            "type": "string",
+            "enum": ["strongest", "strong", "medium", "weak"],
+            "description": "Verification strength tier. weak sources alone cannot move a hypothesis to 'verified'."
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "captured_by": {
+            "type": "string",
+            "description": "Who or what produced this evidence (e.g., 'ai_diagnose', 'operator', 'developer_name', 'crawl_id')."
+          },
+          "artifact_path": {
+            "type": ["string", "null"],
+            "description": "Optional path to the underlying artifact (crawl export, HTML snapshot, API response)."
+          }
+        }
+      }
+    },
+    "contradicting_evidence": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["source", "observation"],
+        "additionalProperties": false,
+        "properties": {
+          "source": { "type": "string" },
+          "observation": { "type": "string", "minLength": 10 },
+          "captured_at": { "type": "string", "format": "date-time" },
+          "captured_by": { "type": "string" },
+          "resolution": {
+            "type": "string",
+            "description": "How was this contradiction handled? Options: 'hypothesis_refined', 'hypothesis_status_reset_to_suspected', 'evidence_explained_as_artifact', 'hypothesis_closed'."
+          }
+        }
+      },
+      "description": "Evidence that contradicts the hypothesis. A non-empty entry should either resolve the contradiction or downgrade the hypothesis status."
+    },
+    "source_of_truth_checked": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "enum": [
+          "live_html",
+          "crawl",
+          "api",
+          "server_file",
+          "gsc",
+          "staging",
+          "developer_inspect",
+          "operator_inspect"
+        ]
+      },
+      "description": "Which source-of-truth verification categories have been performed. For 'verified' status, at least one entry must be from the strong or strongest tier (api, server_file, gsc, staging, developer_inspect, operator_inspect)."
+    },
+    "excluded_alternatives": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["alternative", "excluded_by"],
+        "additionalProperties": false,
+        "properties": {
+          "alternative": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Alternative hypothesis that was considered."
+          },
+          "excluded_by": {
+            "type": "string",
+            "minLength": 10,
+            "description": "What evidence ruled out this alternative."
+          },
+          "excluded_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "description": "Alternative hypotheses that were considered and ruled out. For 'verified' status, this array must be non-empty unless explicitly justified."
+    },
+    "verified_by": {
+      "type": "string",
+      "enum": [
+        "operator",
+        "developer",
+        "live_html_only",
+        "crawl_only",
+        "api_only",
+        "server_file",
+        "gsc_inspection",
+        "staging_reproduction",
+        "mixed_strong",
+        "mixed_medium",
+        "not_yet_verified"
+      ],
+      "description": "Single-value summary of the strongest verification source used. 'not_yet_verified' is the only valid value when hypothesis_status is 'suspected' or 'likely'."
+    },
+    "live_fix_allowed": {
+      "type": "boolean",
+      "description": "Computed field: must be true only when hypothesis_status is 'verified' or 'fixed'. Any other status forces false."
+    },
+    "fix_scope": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "affected_urls": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "URLs in scope for the verified fix. Expanding beyond this list requires re-verification of the expanded scope."
+        },
+        "affected_components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Code components, plugins, templates, or configuration sections in scope."
+        },
+        "minimal_change_description": {
+          "type": "string",
+          "description": "The smallest reversible change that addresses the verified cause."
+        }
+      },
+      "description": "Only required when hypothesis_status is 'verified' or beyond. Defines the bounds of the permitted live fix."
+    },
+    "monitoring_plan": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "stage_1_window_hours": { "type": "integer", "minimum": 1 },
+        "stage_2_window_days": { "type": "integer", "minimum": 1 },
+        "stage_3_window_days": { "type": "integer", "minimum": 1 },
+        "stage_4_window_days": { "type": "integer", "minimum": 1 },
+        "revert_trigger_conditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "description": "Required when hypothesis_status is 'fixed' or 'monitored'."
+    },
+    "operator_approval": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "approved_by": { "type": "string" },
+        "approved_at": { "type": "string", "format": "date-time" },
+        "approval_text": { "type": "string" },
+        "approval_scope_match": {
+          "type": "boolean",
+          "description": "True if the operator's approval explicitly matches the verified fix_scope. Required for live deploy."
+        }
+      },
+      "description": "Required when hypothesis_status is 'fixed' or beyond. Operator approval must reference the verified cause and the fix_scope."
+    },
+    "settlement_gate_override": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "settlement_gate_was_active": { "type": "boolean" },
+        "override_justification": { "type": "string" },
+        "override_approved_by": { "type": "string" }
+      },
+      "description": "If the verified fix was deployed during an active Settlement Gate, this object documents the override decision."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from_status", "to_status", "transitioned_at", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "from_status": { "type": "string" },
+          "to_status": { "type": "string" },
+          "transitioned_at": { "type": "string", "format": "date-time" },
+          "reason": { "type": "string", "minLength": 10 }
+        }
+      },
+      "description": "Audit trail of status transitions. Required for any hypothesis that reaches 'verified' or beyond."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "hypothesis_status": { "enum": ["suspected", "likely"] }
+        }
+      },
+      "then": {
+        "properties": {
+          "live_fix_allowed": { "const": false },
+          "verified_by": { "const": "not_yet_verified" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "hypothesis_status": { "enum": ["verified", "fixed", "monitored"] }
+        }
+      },
+      "then": {
+        "required": ["fix_scope", "status_history"],
+        "properties": {
+          "verified_by": { "not": { "const": "not_yet_verified" } }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "hypothesis_status": { "enum": ["fixed", "monitored"] }
+        }
+      },
+      "then": {
+        "required": ["fix_scope", "monitoring_plan", "operator_approval"],
+        "properties": {
+          "live_fix_allowed": { "const": true }
+        }
+      }
+    }
+  ]
+}

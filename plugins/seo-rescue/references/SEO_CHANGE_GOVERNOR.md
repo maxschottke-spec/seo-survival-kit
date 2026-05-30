@@ -228,6 +228,9 @@ Claude must immediately stop when:
 21. **NEW**: `settlement_gate_active = true` and attempted mode is not in `allowed_modes` (audit_only, emergency_rollback) without an Explicit Emergency Approval per `SEO_SETTLEMENT_GATE.md` section 7
 22. **NEW**: Attempt to spend unused budget as permission (the "Reserve bleibt Reserve" rule). Phrases like "Budget übrig", "Reserve nutzen", "noch schnell", "falls Zeit", "weitere kleine Fixes" trigger this stop
 23. **NEW**: Operator pressure phrases ("sollen wir noch optimieren?", "mach weiter", "warum sind Klicks niedrig?", "lass Titles ändern", "noch Links setzen", "alles fixen", "was kann ich noch machen?") arrive during an active Settlement Gate and no Technical Emergency / new data signal is present
+24. **NEW**: Hypothesis Verification Gate is not at `verified` or `fixed` for the cause being addressed. Live fixes targeting a `suspected` or `likely` cause are blocked regardless of how internally consistent the hypothesis appears. See `references/HYPOTHESIS_VERIFICATION_GATE.md`. The hypothesis status must be present and equal to `verified` (or higher) in any change plan referencing a root cause; planned changes referencing a hypothesis below `verified` produce an automatic stop with output template "hypothesis_status_below_verified".
+25. **NEW**: Fix scope expansion beyond the verified scope. If a hypothesis is `verified` for a specific URL set or component scope, and the proposed change plan addresses URLs or components outside that scope, the expanded portion resets to `likely` and stops the plan for that portion. The verified portion may still proceed with a smaller-scope plan.
+26. **NEW**: Verification relies exclusively on weak-tier sources. Open-source source-code reading alone, pattern matching alone, AI reasoning chain alone, or timing correlation alone is insufficient to produce `verified` status. The change plan must cite at least one strong-tier or strongest-tier verification source (direct API state read, server file inspection, GSC URL Inspection, staging reproduction, operator/developer inspection).
 
 ### Stop Output Format
 
@@ -266,15 +269,26 @@ Claude must immediately stop when:
       "seo_url_precheck": { "...": "..." },
       "requires_dreiscseo_redirect_precheck": false,
       "compliance_review": "none",
-      "medical_terms_detected": []
+      "medical_terms_detected": [],
+      "hypothesis_id": "hvg-canonical-doppel-blog-detail",
+      "hypothesis_status": "verified",
+      "hypothesis_verified_by": "developer",
+      "fix_scope_matches_verified": true
     }
   ],
   "total_risk_points": 4,
   "budget_remaining": 16,
   "stop_required": false,
-  "stop_reasons": []
+  "stop_reasons": [],
+  "hypothesis_verification_gate": {
+    "all_planned_changes_verified": true,
+    "below_verified_count": 0,
+    "scope_expansions_blocked": []
+  }
 }
 ```
+
+Every entry in `planned_changes` must reference a `hypothesis_id` that exists in the run's hypothesis registry (see `schemas/hypothesis-verification.schema.json`) and carry `hypothesis_status` equal to `verified` or `fixed`. Entries referencing a hypothesis below `verified` are rejected by Hard Stop rule 24. Entries whose target URLs or components exceed the verified `fix_scope` are rejected by Hard Stop rule 25.
 
 ## Post-Change QA Format
 
@@ -302,9 +316,11 @@ Claude must immediately stop when:
 ## See Also
 
 - `references/SEO_SETTLEMENT_GATE.md` — Settlement Gate definition, exceptions, unlock criteria
+- `references/HYPOTHESIS_VERIFICATION_GATE.md` — Hypothesis Verification Gate concept, status values, verification source hierarchy
 - `references/SAFE_LIVE_CHANGE_RULES.md` — Approval validation, standard gate response
 - `references/SHOPWARE_SEO_PATTERNS.md` — seo-url collision details
 - `references/DREISCSEO_PATTERNS.md` — DreiscSeo redirect layer
 - `references/DACH_MEDICAL_SEO_TERMS.md` — Medical term risk tiers
 - `references/SEO_CHANGE_HISTORY.md` — NDJSON logging requirements
 - `schemas/recovery-gate.schema.json` — Gate state object schema
+- `schemas/hypothesis-verification.schema.json` — Hypothesis entry schema
