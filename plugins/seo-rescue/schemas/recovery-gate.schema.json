@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SEO Recovery Gate State",
+  "description": "Settlement-gate state for a domain in recovery. Persisted at ~/.cache/seo-rescue/{slug}/recovery-gate.json. Source of truth queried by every recovery command. v1.0.0.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "domain",
+    "run_id",
+    "settlement_gate_active",
+    "reason",
+    "started_at",
+    "minimum_until",
+    "recommended_until",
+    "hard_block_live_optimizations",
+    "allowed_modes",
+    "blocked_modes",
+    "allowed_actions",
+    "blocked_actions",
+    "unlock_criteria",
+    "unlock_status",
+    "missing_unlock_criteria",
+    "emergency_exceptions",
+    "next_allowed_review_date"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Canonical domain (output of normalizeDomain)"
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Run-ID of the run that created or last updated this gate state"
+    },
+    "settlement_gate_active": {
+      "type": "boolean",
+      "description": "True while the gate blocks new live SEO optimizations"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Human-readable trigger reason, e.g. major_batch_on_2026-05-27, manual_activation, sistrix_blackout_plus_recovery"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp of the first write operation in the triggering Major Batch"
+    },
+    "minimum_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp before which non-emergency live operations must not be planned (default: started_at + 5 days)"
+    },
+    "recommended_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp recommended for any live optimization during active recovery (default: started_at + 7 days)"
+    },
+    "click_evaluation_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp before which CTR/title/content/internal-link evaluation is not statistically meaningful (default: started_at + 10 days)"
+    },
+    "hard_block_live_optimizations": {
+      "type": "boolean",
+      "description": "When true, all non-emergency live SEO writes are blocked regardless of operator pressure"
+    },
+    "trigger_signals": {
+      "type": "array",
+      "description": "Which Major Batch trigger conditions fired",
+      "items": {
+        "type": "string",
+        "enum": [
+          "more_than_10_seo_relevant_changes",
+          "more_than_5_url_or_redirect_or_category_ops",
+          "more_than_10_internal_links_changed",
+          "two_or_more_categories_deactivated",
+          "sitewide_plugin_config_changed",
+          "cms_slot_batch_on_multiple_blogposts",
+          "template_or_canonical_or_h1_multi_page_fix",
+          "produced_404_or_301_to_404_or_api_500_or_reactivation",
+          "medical_or_legal_risk_anchor_changed"
+        ]
+      }
+    },
+    "allowed_modes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["audit_only", "emergency_rollback"]
+      },
+      "description": "Modes permitted while gate is active"
+    },
+    "blocked_modes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "micro_fix",
+          "low_risk_fix",
+          "controlled_recovery",
+          "structural_change",
+          "high_risk_requires_approval"
+        ]
+      },
+      "description": "Modes blocked while gate is active"
+    },
+    "allowed_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "read_only_analysis",
+          "crawl",
+          "gsc_pull",
+          "sistrix_pull",
+          "dataforseo_pull",
+          "live_http_check",
+          "ticket_creation",
+          "schema_draft",
+          "rollback_plan",
+          "briefing",
+          "monitoring_render",
+          "repo_file_change",
+          "backlink_audit"
+        ]
+      },
+      "description": "Action types permitted while gate is active"
+    },
+    "blocked_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "title_rewrite",
+          "meta_rewrite",
+          "new_internal_links",
+          "linkblock_reduction",
+          "cms_slot_patch",
+          "category_deactivation",
+          "redirect_experiment",
+          "canonical_consolidation",
+          "content_change",
+          "h1_template_change",
+          "plugin_config_change",
+          "aio_passage_deployment",
+          "noch_schnell_fix"
+        ]
+      },
+      "description": "Action types blocked while gate is active"
+    },
+    "unlock_criteria": {
+      "type": "array",
+      "description": "Criteria evaluated when computing unlock_status",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "satisfied"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "time_minimum_until_passed",
+              "time_recommended_until_passed",
+              "time_click_evaluation_window_reached",
+              "gsc_post_batch_pull",
+              "screaming_frog_post_batch_crawl",
+              "live_http_post_batch_check",
+              "dataforseo_post_batch_snapshot",
+              "sistrix_post_batch_signal",
+              "backlink_post_batch_audit",
+              "no_new_301_to_404_chains",
+              "no_new_internal_404s",
+              "no_new_noindex_or_canonical_errors",
+              "no_new_gsc_coverage_critical_spikes",
+              "no_open_shopware_or_api_state_contradictions",
+              "re_evaluation_report_written",
+              "change_governor_budget_recalculated",
+              "new_change_plan_present",
+              "explicit_approval_present"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": ["time", "data", "stability", "decision"]
+          },
+          "satisfied": { "type": "boolean" },
+          "satisfied_at": { "type": "string", "format": "date-time" },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "unlock_status": {
+      "type": "string",
+      "enum": ["blocked", "partial", "open"],
+      "description": "blocked = no live work; partial = emergency-rollback / 7.A only with per-action approval; open = all criteria met, gate can be ended"
+    },
+    "missing_unlock_criteria": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "IDs of criteria from unlock_criteria that are not yet satisfied"
+    },
+    "emergency_exceptions": {
+      "type": "array",
+      "description": "Per-action overrides recorded during the gate",
+      "items": {
+        "type": "object",
+        "required": ["change_id", "exception_type", "reason", "approved_at"],
+        "properties": {
+          "change_id": { "type": "string" },
+          "exception_type": {
+            "type": "string",
+            "enum": ["technical_emergency", "rollback_stabilization", "explicit_emergency_approval"]
+          },
+          "reason": { "type": "string" },
+          "approval_text": { "type": "string" },
+          "approved_at": { "type": "string", "format": "date-time" },
+          "live_qa_passed": { "type": "boolean" },
+          "rollback_method": { "type": "string" }
+        }
+      }
+    },
+    "next_allowed_review_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Earliest date on which a Re-Evaluation may produce a new Change Plan"
+    },
+    "gate_history": {
+      "type": "array",
+      "description": "Append-only log of state transitions for this gate",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "event"],
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "event": {
+            "type": "string",
+            "enum": [
+              "gate_activated",
+              "criterion_satisfied",
+              "criterion_failed",
+              "emergency_exception_granted",
+              "unlock_partial",
+              "unlock_open",
+              "gate_ended"
+            ]
+          },
+          "run_id": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    }
+  }
+}

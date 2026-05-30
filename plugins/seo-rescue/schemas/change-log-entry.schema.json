@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SEO Change Log Entry",
+  "description": "Single entry in append-only change-history.ndjson. v1.1.0 adds snapshots, pre-check records, and compliance fields.",
+  "type": "object",
+  "required": ["schema_version", "run_id", "change_id", "timestamp", "domain", "actor", "mode", "change_type", "change_category", "entity_system", "url", "risk_points_final", "confidence", "decision"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.1.0" },
+    "run_id": { "type": "string" },
+    "change_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "domain": { "type": "string" },
+    "actor": { "type": "string", "enum": ["claude", "script", "human", "unknown"] },
+    "mode": { "type": "string", "enum": ["audit_only", "micro_fix", "low_risk_fix", "controlled_recovery", "emergency_rollback"] },
+    "change_type": { "type": "string", "enum": ["redirect", "category_status", "product_status", "cms_slot", "internal_link", "anchor_text", "plugin_config", "canonical", "h1", "template", "cache", "other"] },
+    "change_category": { "type": "string", "enum": ["structural", "repair_hygiene", "emergency_stabilization"] },
+    "entity_system": { "type": "string", "enum": ["shopware", "dreiscseo", "nginx", "cms", "plugin", "filesystem", "unknown"] },
+    "entity_id": { "type": "string" },
+    "url": { "type": "string" },
+    "before": { "type": "object" },
+    "after": { "type": "object" },
+    "risk_points_final": { "type": "integer", "minimum": 0 },
+    "data_sources": { "type": "array", "items": { "type": "string" } },
+    "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" },
+        "received": { "type": "boolean" },
+        "approved_by": { "type": ["string", "null"] },
+        "approval_text": { "type": ["string", "null"] },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "is_valid": { "type": "boolean" },
+            "matched_elements": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "pre_checks": {
+      "type": "object",
+      "properties": {
+        "http_status": { "type": ["integer", "null"] },
+        "canonical": { "type": ["string", "null"] },
+        "robots": { "type": ["string", "null"] },
+        "inlinks": { "type": ["integer", "null"] },
+        "backlinks": { "type": ["integer", "null"] },
+        "keywords": { "type": ["integer", "null"] },
+        "seo_url_precheck": {
+          "type": ["object", "null"],
+          "properties": {
+            "foreignKey": { "type": "string" },
+            "active_non_deleted_entries": { "type": "integer" },
+            "collision_detected": { "type": "boolean" }
+          }
+        },
+        "dreiscseo_precheck": {
+          "type": ["object", "null"],
+          "properties": {
+            "redirects_from_url": { "type": "array" },
+            "redirects_to_url": { "type": "array" },
+            "would_create_301_to_404": { "type": "boolean" }
+          }
+        },
+        "compliance_check": {
+          "type": ["object", "null"],
+          "properties": {
+            "medical_terms_detected": { "type": "array" },
+            "compliance_review": { "type": "string" }
+          }
+        }
+      }
+    },
+    "post_checks": {
+      "type": "object",
+      "properties": {
+        "http_status": { "type": ["integer", "null"] },
+        "final_status": { "type": ["integer", "null"] },
+        "canonical": { "type": ["string", "null"] },
+        "robots": { "type": ["string", "null"] },
+        "broken_links_introduced": { "type": ["integer", "null"] },
+        "unexpected_effects": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "snapshots": {
+      "type": "object",
+      "properties": {
+        "before_path": { "type": ["string", "null"] },
+        "after_path": { "type": ["string", "null"] },
+        "content_hash_before": { "type": ["string", "null"] },
+        "content_hash_after": { "type": ["string", "null"] }
+      }
+    },
+    "cms_slot_metadata": {
+      "type": ["object", "null"],
+      "properties": {
+        "slot_id": { "type": "string" },
+        "cms_page_id": { "type": "string" },
+        "section_id": { "type": "string" },
+        "block_id": { "type": "string" },
+        "urls_affected": { "type": "array", "items": { "type": "string" } },
+        "changed_links": { "type": "array" },
+        "changed_anchors": { "type": "array" },
+        "link_count_before": { "type": "integer" },
+        "link_count_after": { "type": "integer" }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "properties": {
+        "possible": { "type": "boolean" },
+        "method": { "type": "string" },
+        "estimated_minutes": { "type": "integer" }
+      }
+    },
+    "decision": { "type": "string", "enum": ["keep", "observe", "fix", "rollback", "dev_ticket", "ignore"] },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "reconstructed": { "type": "boolean" },
+    "reconstruction_sources": { "type": "array", "items": { "type": "string" } },
+    "reconstruction_confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+    "audit_source": { "type": "string" }
+  }
+}

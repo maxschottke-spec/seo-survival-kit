@@ -1,0 +1,26 @@
+{
+  "_description": "Test: CMS-Slot PATCH planned without before/after snapshot path. Must stop.",
+  "input": {
+    "user_instruction": "Add 6 internal links to blog post slot",
+    "planned_change": {
+      "id": "change-cms-001",
+      "type": "cms_slot",
+      "target": "slot-uuid-abc",
+      "description": "Add 6 internal links",
+      "risk_points_final": 5,
+      "requires_cms_slot_snapshot": true,
+      "snapshot_paths": {
+        "before_path": null,
+        "after_path": null
+      }
+    },
+    "current_mode": "low_risk_fix",
+    "change_budget": 10
+  },
+  "expected": {
+    "stop_required": true,
+    "stop_reasons": ["cms_slot_snapshot_missing"],
+    "reason": "Shopware does not reliably return updatedAt for cms-slot PATCH. Local snapshots are required for audit-safe reconstruction.",
+    "remediation": "Write before-snapshot to ~/.cache/seo-rescue/{slug}/snapshots/cms-slots/{slotId}-{timestamp}-before.json before PATCH. Write after-snapshot immediately after PATCH succeeds."
+  }
+}

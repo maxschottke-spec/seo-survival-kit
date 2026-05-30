@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "20260527-210000-test01",
+  "status": "partial",
+  "input_domain": "www.example.com",
+  "domain": "www.example.com",
+  "canonical_domain": null,
+  "slug": "www-example-com",
+  "timestamp": "2026-05-27T21:00:00Z",
+  "warnings": ["No visibility history provider available", "Using manual CSV for keyword data"],
+  "errors": [],
+  "data_quality": "poor",
+  "confidence": "low",
+  "providers_used": ["manual_csv"],
+  "missing_capabilities": ["visibility_history", "backlink_summary"],
+  "vi_current": null,
+  "vi_peak": null,
+  "vi_drop_pct": null,
+  "vi_trend_4w_pct": null,
+  "vi_trend_12w_pct": null,
+  "core_update_correlation": "unknown",
+  "core_update_name": null,
+  "keywords_total": 5,
+  "position_distribution": { "t3": 0, "t10": 1, "t20": 3, "t50": 5, "t100": 5 },
+  "quick_wins": [
+    { "keyword": "matratze 140x200", "position": 12, "volume": 880, "intent": "commercial" },
+    { "keyword": "matratze hart", "position": 15, "volume": 650, "intent": "commercial" }
+  ],
+  "top_losers": [
+    { "keyword": "topper 180x200", "position_before": 18, "position_after": 42, "volume": 520 }
+  ],
+  "backlink_profile": null,
+  "diagnosis": "mixed",
+  "severity": "medium",
+  "recovery_stage_estimate": null,
+  "summary_de": "Eingeschraenkte Diagnose auf Basis manueller CSV-Daten.",
+  "source_notes": [
+    { "field": "keywords_total", "source": "manual_csv", "note": "imports/keywords.csv" }
+  ]
+}

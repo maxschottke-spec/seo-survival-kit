@@ -1,0 +1,42 @@
+{
+  "_description": "Internal link patterns from blog CMS slots: large block, anchor risks, all-200 verification",
+  "blog_posts": [
+    {
+      "url": "/Blog/top-article",
+      "slot_id": "sample-slot-001",
+      "links_before": 7,
+      "links_after": 21,
+      "new_links": 14,
+      "link_position": "ul_block_at_page_end",
+      "risk_assessment": "medium - 21 links in one block may appear as boilerplate to Google",
+      "links": [
+        {"target": "/Category-A/", "anchor": "Category A Name", "status": 200, "canonical": "self", "robots": "index,follow", "anchor_type": "exact_match", "thematic_fit": "strong"},
+        {"target": "/Category-B/", "anchor": "Category B Name", "status": 200, "canonical": "self", "robots": "index,follow", "anchor_type": "exact_match", "thematic_fit": "strong"},
+        {"target": "/Ergonomic-Product/", "anchor": "Ergonomic Item", "status": 200, "canonical": "self", "robots": "index,follow", "anchor_type": "natural", "thematic_fit": "strong", "note": "Corrected from 'Orthopaedische product-item' - medical term compliance"},
+        {"target": "/Skoliose-Product/", "anchor": "Medical Use Case A", "status": 200, "canonical": "self", "robots": "index,follow", "anchor_type": "medical_term", "thematic_fit": "medium", "risk": "medical term in anchor - verify target page substantiates claim"}
+      ],
+      "recommendation": "Reduce from 21 to 14 links. Remove niche/medical links. Distribute top links into article body.",
+      "monitoring": "Check GSC clicks for this blog post at +7d and +14d. If clicks drop >20%, reduce link count."
+    },
+    {
+      "url": "/Blog/small-article",
+      "slot_id": "sample-slot-002",
+      "links_before": 0,
+      "links_after": 6,
+      "new_links": 6,
+      "link_position": "ul_block_at_section_end",
+      "risk_assessment": "low - small thematically tight link set",
+      "recommendation": "Keep as is. Compact and thematically exact."
+    }
+  ],
+  "verification_result": {
+    "total_new_targets": 40,
+    "all_200": true,
+    "all_self_canonical": true,
+    "all_index_follow": true,
+    "broken_links_introduced": 0,
+    "links_to_301": 0,
+    "links_to_404": 0,
+    "links_to_noindex": 0
+  }
+}

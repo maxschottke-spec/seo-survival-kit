@@ -1,0 +1,37 @@
+{
+  "_description": "Test: Multiple non-deleted seo-url entries for same foreignKey/channel/language context. Governor must stop.",
+  "input": {
+    "user_instruction": "Set up redirect from /old-url/ to /new-url/",
+    "target_foreignkey": "cat-uuid-abc123",
+    "target_salesChannelId": "live-storefront-channel",
+    "target_languageId": "de-DE",
+    "target_routeName": "frontend.navigation.page",
+    "existing_seo_url_entries": [
+      {
+        "id": "entry-001",
+        "seoPathInfo": "primary-canonical-slug/",
+        "isCanonical": true,
+        "isDeleted": false,
+        "isModified": false
+      },
+      {
+        "id": "entry-002",
+        "seoPathInfo": "secondary-redirect-slug/",
+        "isCanonical": false,
+        "isDeleted": false,
+        "isModified": true
+      }
+    ],
+    "current_mode": "low_risk_fix",
+    "change_budget": 10
+  },
+  "expected": {
+    "stop_required": true,
+    "stop_reasons": ["shopware_seo_url_foreignkey_collision"],
+    "seo_url_precheck": {
+      "active_non_deleted_entries": 2,
+      "collision_detected": true
+    },
+    "recommendation": "Manual Shopware Admin cleanup OR Nginx-level redirect. PATCH would return HTTP 500."
+  }
+}
