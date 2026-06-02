@@ -1,0 +1,54 @@
+{
+  "_description": "Test: 8 broken-link redirects to high-confidence 200/self-canonical/index targets. Allowed in repair_hygiene category despite >5 URLs.",
+  "input": {
+    "user_instruction": "Repariere die 8 broken internal links durch 301 Redirects",
+    "planned_changes": [
+      {
+        "id": "r-001",
+        "type": "redirect",
+        "change_category": "repair_hygiene",
+        "target": "/broken-source-1/",
+        "redirect_target": "/active-target/",
+        "redirect_target_status": 200,
+        "redirect_target_canonical": "self",
+        "redirect_target_robots": "index,follow",
+        "thematic_fit": "high",
+        "risk_points_base": 2,
+        "multipliers": ["live_no_staging"],
+        "risk_points_final": 4,
+        "rollback_method": "PATCH isDeleted:true",
+        "confidence": "high"
+      },
+      {
+        "id": "r-002",
+        "type": "redirect",
+        "change_category": "repair_hygiene",
+        "target": "/broken-source-2/",
+        "redirect_target": "/active-target/",
+        "redirect_target_status": 200,
+        "redirect_target_canonical": "self",
+        "redirect_target_robots": "index,follow",
+        "thematic_fit": "high",
+        "risk_points_base": 2,
+        "multipliers": ["live_no_staging"],
+        "risk_points_final": 4,
+        "rollback_method": "PATCH isDeleted:true",
+        "confidence": "high"
+      }
+    ],
+    "_note": "Similar entries for r-003 through r-008 omitted for brevity; all share same structure",
+    "total_planned_count": 8,
+    "all_targets_200_self_canonical_index_follow": true,
+    "current_mode": "controlled_recovery",
+    "change_budget": 20
+  },
+  "expected": {
+    "stop_required": false,
+    "structural_5_url_limit_applies": false,
+    "repair_hygiene_10_url_limit_applies": true,
+    "all_repair_hygiene_conditions_met": true,
+    "requires_explicit_approval": true,
+    "valid_approval_required_format": "Ja, fuehre genau diese 8 Redirect-Fixes mit X Punkten aus.",
+    "reason": "Repair-hygiene batches allow up to 10 URLs when all targets are 200/self-canonical/index,follow AND rollback is documented per change AND immediate post-change QA runs."
+  }
+}

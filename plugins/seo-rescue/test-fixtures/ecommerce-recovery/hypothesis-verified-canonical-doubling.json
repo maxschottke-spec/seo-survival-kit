@@ -1,0 +1,120 @@
+{
+  "_fixture_purpose": "Demonstrates a hypothesis that reached 'verified' status through strong-tier verification (developer file-inspect of installed plugin files). Based on the originating recovery case anonymized. Live fix is permitted.",
+  "_fixture_classification": "verified-state-example",
+  "hypothesis_id": "hvg-canonical-doubling-blog-detail",
+  "hypothesis_status": "verified",
+  "hypothesis": "Commercial closed-source SEO plugin in the template inheritance chain renders a fallback canonical pointing to the navigation root (homepage) for blog detail routes, while the blog plugin also renders its own correct self-canonical, producing two competing canonical tags per blog detail page.",
+  "observed_effect": "Blog detail routes show two <link rel=canonical> tags in live HTML: one Self (correct), one Homepage / (incorrect). 18 of 18 blog detail URLs affected. Category, product, and homepage URLs show exactly one canonical tag (correct).",
+  "supporting_evidence": [
+    {
+      "source": "live_html",
+      "observation": "Cross-page-type comparison: blog detail pages have canonical_count=2, category/product/homepage have canonical_count=1. Pattern is route-specific, not theme-global.",
+      "strength": "medium",
+      "captured_at": "2026-05-28T08:30:00Z",
+      "captured_by": "ai_diagnose"
+    },
+    {
+      "source": "screaming_frog_crawl",
+      "observation": "Crawl marks 18 blog detail URLs as 'Nicht indexierbar - Canonicalised', 28 URL variants including case duplicates affected.",
+      "strength": "medium",
+      "captured_at": "2026-05-27T22:51:00Z",
+      "captured_by": "crawl_id_e9cc8580",
+      "artifact_path": "<case-private>/canonical-multiple.ndjson"
+    },
+    {
+      "source": "open_source_code_read",
+      "observation": "Blog plugin upstream repository contains a layout_head_meta_tags block override with a parent() call after its own canonical injection. Mechanically capable of producing the observed doubling.",
+      "strength": "weak",
+      "captured_at": "2026-05-28T10:15:00Z",
+      "captured_by": "ai_diagnose"
+    },
+    {
+      "source": "server_file_inspect",
+      "observation": "Developer downloaded the installed commercial SEO plugin package from production server, inspected the plugin's Twig template files, identified the layout_head_meta_tags block override in the closed-source plugin that produces the homepage-fallback canonical for the blog plugin's detail routes. The blog plugin's parent() call lands at this override, not at Shopware Core.",
+      "strength": "strongest",
+      "captured_at": "2026-05-28T11:20:00Z",
+      "captured_by": "developer"
+    }
+  ],
+  "contradicting_evidence": [],
+  "source_of_truth_checked": [
+    "live_html",
+    "crawl",
+    "server_file",
+    "developer_inspect"
+  ],
+  "excluded_alternatives": [
+    {
+      "alternative": "Custom theme base-layout injects a hardcoded homepage canonical on all storefront pages",
+      "excluded_by": "Live HTML cross-page-type comparison: category and homepage pages show only one canonical, ruling out a theme-global injection. Theme baseConfig inspection confirmed no canonical logic in theme.",
+      "excluded_at": "2026-05-28T09:00:00Z"
+    },
+    {
+      "alternative": "Open-source blog plugin alone is the canonical-doubling source",
+      "excluded_by": "Developer inspection of the production server confirmed that the open-source plugin's parent() call lands at a closed-source SEO plugin's override in the chain, not at Shopware Core. The open-source plugin is a trigger condition, not the producer of the homepage-fallback canonical value.",
+      "excluded_at": "2026-05-28T11:30:00Z"
+    },
+    {
+      "alternative": "Shopware Core canonical block produces the homepage fallback for blog routes due to missing metaInformation.canonicalLink",
+      "excluded_by": "Closed-source SEO plugin in the override chain intercepts the call before it reaches Shopware Core. Core is not actually rendering on these routes.",
+      "excluded_at": "2026-05-28T11:30:00Z"
+    }
+  ],
+  "verified_by": "developer",
+  "live_fix_allowed": true,
+  "fix_scope": {
+    "affected_urls": [
+      "/Blog/<all-18-blog-detail-slugs>"
+    ],
+    "affected_components": [
+      "custom-theme/Resources/views/storefront/layout/meta.html.twig (new file, overriding the closed-source plugin's block)"
+    ],
+    "minimal_change_description": "New Twig file in the custom theme that extends @CommercialSeoPlugin/storefront/layout/meta.html.twig and overrides layout_head_canonical to render only the self-canonical for the blog plugin's detail routes, suppressing the homepage fallback by not calling parent() for that route."
+  },
+  "monitoring_plan": {
+    "stage_1_window_hours": 24,
+    "stage_2_window_days": 3,
+    "stage_3_window_days": 7,
+    "stage_4_window_days": 14,
+    "revert_trigger_conditions": [
+      "canonical_count != 1 on any affected blog URL",
+      "canonical href value not self on any affected blog URL",
+      "homepage canonical reappears on any affected blog URL",
+      "category or product URL canonical state changes (cascade detection)",
+      "any functional check of the commercial SEO plugin fails (Rich Snippets disappear, Sitemap unreachable, Meta description missing)"
+    ]
+  },
+  "operator_approval": {
+    "approved_by": "operator",
+    "approved_at": "2026-05-28T11:25:00Z",
+    "approval_text": "Theme-Override fuer blog-plugin-detail-routes deployen. Scope: 18 Blog-Detail-Routes. Mechanismus: layout_head_canonical-Override. Pre-Check 11:11 committed. Live-QA innerhalb 30 Min. Monitoring Stufe 1 aktiv.",
+    "approval_scope_match": true
+  },
+  "settlement_gate_override": {
+    "settlement_gate_was_active": true,
+    "override_justification": "Verified hypothesis with strongest-tier verification source (developer file inspect). Fix is Repair/Hygiene category. Reversibility under 5 minutes. 79% of 28-day click loss attributed to this single cause. Operator override decision documented per SEO_SETTLEMENT_GATE.md section 7.A.",
+    "override_approved_by": "operator"
+  },
+  "created_at": "2026-05-28T08:30:00Z",
+  "updated_at": "2026-05-28T11:30:00Z",
+  "status_history": [
+    {
+      "from_status": "suspected",
+      "to_status": "likely",
+      "transitioned_at": "2026-05-28T09:00:00Z",
+      "reason": "Live HTML cross-page-type comparison ruled out theme-global injection. Pattern is blog-route-specific."
+    },
+    {
+      "from_status": "likely",
+      "to_status": "likely",
+      "transitioned_at": "2026-05-28T10:15:00Z",
+      "reason": "Open-source plugin code read provided supporting evidence but at weak-tier strength. Status remains likely (attribution may be wrong)."
+    },
+    {
+      "from_status": "likely",
+      "to_status": "verified",
+      "transitioned_at": "2026-05-28T11:20:00Z",
+      "reason": "Developer file-inspect of installed commercial SEO plugin on production server confirmed actual source. Two alternative hypotheses (theme-global, open-source-plugin-alone) explicitly excluded with cited evidence."
+    }
+  ]
+}

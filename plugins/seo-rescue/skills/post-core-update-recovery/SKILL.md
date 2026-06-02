@@ -3,10 +3,11 @@ name: post-core-update-recovery
 description: 'Use when a website experienced a sudden visibility/ranking drop that correlates with a published Google Core Update — symptoms include broad ranking loss across many keywords in a short window (1–6 weeks), Sistrix VI dropping 30 %+ from peak, sales/leads falling despite no technical changes, the owner saying "we used to rank, now we don''t" but pages still load and index normally. Distinguishes Core-Update damage from CWV/technical drops and produces a phased 6–12 month recovery plan focused on Authority and EEAT.'
 user-invokable: true
 argument-hint: '[domain]'
+allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.0'
+  version: '0.5.0'
   category: marketing
 ---
 
@@ -65,6 +66,8 @@ If brand keywords are intact and CWV is stable but generic keywords are broadly 
 3. **DataForSEO ranked-keywords diff** — compare top positions pre vs post update. Specific URL clusters affected or distributed uniformly?
 4. **GSC click diff** — which URLs lost most traffic? Pattern visible (all blog posts? all product pages? all YMYL topics?)
 5. **EEAT audit of lost top URLs** — author visible? Sources cited? Last-updated stamp? Trust layer (About, Imprint, Reviews)?
+6. **Self-canonical audit** — check whether competing pages all carry self-referencing canonical tags. CMS platforms with SEO plugins (Shopware/DreiscSeo, WordPress/Yoast, Magento) commonly set `isCanonical=true` on ALL pages by default. When keyword overlap exists between pages, self-canonicals cause invisible cannibalization: Google sees competing versions without a consolidation signal. Identify clusters with 2+ URLs targeting overlapping keywords, verify each page's `<link rel="canonical">`, and flag cases where ALL competing pages point to themselves.
+7. **Structural quality baseline** — crawl all indexable pages and classify as healthy/broken/thin/duplicate. If >40 % of pages are broken (rendering failures, empty content divs, soft-404s, Lorem-ipsum), the drop is not pure authority — it is authority multiplied by structural decay. Fixing the structural baseline is then a recovery accelerator, not just hygiene.
 
 ## Recovery plan (3 phases × 6–12 months)
 
@@ -116,10 +119,26 @@ These are **NOT** the recovery lever — Core Updates don't penalize tech, they 
 
 ## Realistic expectations
 
-- **Recovery starts visibly only after 3–4 months** — Google needs time to re-evaluate authority signals
-- **Full recovery 9–18 months** — rarely faster
-- **Common outcome: 60–80 % of pre-drop visibility recoverable; 100 % rare without structural changes**
-- **Pattern: recovery in jumps, often with the next Core Update**
+- **Baseline expectation: visible movement starts after 3–4 months.** Google needs time to re-evaluate authority signals. Full recovery usually takes 9–18 months.
+- **Accelerated recovery is possible** when multiple acceleration factors are present simultaneously (see next section). The 3–4 month baseline assumes authority-only work without structural cleanup.
+- **Recovery outcome in observed cases is in the 50–80 % range** of pre-drop visibility. Full recovery to 100 % seems to require structural changes (new content lines, new authority sources), not just optimization of what existed before.
+- **Pattern: recovery comes in jumps**, often timed with the next Core Update rather than gradually. A single week can deliver +30–50 % VI gain after weeks of flat movement.
+
+## Recovery acceleration factors
+
+Recovery CAN be significantly faster than the 3–4 month baseline when these conditions are present:
+
+1. **Pre-existing authority clusters.** If the site already has pages ranking Pos 1–5 for informational authority queries (blog, guides, "best X" content), these serve as trust anchors. Google does not need to build authority from scratch — it needs to re-recognize existing authority after the scoring change.
+
+2. **Structural quality cleanup executed in parallel.** If >40 % of pages are broken/thin/duplicate (see Structural Quality Baseline in RECOVERY_SYSTEM.md), fixing them removes a compounding penalty. The Core Update hit is authority × structural quality — improving either factor independently lifts the product.
+
+3. **Do-Not-Touch discipline maintained.** Sites that panic-edit recovering URLs reset their recovery timeline. Strict protection of winners lets the positive signal accumulate undisturbed.
+
+4. **AI Citations as leading confirmation.** Rising AI Overview / ChatGPT / Perplexity mentions while classical VI is still flat confirm that the authority work is being recognized. This is a confidence signal to continue, not a reason to change course.
+
+5. **Conversion rate improvement validates traffic quality.** If CR rises alongside or shortly after traffic increases, the recovery is bringing the RIGHT users. This rules out the "vanity recovery" scenario where positions improve on irrelevant queries.
+
+When 3+ of these factors are present, recovery has been observed to proceed materially faster than the baseline. Specific outcomes are case-dependent.
 
 ## Owner communication
 

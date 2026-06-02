@@ -106,7 +106,7 @@ This applies to all plugins, not just this one. Anthropic's docs are explicit ab
 
 **Pinned install** (reproducible, recommended for production use):
 ```
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.2.0
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.0
 ```
 or
 ```
@@ -122,12 +122,79 @@ Pinning means a future compromise of the maintainer's GitHub account (or an unin
 3. Run the smoke test in a sandbox first — use a fresh user account or `SEO_CACHE_DIR=/tmp/sandbox-cache SEO_PDF_OUTPUT_DIR=/tmp/sandbox-out`.
 4. Run with reduced env exposure: pass only the env vars the script needs (`SISTRIX_API_KEY`, `DATAFORSEO_LOGIN`, `DATAFORSEO_PASSWORD`, `GOOGLE_API_KEY`), nothing else.
 
+## For external reviewers
+
+If you're reviewing this plugin (independently, as a collaborator, or with LLM assistance in any tier), please follow these reporting rules. They exist because pattern-matching tools (including the bundled `skill-security-auditor`) produce false positives, and because LLM assistants without verified access to this repo will sometimes fabricate file paths, function names, or CVE numbers that sound plausible but don't exist.
+
+### Reporting protocol
+
+1. **Every finding cites `file:line`.** No `file:line`, no finding. If you can't point to the exact location, downgrade to a question in the PR thread instead of a security issue.
+2. **Three confidence labels — pick one explicitly:**
+   - `[VERIFIED]` — code read AND reproduced (PoC, or concrete input that triggers the behavior)
+   - `[PROBABLE]` — code read, pattern matched, but not reproduced
+   - `[UNVERIFIED]` — pattern match or intuition only, no code read
+3. **If you couldn't `grep` it, it doesn't exist.** No invented helper functions, no invented APIs, no invented config keys. "I don't know" beats "I think".
+4. **The bundled auditor has false positives.** For example, `regex.exec(html)` matches the auditor's `[CODE-EXEC]` pattern but is a RegExp method, not `eval()`. `spawnSync` with `shell: false` + array argv matches `[CMD-INJECT]` but is the recommended safe form. Verify by reading the actual code before filing.
+5. **No generic best-practice advice.** This repo has no `package.json`, no runtime dependencies, no postinstall, no telemetry — so suggestions like "run npm audit" or "add a Content-Security-Policy header" don't apply. File issues only for fixes specific to code that exists in this repo.
+
+### LLM-assistant system prompt (copy-paste)
+
+If you use a free-tier or sandboxed LLM (no repo access, no shell, no internet) to help with the review, prepend this to your prompt so the assistant defaults to the same protocol:
+
+```
+You are helping me review an open-source plugin (~2,000 LOC, MIT, zero runtime deps).
+You do NOT have access to the repo, the shell, or the internet — only what I paste.
+
+Rules (hard):
+1. Every finding must cite file:line from the code I paste. No file:line, no finding.
+2. Use exactly three labels: [VERIFIED] (you read the code and reproduced it),
+   [PROBABLE] (you read the code, pattern matched, did not reproduce),
+   [UNVERIFIED] (pattern match only).
+3. If a function, API, file path, or config key is not in the code I pasted,
+   it does not exist. Do not invent it. "I don't know" beats "I think".
+4. Pattern-matching auditors have false positives (e.g. regex.exec() vs eval(),
+   spawnSync with shell:false vs CMD-INJECT). Verify by reading the actual code
+   I pasted before flagging.
+5. No generic best-practice advice. Only fixes for code I have shown you.
+```
+
+## Maintenance model
+
+This is a single-maintainer open-source project. **There is one person maintaining this plugin.** No team, no SLA, no on-call rotation, no commercial support contract. Issue response is best-effort within a few days. Security issues are prioritized, but the bus-factor is 1.
+
+For installers, this means:
+- **Pin to a tag** so a future inactive-maintainer scenario does not silently degrade your installation.
+- **Read the source.** The plugin is intentionally small and reviewable in under 30 minutes.
+- **Treat all framework recommendations as inputs, not authority.** The SEO-recovery framework, the cost ranges, the timelines — they are observations from one extended recovery case plus four validation audits, not population statistics or contracted deliverables.
+
+## Maintainer and installer security hygiene
+
+A small set of practices keeps the supply-chain narrow on both sides.
+
+**For maintainers of this plugin** (and forks):
+- Enable 2FA on the GitHub account that publishes releases. A maintainer-account compromise is the primary supply-chain risk for any unpinned install.
+- Sign tags (`git tag -s`) where practical.
+- Review every PR diff before merging — even from known collaborators.
+- Run `claude plugin validate` locally before pushing a release tag (CI runs the same check, but local validation catches issues before they pollute git history).
+
+**For users installing this plugin:**
+- **Pin to a tag**, not to the default branch. Always-latest installs propagate any future maintainer-account compromise on the next reload.
+- **Review releases before upgrading.** `git diff v<previous>..v<new>` against the published source is enough for a plugin of this size.
+- Treat any plugin from a third-party marketplace as code running in your shell with your user privileges. This applies to all plugins, not only this one.
+
 ## Reporting security issues
 
 If you find a vulnerability:
-- For non-sensitive items: open a GitHub issue at https://github.com/maxschottke-spec/seo-survival-kit/issues
-- For items that could affect users with the plugin already installed: email the maintainer directly. See the GitHub profile.
+- For non-sensitive items: open a GitHub issue at https://github.com/maxschottke-spec/seo-survival-kit/issues. Apply the protocol from "For external reviewers" above (cite `file:line`, use `[VERIFIED]`/`[PROBABLE]`/`[UNVERIFIED]` labels).
+- For items that could affect users with the plugin already installed: contact the maintainer privately via the GitHub profile at https://github.com/maxschottke-spec (use the "Block or report" → "Contact" path if needed, or open a private security advisory via GitHub's Security tab on this repository).
 
 ## Audit trail
 
 This plugin is open-source under MIT. Every change is visible in git history. There are no minified scripts, no obfuscated code, no compiled binaries, no `postinstall` hooks, no `npm install` (the plugin has zero runtime dependencies).
+
+### External security reviews
+
+| Date | Reviewer | Scope | Findings |
+|------|----------|-------|----------|
+| 2026-05-22 | [Jeronzo](https://github.com/kamehamea-art) | **Round 1** — full repo audit: gitleaks + trivy + semgrep tool-pass plus 4 parallel domain-subagent analysis (Injection, Secrets, Deps, Config) | 1 CRITICAL chain, 4 HIGH, 6 MEDIUM, 11 LOW. Drove the v0.3.x security sprint that closed the gitignore-leak surface, the indirect-prompt-injection vector via scraped HTML, the unrestricted skill tool surface, and the CI floating-range supply-chain risk. |
+| 2026-05-22 | Maintainer-driven senior-engineering + marketplace-reviewer audit (post-fix verification) | **Round 2** — independent re-audit against the post-PR-#13 state: gitleaks (filesystem + full git history) + trufflehog v3.95.3 (filesystem + git) + semgrep v1.136.0 (security-audit + javascript + owasp-top-ten + nodejs rule packs), plus manual senior-eng re-read of every `.js` file, every SKILL.md, all docs (CLAUDE / ROADMAP / COSTS / MATURITY / LESSONS / TOOLS / SHOP-SYSTEMS / ONBOARDING), the examples PDF + PNG screenshots, marketplace structure, cross-platform paths, and AI-agent boundary risks. | All automated scans returned 0 verified secrets, 0 SAST findings, 0 supply-chain alerts after PR #12 + #13. Two P1 marketplace items still flagged (pilot-domain PII inconsistency vs the anonymization claim, and version-string drift in user-facing docs) — both closed in PR #15 + #14 + #16. Verdict moved from **PUBLISH WITH WARNINGS** to **SAFE TO PUBLISH** after the closing PRs landed. |

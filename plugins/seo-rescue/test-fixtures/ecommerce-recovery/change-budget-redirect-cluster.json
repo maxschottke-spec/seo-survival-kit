@@ -1,0 +1,26 @@
+{
+  "_description": "Test: 7 redirects planned from 404 to active category pages. Requires batch approval.",
+  "input": {
+    "user_instruction": "Erstelle 301 Redirects fuer die 7 Broken Link URLs",
+    "planned_changes": [
+      {"id": "r-001", "type": "redirect", "target": "/category-variant-A/", "risk_points_base": 2, "multipliers": ["live_no_staging"], "risk_points_final": 4},
+      {"id": "r-002", "type": "redirect", "target": "/category-variant-B/", "risk_points_base": 2, "multipliers": ["live_no_staging"], "risk_points_final": 4},
+      {"id": "r-003", "type": "redirect", "target": "/category-variant-C/", "risk_points_base": 2, "multipliers": ["live_no_staging"], "risk_points_final": 4},
+      {"id": "r-004", "type": "redirect", "target": "/Classic-TFK-180x220/", "risk_points_base": 2, "multipliers": ["live_no_staging"], "risk_points_final": 4},
+      {"id": "r-005", "type": "redirect", "target": "/Hypersoft-CategoryVariant-100x190/", "risk_points_base": 2, "multipliers": ["live_no_staging"], "risk_points_final": 4},
+      {"id": "r-006", "type": "redirect", "target": "/Classic-TFK-120x190/", "risk_points_base": 2, "multipliers": ["live_no_staging"], "risk_points_final": 4},
+      {"id": "r-007", "type": "redirect", "target": "/category-attribute-legacy", "risk_points_base": 2, "multipliers": ["live_no_staging", "external_backlinks"], "risk_points_final": 8}
+    ],
+    "current_mode": "controlled_recovery",
+    "change_budget": 20
+  },
+  "expected": {
+    "stop_required": false,
+    "total_risk_points": 32,
+    "budget_remaining": -12,
+    "budget_exceeded": true,
+    "stop_reasons": ["budget_exceeded", "more_than_5_urls_without_batch_plan"],
+    "requires_explicit_approval": true,
+    "recommendation": "Split into 2 batches: first 4 redirects (16 pts, fits controlled_recovery), then remaining 3 with new budget"
+  }
+}

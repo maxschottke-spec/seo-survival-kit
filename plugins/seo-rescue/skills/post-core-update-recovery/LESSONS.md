@@ -51,7 +51,7 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 2. **Neue Lesson:** CTR-Rewrites (Title/Meta-Optimierung) zeigen schnellere Wirkung (1-3 Wochen) als Authority-Aufbau. Sind aber Hebel auf "wer-klickt-was-bereits-rankt", nicht "was-rankt-überhaupt".
 3. **Recovery-Sequenz validiert:** Phase A (Authority-Foundation) MUSS in den ersten 8 Wochen begonnen werden — wer wartet bis Phase D Tech fertig ist, verliert Monate.
 
-**Quelle:** Verapur-Recovery-Tracking 2026-05-21 (verapur-claude Repo, branch feat/bwa-comforteo-matralux-2026-05-20).
+**Quelle:** Pilot-Domain Recovery-Tracking 2026-05-21 (interne Dokumentation, anonymisiert).
 
 ## 2026-05-21 — Site-Wide-URL-Health-Check als Recovery-Trigger
 
@@ -71,7 +71,7 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 
 **Konsequenz für SKILL.md:** Diagnose-Pflichtschritte sollten um "Site-Wide-URL-Health-Check" erweitert werden — derzeit nur erwähnt, sollte expliziter Schritt 1.5 werden.
 
-**Quelle:** Verapur Site-Wide-Audit 2026-05-21, siehe `data/seo/site-wide-audit-2026-05-21.json` (privat).
+**Quelle:** Pilot-Domain Site-Wide-Audit 2026-05-21 (Crawl-Daten archiviert, anonymisiert).
 
 ---
 
@@ -89,7 +89,7 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 
 **Konsequenz für SKILL.md:** "Realistische Expectations"-Sektion sollte ergänzt werden um AI-Citations als positiven Frühindikator — wenn die hochgehen, ist der klassische VI 2-3 Monate später dran.
 
-**Quelle:** Verapur Sistrix-Toolbox 2026-05-22 (User-Screenshot der UI).
+**Quelle:** Pilot-Domain Sistrix-Toolbox-UI 2026-05-22 (Screenshot, anonymisiert).
 
 ---
 

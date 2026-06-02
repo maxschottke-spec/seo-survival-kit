@@ -1,0 +1,11 @@
+URL,Status,Canonical,Canonical Count,H1,H1 Count,Indexability,Inlinks,Content Type,Issue
+https://example.com/,200,https://example.com/,1,Homepage Title,1,Indexable,232,text/html,
+https://example.com/Blog/top-article,200,https://example.com/Blog/top-article,2,,0,Non-Indexable,5,text/html,Duplicate Canonical (second points to /)
+https://example.com/blog/top-article,200,https://example.com/Blog/top-article,2,,0,Non-Indexable,3,text/html,Case variant of /Blog/ - duplicate canonical
+https://example.com/Category-A/,200,https://example.com/Category-A/,1,,0,Indexable,232,text/html,Missing H1
+https://example.com/Category-B/,200,https://example.com/Category-B/,1,,0,Indexable,232,text/html,Missing H1
+https://example.com/Product-404/,404,,0,,0,,5,text/html,Internal 404 with 5 inlinks
+https://example.com/Redirect-Source/,301,,,,,0,text/html,Redirect to /Target/
+https://example.com/media/image.webp,404,,0,,0,,0,image/webp,Deleted media file
+https://example.com/deactivated-category/,404,,0,,0,,0,text/html,Category active:false - 0 products
+https://example.com/wishlist,200,,0,,0,Indexable,232,text/html,Missing Meta Description + Thin Content

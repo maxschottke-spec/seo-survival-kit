@@ -7,19 +7,29 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # SHA-pinned to defeat compromised-tag attacks. Dependabot keeps these current.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: '20'
 
-      - name: Install YAML parser
-        run: npm install --no-save --no-package-lock js-yaml@4
+      # No `npm install` step. The previous version pulled js-yaml@4 with a
+      # floating range on every PR run, which meant a compromised upstream
+      # could land in the validation gate. We only need to check three things
+      # in the frontmatter (name, description, allowed-tools exist) — a regex
+      # per field is enough, and keeps the workflow's runtime supply chain to
+      # the two SHA-pinned actions above.
 
       - name: Check plugin manifest exists at required path
         run: |
@@ -62,61 +72,60 @@ jobs:
             console.log('✔ marketplace.json references resolve');
           "
 
-      - name: Validate all SKILL.md frontmatters parse as YAML
+      - name: Validate all SKILL.md frontmatters have required fields
         run: |
           node -e "
             const fs = require('fs');
             const path = require('path');
-            const yaml = require('js-yaml');
             const skillsDir = 'plugins/seo-rescue/skills';
+            // Required fields. allowed-tools is enforced to prevent regression of
+            // the M5 finding (full session tool surface inherited by every skill).
+            const REQUIRED = ['name', 'description', 'allowed-tools'];
+            const hasField = (yamlText, key) => new RegExp('^' + key.replace(/[-]/g, '[-]') + ':\\\\s+\\\\S', 'm').test(yamlText);
             let failed = 0;
             for (const name of fs.readdirSync(skillsDir)) {
               const f = path.join(skillsDir, name, 'SKILL.md');
               if (!fs.existsSync(f)) continue;
               const src = fs.readFileSync(f, 'utf8');
-              const m = src.match(/^---\n([\s\S]*?)\n---/);
+              const m = src.match(/^---\\n([\\s\\S]*?)\\n---/);
               if (!m) { console.error('::error::no frontmatter in', f); failed++; continue; }
-              try {
-                const fm = yaml.load(m[1]);
-                if (!fm.name) { console.error('::error::frontmatter missing name in', f); failed++; continue; }
-                if (!fm.description) { console.error('::error::frontmatter missing description in', f); failed++; continue; }
-                console.log('✔', name, '— frontmatter OK');
-              } catch (e) {
-                console.error('::error::YAML parse failed for', f, ':', e.message);
+              const fm = m[1];
+              const missing = REQUIRED.filter(k => !hasField(fm, k));
+              if (missing.length) {
+                console.error('::error::', f, '— missing required frontmatter field(s):', missing.join(', '));
                 failed++;
+                continue;
               }
+              console.log('✔', name, '— frontmatter has', REQUIRED.join(', '));
             }
             if (failed) process.exit(1);
-            console.log('✔ All SKILL.md frontmatters parse');
+            console.log('✔ All SKILL.md frontmatters have required fields');
           "
 
+      # find -print0 + while-read avoids shell word-splitting on filenames containing
+      # spaces, quotes, or shell metacharacters — and prevents a hostile PR-supplied
+      # filename like `'); process.exit(99); //.example.json` from breaking the
+      # subsequent `node -e` step via string interpolation.
       - name: Syntax-check all Node.js scripts
         run: |
-          for f in $(find plugins/seo-rescue -name '*.js'); do
+          set -e
+          fail=0
+          while IFS= read -r -d '' f; do
             echo "Checking $f"
-            node --check "$f"
-          done
+            node --check "$f" || fail=1
+          done < <(find plugins/seo-rescue -name '*.js' -print0)
+          [ "$fail" -eq 0 ] || exit 1
           echo "✔ All .js files pass syntax check"
 
       - name: Validate example JSON configs parse
         run: |
-          for f in $(find plugins/seo-rescue -name '*.example.json'); do
+          set -e
+          fail=0
+          while IFS= read -r -d '' f; do
             echo "Checking $f"
-            node -e "JSON.parse(require('fs').readFileSync('$f', 'utf8'))"
-          done
+            # Pass filename via env var, not shell interpolation, so untrusted
+            # filenames can never escape into the node -e source.
+            FILE="$f" node -e "JSON.parse(require('fs').readFileSync(process.env.FILE, 'utf8'))" || fail=1
+          done < <(find plugins/seo-rescue -name '*.example.json' -print0)
+          [ "$fail" -eq 0 ] || exit 1
           echo "✔ All example JSON configs parse"
-
-      - name: Try claude plugin validate (best-effort)
-        continue-on-error: true
-        run: |
-          # Try multiple install methods. If none work, the manual checks above still gate the PR.
-          if curl -fsSL https://docs.claude.com/install.sh -o /tmp/install.sh 2>/dev/null && bash /tmp/install.sh; then
-            export PATH="$HOME/.local/bin:$PATH"
-            if which claude > /dev/null; then
-              echo "Running claude plugin validate as extra check..."
-              claude plugin validate plugins/seo-rescue
-              claude plugin validate .
-            fi
-          else
-            echo "::notice::claude CLI install failed — manual checks above are authoritative"
-          fi

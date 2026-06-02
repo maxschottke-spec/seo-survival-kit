@@ -6,13 +6,25 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { safeUrl, safeLabel } = require('../../lib/safe.js');
 
 const CFG_PATH = process.env.PSI_CONFIG || './psi-config.json';
 if (!fs.existsSync(CFG_PATH)) { console.error(`Config not found: ${CFG_PATH}`); process.exit(1); }
 const CFG = JSON.parse(fs.readFileSync(CFG_PATH, 'utf8'));
 
-const API_KEY = process.env.GOOGLE_API_KEY || CFG.api_key;
-if (!API_KEY) { console.error('Missing GOOGLE_API_KEY env var or config.api_key'); process.exit(1); }
+// env-only by design: previously this fell back to CFG.api_key, which combined
+// with an un-ignored psi-config.json made it easy to commit the API key to git.
+// Force env-var usage so the secret cannot live in a tracked file.
+const API_KEY = process.env.GOOGLE_API_KEY;
+if (!API_KEY) {
+  console.error('Missing GOOGLE_API_KEY env var. Set it before running:');
+  console.error('  export GOOGLE_API_KEY=AIza...   # or use a .env loader');
+  process.exit(1);
+}
+if (CFG.api_key) {
+  console.error('Refusing to run: psi-config.json contains api_key. Remove it and use the GOOGLE_API_KEY env var instead.');
+  process.exit(1);
+}
 
 const OUT_DIR = CFG.output_dir || './psi-history';
 fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -22,6 +34,52 @@ const STRATEGIES = CFG.strategies || ['mobile', 'desktop'];
 const CATS = CFG.categories || ['performance', 'seo', 'accessibility', 'best-practices'];
 const THRESHOLD = CFG.alert_threshold_drop || 10;
 const BASELINE_WEEKS = CFG.alert_baseline_weeks || 4;
+
+// Validate-at-load + trust-at-use: every config field that flows into a
+// URL, a path, or a control-flow decision is checked once here, so the
+// downstream code can interpolate freely without re-validating.
+//
+// Why this is the right place:
+// - safeUrl blocks non-http(s) schemes + loopback/RFC1918/link-local hosts,
+//   so a hostile psi-config.json cannot use the PSI API as an SSRF proxy
+//   or pivot to cloud-metadata endpoints (169.254.169.254 etc.).
+// - The PSI API ignores unknown category/strategy values silently, so an
+//   allowlist here is purely defensive — but it pins behavior and makes
+//   future code-readers' expectations explicit.
+// - output_dir gets used in fs.mkdirSync + path.join; rejecting absolute
+//   paths and `..` keeps writes confined to the script's CWD.
+if (!Array.isArray(CFG.urls)) { console.error('config.urls must be an array'); process.exit(1); }
+for (const u of CFG.urls) {
+  if (!u || typeof u !== 'object') { console.error('config.urls[*] must be an object'); process.exit(1); }
+  safeUrl(u.url);
+  safeLabel(u.label);
+}
+if (CFG.categories !== undefined) {
+  const VALID_CATS = ['performance', 'seo', 'accessibility', 'best-practices', 'pwa'];
+  if (!Array.isArray(CFG.categories)) { console.error('config.categories must be an array'); process.exit(1); }
+  for (const c of CFG.categories) {
+    if (typeof c !== 'string' || !VALID_CATS.includes(c)) {
+      console.error(`config.categories: unknown value ${JSON.stringify(c)} (allowed: ${VALID_CATS.join(', ')})`);
+      process.exit(1);
+    }
+  }
+}
+if (CFG.strategies !== undefined) {
+  if (!Array.isArray(CFG.strategies)) { console.error('config.strategies must be an array'); process.exit(1); }
+  for (const s of CFG.strategies) {
+    if (s !== 'mobile' && s !== 'desktop') {
+      console.error(`config.strategies: must be "mobile" or "desktop", got ${JSON.stringify(s)}`);
+      process.exit(1);
+    }
+  }
+}
+if (CFG.output_dir !== undefined) {
+  if (typeof CFG.output_dir !== 'string') { console.error('config.output_dir must be a string'); process.exit(1); }
+  if (path.isAbsolute(CFG.output_dir) || CFG.output_dir.includes('..')) {
+    console.error(`config.output_dir: must be a relative path inside CWD (no absolute paths, no ..). Got: ${JSON.stringify(CFG.output_dir)}`);
+    process.exit(1);
+  }
+}
 
 async function psi(url, strategy) {
   const params = new URLSearchParams({ url, strategy, key: API_KEY });
@@ -94,8 +152,16 @@ function baselineFor(history, url, strategy, metricKey, weeksBack) {
     }
   }
 
-  // Append to NDJSON
+  // Append to NDJSON. On first write, the file gets default umask (typically
+  // 0644 = world-readable) which leaks per-domain perf history to other local
+  // users on shared boxes. Force 0600 so only the running user can read it.
+  // chmod is a no-op on Windows (NTFS uses ACLs, not POSIX mode); ACL hardening
+  // there is the user's responsibility — see ONBOARDING.md cross-platform notes.
+  const ndjsonExisted = fs.existsSync(NDJSON);
   fs.appendFileSync(NDJSON, records.map(r => JSON.stringify(r)).join('\n') + '\n');
+  if (!ndjsonExisted) {
+    try { fs.chmodSync(NDJSON, 0o600); } catch {}
+  }
   console.error(`\n✅ Appended ${records.length} rows to ${NDJSON}`);
 
   if (regressions.length) {

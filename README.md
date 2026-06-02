@@ -1,215 +1,245 @@
 # SEO Survival Kit for Claude Code
 
-> Seven focused SEO skills built from real 2026 recovery cases — for any website owner who needs to understand what's wrong, what to fix, and how to talk about it to non-technical stakeholders. **E-commerce, publishers, SaaS, services, agencies — same workflow.**
+> Recovery-first decision support for ecommerce/D2C SEO. Claude Code skills for Core Update recovery diagnosis, prioritized action plans, weekly monitoring, and a Change Governor / Settlement Gate that prevents over-optimizing during recovery windows. Built and validated during real ecommerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
+[![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
-## What's new
+**v0.5.0 shipped · v0.5.1 in flight.** Public beta. Breaking changes possible before v1.0. Pin to a tag for reproducible installs. See [CHANGELOG.md](./CHANGELOG.md).
 
-- **Renamed** from `seo-rescue-skills` to `seo-survival-kit` (2026-05-22) — better captures the scope: rescue + survival + growth across the post-AI-Overview 2026 SERP landscape. See [ROADMAP-2026.md](./ROADMAP-2026.md) for how the skills are positioned for Google's announced direction.
-- **6 skills** covering free-tier audit → recovery framework → outreach reports → channel economics → competitor gaps → automated PSI tracking.
-- **Smoke-tested** on 10 diverse domains across 7 categories (e-commerce, news, SaaS, comparison, content/UGC, services, travel) — pipeline works domain-agnostically.
+## Start here
 
-## See it in action
+Three common entry points. Pick the one that matches your situation:
 
-### Sample outreach report
+**1. Traffic dropped after a Google Core Update**
+```
+/seo-rescue:post-core-update-recovery example.com
+```
+Diagnosis tree + phased Authority-First recovery plan (6–12 month horizon, no 4-week magic promises).
 
-Same layout you get for a real domain — decision-maker-friendly, 10 chapters, ~1 MB PDF:
+**2. Free technical health check before deciding on paid tools**
+```
+/seo-rescue:seo-audit-free example.com
+```
+Free-tier check using only Google's surfaces (GSC + PSI + Lighthouse + curl). No API keys required.
 
-![Sample SEO Report — Cover & Executive Summary](./examples/screenshots/01-cover-executive-summary.png)
+**3. Weekly recovery review using your Sistrix CSV exports**
+```
+/seo-rescue:sistrix-monday-recovery-check current.csv previous.csv example.com
+```
+17-section structured report. CSV-first, no Sistrix API key required.
 
-Full sample PDF: [examples/sample-audit.pdf](./examples/sample-audit.pdf)
+**Typical sequence:** diagnose → recovery plan → weekly monitoring. Every step ends with an operator-reviewable artifact. **No autonomous live changes are made by any skill or command.**
 
-### The use case: extreme Core-Update crash
+## Positioning
 
-This is the pattern these skills are built for — years of stable visibility, then a sharp −60% drop in 2-3 weeks after a published Google Core Update. Owner did nothing wrong. Recovery is now a 6–12 month authority-rebuild, not a tech fix:
+Recovery-first decision intelligence for ecommerce and D2C. Most SEO tools answer *what is technically wrong*. This framework answers *given everything I know, what should I do next, what should I leave alone right now, and what should wait*. It complements technical-audit suites (`claude-seo` and similar); it does not replace them.
 
-![Core Update Crash Use Case](./examples/screenshots/02-core-update-crash-case.png)
+## What this helps you decide
 
-See [ROADMAP-2026.md](./ROADMAP-2026.md) for documented public cases (HouseFresh, Glenn Gabe 2023-24, Dec 2025 retailer, Retro Dodo) and how Google's 2026 search direction shapes the recovery playbook.
+- Should this URL be protected or changed right now?
+- Is this recovery signal real, or is the visibility index lagging real ranking gains?
+- Are winners being offset by a few large losers, masking aggregate movement?
+- Which keywords are commercially important enough to protect at all costs?
+- Is now the wrong time for URL consolidation, title rewrites, or template changes?
+- Should we increase paid spend, or fix margin / tracking / landing pages first?
+- Which channel is profitable, which is bleeding, which to wind down?
+- Which AI surfaces (AI Overview, ChatGPT, Perplexity) are currently citing the site — as a supporting signal, not a primary metric.
 
-## What this is
+## What this is NOT
 
-Most SEO Claude Code skills focus on **audits and implementation**. This plugin focuses on the scenarios audits don't fully address:
+- Not an autonomous SEO system. Every recommendation is reviewed by the operator.
+- Not a full-service marketing agency. Execution belongs to the operator's team, agency, or contractors.
+- Not a generic AI growth platform. The focus is recovery-first decision support for ecommerce/D2C, not breadth across all marketing surfaces.
+- Not automatic ad optimization. No write actions to any ad account. No automatic budget changes.
+- Not a guarantee. Every output carries calibrated confidence; the framework refuses to promise rankings, revenue, or timelines.
 
-1. **You have no budget** for SEO tools and want a quick health check using only Google's free tools
-2. **A website got hit by a Google Core Update** — what's actually happening, and how to recover over 6–12 months
-3. **You want to send a non-technical site owner a polished SEO report** — outreach pitch, client handoff, founder briefing, board-level snapshot
-4. **You need to know which channel actually makes money** (Amazon vs OTTO vs direct shop) and which to drop
-5. **You need a real competitor analysis** that catches the actual organic competitors, not who you think competes
-6. **You need automated weekly performance tracking** to catch regressions before customers do
+## Safety: Change Governor and Settlement Gate
 
-If you're already running [claude-seo](https://github.com/AgriciDaniel/claude-seo) for technical audits, this complements it with the **free-tier entry path**, the **rescue framing**, the **decision-maker communication layer**, and **multi-channel financial perspective**.
+The kit is not designed to execute SEO changes autonomously. Two safety layers sit between the operator and any live modification:
 
-**Who uses this:**
-- 🏪 E-commerce shop owners and operators
-- 📰 News publishers and content sites
-- 💼 SaaS founders and growth teams
-- 🛎️ Service businesses (agencies, consultants, freelancers)
-- 🏥 YMYL sites (healthcare, finance, legal) — Authority-First recovery framework is especially relevant
-- 🤝 SEO agencies and freelancers doing cold outreach
+**Change Governor.** Every session starts in `audit_only` mode with zero change budget. Mode escalation requires explicit operator instruction. Each proposed change is rated on risk, evidence quality, rollback readiness, and approval state — actions without a clear data basis can never be classified as `green` risk.
 
-The skills are domain-type-agnostic. The example data in `examples/` happens to be an e-commerce sample, but the workflow works identically for a B2B SaaS or a news site.
+**Settlement Gate.** After a Major Batch of live changes, the gate hard-blocks new optimization waves until enough data has accumulated to attribute cause and effect. The most dangerous moment in recovery is not the first mistake — it is the impulse to keep optimizing immediately afterwards. The gate enforces a waiting period during which only monitoring, QA, rollback prep, and verified emergencies are allowed.
 
-## Quick Reference
+**Goal.** Don't change too much at once. Protect winners. Keep cause-and-effect measurable. **No live SEO change without operator review.**
 
-Every skill is reachable as a namespaced slash command. Type `/seo-rescue:rescue` in Claude Code to see the routing table, or call any sub-skill directly.
+Canonical references:
+- [`plugins/seo-rescue/references/SEO_CHANGE_GOVERNOR.md`](./plugins/seo-rescue/references/SEO_CHANGE_GOVERNOR.md) — modes, budgets, escalation rules
+- [`plugins/seo-rescue/references/SEO_SETTLEMENT_GATE.md`](./plugins/seo-rescue/references/SEO_SETTLEMENT_GATE.md) — hard-block definition, exceptions, unlock criteria
+- [`plugins/seo-rescue/references/SAFE_LIVE_CHANGE_RULES.md`](./plugins/seo-rescue/references/SAFE_LIVE_CHANGE_RULES.md) — pre/post-crawl rules, batch limits, user-pressure responses
+- [`plugins/seo-rescue/docs/LIVE_CHANGE_QA.md`](./plugins/seo-rescue/docs/LIVE_CHANGE_QA.md) — live-change QA workflow
+- [`plugins/seo-rescue/commands/recovery-audit.md`](./plugins/seo-rescue/commands/recovery-audit.md) — change-budget audit command
 
-| Slash command | What it does | Cost |
+## Naming at a glance
+
+| Refers to | Name |
+|---|---|
+| Repository / marketplace | `seo-survival-kit` |
+| Plugin (technical) | `seo-rescue` |
+| Slash commands | `/seo-rescue:rescue`, `/seo-rescue:seo-audit-free`, … |
+
+The split is intentional (marketplace is the brand, plugin is the technical handle).
+
+## What's in the kit
+
+The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; each can also be called directly. Detailed skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
+
+**Core recovery workflow**
+
+| Command | What it does | Cost |
 |---|---|---|
-| `/seo-rescue:rescue` | Orchestrator + routing table | free |
-| `/seo-rescue:seo-audit-free <domain>` | Free-tier health check (GSC + PSI + Lighthouse + curl) | free |
 | `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
-| `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers (Sistrix + DataForSEO + PSI) | ~$0.05-$0.50 |
-| `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
-| `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10-$0.50 |
+| `/seo-rescue:recovery-diagnose <domain>` | Diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO + GSC CSV) | ~$0.05–$0.50 |
+| `/seo-rescue:recovery-crawl <domain>` | Crawl + severity-classified issues (Screaming Frog or local minimal-crawler fallback) | free |
+| `/seo-rescue:recovery-plan <domain>` | Prioritized 30/60/90-day plan with Do-Not-Touch + human approval gate | free |
+| `/seo-rescue:recovery-monitor <domain>` | Weekly tracking with deterministic 0-100 recovery score | free |
+| `/seo-rescue:recovery-full <domain>` | Full sequence: diagnose → crawl → plan → monitor | ~$0.05–$0.50 |
+| `/seo-rescue:sistrix-monday-recovery-check <current.csv> <previous.csv> [domain?]` | CSV-first weekly review, 17-section structured report | free |
+
+**Diagnostic and analysis**
+
+| Command | What it does | Cost |
+|---|---|---|
+| `/seo-rescue:seo-audit-free <domain>` | Free-tier health check (GSC + PSI + Lighthouse + curl) | free |
+| `/seo-rescue:gsc-deep-dive <domain> [days?]` | One-call Google Search Console snapshot | free |
+| `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10–$0.50 |
 | `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
-| `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery | free |
 
-## The seven skills
+**Reporting and economics**
 
-### `seo-audit-free`
+| Command | What it does | Cost |
+|---|---|---|
+| `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers | ~$0.05–$0.50 |
+| `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
 
-Beginner-friendly SEO health check using **only free tools**:
-- Google Search Console (free with site verification)
-- Google PageSpeed Insights v5 (25k calls/day free with API key)
-- Lighthouse CLI (open source, runs locally)
-- Schema.org Validator (browser-based, free)
-- `curl` for robots.txt, sitemap, HTTP headers
+**AI surface (experimental visibility layer)**
 
-Produces a 1-page Markdown report with traffic-light findings and three concrete next steps. **Zero API costs.**
+| Command | What it does | Cost |
+|---|---|---|
+| `/seo-rescue:ai-search-rescue <domain>` | Diagnosis + framework for AI Overview / ChatGPT / Perplexity citation patterns | free |
+| `/seo-rescue:ai-citations-tracker` | Weekly tracker for brand citations in ChatGPT + Perplexity (NDJSON history) | ~$0.10/year |
 
-**Use when** you don't have budget for paid SEO tools, want to evaluate whether a paid audit is worth it, or are auditing a friend's/family's website. Anti-use: deeper competitive analysis (needs the paid `seo-outreach-report`).
+> AI surfaces are an experimental visibility layer. Citation tracking and diagnosis only — not a guarantee of AI search traffic. Use as a supporting signal alongside classical search data, not as the sole basis for decisions.
 
-### `post-core-update-recovery`
+## Architecture and documentation
 
-Specific recovery framework for domains that lost visibility after a Google Core Update.
-
-- Decision tree for distinguishing Core-Update damage from technical/CWV drops
-- 4-phase plan: Authority foundation → Topical hubs → Off-page authority → Tech hygiene
-- Realistic timelines (6–12 months, not 6–8 weeks)
-- Counter-rationalizations for common owner panic-moves (buying backlinks, doing a relaunch, blaming CWV)
-
-**Triggers automatically** when you describe a Sistrix VI drop correlating with a published Core Update, broad keyword loss with stable brand keywords, no technical changes, no manual action.
-
-### `seo-outreach-report`
-
-End-to-end pipeline that produces a polished A4 PDF SEO snapshot per domain — ready to send to a non-technical site owner.
-
-**Pipeline** (4 small Node.js scripts in the skill folder):
-1. `seo-audit-fetch-v2.js` — parallel Sistrix-VI + DataForSEO Labs + Google PSI v5 fetch
-2. `seo-extract-v2.js` — extract KPIs, top keywords, quick wins (Pos 4–20 with SV≥100)
-3. `seo-onpage.js` — title/meta/H1/schema check from local HTML
-4. `seo-report-gen.js` — Chrome-headless HTML→PDF render with embedded SVG charts
-
-**Report structure** (10 chapters, decision-maker language):
-1. Cover with data-driven headline
-2. Executive Summary (4 KPI gauges + Top-5 priorities)
-3. Status Quo (what we found — neutral, no judgment)
-4. Visibility chart with 18-month history
-5. Top-15 rankings + Quick Wins table
-6. Competitors
-7. PageSpeed with traffic-light gauges
-8. Schema/Title/Meta/Image-alt findings
-9. Backlinks
-10. Conclusion + 30/60/90-day action plan (per item: what, why, how, who, cost, expected impact)
-
-PDF is ~1 MB per domain. Full pipeline runs in under 5 minutes per domain.
-
-### `channel-economics-analyzer`
-
-Channel-level P&L calculator for multi-channel e-commerce businesses (Amazon, OTTO, eBay, direct shop). Per channel: revenue, COGS, fees, ad-spend, operating margin, break-even order count. Tells you which channel is profitable and which is bleeding money.
-
-**Use when** you sell across multiple marketplaces and want to know which to scale, hold, or wind down. Output: channel scorecard with traffic-light status and concrete action thresholds.
-
-### `competitor-deep-audit`
-
-DataForSEO-powered competitor analysis. Identifies the **real** organic competitors (not who the owner thinks), then computes keyword-gap-analysis: keywords where competitors rank top-10 but you don't, sorted by opportunity score (search volume × competitor density).
-
-**Use when** planning content roadmaps or doing a new SEO mandate intake. Output: 30–50-item prioritized opportunity list per competitor audit. Cost: ~$0.10–$0.50 per audit.
-
-### `psi-weekly-cron-baseline`
-
-Automated weekly PageSpeed Insights tracking with regression detection. Runs as launchd/systemd/GitHub-Actions cron, stores history as NDJSON, alerts when scores drop > threshold vs N-week baseline. **Free** (uses PSI v5 free quota).
-
-**Use when** you've done performance optimization and want to make sure it sticks — or when third-party plugins/themes have a history of silently breaking performance.
-
-### `ai-search-rescue`
-
-Framework for recovering visibility in AI search surfaces — Google AI Overviews, Google AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai search. Different mechanics from classical SERP ranking: you're competing to be the source the LLM cites, not the link the user clicks. Seven optimization tactics (extractable passages, question-shaped headings, source-cited statements, author trust, schema for AI, llms.txt, Wikipedia), a three-layer measurement setup (brand-mention prompt set, GSC AI-traffic filter, AI-crawler logs), and a realistic 6-12 week recovery workflow.
-
-**Use when** organic rankings have recovered but AI Overview citations are still going to competitors, or when a site says "ChatGPT keeps recommending the competitor, never us". One operational finding from real recovery work: AI citations move 2-6 weeks before classical Sistrix VI does, so they're a leading indicator that Authority-First work in `post-core-update-recovery` is actually being recognized.
+| Doc | Purpose |
+|---|---|
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Canonical source of truth: vision, positioning, system shape, modules, governance, privacy, adaptive onboarding, knowledge layer, what is NOT implemented |
+| [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) | Six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase sequencing |
+| [DECISION_ENGINE.md](./DECISION_ENGINE.md) | Decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals |
+| [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) | Weekly CSV-first workflow specification — runnable skill at [`plugins/seo-rescue/skills/sistrix-monday-recovery-check/`](./plugins/seo-rescue/skills/sistrix-monday-recovery-check/) (v0.5.1-dev) with synthetic example at [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) |
+| [ROADMAP.md](./ROADMAP.md) | Version-by-version product plan |
+| [ROADMAP-2026.md](./ROADMAP-2026.md) | Google search future-watch (separate from product roadmap) |
 
 ## Installation
 
-**Recommended — pinned to a tag (reproducible, survives upstream changes):**
+Pinned to a tag (reproducible, survives upstream changes):
+
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.3.1
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.0
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
 
 Always-latest (less safe — a maintainer-account compromise would propagate on next reload):
+
 ```shell
 /plugin marketplace add maxschottke-spec/seo-survival-kit
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
 
-See [SECURITY.md](./SECURITY.md#how-to-verify-before-trusting) for how to verify a pinned version before installing.
+See [SECURITY.md → How to verify before trusting](./SECURITY.md#how-to-verify-before-trusting).
 
-## ⚠️ Before you run anything — read these
+### Outside Claude Code
 
-| File | Why it matters |
-|------|----------------|
-| **[COSTS.md](./COSTS.md)** | The `seo-outreach-report` pipeline uses three paid APIs. ~€0.05–€0.50 per domain audit. Read first. |
-| **[SECURITY.md](./SECURITY.md)** | What the scripts access, what they don't, and how to verify before trusting them. |
-| **[MATURITY.md](./MATURITY.md)** | Honest comparison with mature alternatives. This is v0.1 — useful but not a complete suite. |
-| **[ONBOARDING.md](./ONBOARDING.md)** | Step-by-step from install to first PDF in 15 minutes. |
+The three pure-Markdown framework skills (`rescue`, `post-core-update-recovery`, `ai-search-rescue`) are available as platform-agnostic Markdown in [`exports/`](./exports/) with install snippets for Cursor, OpenAI Custom GPT, Gemini CLI, Aider, Continue.dev, and Codex. Script-backed skills remain Claude-Code-specific; MCP wrapper planned for v1.0+.
 
-`post-core-update-recovery` is free — no API costs, no setup needed beyond install.
+## Before you run anything
 
-`seo-outreach-report` requires API credentials for Sistrix + DataForSEO + Google PSI. Full walkthrough in [ONBOARDING.md](./ONBOARDING.md).
+| File | Why |
+|---|---|
+| [COSTS.md](./COSTS.md) | `seo-outreach-report` uses three paid APIs. €0.05–€0.50 per domain typical. |
+| [SECURITY.md](./SECURITY.md) | What the scripts access, what they don't, how to verify. |
+| [MATURITY.md](./MATURITY.md) | Honest comparison with mature alternatives. |
+| [ONBOARDING.md](./ONBOARDING.md) | Install to first PDF in 15 minutes. |
 
-## Who should use this
+`post-core-update-recovery` is free. `seo-outreach-report` requires API credentials for Sistrix + DataForSEO + Google PSI — full walkthrough in [ONBOARDING.md](./ONBOARDING.md).
 
-| You are | This is for you |
-|---------|----------------|
-| **Freelance SEO consultant** | Outreach-report = lead-gen tool. Recovery skill = framework for diagnosing new desperate-client mandates. |
-| **In-house SEO at an e-commerce shop** | Recovery skill after every Core Update hit. Outreach-report to communicate state to non-technical leadership. |
-| **Boutique SEO agency** | Both skills as deliverable templates. Saves hours per onboarding and post-update analysis. |
-| **Founder of a shop that lost traffic** | The recovery framework gives you a realistic plan and counter-arguments against panic-moves. |
+## Sample output
 
-## What this is NOT
+Same layout you get for a real domain — 10 chapters, ~1 MB PDF, plain language for non-technical decision-makers:
 
-- Not a replacement for `claude-seo` or other technical-audit skills. **Use this alongside them.**
-- Not for sites that simply haven't built up SEO yet (<6 months old) — that's an aufbau phase, not a rescue
-- Not a magic Core-Update recovery in 4 weeks — the skill is explicit that real recovery is 6–12 months
+![Sample SEO Report — Cover & Executive Summary](./examples/screenshots/01-cover-executive-summary.png)
 
-## Real-world data
+Full sample: [examples/sample-audit.pdf](./examples/sample-audit.pdf). The use-case pattern (sharp −60% drop in 2-3 weeks after a published Core Update) is documented in [examples/screenshots/02-core-update-crash-case.png](./examples/screenshots/02-core-update-crash-case.png) and [ROADMAP-2026.md](./ROADMAP-2026.md).
 
-Skills were built from four real-world domain audits in May 2026 (mid-size DE mattress shop, foam-cushion manufacturer, German news publisher, camper-mattress brand) and from one extended Core-Update recovery case (March/April 2026 update window).
+## When to use
 
-## Self-improving via LESSONS.md
+- Organic traffic dropped during or shortly after a published Google Core Update. Recovery framework provides a phased Authority-First plan with realistic 6-12 month horizons.
+- A non-technical decision-maker (shop owner, founder, executive) needs to understand the SEO state. Outreach-report pipeline produces a decision-maker A4 PDF.
+- No budget for paid SEO tools, want a free-tier health check. `seo-audit-free` is the entry.
+- Multi-marketplace ecommerce, need to know which channel is profitable. Channel-economics-analyzer computes per-channel break-even and operating margin from your CSVs.
+- Weekly PSI monitoring with regression detection. Free over PSI v5 quota.
+- You want to track AI surface citation patterns (AI Overview, ChatGPT, Perplexity) as a supporting signal alongside classical rankings — not as a primary growth driver.
 
-Each skill has a `LESSONS.md` file. As you use the skills and encounter new patterns or workarounds, append dated entries. After 3+ entries confirm a pattern, consolidate into the main SKILL.md. This way the skills get better the more you use them.
+## When not to use
 
-## License
+- The site is brand new (< 6 months). That is an aufbau-phase, not a rescue-phase.
+- You need a deep technical audit (crawlability, schema validation, CWV across hundreds of URLs). Use `claude-seo` instead. This complements it.
+- You need 4-week magic recovery. The framework is explicit about 6-12 month horizons for Core Update damage.
+- You need production-grade guarantees, SLAs, or enterprise contracts. Public beta, single-maintainer.
 
-MIT — see [LICENSE](./LICENSE).
+## Use-case fit
 
-## Contributing
+This system is currently strongest for ecommerce/D2C recovery workflows, especially when SEO data can be evaluated against revenue, margin, inventory, returns, conversion, and paid-media context.
 
-This is a personal skill collection. PRs welcome if you've found real-world improvements, especially:
-- New Core-Update lessons in `LESSONS.md`
-- Better trigger phrases that improve skill discovery
-- Bug fixes in the pipeline scripts
+| Website type | Fit | Notes |
+|---|---|---|
+| Ecommerce / D2C | Core fit | Strongest current use case. Product, category, margin, inventory, return and conversion data make recovery decisions more reliable. |
+| Lead generation / B2B | Good fit with adaptation | Replace product revenue with lead quality, pipeline, CPL and sales-cycle data. |
+| SaaS | Good fit with adaptation | Use signup, activation, demo, trial and pipeline metrics instead of shop revenue. |
+| Local service | Partial fit | Works when calls, forms, location pages and lead quality can be measured reliably. |
+| Publisher / News | Special case | Requires freshness, topical authority, Discover/News visibility and ad/affiliate revenue logic. Not the current core model. |
+| Affiliate / Comparison | Partial fit | Needs EPC, merchant mix, SERP intent and monetization quality. |
+| YMYL / regulated content | Caution | Requires stricter evidence standards and additional expert/legal review where applicable. |
 
-Open an issue if you want to discuss a larger change before opening a PR.
+The framework should not be treated as a universal SEO automation system. Each website type needs its own business-signal layer.
 
-## Status & Maturity
+## YMYL notice
 
-Version 0.1 — first public release. Built and tested against real 2026 recovery cases (4 domain audits, 1 extended Core-Update recovery). Expect breaking changes until 1.0.
+For Your-Money-Your-Life sites (medical, legal, financial, regulated), have a domain expert review the action plan before client delivery. The framework treats sites uniformly at the SEO-mechanics level; it does not validate domain-specific compliance.
 
-**Honest comparison** with mature alternatives (claude-seo with 6.9k stars is the reference): see [MATURITY.md](./MATURITY.md). This plugin is **niche complement**, not a replacement.
+## Real-world basis
+
+Skills were built from one extended Core-Update recovery case (mid-size DE ecommerce shop, March/April 2026 update window) and validated against four additional real-world domain audits in May 2026. Patterns in skill `LESSONS.md` files are observations from this case base, not population statistics — treat as starting hypotheses to test in your own context.
+
+The open repo is a first-pass methodology and decision-support layer. It helps identify recovery signals, risky changes, protected URLs, winner/loser patterns, missing data, and validation steps. It is not the same as a calibrated recovery engagement that brings private business context into the decision. Deeper recovery work needs data the open repo does not see: GSC/SISTRIX history, shop revenue, margin, returns, inventory, paid-media context, implementation history, competitive context, and operator review to weigh conflicting signals.
+
+## Need help running this on your own site?
+
+The plugin is MIT and self-serve. If you'd rather have someone with operational experience walk you through it on your specific case, the maintainer offers paid engagements:
+
+| Engagement | What you get | Typical scope |
+|---|---|---|
+| **Recovery Audit (fixed)** | Full diagnose-PDF + 60-min strategy call + 4-phase 6-12 month plan | One domain, one Core-Update or AI-search problem |
+| **Recovery Begleitung (retainer)** | Monthly reviews, plan adjustments, prioritization help | 3-6 months, weekly to bi-weekly cadence |
+| **Outreach pipeline setup** | Configured pipeline + first 5 PDFs + handoff | One-time, for agencies that want decision-maker deliverables |
+
+Contact: open a [Discussion](https://github.com/maxschottke-spec/seo-survival-kit/discussions) or reach the maintainer via the email on the [GitHub profile](https://github.com/maxschottke-spec). The framework comes from a specific recovery case still in active recovery; engaging means getting context on which patterns apply to your situation and which do not.
+
+## Contributors
+
+- [Max Schottke](https://github.com/maxschottke-spec) — maintainer, original skills, plugin packaging
+- [Jeronzo](https://github.com/kamehamea-art) — independent security review (audit 2026-05-22 surfaced the data-leak surface, prompt-injection chain, and `allowed-tools` hardening that landed in the v0.3.x security sprint)
+
+## Status
+
+v0.5.0 shipped, v0.5.1 in flight. Single-maintainer open-source project. No SLA, no commercial support. Issue response best-effort within a few days. For production-critical workflows, pin to a specific tag and review releases before upgrading.
+
+## License, security, contributing
+
+MIT. See [LICENSE](./LICENSE), [SECURITY.md](./SECURITY.md), [CONTRIBUTING (open an issue first for larger changes)](https://github.com/maxschottke-spec/seo-survival-kit/issues).

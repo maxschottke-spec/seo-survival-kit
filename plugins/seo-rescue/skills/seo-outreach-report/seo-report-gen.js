@@ -416,7 +416,11 @@ ${actions.map(a => {
 }).join('')}
 
 <div class="disclaimer">
-<b>Hinweis zu Empfehlungen:</b> Die vorgeschlagenen Maßnahmen, Zeitfenster, Kostenschätzungen und Erwartungswerte basieren auf den zum Stichtag verfügbaren Daten und allgemeinen SEO-Best-Practices. Sie stellen <b>keine verbindliche Geschäftsberatung</b> dar. Vor Investitionsentscheidungen wird eine eigenständige Bewertung empfohlen. Ergebnisse hängen von Umsetzungsqualität, Markt- und Wettbewerbsdynamik sowie Google-Algorithmus-Änderungen ab und können abweichen.
+<b>Hinweis zu Empfehlungen:</b> Die vorgeschlagenen Maßnahmen, Zeitfenster, Kostenschätzungen und Erwartungswerte basieren auf den zum Stichtag verfügbaren Daten und allgemeinen SEO-Best-Practices. Sie stellen <b>keine verbindliche Geschäftsberatung</b> dar. Vor Investitionsentscheidungen wird eine eigenständige Bewertung empfohlen. Ergebnisse hängen von Umsetzungsqualität, Markt- und Wettbewerbsdynamik sowie Google-Algorithmus-Änderungen ab und können abweichen. Kostenangaben in EUR sind typische Spannen aus dem DE-Beratungs-Markt — lokale Marktbedingungen können abweichen.
+<br><br>
+<b>YMYL-Hinweis (Your Money or Your Life):</b> Bei Domains aus den Bereichen Medizin, Gesundheit, Recht, Finanzen oder regulierten Industrien empfehlen wir, den Aktionsplan vor Umsetzung oder Weitergabe von einer fachlich qualifizierten Person prüfen zu lassen. Schema-Empfehlungen (z. B. MedicalBusiness, Physician, Attorney), Author-Authority-Massnahmen und Off-Page-Linkbuilding können in regulierten Branchen mit Werbe- oder Berufsordnungen kollidieren. Diese Auswertung berücksichtigt branchen-spezifische Regulierung nicht.
+<br><br>
+<b>Erstellungswerkzeug:</b> Diese Auswertung wurde mit dem Open-Source-Werkzeug seo-survival-kit (MIT-Lizenz, Public Beta v0.3.x) erstellt. Quellcode und Methodik unter https://github.com/maxschottke-spec/seo-survival-kit.
 </div>
 
 <p class="footer-cite">Daten-Stand: ${new Date().toLocaleDateString('de-DE')}. Quellen: Sistrix API (Sichtbarkeitsindex DE), DataForSEO Labs (SERP-Rankings DE, Backlinks, Wettbewerber), Google PageSpeed Insights v5 (Lab + CrUX). Bewertungen und Empfehlungen basieren auf SEO-Best-Practices Stand ${new Date().toLocaleDateString('de-DE', {month:'long', year:'numeric'})}.</p>
@@ -432,6 +436,21 @@ ${actions.map(a => {
   // Construct safe PDF path. `target.domain` may contain dots; we sanitize for filename.
   const fileSafeDomain = String(target.domain || slug).replace(/[^a-z0-9.-]/gi, '-');
   const pdfPath = path.join(OUTPUT_DIR, `SEO-Auswertung-${fileSafeDomain.replace(/\./g,'-')}-${new Date().toISOString().slice(0,10)}.pdf`);
+
+  // Defense against symlink-clobber on the output path: if pdfPath already
+  // exists as a symlink (planted by a local attacker between runs), Chrome's
+  // --print-to-pdf would follow it and write to the symlink target (e.g.
+  // ~/Downloads/foo.pdf -> /etc/something). Unlink any pre-existing symlink
+  // so the next write lands on a real file owned by the running user.
+  try {
+    const st = fs.lstatSync(pdfPath);
+    if (st.isSymbolicLink()) {
+      fs.unlinkSync(pdfPath);
+      console.error(`[${slug}] removed pre-existing symlink at ${pdfPath} before render`);
+    }
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+  }
 
   if (!fs.existsSync(CHROME_PATH)) {
     throw new Error(`Chrome not found at ${CHROME_PATH}. Set CHROME_PATH env var to your Chrome binary.`);

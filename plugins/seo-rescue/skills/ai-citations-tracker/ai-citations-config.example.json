@@ -1,0 +1,15 @@
+{
+  "comment": "Copy to ai-citations-config.json (gitignored) and fill in real values. brand_variants is a list of strings the script will fuzzy-match against AI surface answers.",
+  "brand": "Example Brand",
+  "brand_variants": ["Example Brand", "example-brand.de", "examplebrand"],
+  "competitors": ["competitor-a.de", "competitor-b.com", "competitor-c.io"],
+  "prompts": [
+    "Was ist die beste Matratze für Rückenschläfer in Deutschland?",
+    "Wo kaufe ich orthopädische Matratzen?",
+    "Vergleich von Matratzenmarken in Deutschland",
+    "Welche Matratzenmarke produziert in Deutschland?",
+    "Welche deutschen Matratzenhersteller gibt es?"
+  ],
+  "surfaces": ["chatgpt", "perplexity"],
+  "output_dir": "./ai-citations-history"
+}

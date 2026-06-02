@@ -3,10 +3,11 @@ name: channel-economics-analyzer
 description: 'Use when an e-commerce business sells across multiple channels (own shop, Amazon, OTTO, eBay, Etsy, Zalando, etc.) and wants to know which channel is actually profitable vs which is bleeding money — e.g. "which channel makes money?", "is OTTO/Amazon worth it?", "channel break-even calculation", "marketplace profitability", "Kanal-Ökonomie", "soll ich den Channel zumachen?". Also triggers when ad budget allocation decisions are needed across channels, or when consolidating to fewer channels is being considered.'
 user-invokable: true
 argument-hint: '[channels.json path?]'
+allowed-tools: [Read, Write, Bash(node:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.0'
+  version: '0.5.0'
   category: marketing
 ---
 
@@ -185,7 +186,15 @@ Decision matrix:
 
 ## Channel fee reference table
 
-Typical fee ranges as of 2026. Always verify against your latest seller agreement — these change at least annually.
+Typical fee ranges as observed in public marketplace documentation and seller-community reports as of Q1 2026. **These are starting estimates, not authoritative data.** Marketplace fees vary by:
+
+- Category and product type within the marketplace
+- Seller-tier or volume agreement
+- Currency, region, and shipping setup
+- Whether fulfillment is by the marketplace (e.g. FBA) or by the seller
+- Promotional periods and seller-incentive programs
+
+**Always verify against your current seller agreement and recent invoices** before basing any business decision on these numbers. The fees change at least annually, and individual seller contracts often deviate from the public defaults. The table is a working hypothesis for the initial P&L draft — replace the values with your actual contract terms before drawing conclusions.
 
 ### DACH Marketplaces
 

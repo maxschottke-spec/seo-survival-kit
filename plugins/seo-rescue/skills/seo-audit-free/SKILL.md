@@ -3,10 +3,11 @@ name: seo-audit-free
 description: 'Use when the user wants a basic SEO health check on a domain WITHOUT paying for any SEO tools — e.g. "kostenloser SEO-Check", "SEO ohne Sistrix", "ich habe nur Google Search Console und nichts anderes", "Anfänger-Audit", "wo fange ich beim SEO an", "billiges SEO" oder als Vorstufe vor dem entscheidet ob die kostenpflichtigen Tools (Sistrix, DataForSEO) sinnvoll sind. Anti-Use: NICHT für tiefere Wettbewerbsanalyse, Sichtbarkeitsverlauf, oder professionelle Outreach-Reports — dafür existiert `seo-outreach-report` mit den paid APIs.'
 user-invokable: true
 argument-hint: '[domain]'
+allowed-tools: [Read, Bash(curl:*), Bash(node:*), Bash(npx lighthouse:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.0'
+  version: '0.5.0'
   category: marketing
 ---
 
@@ -75,6 +76,8 @@ Pflicht-Checks:
 - Keine `5xx` Antworten
 
 ### Schritt 4 — On-Page-Signale aus dem HTML
+
+> **Sicherheits-Hinweis:** Die Beispiele unten schreiben nach `/tmp/`, was auf Shared-Hosts world-writable ist und Symlink-Race-Attacks zulässt. Für Solo-Workstations (typischer Use-Case) ist das unbedenklich. Für Shared-/Server-Umgebungen ersetze `/tmp/` durch `$(mktemp -d)/` oder einen Pfad in deinem eigenen Home: `WORK=$(mktemp -d -t seo-audit-XXXXXX) && trap "rm -rf $WORK" EXIT` am Anfang des Blocks setzen, dann `$WORK/home.html` statt `/tmp/home.html`.
 
 ```bash
 curl -s -A "Mozilla/5.0" https://example.com/ > /tmp/home.html
@@ -234,4 +237,4 @@ Wenn du folgende Fragen beantworten willst, brauchst du paid APIs:
 - "Wie viele Domains verlinken zu mir, mit welchem Spam-Score?" → DataForSEO Backlinks
 - "Wie schneide ich gegen 6 Konkurrenten im Längsschnitt ab?" → Sistrix mit mehreren Domains
 
-Wenn 2+ dieser Fragen geschäftskritisch sind → Upgrade auf `seo-outreach-report` mit Sistrix + DataForSEO. ROI typisch 1-2 gewonnene Mandate bezahlt die Tools für ein Jahr.
+Wenn 2+ dieser Fragen geschäftskritisch sind, kann ein Upgrade auf den `seo-outreach-report`-Skill mit Sistrix + DataForSEO sinnvoll sein. Ob sich die monatlichen Tool-Kosten rechnen, hängt vom konkreten Anwendungsfall ab — pro Einsatz die Kosten gegen den erwarteten Hebel (z. B. Klarheit für eine Investitionsentscheidung, Onboarding eines Neukunden, Quartals-Status für ein internes Team) prüfen.

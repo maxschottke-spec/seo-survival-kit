@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "seo-rescue",
-  "version": "0.3.1",
-  "description": "Seven SEO skills + orchestrator. Type /seo-rescue:rescue for the routing table, or call sub-skills directly: /seo-rescue:seo-audit-free (free-tier audit), /seo-rescue:post-core-update-recovery (Core Update recovery framework), /seo-rescue:seo-outreach-report (decision-maker PDF via Sistrix+DataForSEO+PSI), /seo-rescue:channel-economics-analyzer (per-channel P&L for 30+ marketplaces), /seo-rescue:competitor-deep-audit (DataForSEO keyword-gap analysis), /seo-rescue:psi-weekly-cron-baseline (automated PSI tracking), /seo-rescue:ai-search-rescue (AI Overviews + ChatGPT + Perplexity citation recovery).",
+  "version": "0.5.1",
+  "description": "Fourteen SEO skills + orchestrator. Type /seo-rescue:rescue for the routing table. NEW in v0.5.1: Recovery Workflow Automation — /seo-rescue:recovery-full (full workflow), /seo-rescue:recovery-diagnose (Core Update diagnosis), /seo-rescue:recovery-crawl (Screaming Frog issue scan), /seo-rescue:recovery-plan (prioritized action plan), /seo-rescue:recovery-monitor (weekly tracking + score). Plus existing skills: seo-audit-free, post-core-update-recovery, seo-outreach-report, channel-economics-analyzer, competitor-deep-audit, psi-weekly-cron-baseline, ai-search-rescue, ai-citations-tracker, gsc-deep-dive.",
   "author": {
     "name": "Max Schottke",
     "url": "https://github.com/maxschottke-spec"

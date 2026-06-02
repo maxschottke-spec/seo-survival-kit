@@ -3,10 +3,11 @@ name: competitor-deep-audit
 description: 'Use when an e-commerce or content site wants to deeply understand WHO their organic competitors are (often surprising — not the brands they think) and WHERE the competitors outrank them — e.g. "competitor analysis", "keyword gap analysis", "who outranks me", "Wettbewerber-Lücken", "wo verlieren wir gegen die Konkurrenz", "content opportunities from competitor SERPs". Produces a prioritized opportunity list (keyword + search volume + competitor URL + your current position) for the next content-roadmap quarter. Triggers also from "Sistrix Konkurrenten" or "DataForSEO competitors".'
 user-invokable: true
 argument-hint: '[domain]'
+allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.0'
+  version: '0.5.0'
   category: marketing
 ---
 

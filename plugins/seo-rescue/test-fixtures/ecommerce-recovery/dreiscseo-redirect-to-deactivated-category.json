@@ -1,0 +1,40 @@
+{
+  "_description": "Test: DreiscSeo redirect points to category planned for deactivation. Governor must stop or require strategy.",
+  "input": {
+    "user_instruction": "Deactivate empty category /empty-category-A/",
+    "category_to_deactivate": {
+      "url": "/empty-category-A/",
+      "id": "cat-uuid-empty-a",
+      "product_count": 0,
+      "active": true
+    },
+    "dreiscseo_redirects_pointing_to_url": [
+      {
+        "id": "dreisc-001",
+        "sourcePath": "old-variant-A/",
+        "redirectPath": "empty-category-A/",
+        "active": true,
+        "redirectHttpStatusCode": "301"
+      },
+      {
+        "id": "dreisc-002",
+        "sourcePath": "cheap-variant-A/",
+        "redirectPath": "empty-category-A/",
+        "active": true,
+        "redirectHttpStatusCode": "301"
+      }
+    ],
+    "current_mode": "low_risk_fix",
+    "change_budget": 10
+  },
+  "expected": {
+    "stop_required": true,
+    "stop_reasons": ["dreiscseo_would_create_301_to_404"],
+    "dreiscseo_precheck": {
+      "redirects_to_url": ["dreisc-001", "dreisc-002"],
+      "would_create_301_to_404": true,
+      "affected_redirect_ids": ["dreisc-001", "dreisc-002"]
+    },
+    "recommendation": "Deactivate DreiscSeo redirects FIRST (PATCH active:false), THEN deactivate category. OR cancel category deactivation."
+  }
+}

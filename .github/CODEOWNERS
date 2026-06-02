@@ -1,0 +1,8 @@
+# Required reviewer for all security-sensitive paths.
+# Default fallback covers everything else.
+*                                       @maxschottke-spec
+/.github/                               @maxschottke-spec
+/.claude-plugin/                        @maxschottke-spec
+/plugins/seo-rescue/.claude-plugin/     @maxschottke-spec
+/plugins/seo-rescue/lib/                @maxschottke-spec
+/SECURITY.md                            @maxschottke-spec

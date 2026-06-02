@@ -3,10 +3,11 @@ name: ai-search-rescue
 description: 'Use when a site has lost visibility in AI search surfaces (Google AI Overviews, Google AI Mode, ChatGPT citations, Perplexity citations) or wants to systematically work toward being cited rather than just ranked. Trigger phrases include "AI Overviews recovery", "ChatGPT zitiert uns nicht mehr", "wir sind aus den AI Overviews rausgeflogen", "generative engine optimization", "GEO strategy", "AI search visibility", "warum zitiert AI Overview den Wettbewerber statt uns", "Perplexity-Citations aufbauen". Anti-Use: NICHT für klassische SERP-Rankings — dafür existieren `seo-outreach-report` und `competitor-deep-audit`.'
 user-invokable: true
 argument-hint: '[domain]'
+allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.3.0'
+  version: '0.5.0'
   category: marketing
 ---
 
@@ -18,7 +19,7 @@ A framework for recovering and growing visibility in AI search surfaces: Google 
 
 Two operational findings drive this skill:
 
-1. **AI citations lead classical SERP recovery by 2-6 weeks.** In one mid-sized e-commerce recovery (March 2026 Core Update), AI-Mode + AI-Overviews + ChatGPT citations started moving up well before the Sistrix VI did. AI surfaces are a leading indicator that the authority signals you fixed in [[post-core-update-recovery]] Phase A are actually being recognized.
+1. **AI citations may lead classical SERP recovery by several weeks.** In one mid-sized e-commerce recovery (March 2026 Core Update), AI-Mode + AI-Overviews + ChatGPT citations started moving up roughly 2–6 weeks before the Sistrix VI did. The pattern is an observation from a single case plus published anecdata, not a measured statistical relationship. Treat it as an indicator worth watching, not a prediction. If you observe the same or opposite pattern in your own recoveries, please contribute the data point back to `LESSONS.md`.
 2. **The optimization isn't keyword targeting, it's passage targeting.** AI surfaces extract short passages (one sentence to one paragraph) that directly answer a sub-question of the user's prompt. If your page has no extractable passages, you don't get cited even when you rank #1 organically.
 
 ## When to use

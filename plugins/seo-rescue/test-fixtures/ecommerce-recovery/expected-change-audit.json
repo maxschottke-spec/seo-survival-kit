@@ -1,0 +1,89 @@
+{
+  "_description": "Expected classification of changes from the ExampleShop 2026-05-27 session",
+  "schema_version": "1.0.0",
+  "domain": "example-shop.com",
+  "expected_classifications": [
+    {
+      "pattern": "301->404 chain",
+      "severity": "high",
+      "decision": "fix_immediately"
+    },
+    {
+      "pattern": "duplicate canonical on blog pages",
+      "severity": "critical",
+      "decision": "dev_ticket_this_week"
+    },
+    {
+      "pattern": "missing H1 on category pages",
+      "severity": "high",
+      "decision": "dev_ticket"
+    },
+    {
+      "pattern": "medical/risky anchor text",
+      "severity": "medium",
+      "decision": "fix_anchor"
+    },
+    {
+      "pattern": "clean 301 redirect from 404 to 200/self-canonical/index",
+      "severity": "none",
+      "decision": "keep"
+    },
+    {
+      "pattern": "broad live batch without explicit approval",
+      "severity": "high",
+      "decision": "approval_required"
+    },
+    {
+      "pattern": "category deactivation with 0 products and 0 traffic",
+      "severity": "low",
+      "decision": "keep"
+    },
+    {
+      "pattern": "14+ links added to single blog post in one session",
+      "severity": "medium",
+      "decision": "observe_14_days"
+    },
+    {
+      "pattern": "redirect to thematically wrong target",
+      "severity": "medium",
+      "decision": "correct_when_possible"
+    },
+    {
+      "pattern": "API 500 on seo-url PATCH",
+      "severity": "medium",
+      "decision": "dev_ticket"
+    },
+    {
+      "pattern": "category deactivated then reactivated (redirect failed)",
+      "severity": "high",
+      "decision": "dev_ticket_manual_redirect"
+    },
+    {
+      "pattern": "plugin config change with sitewide effect",
+      "severity": "medium",
+      "decision": "keep_if_improvement"
+    }
+  ],
+  "expected_audit_summary": {
+    "total_changes": 31,
+    "successful": 25,
+    "failed": 2,
+    "reverted": 1,
+    "unverified": 3,
+    "total_risk_points_consumed": "not_reconstructable_without_change_history",
+    "changes_without_explicit_approval": 31,
+    "changes_without_rollback_method": 0,
+    "audit_gaps": [
+      {
+        "period": "afternoon session 2026-05-27 11:00-18:00",
+        "gap_type": "no_change_history",
+        "severity": "high"
+      },
+      {
+        "period": "CMS slot patches",
+        "gap_type": "no_updatedAt_in_api_response",
+        "severity": "medium"
+      }
+    ]
+  }
+}

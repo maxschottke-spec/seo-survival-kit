@@ -1,0 +1,26 @@
+keyword,position,url,search_volume,previous_position,intent
+office chair ergonomic 27 inch,2,https://example-furniture-shop.test/office-chair-ergo-27,4400,18,transactional
+office chair ergonomic,5,https://example-furniture-shop.test/office-chairs,9900,11,transactional
+ergonomic desk chair black,7,https://example-furniture-shop.test/office-chairs/black,2900,14,transactional
+office chair lumbar support,9,https://example-furniture-shop.test/office-chairs/lumbar,3300,17,transactional
+mesh office chair,12,https://example-furniture-shop.test/office-chairs/mesh,5400,20,transactional
+high back office chair,8,https://example-furniture-shop.test/office-chairs/high-back,2400,15,transactional
+office chair with footrest,18,https://example-furniture-shop.test/office-chairs/footrest,1300,29,commercial-investigation
+office chair under 300,15,https://example-furniture-shop.test/office-chairs/budget,1900,24,transactional
+gaming chair vs office chair,32,https://example-furniture-shop.test/guides/gaming-vs-office,4400,12,informational
+best office chair for back pain,21,https://example-furniture-shop.test/guides/back-pain,8100,8,informational
+what is an ergonomic chair,45,https://example-furniture-shop.test/guides/what-is-ergonomic,2900,15,informational
+ergonomic chair benefits,38,https://example-furniture-shop.test/guides/benefits,1900,18,informational
+standing desk,28,https://example-furniture-shop.test/desks/standing,12100,30,transactional
+standing desk converter,22,https://example-furniture-shop.test/desks/converters,4400,33,commercial-investigation
+office desk wood,19,https://example-furniture-shop.test/desks/wood,3300,28,transactional
+office desk small,14,https://example-furniture-shop.test/desks/small,2900,26,transactional
+filing cabinet,42,https://example-furniture-shop.test/storage/filing,2900,55,commercial-investigation
+office bookshelf,55,https://example-furniture-shop.test/storage/bookshelves,1900,68,commercial-investigation
+example-furniture-shop,1,https://example-furniture-shop.test,2400,1,navigational
+example-furniture-shop reviews,3,https://example-furniture-shop.test/reviews,590,4,navigational
+ergonomic furniture brand,6,https://example-furniture-shop.test/about,210,9,navigational
+desk chair,11,https://example-furniture-shop.test/office-chairs,18100,16,transactional
+modern office desk,17,https://example-furniture-shop.test/desks/modern,2400,25,transactional
+oak desk,33,https://example-furniture-shop.test/desks/oak,1600,45,commercial-investigation
+adjustable office chair,10,https://example-furniture-shop.test/office-chairs/adjustable,4400,19,transactional
