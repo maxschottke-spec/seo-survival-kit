@@ -1,0 +1,53 @@
+name: Feature request
+description: Suggest an improvement or a new capability
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. Please describe the use case clearly so we can judge whether it fits the plugin's scope. This plugin is in public beta and is consciously kept small; not every request will land.
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What were you trying to do when you wished the plugin had this feature?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed solution
+      description: How would you imagine this working? It is fine to leave this vague if you are not sure.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What did you try or consider before requesting this? Including "nothing else" is fine.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which skill area does this touch?
+      options:
+        - new skill suggestion
+        - improvement to existing skill
+        - cross-skill / infrastructure
+        - documentation / onboarding
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Optional context. Examples, real-world data, references.
+    validations:
+      required: false
