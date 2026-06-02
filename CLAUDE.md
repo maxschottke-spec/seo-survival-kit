@@ -2,7 +2,7 @@
 
 ## What this repository is
 
-seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **eleven skills (one orchestrator plus ten sub-skills)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit. Canonical skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
+seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **seventeen skills and commands (one orchestrator plus sixteen sub-skills and recovery commands)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit. Canonical skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 
 Positioning: **Recovery Operating System for Ecommerce/D2C**. Recovery-first, decision-first, profit-aware, risk-aware. The framework supports operators making recovery and growth decisions; execution belongs to the operator's team, agency, or contractors. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the canonical source of truth.
 
@@ -46,7 +46,7 @@ seo-survival-kit/
 │       │   ├── FALLBACKS.md
 │       │   └── TROUBLESHOOTING.md
 │       ├── test-fixtures/            # Minimal test data for offline testing
-│       └── skills/                   # 16 skills (1 orchestrator + 15 sub-skills/commands)
+│       └── skills/                   # 17 skills/commands (1 orchestrator + 16 sub-skills/commands)
 │           ├── rescue/                       # Orchestrator + routing table
 │           ├── seo-audit-free/
 │           ├── post-core-update-recovery/
@@ -57,13 +57,15 @@ seo-survival-kit/
 │           ├── ai-search-rescue/
 │           ├── ai-citations-tracker/         # v0.4 addition: weekly cron AI surface tracker
 │           ├── gsc-deep-dive/                # v0.4 addition: one-call GSC API snapshot
-│           └── sistrix-monday-recovery-check/  # v0.5.1 addition: CSV-first weekly recovery review
+│           ├── sistrix-monday-recovery-check/  # v0.5.2: CSV-first weekly recovery review
+│           ├── subscription-monetization-audit/ # v0.5.2: recurring-revenue lever audit
+│           └── recovery-{diagnose,crawl,plan,monitor,full}/  # v0.5.2: thin wrappers for the recovery-workflow commands
 ├── exports/                          # Platform-agnostic Markdown copies (Cursor / Custom GPT / Gemini / Aider / Codex)
 ├── examples/                         # Sample PDF + screenshots (synthetic data)
 ├── ARCHITECTURE.md                   # Canonical source of truth (vision, positioning, modules, governance, privacy)
 ├── RECOVERY_SYSTEM.md                # Recovery operational detail
 ├── DECISION_ENGINE.md                # Decision rules, prioritization, sequencing, cross-channel signals
-├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Weekly workflow specification (skill ships in v0.5.1)
+├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Weekly workflow specification (skill ships in v0.5.2)
 ├── ROADMAP.md                        # Version-by-version product plan
 ├── ROADMAP-2026.md                   # Google search future-watch (separate from product roadmap)
 ├── CHANGELOG.md                      # Per-release notes
@@ -187,7 +189,7 @@ These rules are derived from real recovery operations and apply to all commands 
 
 - Repository: https://github.com/maxschottke-spec/seo-survival-kit
 - Anthropic community marketplace: pending review at claude-plugins-community
-- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.0`
+- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.2`
 - Pilot-domain recovery case (anonymized): see `post-core-update-recovery/LESSONS.md` for the dated lesson entries that source the framework
 
 ## Canonical doc map
@@ -197,7 +199,7 @@ When working on this repository, the source-of-truth docs are:
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — vision, positioning, modules, governance, privacy, adaptive onboarding, knowledge layer, plugin architecture, compatibility, what is NOT implemented
 - [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) — six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase recovery sequencing
 - [DECISION_ENGINE.md](./DECISION_ENGINE.md) — decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals
-- [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow (skill ships in v0.5.1)
+- [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow (skill ships in v0.5.2)
 - [ROADMAP.md](./ROADMAP.md) — version-by-version product plan
 
 Anti-bloat rule for new top-level docs: a new doc must pass the standalone test (own workflow / own inputs / own outputs / own user interaction / meaningful implementation complexity / independent future evolution). Otherwise it becomes a section in one of the existing docs.

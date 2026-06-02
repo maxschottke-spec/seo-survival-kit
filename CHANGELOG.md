@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 - `lib/safe.js` — `atomicWriteJSON` now writes its temp file with `O_EXCL` (via `writeFileExclusive`), so a pre-existing symlink at the temp path aborts the write instead of being followed (parity with `appendNDJSON`/`writeFileExclusive`).
 - `subscription-monetization-audit/csv-import.example.js` — summary write switched from unlink-then-exclusive (TOCTOU) to `atomicWriteJSON` (atomic, symlink-checked, idempotent).
 
+### Changed
+
+- Documentation consistency sweep: reconciled the contradictory skill counts (was "eleven"/"ten"/"sixteen" across CLAUDE.md, ARCHITECTURE.md, and the orchestrator) to the canonical **seventeen skills/commands (one orchestrator + sixteen sub-skills and recovery commands)**; refreshed install pins and status lines to v0.5.2; aligned every per-skill `version:` frontmatter to 0.5.2.
+
 ## [0.5.2] — 2026-06-02
 
 ### Added

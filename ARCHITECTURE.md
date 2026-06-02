@@ -84,9 +84,9 @@ Skills do not implement the decision layer themselves. They feed it. The user in
 
 ## 4. Modules and skill registry
 
-### Active modules (v0.5.0)
+### Active modules (v0.5.2)
 
-**seo-rescue.** The current installable plugin. Ten skills (one routing orchestrator plus nine sub-skills). Stable. The wedge.
+**seo-rescue.** The current installable plugin. Seventeen skills and commands (one routing orchestrator plus sixteen sub-skills and recovery commands). Stable. The wedge.
 
 ### Planned modules (umbrella roadmap)
 
@@ -308,7 +308,7 @@ If no profile exists: D2C-ecommerce / DE / German output / public-synthetic-only
 Workflow defaults the intent router selects from:
 
 - **SEO Recovery Mode**: post-Core-Update, traffic drops, GSC analysis. Default skills: `post-core-update-recovery`, `gsc-deep-dive`, `psi-weekly-cron-baseline`, `seo-audit-free`, `ai-search-rescue`.
-- **SISTRIX Monday Recovery Mode**: weekly recovery review. Default skill: `sistrix-monday-recovery-check` (v0.5.1).
+- **SISTRIX Monday Recovery Mode**: weekly recovery review. Default skill: `sistrix-monday-recovery-check` (v0.5.2).
 - **Agency Delivery Mode**: client audits, PDF reports. Default skills: `seo-outreach-report`, `competitor-deep-audit`, `channel-economics-analyzer`, `psi-weekly-cron-baseline`, `gsc-deep-dive`.
 - **Founder/Operator Mode**: prioritization, cost control, fast decisions on the operator's own business. Default skills: `channel-economics-analyzer`, `psi-weekly-cron-baseline`, `post-core-update-recovery`, `ai-search-rescue`.
 - **Revenue Forecast Mode** (v0.6): scenario-based forecasting.
@@ -377,7 +377,7 @@ seo-survival-kit/                  # Repository / marketplace name
 │       │   └── plugin.json        # Plugin manifest (path matters — v0.2.0/v0.2.1 yanked for wrong path)
 │       ├── lib/
 │       │   └── safe.js            # Shared safety primitives
-│       └── skills/                # 10 skills (1 orchestrator + 9 sub-skills)
+│       └── skills/                # 17 skills/commands (1 orchestrator + 16 sub-skills/commands)
 ├── exports/                       # Platform-agnostic Markdown for Cursor / Custom GPT / Gemini / Aider / Codex
 ├── examples/                      # Sample PDF + screenshots only (synthetic data)
 ├── ARCHITECTURE.md                # This document
