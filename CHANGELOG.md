@@ -1,31 +1,149 @@
 # Changelog
 
-All notable changes to seo-survival-kit are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- **New skill: `subscription-monetization-audit`** ([SKILL.md](./plugins/seo-rescue/skills/subscription-monetization-audit/SKILL.md)) — a 5-lever recurring-revenue playbook (pricing, packaging, retention, expansion, win-back) with an optional CSV import path for Stripe / Chargebee / Recurly exports that computes MRR, ARPU, churn, and cohort retention locally. CSV import via `csv-import.example.js` with `lib/safe.js` safety primitives (size-capped reads, no network calls). Routed in the `rescue` orchestrator as `/seo-rescue:rescue monetization` and listed in the README "Reporting and economics" table.
+
+## [Unreleased] — v0.5.1-dev
+
+### Added
+
+- **Recovery Workflow Commands**: Five new commands for automated SEO recovery
+  - `recovery-diagnose` — Core Update diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO MCP + GSC CSV + manual CSV)
+  - `recovery-crawl` — Screaming Frog MCP crawl + local minimal-crawler fallback + issue classification
+  - `recovery-plan` — Prioritized 30/60/90-day action plan with human approval gate and evidence arrays
+  - `recovery-monitor` — Weekly tracking with deterministic 0-100 recovery score and component scores
+  - `recovery-full` — Orchestrator chaining all four commands with graceful degradation
+- **New runnable skill: `sistrix-monday-recovery-check`** ([SKILL.md](./plugins/seo-rescue/skills/sistrix-monday-recovery-check/SKILL.md)) — CSV-first weekly recovery review during an active SEO recovery. No SISTRIX API key required. Reads current and previous SISTRIX keyword exports (optionally a money-keyword list, optionally a GSC export, optionally CR data) and emits a fixed 17-section structured report: visibility-index interpretation, Top-100/50/20/10/5/3 recovery distribution, winner/loser neutralization, money-keyword protection table, URL-level recovery table, per-cluster recovery stage (0-5), Recovery Signal Score (0-100), optional GSC cross-check, optional conversion-rate validation, one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate), explicit What-Not-To-Touch guard, next-7-day monitoring plan, next-Monday checklist, confidence level, data limitations. Methodology specification in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md); operational detail in [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) sections 4-10.
+- Synthetic example folder [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) with the input SISTRIX CSV shape (current week + previous week + money-keyword list) and the expected output Markdown. All data uses the RFC 2606 reserved `.test` TLD.
+- **lib/safe.js v2**: `normalizeDomain()`, `generateRunId()`, enhanced `acquireLock()` (PID/token/stale TTL), `atomicWriteJSON()` (collision-safe), `appendNDJSON()`, `safeReadJSON()`, `safeReadLatestImport()`, `maskSecrets()`, `safeLog()`
+- **JSON Schemas**: schema_version, run_id, data_quality, confidence, providers_used, missing_capabilities in all command outputs
+- **Reference documents**: `CORE_UPDATES.md` with 90-day freshness policy, `RECOVERY_SYSTEM.md`, `DECISION_ENGINE.md` under `plugins/seo-rescue/references/`
+- **Documentation**: ONBOARDING.md, SETUP.md, TOOL_PROVIDERS.md, FALLBACKS.md, TROUBLESHOOTING.md under `plugins/seo-rescue/docs/`
+- **Test fixtures**: Minimal CSV and JSON test data for offline testing under `plugins/seo-rescue/test-fixtures/`
+- **Command/skill wrapper pattern**: Detailed command specs in `commands/` with thin `skills/*/SKILL.md` wrappers
+
+### Changed
+
+- Skill count is now sixteen (one orchestrator plus fifteen sub-skills/commands). [README.md](./README.md), [CLAUDE.md](./CLAUDE.md), and the orchestrator [`rescue/SKILL.md`](./plugins/seo-rescue/skills/rescue/SKILL.md) updated accordingly.
+- `rescue/SKILL.md` Quick Reference table adds the `/seo-rescue:rescue monday` alias plus the five new recovery commands. Cost summary table extended. Latest installable version footer updated from a stale v0.3.0 to v0.5.1.
+
+### Deferred to a later v0.5.x
+
+- Optional Node.js helper script for deterministic CSV parsing + Recovery Signal Score computation. v0.5.1 ships as a pure-Markdown framework skill — Claude reads the CSVs via the Read tool and applies the methodology. The helper script would let the same workflow run in batch / cron mode and is the natural v0.5.2 follow-up if usage proves the demand.
+- ARCHITECTURE.md skill registry and MATURITY.md comparison-table skill-count cosmetic updates land at v0.5.1 release alongside the manifest version bump.
+
+## [0.5.0] — 2026-05-26
+
+### Architecture consolidation
+
+This release does not change runtime behavior. It reaches canonical-source-of-truth state for the documentation. Skill set remains the same 10 (1 orchestrator + 9 sub-skills). Plugin manifest, per-skill `version:` frontmatter, and install pin lines (`/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.0`) bumped from `0.4.1` to `0.5.0` at release time.
+
+#### Added
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — canonical source of truth: vision, ecommerce/D2C positioning, system shape (diagnostic/decision/workflow layers), skill registry, governance and lifecycle, privacy and client-data posture (private experience layer with pattern maturity model), adaptive user onboarding, knowledge layer with four-level evidence weighting, plugin architecture, compatibility with adjacent tools, versioning and release process, what is intentionally not implemented
+- [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) — six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection rules and at-risk classification, Winner/Loser Neutralization detection and severity, URL Recovery Analysis with per-type recommendations, Recovery Signal Score with twelve factors, five-phase recovery sequencing (R1 Protect → R2 Stabilize → R3 Improve internal links → R4 Fix intent conflicts → R5 Selective consolidation)
+- [DECISION_ENGINE.md](./DECISION_ENGINE.md) — decision-first manifesto, codified decision rules (`r-margin-unknown-no-scale`, `r-roas-positive-margin-negative`, `r-sistrix-vi-flat-money-keywords-recovered`, `r-money-keywords-top3-protect`, `r-ai-citations-leading-indicator`, and others), evidence weighting at four levels, data quality layer with four dimensions, profitability signals as first-class concern, five-class prioritization (Immediate / Medium / Monitor only / Risky / False), sequencing constraints across phases, cross-channel signal integration patterns
+- [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow specification (runnable skill ships in v0.5.1)
+- [ROADMAP.md](./ROADMAP.md) — version-by-version product plan, distinct from ROADMAP-2026.md (future-watch document)
+
+#### Changed
+
+- README repositioned around ecommerce/D2C Recovery OS wedge. Skill-count corrected from "Nine" to "Ten skills (1 orchestrator + 9 sub-skills)". Status section updated from v0.3.x to v0.4.1 shipped / v0.5-dev in flight. Doc map added.
+- CLAUDE.md architecture tree updated to include `ai-citations-tracker`, `gsc-deep-dive`, `exports/`, and the new top-level docs. Skill count corrected from "seven SEO skills" to ten.
+- MATURITY.md version row updated to reflect v0.4.1 shipped + v0.5-dev in flight. Positioning paragraph added.
+- `.gitignore` extended for private data paths: `private/`, `client-data/`, `real-data/`, `exports/private/`, `lessons/private/`, `case-notes/private/`, `local-notes/`, `tokens/`, `credentials/`, `sistrix-exports/`, `gsc-exports/`, `*_sistrix*.csv`, `*_visibility*.csv`, `*_keywords*.csv`, `*_ranking*.csv`, `.growth-survival-kit/`, `.seo-survival-kit/`, `gsc-config.json`, `ai-citations-config.json`, `gsc-history/`, `ai-citations-history/`
+
+#### Fixed
+
+- `plugins/seo-rescue/skills/gsc-deep-dive/SKILL.md` Step 1a now warns explicitly against using Google AI Studio default projects (project IDs matching `gen-lang-client-XXXXXXXXXX`); these service accounts hit "Email not found" when added to GSC even after 12+ hours of propagation. Addresses real-user issue [#26](https://github.com/maxschottke-spec/seo-survival-kit/issues/26).
+- `plugins/seo-rescue/skills/gsc-deep-dive/SKILL.md` private example-domain reference replaced with reserved-TLD example per redaction policy.
+- `plugins/seo-rescue/skills/ai-citations-tracker/SKILL.md` brand-variant false-positive example updated to reserved-TLD `aero-mattress.test`.
+
+#### Deferred to v0.5.5 (separate PR)
+
+- Commercial Model documentation: agency model, decision-first agency principles, service model stages, productized offer hypotheses with pricing logic, Fiverr Interface positioning and planned commands, buyer-objection log schema, GTM experiment template, implementation partner model. Kept separate from v0.5 technical architecture for review clarity.
+
+#### Deferred to v0.6+
+
+- Runnable SISTRIX Monday Recovery Check skill (v0.5.1)
+- Revenue Rescue runtime (v0.6)
+- Safe updater implementation (v0.6); v0.5 documents the design only
+- Test fixtures, expected-output assertions, evaluation rubric (v0.6+)
+
+## [0.4.1] — 2026-05-22
+
+### Added — cross-platform exports
+
+New `exports/` directory with the framework-only skills in platform-agnostic Markdown, plus per-platform install snippets:
+
+- **`exports/skills/seo-rescue-overview.md`** — top-level routing + framework index (replaces the Claude-Code-specific `/seo-rescue:rescue` orchestrator for non-Claude tools)
+- **`exports/skills/post-core-update-recovery.md`** — diagnose tree + 4-phase Authority-First recovery plan, Claude-frontmatter stripped
+- **`exports/skills/ai-search-rescue.md`** — 7 tactics + 3-layer measurement for AI Overview / ChatGPT / Perplexity citation visibility, Claude-frontmatter stripped
+- **`exports/README.md`** — per-platform install guides for Cursor (`.cursor/rules/*.mdc`), OpenAI Custom GPT (Instructions + Knowledge files), Gemini CLI (`GEMINI.md`), Aider (`CONVENTIONS.md`), Continue.dev (config.json docs), Codex (`AGENTS.md`), plus a generic-Markdown fallback for any other LLM
+
+### Why this matters
+
+The MATURITY.md "agentskills.io compliant — works in Cursor / Codex / Gemini CLI" claim was only true for the **pure-Markdown framework skills**, and only if the user manually stripped the Claude-specific frontmatter. This release makes that automatic: paste the right file into the right place and the framework loads.
+
+### Scope
+
+Only the three pure-Markdown framework skills are exported. The seven script-backed skills (`seo-audit-free`, `seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`) remain Claude-Code-specific because their SKILL.md routing depends on Claude Code's slash-command + `allowed-tools` conventions. The underlying Node scripts in each skill folder are platform-agnostic — `exports/README.md` documents how to run them directly with `node` on any system.
+
+### Planned next
+
+`v0.5.x` will add an MCP server wrapper exposing each script-backed skill as an MCP tool — real cross-LLM portability (Cursor, Codex, Continue, Aider, Claude Desktop, Goose, n8n) instead of just framework-knowledge portability.
+
+### Changed
+
+- `plugin.json` + 10 × SKILL.md frontmatter `version` bumped 0.4.0 → 0.4.1
+- README / ONBOARDING / CLAUDE / SECURITY install commands bumped to `#v0.4.1`
+- MATURITY version line bumped to 0.4.1
+
+No code, skill behavior, or trigger-phrase changes vs v0.4.0.
 
 ## [0.4.0] — 2026-05-22
 
-### Added (new skill — minor version bump per SemVer because new functionality)
+### Added — two new skills (the two leading-indicator + convenience picks from the strategic roadmap)
 
-- **New skill `subscription-monetization-audit`** for diagnosing revenue gaps in subscription / recurring-revenue businesses (news paywalls, SaaS-light, membership platforms, e-commerce with subscription tier). Two analysis modes:
-  - **Outside-In mode** — detection from the public website (paywall structure, tier visibility, ad-network density, AI-shopping signals, newsletter prominence, event/affiliate/donation CTAs, cancel-flow accessibility).
-  - **Inside-Out mode** — optional CSV import from Stripe / Chargebee / Recurly / Shopify Subscriptions / custom dashboards. Generic CSV format with 10 required columns and 6 optional columns. Computes MRR, ARR, ARPU, churn 30 / 60 / 90 day, cohort retention, plan distribution, CLV per plan, pending cancellations + MRR at risk, win-back-pool size, payment-provider distribution, country distribution.
-- **Five-lever monetization playbook** with each lever sized by Inside-Out data (or industry-typical benchmarks in Outside-In mode) and anchored on a real-market vorbild:
-  1. Premium-Tier introduction (Welt Plus / Bild Plus / NYT pattern)
-  2. Conversion-Pool activation from active-non-subscribers
-  3. Win-Back of churned subscribers still active on site
-  4. B2B Adjacency / Professional Newsletter (Politico Pro / Tagesspiegel Background / FT Confidential pattern)
-  5. Live Events / Conferences (Axios / Stratechery pattern)
-- **Two bonus levers**: overdue invoice collection (sofort-cash hebel), ad-stack optimization (where ads coexist with subscriptions).
-- **Negative-trend discipline rule**: before applying any conversion-lever, if signup trend is declining month-over-month, the underlying cause of the decline must be diagnosed and addressed first.
-- **Premium-Tier-ARPU goal calculator**: surfaces the most common subscription-business mistake of treating subscriber-count as the only growth lever when blended-ARPU achieves the same ARR goal with less acquisition risk.
-- **CSV-import script** (`csv-import.example.js`) plus example CSV (`csv-import.example.csv`) with synthetic data covering yearly / monthly / weekly billing, active / canceled / pending statuses, payment-provider and country fields.
-- **Orchestrator updated** (`rescue/SKILL.md`) with new routing entry `/seo-rescue:rescue subs [domain | --csv path]`.
-- **README "The eight skills" section** with new entry. Quick Reference table extended to 8 rows.
-- **`marketplace.json` and `plugin.json` descriptions** updated to mention all eight skills.
+- **`ai-citations-tracker`** — weekly cron job that fires a configurable brand-mention prompt set against ChatGPT (OpenAI API) and Perplexity (Sonar API), parses each answer for brand vs competitor mentions, and appends NDJSON history for trend analysis. Same architecture pattern as `psi-weekly-cron-baseline`. Default cost: ~$0.10/year of OpenAI credits + Perplexity free tier. Manual workflow documented for Google AI Mode / AI Overviews / Bing Copilot / Claude.ai (no stable public APIs yet). Tracks the leading-indicator pattern from `post-core-update-recovery` LESSONS (2026-05-22 entry: AI citation counts often move 2–6 weeks before classical Sistrix VI recovers).
+- **`gsc-deep-dive`** — one-call Google Search Console API snapshot. Pulls top queries, top pages, query-page pairs, search-appearance breakdown (incl. AI Overview impressions where GSC exposes them), and derives a summary with Quick-Win opportunity counts (pos 11-20 + >100 impressions). Authenticates via service-account JWT (zero npm deps, manual RS256 sign instead of pulling `googleapis`). Removes the manual GSC click-through that is the friction point of every recovery / audit session.
 
-### Why minor bump (0.4.0)
+### Added — monetization-funnel surface (docs only)
 
-New skill = new functionality surface = minor version increment per SemVer. No breaking changes to existing skills, no plugin-manifest restructure. Existing v0.3.x installs upgrade transparently and gain the new skill. The previous 0.3.x line was three patch releases on the same skill surface (security hardening + documentation polish); a new skill warrants the minor bump.
+- **README "Need help running this on your own site?" section** — explicit consulting CTA between Contributors and Status. Three engagement formats (Recovery Audit / Recovery Begleitung retainer / Outreach pipeline setup) with rationale (the maintainer ran the framework on a real Core-Update case, paying for a session = getting context on which patterns apply to your specific situation). Contact via GitHub Discussions or maintainer profile. Calendly link slot reserved.
+
+### Changed
+
+- **`rescue` orchestrator** updated routing table with the two new sub-aliases: `/seo-rescue:rescue ai-citations` and `/seo-rescue:rescue gsc <domain>`.
+- **`plugin.json` + `marketplace.json` descriptions** updated to "Nine SEO skills + orchestrator" with the new slash commands embedded inline for catalog discoverability (same convention as v0.3.1).
+- **All 10 SKILL.md frontmatter `version` lifted to `0.4.0`** (8 existing + 2 new — full alignment with plugin.json).
+
+### Security notes for the new skills
+
+Both new scripts follow the post-Round-1-audit hardening conventions established in v0.3.2:
+
+- API keys env-only (`OPENAI_API_KEY`, `PERPLEXITY_API_KEY`, `GSC_SERVICE_ACCOUNT_JSON`); hard-fail if config file contains a key field.
+- Validate-at-load + trust-at-use for every config field (prompts as string arrays with length cap, competitors as hostname-shaped strings, surfaces as enum allowlist, site identifier with strict regex covering both `sc-domain:` and URL-prefix formats).
+- All AI-surface responses (untrusted!) pass through the same 12-pattern `sanitize()` defense as `seo-onpage.js`. GSC `query` field gets the same treatment (Google indexes attacker-controllable search strings).
+- Hardcoded network destinations only: `api.openai.com`, `api.perplexity.ai`, `oauth2.googleapis.com`, `searchconsole.googleapis.com`, `www.googleapis.com/pagespeedonline/v5`. No SSRF possible from config.
+- NDJSON / JSON output files get `chmod 0o600` on first write (same defense as v0.3.3 L3).
+- Symlink-clobber defense (`lstat` + unlink-if-symlink) on the GSC snapshot output path (same pattern as v0.3.3 L5).
+
+### Upgrade notes
+
+No breaking changes. Existing v0.3.x install commands keep working. The two new skills are opt-in — install + ignore them if you don't need AI-citation tracking or direct GSC access. The README CTA is purely additive.
+
+```
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.0
+```
 
 ## [0.3.3] — 2026-05-22
 
@@ -89,20 +207,24 @@ This is a documentation-only release. No functional code changes, no version-inc
 ## [0.3.1] — 2026-05-22
 
 ### Changed
-- Plugin and marketplace descriptions now embed the namespaced slash commands inline. Catalog browsers see the full command surface (`/seo-rescue:rescue`, `/seo-rescue:seo-audit-free [domain]`, `/seo-rescue:post-core-update-recovery [domain]`, `/seo-rescue:seo-outreach-report [domain]`, `/seo-rescue:channel-economics-analyzer`, `/seo-rescue:competitor-deep-audit [domain]`, `/seo-rescue:psi-weekly-cron-baseline`, `/seo-rescue:ai-search-rescue [domain]`) directly in the listing without having to click through. README, ONBOARDING, and LAUNCH pack install commands updated to `#v0.3.1`.
+
+- Plugin and marketplace descriptions now embed the namespaced slash commands inline. Catalog browsers (claude.ai/settings/plugins, claude-plugins-community marketplace.json) see the full command surface (`/seo-rescue:rescue`, `/seo-rescue:seo-audit-free [domain]`, `/seo-rescue:post-core-update-recovery [domain]`, `/seo-rescue:seo-outreach-report [domain]`, `/seo-rescue:channel-economics-analyzer`, `/seo-rescue:competitor-deep-audit [domain]`, `/seo-rescue:psi-weekly-cron-baseline`, `/seo-rescue:ai-search-rescue [domain]`) directly in the listing without having to click through.
+- README, ONBOARDING.md, CLAUDE.md install commands updated to `#v0.3.1`.
 
 ## [0.3.0] — 2026-05-22
 
 ### Added
+
 - New skill `ai-search-rescue` for AI-search visibility recovery (Google AI Overviews, AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai search). Framework includes a measurement layer across the six AI surfaces, seven optimization tactics (extractable passages, question-shaped headings, source-cited statements, author trust, schema for AI, llms.txt, Wikipedia), and a realistic 6-12 week recovery workflow.
-- New orchestrator skill `rescue` at `plugins/seo-rescue/skills/rescue/SKILL.md`. Acts as the entry point for the plugin — type `/seo-rescue:rescue` to see the routing table covering all seven content skills, or use sub-aliases like `/seo-rescue:rescue audit <domain>` to route to a specific sub-skill. Modeled after the pro-grade orchestrator pattern in `claude-seo:seo`.
-- GitHub Actions CI workflow at `.github/workflows/validate.yml` running `claude plugin validate` on the marketplace and plugin on every push and PR, plus syntax-check on all `.js` files and JSON parse-check on config examples. Prevents repeat of the v0.2.0/v0.2.1 un-installable releases.
+- New orchestrator skill `rescue` at `plugins/seo-rescue/skills/rescue/SKILL.md`. Acts as the entry point for the plugin — type `/seo-rescue:rescue` to see the routing table covering all seven content skills, or use sub-aliases like `/seo-rescue:rescue audit <domain>` to route to a specific sub-skill. Modeled after the orchestrator pattern in `claude-seo:seo`.
+- GitHub Actions CI workflow at `.github/workflows/validate.yml` running pure node/yaml structure and parse checks on every push and PR. Catches the same bug classes as `claude plugin validate` (manifest paths, JSON parse, YAML frontmatter parse, marketplace.json reference resolution). Prevents repeat of the v0.2.0/v0.2.1 un-installable releases.
 - `CLAUDE.md` at repo root with project overview, architecture diagram, release process, security model, and contribution guidelines for working with the codebase.
 - `CHANGELOG.md` (this file) for installer transparency.
 - Quick Reference table at the top of README.md showing every namespaced slash command with one-line description and cost-per-audit.
 
 ### Changed
-- All seven content SKILL.md frontmatters now declare `user-invokable: true`, `argument-hint`, `license: MIT`, and a `metadata` block (`author`, `version`, `category`). Discoverability via Claude Code's autocomplete and downstream catalog tooling improved to match the conventions used by claude-seo.
+
+- All seven content SKILL.md frontmatters now declare `user-invokable: true`, `argument-hint`, `license: MIT`, and a `metadata` block (`author`, `version`, `category`). Discoverability via Claude Code's autocomplete and downstream catalog tooling improved to match the conventions used by `claude-seo`.
 - Marketplace metadata updated to reflect seven skills instead of six.
 - Marketplace keywords expanded with `ai-search`, `ai-overviews`, `geo`, `generative-engine-optimization`, `chatgpt`, `perplexity`, `llms-txt`.
 - README skill count updated.
@@ -112,26 +234,34 @@ This is a documentation-only release. No functional code changes, no version-inc
 First actually-installable release.
 
 ### Fixed
-- **Plugin manifest path.** `plugin.json` was at `plugins/seo-rescue/plugin.json` instead of the required `plugins/seo-rescue/.claude-plugin/plugin.json`. Without this fix, `/plugin marketplace add` silently skipped the plugin — v0.2.0 and v0.2.1 were never actually installable from their published `marketplace.json`.
-- **YAML frontmatter in all six SKILL.md files.** Unquoted double-quotes inside `description:` fields (`"kostenloser SEO-Check"`, `we don't`) broke YAML 1.2 parsing. All skills loaded with empty metadata at runtime, so trigger phrases didn't activate the skills. Fixed by single-quote-wrapping each `description` and escaping internal single quotes as `''`.
+
+- Plugin manifest path. `plugin.json` was at `plugins/seo-rescue/plugin.json` instead of the required `plugins/seo-rescue/.claude-plugin/plugin.json`. Without this fix, `/plugin marketplace add` silently skipped the plugin — v0.2.0 and v0.2.1 were never actually installable from their published `marketplace.json`.
+- YAML frontmatter in all six SKILL.md files. Unquoted double-quotes inside `description:` fields (`"kostenloser SEO-Check"`, `we don't`) broke YAML 1.2 parsing. All skills loaded with empty metadata at runtime, so trigger phrases didn't activate the skills. Fixed by single-quote-wrapping each `description` and escaping internal single quotes as `''`.
 
 ### Added
+
 - `channel-economics-analyzer` expanded from 5 to ~30 channels across DACH marketplaces (Amazon, OTTO, Kaufland.de, eBay, Zalando, About You, Galeria, Avocadostore, manomano, Limango, Bonprix, MyToys), EU marketplaces (Bol.com, CDiscount, Allegro, ManoMano, Spartoo), US marketplaces (Amazon US, Walmart, Etsy, Wayfair, Target Plus), social commerce (TikTok Shop, Instagram, Pinterest, YouTube, Live-Commerce), B2B/Wholesale (Alibaba, Faire, Ankorstore), direct-shop PSPs (Shopify, Shopware, WooCommerce, Klarna, PayPal, Stripe), and affiliate channels (Awin, TradeDoubler, Influencer codes, Google Shopping, Idealo). Per-channel gotchas and channel-portfolio templates per business category included.
 - `channels.example.json` expanded from 4 to 19 example entries.
 
-## [0.2.1] — 2026-05-22 [DEPRECATED]
+## [0.2.1] — 2026-05-22 [YANKED]
 
-Released but never actually installable due to the plugin manifest path issue fixed in v0.2.2. Skip this version.
+Tagged but never actually installable due to the plugin manifest path issue fixed in v0.2.2. Skip this version — install v0.2.2 or newer instead.
 
-### Fixed (in spirit — these landed in installable form in v0.2.2)
+### Fixed
+
+The following changes shipped in this tag but were not reachable from any working install. They landed in installable form in v0.2.2.
+
 - Realistic keyword position distribution. `ranked_keywords` API call was using `limit: 100` + `order_by: rank_group asc`, returning only the best-ranking 100 keywords. The PDF's position distribution chart was always near-100% Top 3 regardless of the real spread. Now `limit: 1000` + `order_by: search_volume desc`, with local re-sort for the Top-Keywords table.
 - Competitor self-filter. DataForSEO's `competitors_domain` endpoint returns the target as competitor #1 with 100% overlap. Now filtered out by normalized domain (lowercase, strip www).
 
-## [0.2.0] — 2026-05-22 [DEPRECATED]
+## [0.2.0] — 2026-05-22 [YANKED]
 
-Released but never actually installable due to the plugin manifest path issue fixed in v0.2.2. Skip this version.
+Tagged but never actually installable due to the plugin manifest path issue fixed in v0.2.2. Skip this version — install v0.2.2 or newer instead.
 
-### Security (in spirit — these landed in installable form in v0.2.2)
+### Security
+
+The following changes shipped in this tag but were not reachable from any working install. They landed in installable form in v0.2.2.
+
 - Centralized input validation in shared `lib/safe.js` with `safeSlug`, `safeReadFile`, `cachePath`, `mkRunDir`, `writeFileExclusive`, `getCacheDir`.
 - `safeSlug()` enforced at config-load in all scripts (previously only in `seo-report-gen.js`; `seo-extract-v2.js` and `seo-onpage.js` allowed path traversal).
 - Cache moved from world-writable `/tmp/seo-*.json` to per-user `~/.cache/seo-rescue/` (mode 0700, refused on symlink). Defeats local symlink-clobber attacks.
@@ -142,11 +272,20 @@ Released but never actually installable due to the plugin manifest path issue fi
 
 ## [0.1.0] — 2026-05-21
 
-Initial public release. Three skills: `seo-audit-free`, `post-core-update-recovery`, `seo-outreach-report`. Repository was previously named `seo-rescue-skills` and was renamed to `seo-survival-kit` on 2026-05-22.
+Initial public release.
 
----
+### Added
 
-[0.3.0]: https://github.com/maxschottke-spec/seo-survival-kit/releases/tag/v0.3.0
-[0.2.2]: https://github.com/maxschottke-spec/seo-survival-kit/releases/tag/v0.2.2
-[0.2.1]: https://github.com/maxschottke-spec/seo-survival-kit/releases/tag/v0.2.1
-[0.2.0]: https://github.com/maxschottke-spec/seo-survival-kit/releases/tag/v0.2.0
+- Three skills: `seo-audit-free`, `post-core-update-recovery`, `seo-outreach-report`.
+
+### Changed
+
+- Repository was previously named `seo-rescue-skills` and was renamed to `seo-survival-kit` on 2026-05-22.
+
+[Unreleased]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.2.2...v0.3.0
+[0.2.2]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/maxschottke-spec/seo-survival-kit/releases/tag/v0.1.0

@@ -106,7 +106,7 @@ This applies to all plugins, not just this one. Anthropic's docs are explicit ab
 
 **Pinned install** (reproducible, recommended for production use):
 ```
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.4.0
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.0
 ```
 or
 ```
@@ -164,8 +164,23 @@ This is a single-maintainer open-source project. **There is one person maintaini
 
 For installers, this means:
 - **Pin to a tag** so a future inactive-maintainer scenario does not silently degrade your installation.
-- **Read the source.** The plugin is intentionally small (~2,000 lines) and reviewable in under 30 minutes.
+- **Read the source.** The plugin is intentionally small and reviewable in under 30 minutes.
 - **Treat all framework recommendations as inputs, not authority.** The SEO-recovery framework, the cost ranges, the timelines — they are observations from one extended recovery case plus four validation audits, not population statistics or contracted deliverables.
+
+## Maintainer and installer security hygiene
+
+A small set of practices keeps the supply-chain narrow on both sides.
+
+**For maintainers of this plugin** (and forks):
+- Enable 2FA on the GitHub account that publishes releases. A maintainer-account compromise is the primary supply-chain risk for any unpinned install.
+- Sign tags (`git tag -s`) where practical.
+- Review every PR diff before merging — even from known collaborators.
+- Run `claude plugin validate` locally before pushing a release tag (CI runs the same check, but local validation catches issues before they pollute git history).
+
+**For users installing this plugin:**
+- **Pin to a tag**, not to the default branch. Always-latest installs propagate any future maintainer-account compromise on the next reload.
+- **Review releases before upgrading.** `git diff v<previous>..v<new>` against the published source is enough for a plugin of this size.
+- Treat any plugin from a third-party marketplace as code running in your shell with your user privileges. This applies to all plugins, not only this one.
 
 ## Reporting security issues
 

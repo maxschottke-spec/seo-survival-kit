@@ -1,0 +1,7 @@
+{
+  "comment": "Copy to gsc-config.json (gitignored). 'site' must match exactly what's verified in GSC: sc-domain:example.com for domain properties, or https://www.example.com/ for URL-prefix properties (trailing slash matters).",
+  "site": "sc-domain:example.com",
+  "days": 90,
+  "output_dir": "./gsc-history",
+  "top_n": 500
+}

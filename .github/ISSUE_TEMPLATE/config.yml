@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussion (open-ended questions, use cases, ideas)
+    url: https://github.com/maxschottke-spec/seo-survival-kit/discussions
+    about: For general questions, sharing how you use the plugin, or open-ended discussion. Issues are for bugs and concrete feature requests.
+  - name: Security vulnerability (private)
+    url: https://github.com/maxschottke-spec/seo-survival-kit/security/advisories/new
+    about: For items that could affect installed users. Use GitHub's private security advisory feature, not a public issue.

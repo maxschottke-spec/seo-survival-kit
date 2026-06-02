@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SEO Change Audit",
+  "description": "Output of recovery-audit: validates change history completeness and correctness",
+  "type": "object",
+  "required": ["schema_version", "domain", "audit_timestamp", "change_history_present", "not_audit_safe_reconstruction"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "domain": { "type": "string" },
+    "audit_timestamp": { "type": "string", "format": "date-time" },
+    "audit_period_days": { "type": "integer" },
+    "change_history_present": { "type": "boolean" },
+    "not_audit_safe_reconstruction": { "type": "boolean" },
+    "sources_checked": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "missing_sources": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "changes": {
+      "type": "array",
+      "items": { "$ref": "change-log-entry.schema.json" }
+    },
+    "failed_change_attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "change_id": { "type": "string" },
+          "timestamp": { "type": "string" },
+          "error": { "type": "string" },
+          "url": { "type": "string" }
+        }
+      }
+    },
+    "unverified_changes": {
+      "type": "array",
+      "description": "Changes detected via API state but not confirmed via live check",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string" },
+          "detected_via": { "type": "string" },
+          "confidence": { "type": "string" }
+        }
+      }
+    },
+    "audit_gaps": {
+      "type": "array",
+      "description": "Time periods or change types where audit trail is incomplete",
+      "items": {
+        "type": "object",
+        "properties": {
+          "period": { "type": "string" },
+          "gap_type": { "type": "string" },
+          "description": { "type": "string" },
+          "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total_changes": { "type": "integer" },
+        "successful": { "type": "integer" },
+        "failed": { "type": "integer" },
+        "unverified": { "type": "integer" },
+        "total_risk_points": { "type": "integer" },
+        "highest_single_risk": { "type": "integer" },
+        "changes_without_approval": { "type": "integer" },
+        "changes_without_rollback": { "type": "integer" }
+      }
+    }
+  }
+}

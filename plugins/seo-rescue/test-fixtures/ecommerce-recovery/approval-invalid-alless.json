@@ -1,0 +1,23 @@
+{
+  "_description": "Test: Invalid broad approvals trigger Hard Stop.",
+  "input_cases": [
+    {"user_approval_text": "ALLESS"},
+    {"user_approval_text": "alles"},
+    {"user_approval_text": "mach"},
+    {"user_approval_text": "ja"},
+    {"user_approval_text": "weiter"},
+    {"user_approval_text": "passt"},
+    {"user_approval_text": "ok"},
+    {"user_approval_text": "go"},
+    {"user_approval_text": "mach den Rest"},
+    {"user_approval_text": "alles patchen"}
+  ],
+  "expected_all_cases": {
+    "is_valid": false,
+    "matched_elements": [],
+    "missing_elements": ["number", "type", "risk_points", "urls", "plan_reference", "permission"],
+    "reason": "Broad batch trigger phrase; explicit plan reference required",
+    "stop_required": true,
+    "stop_reasons": ["broad_batch_approval_invalid"]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "_description": "Test: DACH medical term risk classification for anchor texts.",
+  "test_cases": [
+    {
+      "anchor": "Orthopaedische Matratze (as effect claim)",
+      "context": "Product page claims medical effect",
+      "expected_risk_tier": "high",
+      "expected_compliance_review": "required",
+      "expected_action": "Block introduction without substantiation; recommend neutral alternative 'Ergonomische Matratze'"
+    },
+    {
+      "anchor": "Orthopaedische Matratze (as product category name)",
+      "context": "Shopware category name in navigation",
+      "expected_risk_tier": "medium",
+      "expected_compliance_review": "required",
+      "expected_action": "Verify target page uses factual framing, not medical effect claims"
+    },
+    {
+      "anchor": "Skoliose-Matratze",
+      "context": "Product category link",
+      "expected_risk_tier": "medium",
+      "expected_compliance_review": "required",
+      "expected_action": "Verify target page does not contain unsubstantiated healing claims for scoliosis"
+    },
+    {
+      "anchor": "Matratze bei Bandscheibenvorfall",
+      "context": "Product solution page",
+      "expected_risk_tier": "medium",
+      "expected_compliance_review": "required",
+      "expected_action": "Verify framing is informational/educational, not therapeutic claim"
+    },
+    {
+      "anchor": "Matratze bei Rueckenschmerzen",
+      "context": "Guide article link",
+      "expected_risk_tier": "medium",
+      "expected_compliance_review": "recommended",
+      "expected_action": "Acceptable as question/guide framing; verify no unsubstantiated pain-relief claim on target"
+    },
+    {
+      "anchor": "Heilende Matratze",
+      "context": "Marketing copy",
+      "expected_risk_tier": "high",
+      "expected_compliance_review": "required",
+      "expected_action": "BLOCK — healing claim violates HWG. Substitute 'Stuetzende Matratze' or remove."
+    },
+    {
+      "anchor": "Schmerzlindernde Matratze",
+      "context": "Product description",
+      "expected_risk_tier": "high",
+      "expected_compliance_review": "required",
+      "expected_action": "BLOCK — pain-relief claim. Substitute 'Druckverteilende Matratze' or factual feature description."
+    },
+    {
+      "anchor": "Aerztlich empfohlene Matratze",
+      "context": "Trust badge text",
+      "expected_risk_tier": "high",
+      "expected_compliance_review": "required",
+      "expected_action": "BLOCK without verifiable medical endorsement documentation."
+    },
+    {
+      "anchor": "Ergonomische Matratze (factual)",
+      "context": "Product feature explanation",
+      "expected_risk_tier": "low",
+      "expected_compliance_review": "none",
+      "expected_action": "Allowed when used factually about design, not as medical effect"
+    },
+    {
+      "anchor": "Matratze fuer Seitenschlaefer",
+      "context": "Use case category",
+      "expected_risk_tier": "low",
+      "expected_compliance_review": "none",
+      "expected_action": "Sleep position is factual use case; allowed"
+    },
+    {
+      "anchor": "Matratze bis 150 kg",
+      "context": "Weight specification",
+      "expected_risk_tier": "low",
+      "expected_compliance_review": "none",
+      "expected_action": "Factual weight range; allowed"
+    },
+    {
+      "anchor": "OEKO-TEX zertifizierte Matratze",
+      "context": "Verified certification",
+      "expected_risk_tier": "low",
+      "expected_compliance_review": "none",
+      "expected_action": "Verified certification; allowed"
+    }
+  ],
+  "multiplier_rules": {
+    "high_risk_term_in_change": "x2 risk points + compliance_review: required + block if introducing new",
+    "medium_risk_term_in_change": "x2 risk points + compliance_review: required + verify target substantiates",
+    "low_risk_term": "no multiplier + no compliance review"
+  }
+}

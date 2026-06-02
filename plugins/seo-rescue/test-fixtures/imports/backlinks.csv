@@ -1,0 +1,5 @@
+source_url,target_url,domain,nofollow,authority,status
+https://blog.schlafmagazin.de/vergleich,https://www.example.com/,blog.schlafmagazin.de,false,45,200
+https://www.testberichte.org/matratzen/,https://www.example.com/matratzen/,www.testberichte.org,false,52,200
+https://forum.schlafen.de/thread/123,https://www.example.com/blog/,forum.schlafen.de,true,28,200
+https://spam-links.example.net/,https://www.example.com/,spam-links.example.net,true,5,200

@@ -1,0 +1,81 @@
+{
+  "fixture_id": "settlement-gate-emergency-rollback",
+  "fixture_purpose": "During an active Settlement Gate, a 301 -> 404 chain is detected on a URL with backlinks. Emergency rollback is permitted under section 7.B; new optimization remains blocked.",
+  "input": {
+    "today": "2026-05-29",
+    "domain": "ecommerce-recovery.example",
+    "recovery_gate_state": {
+      "settlement_gate_active": true,
+      "started_at": "2026-05-27T19:43:00Z",
+      "minimum_until": "2026-06-02T00:00:00Z",
+      "recommended_until": "2026-06-06T00:00:00Z",
+      "unlock_status": "blocked"
+    },
+    "detected_defect": {
+      "type": "301_to_404_chain",
+      "source_url": "/example-product-old/",
+      "intermediate_redirect": "/example-product-new/",
+      "final_status": 404,
+      "evidence": [
+        "live_http_curl_confirms_chain",
+        "screaming_frog_crawl_2026-05-29_marks_chain",
+        "5_external_dofollow_backlinks_to_source"
+      ],
+      "introduced_by": "session-major-batch-001"
+    },
+    "operator_request": "fix the chain so the backlinks land on a 200 again"
+  },
+  "expected_classification": {
+    "exception_class": "rollback_stabilization",
+    "section_reference": "SEO_SETTLEMENT_GATE.md section 7.B",
+    "permitted_during_gate": true,
+    "mode": "emergency_rollback",
+    "scope": "single_url_chain_fix_only"
+  },
+  "expected_change_budget_object": {
+    "mode": "emergency_rollback",
+    "change_budget": 30,
+    "settlement_gate_active": true,
+    "settlement_gate_override_requested": true,
+    "settlement_gate_override_allowed": true,
+    "override_type": "rollback_stabilization",
+    "override_reason": "301_to_404_chain_with_5_external_dofollow_backlinks_introduced_by_settlement_batch",
+    "planned_changes": [
+      {
+        "id": "rollback-001",
+        "type": "redirect",
+        "change_category": "emergency_stabilization",
+        "target": "/example-product-old/",
+        "description": "Replace 301 -> 404 chain with 301 to thematically correct 200 target",
+        "risk_points_base": 2,
+        "risk_points_final": 4,
+        "data_sources": ["Live HTTP", "Screaming Frog", "External backlink check"],
+        "confidence": "high",
+        "rollback_method": "PATCH seo-url isDeleted:true on new redirect",
+        "requires_explicit_approval": true,
+        "requires_pre_check_for_duplicate_foreignkey_in_channel": true
+      }
+    ],
+    "total_risk_points": 4,
+    "budget_remaining": 26,
+    "stop_required": false,
+    "reserve_bleibt_reserve_acknowledged": true,
+    "unused_budget_handling": "forfeit"
+  },
+  "expected_blocked_concurrent_requests": [
+    {
+      "operator_request": "while you're in there, also fix the 3 other broken redirects",
+      "expected_response": "blocked. emergency_rollback covers only the single chain in scope. additional rollbacks require their own Change Plan, risk points, and approval. Reserve bleibt Reserve."
+    },
+    {
+      "operator_request": "and rewrite the title of the redirected target",
+      "expected_response": "blocked. title rewrite is in blocked_actions during Settlement Gate. earliest planning after 2026-06-10."
+    }
+  ],
+  "expected_post_change_qa": {
+    "live_qa_required": true,
+    "live_qa_must_pass_before_marking_complete": true,
+    "appended_to_change_history_ndjson": true,
+    "settlement_gate_remains_active_after_rollback": true
+  }
+}
