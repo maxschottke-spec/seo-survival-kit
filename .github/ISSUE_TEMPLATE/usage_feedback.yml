@@ -1,0 +1,69 @@
+name: Usage feedback
+description: Tell us how you use the plugin (voluntary, helps shape the roadmap)
+labels: [feedback]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for voluntary feedback about how you use the plugin. Nothing here is required. Everything you write becomes a public issue on GitHub — only share what you would also write in a public Discussion.
+
+        There is no tracking in the plugin. This template is the only feedback channel besides Stars, Discussions, and the bug / feature templates.
+
+  - type: dropdown
+    id: usage-context
+    attributes:
+      label: How do you use the plugin?
+      multiple: true
+      options:
+        - Solo consultant work
+        - In-house SEO at an e-commerce shop
+        - In-house SEO at a publisher / news site
+        - Agency deliverable templates
+        - Founder of a site that lost traffic
+        - Personal / hobby project
+        - Education / teaching
+        - Other
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: skills-used
+    attributes:
+      label: Which skills do you actually use? (multi-select)
+      options:
+        - label: rescue (orchestrator)
+        - label: seo-audit-free
+        - label: post-core-update-recovery
+        - label: seo-outreach-report
+        - label: channel-economics-analyzer
+        - label: competitor-deep-audit
+        - label: psi-weekly-cron-baseline
+        - label: ai-search-rescue
+        - label: subscription-monetization-audit
+
+  - type: textarea
+    id: most-useful
+    attributes:
+      label: What is the most useful part for you?
+      description: One sentence is fine.
+
+  - type: textarea
+    id: missing
+    attributes:
+      label: What is missing or could be better?
+      description: Concrete pain points are more useful than abstract wishes.
+
+  - type: textarea
+    id: results
+    attributes:
+      label: Did the plugin help produce a measurable result?
+      description: Optional. If you ran a recovery, a competitor audit, a workshop — what did the plugin contribute? Round numbers and time saved are fine; sensitive client data is not necessary.
+
+  - type: input
+    id: contact-optional
+    attributes:
+      label: Want a follow-up question? (optional)
+      description: Leave a way to reach you only if you want a maintainer follow-up. GitHub handle is fine. Empty = no contact, default.
+      placeholder: "@yourhandle (optional)"
+    validations:
+      required: false
