@@ -4,7 +4,7 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 
 ## Where this plugin is today
 
-**Version 0.5.0** (shipped) — sixth release in the May 2026 launch + hardening cycle. Architecture consolidation: doc structure reached canonical-source-of-truth state in [ARCHITECTURE.md](./ARCHITECTURE.md). No new runtime skills and no change to runtime behavior relative to v0.4.1. **v0.5.1 in flight:** runnable SISTRIX Monday Recovery Check skill matching the specification in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md).
+**Version 0.5.0** (shipped) — sixth release in the May 2026 launch + hardening cycle. Architecture consolidation: doc structure reached canonical-source-of-truth state in [ARCHITECTURE.md](./ARCHITECTURE.md). No new runtime skills and no change to runtime behavior relative to v0.4.1. **v0.5.2 shipped:** SEO Change Governor + Settlement Gate, the recovery-workflow commands, and the runnable SISTRIX Monday Recovery Check and subscription-monetization-audit skills.
 
 **Positioning.** Recovery Operating System for Ecommerce/D2C. Recovery-first, decision-first, profit-aware, risk-aware. Complements technical-audit suites like `claude-seo`; does not replace them. The framework supports decisions; execution belongs to the operator's team, agency, or contractors.
 
@@ -47,7 +47,7 @@ What this is **not** yet: production-grade in the sense of having external users
 | [zubair-trabzada/dataforseo-claude](https://github.com/zubair-trabzada/dataforseo-claude) | 79 | Newer | DataForSEO-focused with 13 skills + 5 subagents | Good if DataForSEO is your main data source. |
 | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | 12.9k | Very mature | Marketing stack (CRO, copy, paid ads, SEO) — broader scope | Use for marketing breadth, not deep SEO. |
 | [SwayyEm 21-Skills Pack](https://www.swayyem.com/guides/21-seo-skills-built-for-claude) | n/a (lead magnet) | Newer | 21 pure-prompt skills across keywords, content, technical, off-page, AI-search. Distributed as commercial lead magnet for editorial-PR services with email gate on full content. | Use for prompt-engineering patterns and breadth ideas. Lacks live API integrations, drift detection, recovery-window discipline, identity-leak sanitization, and pattern maturity stages. |
-| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.5.0 shipped, v0.5.1 in flight, hardened** | Recovery Operating System for ecommerce/D2C: Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking, GSC deep dive, AI citation tracking, decision/sequencing layer (v0.5 docs) | **Use when** the situation is recovery / cold-outreach / AI-search visibility / cross-channel decision support for ecommerce. Complements technical-audit plugins. |
+| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.5.2 shipped, hardened** | Recovery Operating System for ecommerce/D2C: Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking, GSC deep dive, AI citation tracking, decision/sequencing layer (v0.5 docs) | **Use when** the situation is recovery / cold-outreach / AI-search visibility / cross-channel decision support for ecommerce. Complements technical-audit plugins. |
 
 ### Comparison detail
 

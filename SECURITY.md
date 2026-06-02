@@ -106,7 +106,7 @@ This applies to all plugins, not just this one. Anthropic's docs are explicit ab
 
 **Pinned install** (reproducible, recommended for production use):
 ```
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.0
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.2
 ```
 or
 ```

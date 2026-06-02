@@ -1,13 +1,13 @@
 ---
 name: rescue
-description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the ten sub-skills covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, AI search rescue, AI citations tracker (v0.4 — weekly cron measuring brand citations in ChatGPT/Perplexity/AI Overviews), GSC deep-dive (v0.4 — one-call Google Search Console API snapshot), and SISTRIX Monday recovery check (NEW v0.5.1 — CSV-first weekly recovery review producing a 17-section structured report). Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
+description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the sixteen sub-skills and recovery commands covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, AI search rescue, AI citations tracker, GSC deep-dive, SISTRIX Monday recovery check (CSV-first weekly review), subscription monetization audit, and the recovery-workflow commands (diagnose, crawl, plan, monitor, full) governed by the SEO Change Governor + Settlement Gate. Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
 user-invokable: true
 argument-hint: '[subcommand] [domain-or-args]'
 allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.0'
+  version: '0.5.2'
   category: marketing
 ---
 
