@@ -2,7 +2,7 @@
 
 ## What this repository is
 
-seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **eleven skills (one orchestrator plus ten sub-skills)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit.
+seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **eleven skills (one orchestrator plus ten sub-skills)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit. Canonical skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 
 Positioning: **Recovery Operating System for Ecommerce/D2C**. Recovery-first, decision-first, profit-aware, risk-aware. The framework supports operators making recovery and growth decisions; execution belongs to the operator's team, agency, or contractors. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the canonical source of truth.
 
