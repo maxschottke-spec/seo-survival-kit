@@ -20,7 +20,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { safeReadFile, getCacheDir, writeFileExclusive } = require('../../lib/safe.js');
+const { safeReadFile, getCacheDir, atomicWriteJSON } = require('../../lib/safe.js');
 
 const REQUIRED = [
   'subscription_id', 'customer_id', 'plan_name', 'billing_period',
@@ -266,8 +266,8 @@ if (process.env.GOAL_SUBS && process.env.PREMIUM_ARPU_EUR && process.env.PREMIUM
 }
 
 const out = path.join(getCacheDir(), `subscription-summary-${summary.snapshot_date}.json`);
-try { fs.unlinkSync(out); } catch (e) { if (e.code !== 'ENOENT') throw e; }
-writeFileExclusive(out, JSON.stringify(summary, null, 2));
+// Atomic, symlink-checked, idempotent overwrite (no unlink-then-recreate TOCTOU).
+atomicWriteJSON(out, summary);
 
 console.error('');
 console.error('=== KPI SNAPSHOT ===');

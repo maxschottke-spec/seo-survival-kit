@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
-Nothing yet.
+### Security
+
+- `lib/safe.js` — `acquireLock` back-off no longer shells out (`execSync('sleep …')` replaced with `Atomics.wait`), honoring the repo's own "never `execSync` a string" rule; portable and spawns no process.
+- `lib/safe.js` — `atomicWriteJSON` now writes its temp file with `O_EXCL` (via `writeFileExclusive`), so a pre-existing symlink at the temp path aborts the write instead of being followed (parity with `appendNDJSON`/`writeFileExclusive`).
+- `subscription-monetization-audit/csv-import.example.js` — summary write switched from unlink-then-exclusive (TOCTOU) to `atomicWriteJSON` (atomic, symlink-checked, idempotent).
 
 ## [0.5.2] — 2026-06-02
 

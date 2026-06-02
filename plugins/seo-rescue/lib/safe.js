@@ -214,7 +214,9 @@ function acquireLock(domainDir, command = 'unknown', timeoutMs = 30000) {
         if (Date.now() >= deadline) {
           throw new Error(`acquireLock: timeout after ${timeoutMs}ms — another command may be running for this domain. Lock: ${lockPath}`);
         }
-        require('node:child_process').execSync('sleep 0.1', { stdio: 'ignore' });
+        // Synchronous ~100ms back-off without spawning a shell/process.
+        // (CLAUDE.md security model: never execSync a string; also portable + Windows-safe.)
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100);
         continue;
       }
       throw e;
@@ -242,7 +244,9 @@ function atomicWriteJSON(filePath, data) {
   }
   const tmpPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
   const json = JSON.stringify(data, null, 2) + '\n';
-  fs.writeFileSync(tmpPath, json, { mode: 0o600 });
+  // Write the temp file with O_EXCL so a pre-existing symlink at tmpPath aborts
+  // the write instead of being followed (parity with writeFileExclusive/appendNDJSON).
+  writeFileExclusive(tmpPath, json);
   fs.renameSync(tmpPath, filePath);
 }
 
