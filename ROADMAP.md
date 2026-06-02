@@ -65,6 +65,7 @@ Scope:
 
 - `revenue-opportunity-forecast` skill: 30/60/90/180-day horizon scenarios, three-scenario format (conservative/base/aggressive)
 - Contribution-margin-aware prioritization in shared scoring utility
+- AI-surface-drift-detection sub-skill: weekly delta on AI-citation coverage (Google AI Overviews, Perplexity, ChatGPT, Claude) using existing `ai-citations-tracker` data. Drift classification (NEW / LOST / CHANGED citation) with stop-regel integration on HIGHEST/HIGH-classed URLs. Read-only, no API write.
 - `safe-update`, `check-updates`, `rollback-update` scripts with functional implementations (dry-run stubs land in v0.5 docs)
 - First evaluation fixtures for the calculation logic
 
@@ -158,4 +159,5 @@ Direction depends on adoption, feedback, contribution capacity. None of the foll
 - Scraping against platform terms of service.
 - Private client data in public repository files.
 - Hidden personalization. Silent updates.
+- Tier-1 editorial coverage and brand-authority backlinks. Editorial relationships require sustained beat-coverage work over multiple years. The skill set can identify which publications a brand needs to be in and draft pitch briefs; it cannot make an editor open a stranger's email. Recovery cases that hit the editorial-authority wall should pair this kit with a digital-PR partner or in-house PR capacity.
 - Replacement for comprehensive audit suites like `claude-seo` (this kit complements, it does not replace).

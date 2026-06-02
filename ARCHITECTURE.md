@@ -519,6 +519,7 @@ These are out of scope for the framework. Knowing what is not built is as import
 - Content writing, brand voice, ad creative, email sequences, copywriting (handed off per section 9)
 - Schema markup generation beyond what `seo-outreach-report` already checks (use `claude-seo:seo-schema`)
 - Comprehensive technical audit of hundreds of URLs (use `claude-seo:seo-audit`)
+- Tier-1 editorial coverage and brand-authority backlinks. Editorial relationships require sustained beat-coverage work over multiple years. The skill set can identify which publications a brand needs to be in and draft pitch briefs; it cannot make an editor open a stranger's email. Pair this kit with a digital-PR partner or in-house PR capacity when editorial authority is the bottleneck.
 
 ---
 
