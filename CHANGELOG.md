@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **New skill: `subscription-monetization-audit`** ([SKILL.md](./plugins/seo-rescue/skills/subscription-monetization-audit/SKILL.md)) — a 5-lever recurring-revenue playbook (pricing, packaging, retention, expansion, win-back) with an optional CSV import path for Stripe / Chargebee / Recurly exports that computes MRR, ARPU, churn, and cohort retention locally. CSV import via `csv-import.example.js` with `lib/safe.js` safety primitives (size-capped reads, no network calls). Routed in the `rescue` orchestrator as `/seo-rescue:rescue monetization` and listed in the README "Reporting and economics" table.
 
 ## [Unreleased] — v0.5.1-dev
 

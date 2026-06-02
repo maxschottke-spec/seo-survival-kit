@@ -113,6 +113,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 |---|---|---|
 | `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers | ~$0.05–$0.50 |
 | `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
+| `/seo-rescue:subscription-monetization-audit [domain \| --csv]` | 5-lever recurring-revenue playbook; optional Stripe/Chargebee/Recurly CSV import for MRR / ARPU / churn / cohort analysis | free (your CSVs) |
 
 **AI surface (experimental visibility layer)**
 

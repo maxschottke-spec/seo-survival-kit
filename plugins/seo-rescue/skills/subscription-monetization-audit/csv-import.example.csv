@@ -1,0 +1,11 @@
+subscription_id,customer_id,plan_name,billing_period,amount_eur,currency,start_date,end_date,status,churn_date,last_login_date,payment_provider,country,coupon_code
+sub_aaa001,cus_zzz001,insider-yearly,yearly,99.99,EUR,2024-05-15,,active,,2026-05-20,creditcard,DE,
+sub_aaa002,cus_zzz002,insider-monthly,monthly,9.99,EUR,2025-08-10,,active,,2026-05-21,paypal,DE,
+sub_aaa003,cus_zzz003,insider-yearly,yearly,99.99,EUR,2024-11-22,,active,,2026-05-19,debit,AT,
+sub_aaa004,cus_zzz004,insider-monthly,monthly,9.99,EUR,2025-03-01,2025-09-01,canceled,2025-09-01,2026-05-18,creditcard,DE,BWMONAT
+sub_aaa005,cus_zzz005,insider-premium-yearly,yearly,249.00,EUR,2026-01-15,,active,,2026-05-22,creditcard,DE,
+sub_aaa006,cus_zzz006,insider-monthly,monthly,9.99,EUR,2025-12-01,2026-04-15,canceled,2026-04-15,2026-05-10,paypal,DE,
+sub_aaa007,cus_zzz007,insider-yearly,yearly,99.99,EUR,2025-06-30,,pending_cancellation,,2026-05-22,creditcard,CH,NEUJAHR
+sub_aaa008,cus_zzz008,insider-weekly,weekly,2.50,EUR,2025-11-01,,active,,2026-05-22,debit,DE,
+sub_aaa009,cus_zzz009,insider-monthly,monthly,9.99,EUR,2026-02-10,,active,,2026-05-18,paypal,DE,
+sub_aaa010,cus_zzz010,insider-yearly,yearly,99.99,EUR,2025-04-20,2026-04-20,canceled,2026-04-20,2026-04-25,creditcard,DE,
