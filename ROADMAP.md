@@ -52,10 +52,10 @@ Commercial Model PR (separate from v0.5 to keep technical architecture review cl
 
 Scope:
 
-- COMMERCIAL_MODEL.md or equivalent positioning doc: agency model, decision-first principles, productized offer hypotheses, service model stages, implementation partner model
+- COMMERCIAL_MODEL.md or equivalent positioning doc (marked informational-not-contractual at the top of the document): agency model, decision-first principles, productized offer hypotheses, service model stages, implementation partner model
 - Revenue Rescue positioning, pricing logic, offer validation framework, scenario planning
 - Fiverr Interface: planned commands, buyer-objection log schema, GTM experiment template
-- All pricing in hypothesis form. No proven-benchmark claims.
+- All pricing in hypothesis form. No proven-benchmark claims. No binding offers. Revenue-forecast validation lands in v0.6 after the runtime skill ships and at least one post-validation cycle is documented.
 
 ## v0.6
 
@@ -126,8 +126,20 @@ Scope:
 - Updater validation in CI
 - Privacy scan in CI
 - 5+ entries in each LESSONS.md
-- At least one external contributor PR merged besides security collaborator
-- DE hardcoding (`location_code: 2276`) lifted to user-configurable
+- Either: at least one external contributor PR merged besides security collaborator, OR documented community-outreach attempt with minimum-three-week response window. v1.0 is not blocked on external contribution; the goal is openness, not a specific contributor count.
+- Prepare-for-i18n: DE hardcoding (`location_code: 2276`) extracted to config layer with a clear default-marker. Full i18n implementation deferred to v1.1, after at least one non-DE case validation.
+
+## v1.1
+
+Internationalization implementation and first non-DE case validation.
+
+Scope:
+
+- Full i18n for location codes, language codes, currency-aware recovery thresholds
+- At least one non-DE case (US, UK, or other major market) recovered end-to-end with this kit
+- LESSONS.md entries from the non-DE recovery cycle
+- Documentation updates to reflect multi-market posture
+- Backward-compatible: DE default behavior unchanged for existing users
 
 ## Post-v1.0 (hypothesis only)
 
