@@ -1,12 +1,36 @@
 # SEO Survival Kit for Claude Code
 
-> Recovery Operating System for Ecommerce/D2C. Eleven Claude Code skills (one orchestrator + ten sub-skills) for SEO diagnosis, Core Update recovery, AI search visibility, decision-maker reporting, channel economics, and weekly recovery review. Built and validated during real ecommerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
+> Recovery-first decision support for ecommerce/D2C SEO. Claude Code skills for Core Update recovery diagnosis, prioritized action plans, weekly monitoring, and a Change Governor / Settlement Gate that prevents over-optimizing during recovery windows. Built and validated during real ecommerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
 [![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
 **v0.5.0 shipped · v0.5.1 in flight.** Public beta. Breaking changes possible before v1.0. Pin to a tag for reproducible installs. See [CHANGELOG.md](./CHANGELOG.md).
+
+## Start here
+
+Three common entry points. Pick the one that matches your situation:
+
+**1. Traffic dropped after a Google Core Update**
+```
+/seo-rescue:post-core-update-recovery example.com
+```
+Diagnosis tree + phased Authority-First recovery plan (6–12 month horizon, no 4-week magic promises).
+
+**2. Free technical health check before deciding on paid tools**
+```
+/seo-rescue:seo-audit-free example.com
+```
+Free-tier check using only Google's surfaces (GSC + PSI + Lighthouse + curl). No API keys required.
+
+**3. Weekly recovery review using your Sistrix CSV exports**
+```
+/seo-rescue:sistrix-monday-recovery-check current.csv previous.csv example.com
+```
+17-section structured report. CSV-first, no Sistrix API key required.
+
+**Typical sequence:** diagnose → recovery plan → weekly monitoring. Every step ends with an operator-reviewable artifact. **No autonomous live changes are made by any skill or command.**
 
 ## Positioning
 
@@ -21,7 +45,7 @@ Recovery-first decision intelligence for ecommerce and D2C. Most SEO tools answe
 - Is now the wrong time for URL consolidation, title rewrites, or template changes?
 - Should we increase paid spend, or fix margin / tracking / landing pages first?
 - Which channel is profitable, which is bleeding, which to wind down?
-- Which AI surfaces (AI Overview, ChatGPT, Perplexity) are citing the site, and which are still going to competitors?
+- Which AI surfaces (AI Overview, ChatGPT, Perplexity) are currently citing the site — as a supporting signal, not a primary metric.
 
 ## What this is NOT
 
@@ -30,6 +54,23 @@ Recovery-first decision intelligence for ecommerce and D2C. Most SEO tools answe
 - Not a generic AI growth platform. The focus is recovery-first decision support for ecommerce/D2C, not breadth across all marketing surfaces.
 - Not automatic ad optimization. No write actions to any ad account. No automatic budget changes.
 - Not a guarantee. Every output carries calibrated confidence; the framework refuses to promise rankings, revenue, or timelines.
+
+## Safety: Change Governor and Settlement Gate
+
+The kit is not designed to execute SEO changes autonomously. Two safety layers sit between the operator and any live modification:
+
+**Change Governor.** Every session starts in `audit_only` mode with zero change budget. Mode escalation requires explicit operator instruction. Each proposed change is rated on risk, evidence quality, rollback readiness, and approval state — actions without a clear data basis can never be classified as `green` risk.
+
+**Settlement Gate.** After a Major Batch of live changes, the gate hard-blocks new optimization waves until enough data has accumulated to attribute cause and effect. The most dangerous moment in recovery is not the first mistake — it is the impulse to keep optimizing immediately afterwards. The gate enforces a waiting period during which only monitoring, QA, rollback prep, and verified emergencies are allowed.
+
+**Goal.** Don't change too much at once. Protect winners. Keep cause-and-effect measurable. **No live SEO change without operator review.**
+
+Canonical references:
+- [`plugins/seo-rescue/references/SEO_CHANGE_GOVERNOR.md`](./plugins/seo-rescue/references/SEO_CHANGE_GOVERNOR.md) — modes, budgets, escalation rules
+- [`plugins/seo-rescue/references/SEO_SETTLEMENT_GATE.md`](./plugins/seo-rescue/references/SEO_SETTLEMENT_GATE.md) — hard-block definition, exceptions, unlock criteria
+- [`plugins/seo-rescue/references/SAFE_LIVE_CHANGE_RULES.md`](./plugins/seo-rescue/references/SAFE_LIVE_CHANGE_RULES.md) — pre/post-crawl rules, batch limits, user-pressure responses
+- [`plugins/seo-rescue/docs/LIVE_CHANGE_QA.md`](./plugins/seo-rescue/docs/LIVE_CHANGE_QA.md) — live-change QA workflow
+- [`plugins/seo-rescue/commands/recovery-audit.md`](./plugins/seo-rescue/commands/recovery-audit.md) — change-budget audit command
 
 ## Naming at a glance
 
@@ -41,25 +82,46 @@ Recovery-first decision intelligence for ecommerce and D2C. Most SEO tools answe
 
 The split is intentional (marketplace is the brand, plugin is the technical handle).
 
-## The eleven skills (1 orchestrator + 10 specialized sub-skills)
+## What's in the kit
 
-Every skill is reachable as a namespaced slash command. The orchestrator (`rescue`) routes to the right sub-skill; each sub-skill can also be called directly.
+The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; each can also be called directly. Detailed skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 
-| Type | Slash command | What it does | Cost |
-|---|---|---|---|
-| Orchestrator | `/seo-rescue:rescue` | Routing table — points at the right sub-skill | free |
-| Sub-skill | `/seo-rescue:seo-audit-free <domain>` | Free-tier health check (GSC + PSI + Lighthouse + curl) | free |
-| Sub-skill | `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
-| Sub-skill | `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers (Sistrix + DataForSEO + PSI) | ~$0.05-$0.50 |
-| Sub-skill | `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
-| Sub-skill | `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10-$0.50 |
-| Sub-skill | `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
-| Sub-skill | `/seo-rescue:ai-search-rescue <domain>` | AI Overviews + AI Mode + ChatGPT + Perplexity visibility recovery (framework) | free |
-| Sub-skill | `/seo-rescue:ai-citations-tracker` | Weekly cron tracking brand citations in ChatGPT + Perplexity (NDJSON history) | ~$0.10/year |
-| Sub-skill | `/seo-rescue:gsc-deep-dive <domain> [days?]` | One-call Google Search Console snapshot (queries + pages + coverage + CrUX) | free |
-| Sub-skill | `/seo-rescue:sistrix-monday-recovery-check <current-csv> <previous-csv> [domain?]` | CSV-first weekly recovery review — 17-section structured report (visibility-index interpretation, Top-N delta, winner/loser neutralization, money-keyword protection, URL recovery, per-cluster stage, Recovery Signal Score, recommended action) | free |
+**Core recovery workflow**
 
-Skill-level detail: see [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
+| Command | What it does | Cost |
+|---|---|---|
+| `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
+| `/seo-rescue:recovery-diagnose <domain>` | Diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO + GSC CSV) | ~$0.05–$0.50 |
+| `/seo-rescue:recovery-crawl <domain>` | Crawl + severity-classified issues (Screaming Frog or local minimal-crawler fallback) | free |
+| `/seo-rescue:recovery-plan <domain>` | Prioritized 30/60/90-day plan with Do-Not-Touch + human approval gate | free |
+| `/seo-rescue:recovery-monitor <domain>` | Weekly tracking with deterministic 0-100 recovery score | free |
+| `/seo-rescue:recovery-full <domain>` | Full sequence: diagnose → crawl → plan → monitor | ~$0.05–$0.50 |
+| `/seo-rescue:sistrix-monday-recovery-check <current.csv> <previous.csv> [domain?]` | CSV-first weekly review, 17-section structured report | free |
+
+**Diagnostic and analysis**
+
+| Command | What it does | Cost |
+|---|---|---|
+| `/seo-rescue:seo-audit-free <domain>` | Free-tier health check (GSC + PSI + Lighthouse + curl) | free |
+| `/seo-rescue:gsc-deep-dive <domain> [days?]` | One-call Google Search Console snapshot | free |
+| `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10–$0.50 |
+| `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
+
+**Reporting and economics**
+
+| Command | What it does | Cost |
+|---|---|---|
+| `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers | ~$0.05–$0.50 |
+| `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
+
+**AI surface (experimental visibility layer)**
+
+| Command | What it does | Cost |
+|---|---|---|
+| `/seo-rescue:ai-search-rescue <domain>` | Diagnosis + framework for AI Overview / ChatGPT / Perplexity citation patterns | free |
+| `/seo-rescue:ai-citations-tracker` | Weekly tracker for brand citations in ChatGPT + Perplexity (NDJSON history) | ~$0.10/year |
+
+> AI surfaces are an experimental visibility layer. Citation tracking and diagnosis only — not a guarantee of AI search traffic. Use as a supporting signal alongside classical search data, not as the sole basis for decisions.
 
 ## Architecture and documentation
 
@@ -122,7 +184,7 @@ Full sample: [examples/sample-audit.pdf](./examples/sample-audit.pdf). The use-c
 - No budget for paid SEO tools, want a free-tier health check. `seo-audit-free` is the entry.
 - Multi-marketplace ecommerce, need to know which channel is profitable. Channel-economics-analyzer computes per-channel break-even and operating margin from your CSVs.
 - Weekly PSI monitoring with regression detection. Free over PSI v5 quota.
-- AI search visibility (AI Overview, ChatGPT, Perplexity) citation recovery, not just classical rankings.
+- You want to track AI surface citation patterns (AI Overview, ChatGPT, Perplexity) as a supporting signal alongside classical rankings — not as a primary growth driver.
 
 ## When not to use
 

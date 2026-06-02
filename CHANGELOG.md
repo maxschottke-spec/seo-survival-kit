@@ -6,13 +6,25 @@ All notable changes to seo-survival-kit are documented here. The format follows 
 
 ### Added
 
+- **Recovery Workflow Commands**: Five new commands for automated SEO recovery
+  - `recovery-diagnose` — Core Update diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO MCP + GSC CSV + manual CSV)
+  - `recovery-crawl` — Screaming Frog MCP crawl + local minimal-crawler fallback + issue classification
+  - `recovery-plan` — Prioritized 30/60/90-day action plan with human approval gate and evidence arrays
+  - `recovery-monitor` — Weekly tracking with deterministic 0-100 recovery score and component scores
+  - `recovery-full` — Orchestrator chaining all four commands with graceful degradation
 - **New runnable skill: `sistrix-monday-recovery-check`** ([SKILL.md](./plugins/seo-rescue/skills/sistrix-monday-recovery-check/SKILL.md)) — CSV-first weekly recovery review during an active SEO recovery. No SISTRIX API key required. Reads current and previous SISTRIX keyword exports (optionally a money-keyword list, optionally a GSC export, optionally CR data) and emits a fixed 17-section structured report: visibility-index interpretation, Top-100/50/20/10/5/3 recovery distribution, winner/loser neutralization, money-keyword protection table, URL-level recovery table, per-cluster recovery stage (0-5), Recovery Signal Score (0-100), optional GSC cross-check, optional conversion-rate validation, one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate), explicit What-Not-To-Touch guard, next-7-day monitoring plan, next-Monday checklist, confidence level, data limitations. Methodology specification in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md); operational detail in [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) sections 4-10.
-- Synthetic example folder [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) with the input SISTRIX CSV shape (current week + previous week + money-keyword list) and the expected output Markdown. All data uses the RFC 2606 reserved `.test` TLD. The example demonstrates the Winner/Loser neutralization pattern: product-cluster recovery alongside informational-guide losses leaving the VI flat.
+- Synthetic example folder [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) with the input SISTRIX CSV shape (current week + previous week + money-keyword list) and the expected output Markdown. All data uses the RFC 2606 reserved `.test` TLD.
+- **lib/safe.js v2**: `normalizeDomain()`, `generateRunId()`, enhanced `acquireLock()` (PID/token/stale TTL), `atomicWriteJSON()` (collision-safe), `appendNDJSON()`, `safeReadJSON()`, `safeReadLatestImport()`, `maskSecrets()`, `safeLog()`
+- **JSON Schemas**: schema_version, run_id, data_quality, confidence, providers_used, missing_capabilities in all command outputs
+- **Reference documents**: `CORE_UPDATES.md` with 90-day freshness policy, `RECOVERY_SYSTEM.md`, `DECISION_ENGINE.md` under `plugins/seo-rescue/references/`
+- **Documentation**: ONBOARDING.md, SETUP.md, TOOL_PROVIDERS.md, FALLBACKS.md, TROUBLESHOOTING.md under `plugins/seo-rescue/docs/`
+- **Test fixtures**: Minimal CSV and JSON test data for offline testing under `plugins/seo-rescue/test-fixtures/`
+- **Command/skill wrapper pattern**: Detailed command specs in `commands/` with thin `skills/*/SKILL.md` wrappers
 
 ### Changed
 
-- Skill count is now eleven (one orchestrator plus ten sub-skills). [README.md](./README.md), [CLAUDE.md](./CLAUDE.md), and the orchestrator [`rescue/SKILL.md`](./plugins/seo-rescue/skills/rescue/SKILL.md) updated accordingly. Quick Reference tables and sub-skill summaries updated.
-- `rescue/SKILL.md` Quick Reference table adds the `/seo-rescue:rescue monday` alias. Cost summary table extended with rows for `ai-citations-tracker`, `gsc-deep-dive`, and `sistrix-monday-recovery-check`. Latest installable version footer updated from a stale v0.3.0 to v0.5.0.
+- Skill count is now sixteen (one orchestrator plus fifteen sub-skills/commands). [README.md](./README.md), [CLAUDE.md](./CLAUDE.md), and the orchestrator [`rescue/SKILL.md`](./plugins/seo-rescue/skills/rescue/SKILL.md) updated accordingly.
+- `rescue/SKILL.md` Quick Reference table adds the `/seo-rescue:rescue monday` alias plus the five new recovery commands. Cost summary table extended. Latest installable version footer updated from a stale v0.3.0 to v0.5.1.
 
 ### Deferred to a later v0.5.x
 

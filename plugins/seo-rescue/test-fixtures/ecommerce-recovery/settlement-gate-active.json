@@ -1,0 +1,77 @@
+{
+  "fixture_id": "settlement-gate-active",
+  "fixture_purpose": "After a Major Batch (T-1, 31 changes), the Settlement Gate must be active and live changes blocked. Tests the basic activation path.",
+  "input": {
+    "today": "2026-05-28",
+    "domain": "ecommerce-recovery.example",
+    "last_major_batch": {
+      "started_at": "2026-05-27T19:43:00Z",
+      "session_id": "session-major-batch-001",
+      "change_count": 31,
+      "ops_breakdown": {
+        "seo_url_patches": 8,
+        "seo_url_posts": 1,
+        "category_deactivations": 8,
+        "dreiscseo_redirect_deactivations": 3,
+        "cms_slot_patches": 4,
+        "anchor_text_fixes": 2,
+        "plugin_config_changes": 1,
+        "url_reactivations": 1,
+        "cache_invalidations": 3
+      },
+      "trigger_signals_fired": [
+        "more_than_10_seo_relevant_changes",
+        "more_than_5_url_or_redirect_or_category_ops",
+        "more_than_10_internal_links_changed",
+        "two_or_more_categories_deactivated",
+        "sitewide_plugin_config_changed",
+        "cms_slot_batch_on_multiple_blogposts",
+        "produced_404_or_301_to_404_or_api_500_or_reactivation",
+        "medical_or_legal_risk_anchor_changed"
+      ]
+    }
+  },
+  "expected_recovery_gate_state": {
+    "settlement_gate_active": true,
+    "reason": "major_batch_on_2026-05-27",
+    "started_at": "2026-05-27T19:43:00Z",
+    "minimum_until": "2026-06-02T00:00:00Z",
+    "recommended_until": "2026-06-06T00:00:00Z",
+    "click_evaluation_until": "2026-06-10T00:00:00Z",
+    "hard_block_live_optimizations": true,
+    "live_changes_allowed": false,
+    "allowed_modes": ["audit_only", "emergency_rollback"],
+    "blocked_modes": [
+      "micro_fix",
+      "low_risk_fix",
+      "controlled_recovery",
+      "structural_change",
+      "high_risk_requires_approval"
+    ],
+    "unlock_status": "blocked",
+    "missing_unlock_criteria": [
+      "time_minimum_until_passed",
+      "gsc_post_batch_pull",
+      "screaming_frog_post_batch_crawl",
+      "re_evaluation_report_written",
+      "change_governor_budget_recalculated",
+      "new_change_plan_present"
+    ],
+    "next_allowed_review_date": "2026-06-06"
+  },
+  "expected_command_behavior": {
+    "recovery_plan": {
+      "live_changes_allowed": false,
+      "produces_read_only_roadmap": true,
+      "all_actions_bucketed": true
+    },
+    "recovery_full": {
+      "skips_live_steps": true,
+      "produces_plan_after_gate_document": true
+    },
+    "recovery_audit": {
+      "emits_settlement_gate_block": true,
+      "active_field_true": true
+    }
+  }
+}

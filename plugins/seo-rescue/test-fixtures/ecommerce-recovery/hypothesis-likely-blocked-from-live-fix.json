@@ -1,0 +1,60 @@
+{
+  "_fixture_purpose": "Demonstrates a hypothesis that is internally consistent and supported by open-source-code reading, but has NOT been verified against the operator's specific stack. Live fix is blocked. This is the state the originating recovery case was in BEFORE the developer file-inspect — and is the state the framework must explicitly refuse to deploy from.",
+  "_fixture_classification": "likely-state-example-must-be-blocked",
+  "hypothesis_id": "hvg-canonical-doubling-blog-detail-PRE-DEV-INSPECT",
+  "hypothesis_status": "likely",
+  "hypothesis": "Open-source blog plugin overrides the wrong Twig block (layout_head_meta_tags instead of layout_head_canonical) and calls parent() after its own canonical injection. The parent() call triggers Shopware Core to render an additional canonical that falls back to the homepage on blog detail routes, producing the observed two-canonical doubling.",
+  "observed_effect": "Blog detail routes show two <link rel=canonical> tags in live HTML: one Self (correct), one Homepage / (incorrect). 18 of 18 blog detail URLs affected. Category, product, and homepage URLs show exactly one canonical tag (correct).",
+  "supporting_evidence": [
+    {
+      "source": "live_html",
+      "observation": "Cross-page-type comparison confirms blog routes are the only ones affected.",
+      "strength": "medium",
+      "captured_at": "2026-05-28T08:30:00Z",
+      "captured_by": "ai_diagnose"
+    },
+    {
+      "source": "screaming_frog_crawl",
+      "observation": "Crawl marks 18 blog detail URLs as Canonicalised.",
+      "strength": "medium",
+      "captured_at": "2026-05-27T22:51:00Z",
+      "captured_by": "crawl"
+    },
+    {
+      "source": "open_source_code_read",
+      "observation": "Blog plugin upstream repository contains a block override with parent() call that is mechanically capable of producing the observed doubling.",
+      "strength": "weak",
+      "captured_at": "2026-05-28T10:15:00Z",
+      "captured_by": "ai_diagnose"
+    }
+  ],
+  "contradicting_evidence": [],
+  "source_of_truth_checked": [
+    "live_html",
+    "crawl"
+  ],
+  "excluded_alternatives": [
+    {
+      "alternative": "Custom theme base-layout injects a hardcoded homepage canonical",
+      "excluded_by": "Live HTML cross-page-type comparison rules out theme-global injection",
+      "excluded_at": "2026-05-28T09:00:00Z"
+    }
+  ],
+  "verified_by": "not_yet_verified",
+  "live_fix_allowed": false,
+  "fix_scope": null,
+  "monitoring_plan": null,
+  "operator_approval": null,
+  "settlement_gate_override": null,
+  "created_at": "2026-05-28T08:30:00Z",
+  "updated_at": "2026-05-28T10:15:00Z",
+  "status_history": [
+    {
+      "from_status": "suspected",
+      "to_status": "likely",
+      "transitioned_at": "2026-05-28T09:00:00Z",
+      "reason": "Live HTML cross-page-type comparison ruled out one alternative (theme-global). Pattern is blog-route-specific. Status promoted from suspected to likely."
+    }
+  ],
+  "_framework_note": "Even though this hypothesis is internally consistent and the proposed mechanism is plausible, the verification stack does not yet contain a strong-tier source. Open-source code reading is weak-tier and cannot verify that this specific code path is the active one on the operator's installed stack. Multiple weak-tier sources (live_html medium, crawl medium, open_source_code weak) do not aggregate into verified. A strong-tier verification (server file inspect of the actually installed plugin, or staging reproduction, or operator/developer direct review) is required before live_fix_allowed can be true. Until then, fix-planning, briefings, and Pre-Check baseline collection are permitted; any live deploy is blocked by Hard Stop rule 24 in SEO_CHANGE_GOVERNOR.md."
+}

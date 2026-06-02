@@ -1,0 +1,30 @@
+{
+  "_fixture_purpose": "Demonstrates a hypothesis at the lowest verification level — a pattern match with no specific evidence against the operator's stack. Often the first 30 seconds of a diagnosis. Live fix is blocked. Used as the entry-state for hypothesis-status transitions.",
+  "_fixture_classification": "suspected-state-example",
+  "hypothesis_id": "hvg-ai-overviews-zero-click-effect",
+  "hypothesis_status": "suspected",
+  "hypothesis": "Click decline despite stable rankings could be explained by AI Overviews appearing on more SERPs and absorbing clicks that would otherwise reach the organic top results.",
+  "observed_effect": "28-day GSC clicks down 23% versus prior 28-day window. Impressions down only 9%, average position roughly flat. CTR dropped from 1.24% to 1.05%.",
+  "supporting_evidence": [
+    {
+      "source": "pattern_match",
+      "observation": "Observed pattern (stable position + stable impressions + falling CTR) is consistent with AI Overviews zero-click absorption as documented across the SEO industry in 2025-2026.",
+      "strength": "weak",
+      "captured_at": "2026-05-28T08:40:00Z",
+      "captured_by": "ai_diagnose"
+    }
+  ],
+  "contradicting_evidence": [],
+  "source_of_truth_checked": [],
+  "excluded_alternatives": [],
+  "verified_by": "not_yet_verified",
+  "live_fix_allowed": false,
+  "fix_scope": null,
+  "monitoring_plan": null,
+  "operator_approval": null,
+  "settlement_gate_override": null,
+  "created_at": "2026-05-28T08:40:00Z",
+  "updated_at": "2026-05-28T08:40:00Z",
+  "status_history": [],
+  "_framework_note": "Pattern match alone never produces verified status. To move from suspected to likely, a per-URL or per-query analysis of SERP feature presence (via DataForSEO live SERP, Sistrix SERP-feature snapshot, or manual SERP inspection) would need to confirm that AI Overviews are present on the affected queries. To move from likely to verified, GSC URL Inspection or a controlled test (running the query in incognito with location-matched IP) would need to show the AI Overview live and absorbing the click position. In the originating recovery case, this hypothesis was opened on 2026-05-28 at 08:40, downgraded by 11:00 when a stronger competing hypothesis (canonical doubling on a single page accounting for 71% of click loss) emerged from direct page-level GSC analysis. AI Overviews remained as a secondary partial-cause hypothesis to revisit in monitoring phase 4."
+}

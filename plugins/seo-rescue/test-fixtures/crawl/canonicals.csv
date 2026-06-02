@@ -1,0 +1,3 @@
+Address,Canonical Link Element 1,Indexability
+https://www.example.com/matratzen/?sort=price,https://www.example.com/matratzen/,Non-Indexable
+https://www.example.com/matratzen/?page=2,https://www.example.com/matratzen/,Non-Indexable
