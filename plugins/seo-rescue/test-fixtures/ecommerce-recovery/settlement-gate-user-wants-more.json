@@ -1,0 +1,52 @@
+{
+  "fixture_id": "settlement-gate-user-wants-more",
+  "fixture_purpose": "While the Settlement Gate is active, the operator applies pressure asking for more optimization. Claude must refuse with the standard answer.",
+  "input": {
+    "today": "2026-05-28",
+    "domain": "ecommerce-recovery.example",
+    "recovery_gate_state": {
+      "settlement_gate_active": true,
+      "started_at": "2026-05-27T19:43:00Z",
+      "minimum_until": "2026-06-02T00:00:00Z",
+      "recommended_until": "2026-06-06T00:00:00Z",
+      "unlock_status": "blocked"
+    },
+    "operator_messages": [
+      "können wir noch Titles optimieren?",
+      "sollen wir noch optimieren?",
+      "mach weiter",
+      "warum sind Klicks niedrig?",
+      "lass Titles ändern",
+      "noch Links setzen",
+      "alles fixen",
+      "ALLESS",
+      "was kann ich noch machen?"
+    ],
+    "no_new_data_signals_since_started_at": true,
+    "no_technical_emergency": true
+  },
+  "expected_internal_check_results": {
+    "is_settlement_gate_active": true,
+    "is_verified_technical_emergency": false,
+    "new_post_batch_data_signals": false,
+    "would_conflate_cause_and_effect": true
+  },
+  "expected_response": {
+    "stop_required": true,
+    "stop_reason": "settlement_gate_active",
+    "must_emit_standard_settlement_gate_response": true,
+    "standard_settlement_gate_response_text": "Settlement Gate aktiv. Ich mache keine neuen Live-SEO-Optimierungen, weil der letzte Major Batch noch nicht belastbar ausgewertet ist. Erlaubt sind jetzt nur Monitoring, Datenpulls, QA, Briefings und Rollback-Vorbereitung. Neue Live-Maßnahmen erst nach Re-Evaluation mit GSC/Crawl/Rankingdaten oder bei technischem Notfall.",
+    "must_offer_allowed_actions_list": true,
+    "must_state_next_allowed_review_date": "2026-06-06",
+    "must_not_plan_or_execute": true,
+    "must_not_infer_optimization_from_low_clicks": true
+  },
+  "expected_change_budget_object": {
+    "mode": "audit_only",
+    "change_budget": 0,
+    "settlement_gate_active": true,
+    "stop_required": true,
+    "stop_reasons": ["settlement_gate_active"],
+    "planned_changes": []
+  }
+}

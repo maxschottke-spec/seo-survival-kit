@@ -1,0 +1,26 @@
+{
+  "_description": "Test: Single anchor text fix for compliance risk reduction. Should pass in micro_fix mode.",
+  "input": {
+    "user_instruction": "Aendere den Anchor 'Orthopaedische product-item' zu 'Ergonomic Item' im Top-Blog",
+    "planned_changes": [
+      {
+        "id": "change-001",
+        "type": "anchor_text",
+        "target": "/Blog/authority-article-A",
+        "description": "Anchor fix: Orthopaedische -> Ergonomische (medical term reduction)",
+        "risk_points_base": 1,
+        "multipliers": ["medical_term"],
+        "risk_points_final": 2
+      }
+    ],
+    "current_mode": "micro_fix",
+    "change_budget": 3
+  },
+  "expected": {
+    "stop_required": false,
+    "total_risk_points": 2,
+    "budget_remaining": 1,
+    "requires_explicit_approval": true,
+    "mode_valid": true
+  }
+}

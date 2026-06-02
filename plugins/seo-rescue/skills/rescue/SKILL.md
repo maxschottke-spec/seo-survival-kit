@@ -31,6 +31,12 @@ This is the entry point for the seo-rescue plugin. It routes to ten specialized 
 | `/seo-rescue:rescue ai-citations` | Track AI citations weekly (alias for `/seo-rescue:ai-citations-tracker`) |
 | `/seo-rescue:rescue gsc <domain> [days?]` | One-call Google Search Console snapshot (alias for `/seo-rescue:gsc-deep-dive`) |
 | `/seo-rescue:rescue monday <current-csv> <previous-csv> [domain?]` | CSV-first weekly recovery review (alias for `/seo-rescue:sistrix-monday-recovery-check`) |
+| `/seo-rescue:rescue recovery <domain>` | Full recovery workflow (alias for `/seo-rescue:recovery-full`) |
+| `/seo-rescue:recovery-diagnose <domain>` | Core Update diagnosis via Sistrix + DataForSEO (with CSV fallbacks) |
+| `/seo-rescue:recovery-crawl <domain>` | Screaming Frog crawl + issue classification |
+| `/seo-rescue:recovery-plan <domain>` | Prioritized recovery action plan with human approval gate |
+| `/seo-rescue:recovery-monitor <domain>` | Weekly recovery tracking + score |
+| `/seo-rescue:recovery-full <domain>` | Full workflow: diagnose → crawl → plan → monitor |
 | `/seo-rescue:rescue help` | Show this routing table |
 
 ## When to use which
