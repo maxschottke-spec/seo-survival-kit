@@ -238,7 +238,7 @@ Contact: open a [Discussion](https://github.com/maxschottke-spec/seo-survival-ki
 
 ## Status
 
-v0.5.0 shipped, v0.5.1 in flight. Single-maintainer open-source project. No SLA, no commercial support. Issue response best-effort within a few days. For production-critical workflows, pin to a specific tag and review releases before upgrading.
+Single-maintainer open-source project. No SLA, no commercial support. Issue response best-effort within a few days. For production-critical workflows, pin to a specific tag and review releases before upgrading. The currently shipping version is visible in the badge near the top of this README and in [CHANGELOG.md](./CHANGELOG.md).
 
 ## License, security, contributing
 
