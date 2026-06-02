@@ -7,13 +7,15 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.5.2] — 2026-06-02
+
 ### Added
 
+- **SEO Change Governor + Settlement Gate** — session-mode change budgets (`audit_only` default with explicit operator escalation), per-change risk / evidence / rollback / approval rating, and a post-Major-Batch Settlement Gate that hard-blocks new optimization waves until enough data has accumulated to attribute cause and effect. Ships with `references/SEO_CHANGE_GOVERNOR.md`, `references/SEO_SETTLEMENT_GATE.md`, `references/SAFE_LIVE_CHANGE_RULES.md`, the `recovery-audit` command, governance JSON schemas (`change-budget`, `recovery-gate`, `seo-change-audit`, `hypothesis-verification`), platform/plugin SEO references, and ecommerce recovery test fixtures.
+- **GitHub issue templates** — bug report, feature request, usage feedback, and a config router pointing open-ended questions to Discussions and security reports to private advisories.
 - **New skill: `subscription-monetization-audit`** ([SKILL.md](./plugins/seo-rescue/skills/subscription-monetization-audit/SKILL.md)) — a 5-lever recurring-revenue playbook (pricing, packaging, retention, expansion, win-back) with an optional CSV import path for Stripe / Chargebee / Recurly exports that computes MRR, ARPU, churn, and cohort retention locally. CSV import via `csv-import.example.js` with `lib/safe.js` safety primitives (size-capped reads, no network calls). Routed in the `rescue` orchestrator as `/seo-rescue:rescue monetization` and listed in the README "Reporting and economics" table.
-
-## [Unreleased] — v0.5.1-dev
-
-### Added
 
 - **Recovery Workflow Commands**: Five new commands for automated SEO recovery
   - `recovery-diagnose` — Core Update diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO MCP + GSC CSV + manual CSV)
