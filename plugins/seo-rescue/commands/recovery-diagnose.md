@@ -15,6 +15,28 @@ Mode: `audit_only`. Change Budget: 0. Keine Live-Shop-Writes. Nur Cache-Report-A
 
 Wenn `change-history.ndjson` existiert, wird sie am Anfang gelesen und im Befund referenziert. Jede Aussage muss Quelle und Confidence tragen.
 
+## Settlement Gate Awareness
+
+Dieses Command ist read-only (`audit_only`, Change Budget 0) — ein aktiver Settlement Gate (`../../references/SEO_SETTLEMENT_GATE.md`) blockiert es NIE. Es muss den Gate-State aber kennen und ausweisen:
+
+1. Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`, falls vorhanden. **Writer dieser Datei ist `recovery-audit`** (siehe `commands/recovery-audit.md`, Settlement Gate Detection) — recovery-diagnose liest sie nur. Fehlt die Datei, gilt der Gate als `never_triggered`: keine Warnung, normaler Ablauf.
+2. Falls `settlement_gate_active = true`:
+   - Diagnose laeuft normal weiter — read-only Analyse ist waehrend eines aktiven Gates immer erlaubt.
+   - In den Befund (Top-Level) das Feld `settlement_gate_status` aufnehmen, gespiegelt aus der Gate-Datei:
+
+     ```json
+     "settlement_gate_status": {
+       "active": true,
+       "next_allowed_review_date": "2026-06-06",
+       "unlock_status": "blocked"
+     }
+     ```
+
+     (`unlock_status`: `blocked | partial | open`, direkt aus der Gate-Datei uebernommen.)
+   - In der User-Ausgabe eine Zeile ausgeben: `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Diagnose erlaubt, Live-Aenderungen blockiert`
+   - Jeder Empfehlungstext (insbesondere `summary_de` und der "Naechster Schritt") darf KEINE sofortigen Live-Aenderungen vorschlagen. Naechste Schritte als "jetzt vorbereiten/Drafts erstellen, Ausfuehrung nach Gate-Re-Evaluation" formulieren (`prepare_now_execute_later`-Prinzip aus `SEO_SETTLEMENT_GATE.md`).
+3. Falls Gate-Datei fehlt oder `settlement_gate_active = false`: `settlement_gate_status: { "active": false }` in den Befund schreiben. Keine User-Ausgabe-Zeile noetig.
+
 ## Trigger
 
 `/seo-rescue:recovery-diagnose <domain>`
@@ -347,6 +369,7 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
   "diagnosis": "core-update | technical | content | mixed | healthy",
   "severity": "critical | high | medium | low",
   "recovery_stage_estimate": "R1 | R2 | R3 | R4 | R5 | null",
+  "settlement_gate_status": { "active": false },
   "summary_de": "<deutschsprachige Zusammenfassung>"
 }
 ```
@@ -421,6 +444,11 @@ Ersetze `{slug}` durch den ermittelten Slug und `BEFUND_OBJECT` durch das vollst
   "diagnosis": "core-update",
   "severity": "critical",
   "recovery_stage_estimate": "R2",
+  "settlement_gate_status": {
+    "active": true,
+    "next_allowed_review_date": "2026-06-06",
+    "unlock_status": "blocked"
+  },
   "summary_de": "Die Domain verzeichnete einen VI-Drop von 49.8% korrelierend mit dem March 2024 Core Update. ..."
 }
 ```
@@ -435,12 +463,15 @@ Nach erfolgreichem Schreiben des Befunds, gib folgende Informationen aus:
 4. **Core-Update-Korrelation:** `Core Update: {core_update_name} ({core_update_correlation})`
 5. **Keywords:** `Rankende Keywords: {keywords_total} | Quick Wins: {quick_wins.length}`
 6. **Fehlende Capabilities** (falls vorhanden): `Fehlende Daten: {missing_capabilities.join(', ')}`
-7. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
+7. **Settlement Gate** (nur falls `settlement_gate_status.active = true`): `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Diagnose erlaubt, Live-Aenderungen blockiert`
+8. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
    - `core-update` → `/seo-rescue:post-core-update-recovery`
    - `technical` → `/seo-rescue:seo-audit-free`
    - `content` → `/seo-rescue:recovery-plan`
    - `mixed` → `/seo-rescue:recovery-plan`
    - `healthy` → keine weiteren Massnahmen noetig
+
+   Bei aktivem Settlement Gate: Empfehlung als "jetzt vorbereiten, ausfuehren nach Gate-Re-Evaluation am {next_allowed_review_date}" formulieren — keine sofortigen Live-Aenderungen vorschlagen.
 
 ## Fehlerbehandlung
 
@@ -501,5 +532,7 @@ Bei `data_quality = "poor"`: Keine aggressiven Empfehlungen. Jede Handlungsempfe
 
 - `../../references/CORE_UPDATES.md` — Datumsliste bekannter Google Core Updates
 - `../../references/RECOVERY_SYSTEM.md` — Schwellwerte, Recovery-Stage-Definitionen (R1–R5)
+- `../../references/SEO_SETTLEMENT_GATE.md` — Settlement-Gate-Definition, Exceptions, Unlock-Kriterien
 - `../../schemas/befund.schema.json` — vollstaendiges JSON-Schema des Output-Objekts
+- `../../schemas/recovery-gate.schema.json` — Gate-State-Schema (`recovery-gate.json`)
 - `../../lib/safe.js` — `normalizeDomain()`, `safeSlug()`, `ensureDomainDir()`, `acquireLock()`, `releaseLock()`, `atomicWriteJSON()`

@@ -127,7 +127,7 @@ Scope:
 - Updater validation in CI
 - Privacy scan in CI
 - 5+ entries in each LESSONS.md
-- Either: at least one external contributor PR merged besides security collaborator, OR documented community-outreach attempt with minimum-three-week response window. v1.0 is not blocked on external contribution; the goal is openness, not a specific contributor count.
+- Either: at least one external contributor PR landed (reviewed; merged at maintainer discretion), OR documented community-outreach attempt with minimum-three-week response window. v1.0 is not blocked on external contribution; the goal is openness, not a specific contributor count.
 - Prepare-for-i18n: DE hardcoding (`location_code: 2276`) extracted to config layer with a clear default-marker. Full i18n implementation deferred to v1.1, after at least one non-DE case validation.
 
 ## v1.1
@@ -154,10 +154,4 @@ Direction depends on adoption, feedback, contribution capacity. None of the foll
 
 ## What stays out of scope
 
-- Automatic ad-account writes. Automatic budget changes.
-- Guaranteed rankings or guaranteed revenue.
-- Scraping against platform terms of service.
-- Private client data in public repository files.
-- Hidden personalization. Silent updates.
-- Tier-1 editorial coverage and brand-authority backlinks. Editorial relationships require sustained beat-coverage work over multiple years. The skill set can identify which publications a brand needs to be in and draft pitch briefs; it cannot make an editor open a stranger's email. Recovery cases that hit the editorial-authority wall should pair this kit with a digital-PR partner or in-house PR capacity.
-- Replacement for comprehensive audit suites like `claude-seo` (this kit complements, it does not replace).
+The authoritative non-goals list (permanent exclusions like automatic ad-account writes, guaranteed outcomes, silent updates, and private client data in tracked files, plus the version-gated exclusions) lives in [ARCHITECTURE.md §11 — What is intentionally NOT implemented](./ARCHITECTURE.md#11-what-is-intentionally-not-implemented). Anything listed there is out of scope for every version on this page.

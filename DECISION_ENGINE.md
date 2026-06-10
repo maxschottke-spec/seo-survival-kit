@@ -283,33 +283,7 @@ Overrides are logged. After several overrides on the same pattern, the framework
 
 ## 7. Sequencing across phases
 
-Sequencing decides when actions happen, not just which actions matter. Every skill producing actionable recommendations runs them through a sequencer before output.
-
-### Sequencing constraints
-
-- **S1: Protection blocks optimization.** If a URL is in "winning during recovery" state, the sequencer blocks recommendations beyond the safe-to-make list per [RECOVERY_SYSTEM.md section 7](./RECOVERY_SYSTEM.md#7-money-keyword-protection).
-- **S2: Data gathering before recommendations under low confidence.** If data confidence is low, the sequencer reorders to put data-gathering actions first.
-- **S3: Margin work before paid scaling.** Per rule `r-margin-unknown-no-scale`.
-- **S4: Tracking work before paid scaling.** Per future rule `r-paid-tracking-low-no-scale` (v0.8 codification).
-- **S5: Recovery before growth during active recovery.** If post-Core-Update + less than 90 days into recovery, recovery actions take precedence over growth actions even when growth looks high-impact in isolation.
-- **S6: Investigate before strengthen during High neutralization.** Strengthening winners while losers offset visibility produces no aggregate movement; losers are the lever.
-
-### Cross-channel sequencing (roadmap)
-
-When v0.6 ships Revenue Rescue and v0.8 ships paid media, the sequencer extends: recovery work on dominant channel before scaling minor channels; tracking before paid scaling; margin work before any channel investment increase; CRO work before paid scaling on weak landing pages.
-
-### Sequencing output
-
-When a skill produces a recommendation list, output includes:
-
-- Current recovery phase (R0 to R5)
-- Recommended actions for this week (current phase)
-- Recommended actions for the upcoming 2-4 weeks (current phase + prep for next)
-- Actions explicitly deferred to a later phase (with phase label)
-- Actions blocked by sequencing constraints (with constraint cited)
-- Phase advancement criteria for moving to the next phase
-
-The operator sees the full plan but only the current-week actions are immediately actionable.
+Authoritative sequencing — the five recovery phases (R1–R5), phase advancement criteria, and the six sequencing constraints — lives in [RECOVERY_SYSTEM.md §11](./RECOVERY_SYSTEM.md#11-recovery-sequencing-five-phases). The engine's specific contribution is the binding to decision rules and skill output: every skill producing actionable recommendations runs them through a sequencer before output; the constraints map to engine rules where they exist (protection blocks optimization beyond the safe-to-make list per [RECOVERY_SYSTEM.md section 7](./RECOVERY_SYSTEM.md#7-money-keyword-protection); margin work before paid scaling per `r-margin-unknown-no-scale`; tracking work before paid scaling per the future rule `r-paid-tracking-low-no-scale`, v0.8 codification); and the sequenced output names the current recovery phase (R0 to R5), this week's recommended actions, actions for the upcoming 2-4 weeks, actions explicitly deferred to a later phase (with phase label), actions blocked by sequencing constraints (with constraint cited), and the phase advancement criteria — so the operator sees the full plan but only the current-week actions are immediately actionable. When v0.6 ships Revenue Rescue and v0.8 ships paid media, the same sequencer extends cross-channel (recovery work on the dominant channel before scaling minor channels; CRO work before paid scaling on weak landing pages).
 
 ---
 

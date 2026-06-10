@@ -82,7 +82,7 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 **Befund:**
 - Klassischer VI hängt hinter der Realität ~3-5 Tage (API vs UI), Recovery-Indikator dort: +22% Trend trotz absoluter Niedrigwerte
 - **AI Citations sind explosiv:** 153 Google AI Mode + 121 Google AI Overviews + 22 ChatGPT = **296 AI-Surface-Erwähnungen** trotz niedrigem klassischen VI
-- 8+ Authority-Cluster-Keywords ranken Pos 1 ("matratzenhersteller deutschland", "deutsche matratzenhersteller", "matratzen-hersteller deutschland", "komfortschaum", "normale matratzengröße", etc.)
+- 8+ Authority-Cluster-Keywords ranken Pos 1 (Manufacturer-Intent-Head-Terms in 3 Schreibvarianten à la "[kategorie]hersteller [land]" / "[land-adjektiv] [kategorie]hersteller" / "[kategorie]-hersteller [land]", dazu ein "[material-begriff]" und ein "[standardgrößen-begriff]", etc.)
 - Erste sichtbare Bewegung nach 8 Wochen — Framework sagte 3-4 Monate
 
 **Konsequenz:** Pattern "AI Citations vorgelagerter Indikator" könnte das Recovery-Tracking-Modell erweitern. Hypothese: Google testet im AI Mode neue Authority-Signale, die später in den klassischen Index durchschlagen. **Tracking-Empfehlung für künftige Recoveries:** zusätzlich zu Sistrix-VI auch AI-Citation-Counts (Sistrix-Toolbox-Metrik seit 2026) wöchentlich pullen.

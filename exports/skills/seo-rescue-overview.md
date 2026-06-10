@@ -2,7 +2,7 @@
 
 > **Source:** `plugins/seo-rescue/skills/rescue/SKILL.md` (canonical Claude Code orchestrator). This export is a **platform-agnostic overview** for non-Claude-Code LLMs — the slash-command-based routing in the original (`/seo-rescue:rescue audit <domain>` etc.) does not apply outside Claude Code.
 
-This document describes the overall SEO-Rescue framework so any LLM (Cursor, OpenAI Custom GPT, Gemini, Aider) can route the user to the right sub-framework. Two of the sub-frameworks (`post-core-update-recovery`, `ai-search-rescue`) are also available as exported markdown in this directory. The script-backed sub-frameworks (`seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`) remain Claude-Code-specific — see "Script-backed skills" below.
+This document describes the overall SEO-Rescue framework so any LLM (Cursor, OpenAI Custom GPT, Gemini, Aider) can route the user to the right sub-framework. Two of the sub-frameworks (`post-core-update-recovery`, `ai-search-rescue`) are also available as exported markdown in this directory. The remaining sub-frameworks (`seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`, `sistrix-monday-recovery-check`, `subscription-monetization-audit`, plus the six `recovery-*` workflow commands) remain Claude-Code-specific — see "Script-backed skills" below.
 
 ## Routing — pick the right sub-framework by symptom
 
@@ -17,6 +17,9 @@ This document describes the overall SEO-Rescue framework so any LLM (Cursor, Ope
 | "Set up weekly PSI tracking with regression alerts" | psi-weekly-cron-baseline (Claude Code only — Node-pipeline script) |
 | "Track ChatGPT / Perplexity brand-citation frequency weekly" | ai-citations-tracker (Claude Code only — Node-pipeline script) |
 | "Pull Google Search Console data in one call" | gsc-deep-dive (Claude Code only — Node-pipeline script) |
+| "Run my weekly Monday recovery review from SISTRIX CSVs" | sistrix-monday-recovery-check (Claude Code only — CSV-first weekly review) |
+| "Audit my subscription / recurring-revenue levers" | subscription-monetization-audit (Claude Code only — optional Stripe/Chargebee/Recurly CSV import) |
+| "Run the full recovery workflow on my domain" | recovery-full and the recovery-diagnose/crawl/audit/plan/monitor commands (Claude Code only) |
 
 ## When to use which framework
 
@@ -64,7 +67,7 @@ For non-Claude-Code use:
 3. **Run with `node` directly** in the script directory.
 4. **Cross-reference the SKILL.md** for the editorial context — that part is platform-independent even if the slash-command invocation isn't.
 
-If you want native skill-like behavior on Cursor / Custom GPT / Gemini / Aider, an MCP server wrapper would be the right solution (planned for v0.5.x).
+If you want native skill-like behavior on Cursor / Custom GPT / Gemini / Aider, an MCP server wrapper would be the right solution (planned for v1.0+).
 
 ## Plugin info
 
@@ -73,7 +76,7 @@ If you want native skill-like behavior on Cursor / Custom GPT / Gemini / Aider, 
 - **License:** MIT
 - **Dependencies:** zero npm runtime deps (everything that talks to a network is via `fetch`; PDF rendering uses Chrome-headless via `spawnSync` with `shell: false`)
 - **Security:** two independent review rounds, see [SECURITY.md](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/SECURITY.md#external-security-reviews)
-- **Status:** Public Beta (v0.4.x)
+- **Status:** Public Beta (v0.5.2 — 18 skills/commands: 1 orchestrator + 17 sub-skills and recovery commands)
 
 ---
 

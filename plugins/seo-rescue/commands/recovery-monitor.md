@@ -9,6 +9,29 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 
 Woechentliches Recovery-Tracking. Holt aktuelle VI + Keyword-Daten, berechnet Recovery-Score, appendet an die History-Datei. Laeuft auch bei fehlenden Datenquellen durch und schreibt einen Partial-Eintrag — der Zeitstempel allein ist wertvoll fuer die Zeitreihe.
 
+## Settlement Gate Awareness
+
+Dieses Command ist read-only gegenueber dem Live-Shop (`audit_only`, Change Budget 0, schreibt nur Cache-Artefakte) — ein aktiver Settlement Gate (`references/SEO_SETTLEMENT_GATE.md`) blockiert es NIE. Es muss den Gate-State aber kennen und ausweisen:
+
+1. Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`, falls vorhanden. **Writer dieser Datei ist `recovery-audit`** (siehe `commands/recovery-audit.md`, Settlement Gate Detection) — recovery-monitor liest sie nur. Fehlt die Datei, gilt der Gate als `never_triggered`: keine Warnung, normaler Ablauf.
+2. Falls `settlement_gate_active = true`:
+   - Monitoring laeuft normal weiter — read-only Tracking ist waehrend eines aktiven Gates immer erlaubt und ausdruecklich erwuenscht (der Gate braucht Re-Evaluation-Daten).
+   - In den History-Eintrag (Top-Level) das Feld `settlement_gate_status` aufnehmen, gespiegelt aus der Gate-Datei:
+
+     ```json
+     "settlement_gate_status": {
+       "active": true,
+       "next_allowed_review_date": "2026-06-06",
+       "unlock_status": "blocked"
+     }
+     ```
+
+     (`unlock_status`: `blocked | partial | open`, direkt aus der Gate-Datei uebernommen.)
+   - In der User-Ausgabe (Delta-Report) eine Zeile ausgeben: `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Monitoring erlaubt, Live-Aenderungen blockiert`
+   - Jeder Empfehlungstext darf KEINE sofortigen Live-Aenderungen vorschlagen. Naechste Schritte als "jetzt vorbereiten/Drafts erstellen, Ausfuehrung nach Gate-Re-Evaluation" formulieren (`prepare_now_execute_later`-Prinzip aus `SEO_SETTLEMENT_GATE.md`).
+   - **Score-Bewegung waehrend aktivem Gate:** Wenn der Recovery Score stark gefallen ist (Drop > 15 Punkte gegenueber dem letzten History-Eintrag), KEINE korrigierende Live-Aktion empfehlen. Stattdessen empfehlen, die Beobachtung in die Gate-Re-Evaluation am `next_allowed_review_date` mitzunehmen — der Gate existiert genau dafuer, dass frisches Post-Batch-Rauschen nicht sofort beantwortet wird. Das gilt auch fuer Rollback-Empfehlungen aus der Change-History-Integration: Anomalies werden geflagged und fuer die Re-Evaluation dokumentiert; ob daraus ein Emergency-Rollback per `SEO_SETTLEMENT_GATE.md` section 7 wird, entscheidet der Operator.
+3. Falls Gate-Datei fehlt oder `settlement_gate_active = false`: `settlement_gate_status: { "active": false }` in den History-Eintrag schreiben. Keine User-Ausgabe-Zeile noetig.
+
 ## Trigger
 
 `/seo-rescue:recovery-monitor <domain>`
@@ -152,6 +175,7 @@ Jeder History-Eintrag in der NDJSON-Datei:
   "keywords_total": 890,
   "score": 62,
   "phase": "R2",
+  "settlement_gate_status": { "active": false },
   "component_scores": {
     "vi_trend": { "value": 68, "weight": 0.30 },
     "keyword_stability": { "value": 71, "weight": 0.25 },
@@ -291,6 +315,8 @@ Der Monitor schreibt selbst nichts zurueck — er flagged nur. Rollback bleibt e
 
 - `scripts/recovery-monitor.js` — Score-Berechnung + Delta-Report; deterministischer Score-Algorithmus
 - `schemas/history.schema.json` — Output-Schema
+- `schemas/recovery-gate.schema.json` — Gate-State-Schema (`recovery-gate.json`)
 - `references/SEO_CHANGE_HISTORY.md` — Change-History NDJSON Format
 - `references/SEO_CHANGE_GOVERNOR.md` — Governance Rules
+- `references/SEO_SETTLEMENT_GATE.md` — Settlement-Gate-Definition, Exceptions, Unlock-Kriterien
 - `lib/safe.js` — `normalizeDomain()`, `safeSlug()`, `ensureDomainDir()`, `acquireLock()`, `releaseLock()`, `atomicWriteJSON()`, `readChangeHistory()` (neu)
