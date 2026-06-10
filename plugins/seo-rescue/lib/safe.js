@@ -504,6 +504,148 @@ function checkDreiscSeoPrecheck(redirects, urlSlug) {
   };
 }
 
+// checkHypothesisScopeMatch(plannedChanges, hypothesisRegistry)
+// Enforces the Hypothesis Verification Gate (recovery-plan Step 8a) in code.
+// plannedChanges: array of change-budget planned_changes entries
+//   (each needs at least { id, target, hypothesis_id }).
+// hypothesisRegistry: array of hypothesis entries from recovery-audit output
+//   (each needs { hypothesis_id, hypothesis_status, fix_scope }), or null/undefined
+//   when no recovery-audit output exists (first run).
+// Returns { audit_output_available, all_planned_changes_verified,
+//   below_verified_count, scope_expansions_blocked, missing_hypothesis_ids,
+//   hard_stops, per_change: [{ id, disposition, stop_reason }] }.
+// disposition: 'allowed_now' | 'prepare_now_execute_later' | 'hard_stop'.
+// Graceful first-run degradation: empty/missing registry never hard-stops —
+// every change is segregated to prepare_now_execute_later (roadmap-only).
+function checkHypothesisScopeMatch(plannedChanges, hypothesisRegistry) {
+  if (!Array.isArray(plannedChanges)) {
+    throw new Error('checkHypothesisScopeMatch: plannedChanges must be an array');
+  }
+  const normalizeUrl = (s) => String(s || '').toLowerCase().replace(/^https?:\/\//, '').replace(/^\/+|\/+$/g, '');
+  const registry = Array.isArray(hypothesisRegistry) ? hypothesisRegistry : [];
+  const auditAvailable = registry.length > 0;
+  const byId = new Map(registry.map(h => [h && h.hypothesis_id, h]));
+
+  const perChange = [];
+  const scopeExpansionsBlocked = [];
+  const missingHypothesisIds = [];
+  const hardStops = [];
+  let belowVerifiedCount = 0;
+
+  for (const change of plannedChanges) {
+    const id = change && change.id;
+    if (!auditAvailable) {
+      perChange.push({ id, disposition: 'prepare_now_execute_later', stop_reason: 'hypothesis_gate_no_audit_output' });
+      belowVerifiedCount += 1;
+      continue;
+    }
+    if (!change || !change.hypothesis_id) {
+      perChange.push({ id, disposition: 'hard_stop', stop_reason: 'hypothesis_id_missing' });
+      missingHypothesisIds.push(id);
+      hardStops.push(id);
+      continue;
+    }
+    const hypothesis = byId.get(change.hypothesis_id);
+    if (!hypothesis) {
+      perChange.push({ id, disposition: 'hard_stop', stop_reason: 'hypothesis_not_in_registry' });
+      missingHypothesisIds.push(id);
+      hardStops.push(id);
+      continue;
+    }
+    const status = hypothesis.hypothesis_status;
+    if (status !== 'verified' && status !== 'fixed') {
+      perChange.push({ id, disposition: 'prepare_now_execute_later', stop_reason: 'hypothesis_below_verified' });
+      belowVerifiedCount += 1;
+      continue;
+    }
+    const scopeUrls = hypothesis.fix_scope && Array.isArray(hypothesis.fix_scope.affected_urls)
+      ? hypothesis.fix_scope.affected_urls.map(normalizeUrl)
+      : null;
+    if (scopeUrls && change.target && !scopeUrls.includes(normalizeUrl(change.target))) {
+      perChange.push({ id, disposition: 'prepare_now_execute_later', stop_reason: 'fix_scope_expansion' });
+      scopeExpansionsBlocked.push(id);
+      continue;
+    }
+    perChange.push({ id, disposition: 'allowed_now', stop_reason: null });
+  }
+
+  return {
+    audit_output_available: auditAvailable,
+    all_planned_changes_verified: perChange.length > 0 && perChange.every(c => c.disposition === 'allowed_now'),
+    below_verified_count: belowVerifiedCount,
+    scope_expansions_blocked: scopeExpansionsBlocked,
+    missing_hypothesis_ids: missingHypothesisIds,
+    hard_stops: hardStops,
+    per_change: perChange,
+  };
+}
+
+// validateSettlementOverride(plan)
+// Validates a Settlement-Gate override request against SEO_SETTLEMENT_GATE.md
+// section 7. plan: a change plan per change-budget.schema.json.
+// Returns { override_allowed, override_type, missing_requirements, reason }.
+// Never throws on malformed plans — missing structure is reported as a
+// missing requirement so callers always get a deny-by-default verdict.
+function validateSettlementOverride(plan) {
+  const missing = [];
+  if (!plan || typeof plan !== 'object') {
+    return { override_allowed: false, override_type: null, missing_requirements: ['plan_object'], reason: 'plan must be an object' };
+  }
+  if (plan.settlement_gate_override_requested !== true) {
+    return { override_allowed: false, override_type: plan.override_type || null, missing_requirements: ['settlement_gate_override_requested'], reason: 'no override requested' };
+  }
+  const overrideType = plan.override_type;
+  const validTypes = ['technical_emergency', 'rollback_stabilization', 'explicit_emergency_approval'];
+  if (!validTypes.includes(overrideType)) {
+    return { override_allowed: false, override_type: overrideType || null, missing_requirements: ['override_type'], reason: `override_type must be one of: ${validTypes.join(', ')}` };
+  }
+  if (typeof plan.override_reason !== 'string' || !plan.override_reason.trim()) {
+    missing.push('override_reason');
+  }
+  const changes = Array.isArray(plan.planned_changes) ? plan.planned_changes : [];
+  if (changes.length === 0) missing.push('planned_changes_non_empty');
+
+  if (overrideType === 'technical_emergency') {
+    // 7.A: each emergency must be supported by a live HTTP verification
+    for (const c of changes) {
+      const method = c && c.pre_change_state_check && c.pre_change_state_check.method;
+      if (method !== 'live_http' && method !== 'live_http_and_api') {
+        missing.push(`live_http_verification:${(c && c.id) || 'unknown'}`);
+      }
+    }
+  }
+
+  if (overrideType === 'explicit_emergency_approval') {
+    // 7.C: ALL requirements must be present
+    if (typeof plan.total_risk_points !== 'number') missing.push('total_risk_points');
+    if (!Array.isArray(plan.post_change_checks) || plan.post_change_checks.length === 0) missing.push('post_change_checks');
+    const av = plan.approval_validation;
+    if (!av || av.is_valid !== true) missing.push('approval_validation_is_valid');
+    if (av && typeof av.approval_text === 'string') {
+      const normalized = av.approval_text.trim().toLowerCase();
+      if (BROAD_APPROVAL_TRIGGERS.includes(normalized)) missing.push('approval_text_is_broad_trigger');
+    }
+    for (const c of changes) {
+      const cid = (c && c.id) || 'unknown';
+      if (!c || typeof c.risk_points_final !== 'number') missing.push(`risk_points_final:${cid}`);
+      if (!c || !Array.isArray(c.data_sources) || c.data_sources.length === 0) missing.push(`data_sources:${cid}`);
+      if (!c || !['high', 'medium'].includes(c.confidence)) missing.push(`confidence_medium_or_higher:${cid}`);
+      if (!c || typeof c.rollback_method !== 'string' || !c.rollback_method.trim()) missing.push(`rollback_method:${cid}`);
+      if (!c || !c.pre_change_state_check || !c.pre_change_state_check.method) missing.push(`pre_change_state_check:${cid}`);
+    }
+  }
+
+  const allowed = missing.length === 0;
+  return {
+    override_allowed: allowed,
+    override_type: overrideType,
+    missing_requirements: missing,
+    reason: allowed
+      ? `override requirements for ${overrideType} satisfied`
+      : `override denied — ${missing.length} requirement(s) missing`,
+  };
+}
+
 // readChangeHistory(slug) — reads change-history.ndjson and returns parsed entries.
 // Returns [] if file does not exist. Skips invalid lines silently.
 // Uses ensureSafeDomainDir to match the path used by appendChangeHistory.
@@ -552,6 +694,8 @@ module.exports = {
   writeSnapshot,
   checkSeoUrlCollision,
   checkDreiscSeoPrecheck,
+  checkHypothesisScopeMatch,
+  validateSettlementOverride,
   readChangeHistory,
   CHANGE_HISTORY_SCHEMA_VERSION,
   APPROVAL_ELEMENTS,

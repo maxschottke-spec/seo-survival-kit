@@ -210,7 +210,7 @@ Bevor eine Massnahme in den ausfuehrbaren Plan-Teil aufgenommen wird (`live_chan
 - Warnung eintragen: `hypothesis_gate_no_audit_output — Plan ist Roadmap-only. Fuer live-fix-eligible Aktionen zuerst /seo-rescue:recovery-audit ausfuehren.`
 - Top-Level-Gate-Block bekommt `"audit_output_available": false`
 
-Die folgenden Hard-Stop-Regeln gelten nur, wenn ein `hypothesis_registry` aus recovery-audit vorliegt:
+Die folgenden Hard-Stop-Regeln gelten nur, wenn ein `hypothesis_registry` aus recovery-audit vorliegt. Die Pruefung ist als `checkHypothesisScopeMatch(plannedChanges, hypothesisRegistry)` in `lib/safe.js` implementiert — nutze sie statt manueller Abgleiche:
 
 Regelwerk:
 
