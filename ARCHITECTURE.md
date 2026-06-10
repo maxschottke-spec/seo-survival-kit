@@ -86,7 +86,7 @@ Skills do not implement the decision layer themselves. They feed it. The user in
 
 ### Active modules (v0.5.2)
 
-**seo-rescue.** The current installable plugin. Seventeen skills and commands (one routing orchestrator plus sixteen sub-skills and recovery commands). Stable. The wedge.
+**seo-rescue.** The current installable plugin. Eighteen skills and commands (one routing orchestrator plus seventeen sub-skills and recovery commands). Stable. The wedge.
 
 ### Planned modules (umbrella roadmap)
 
@@ -377,7 +377,7 @@ seo-survival-kit/                  # Repository / marketplace name
 │       │   └── plugin.json        # Plugin manifest (path matters — v0.2.0/v0.2.1 yanked for wrong path)
 │       ├── lib/
 │       │   └── safe.js            # Shared safety primitives
-│       └── skills/                # 17 skills/commands (1 orchestrator + 16 sub-skills/commands)
+│       └── skills/                # 18 skills/commands (1 orchestrator + 17 sub-skills/commands)
 ├── exports/                       # Platform-agnostic Markdown for Cursor / Custom GPT / Gemini / Aider / Codex
 ├── examples/                      # Sample PDF + screenshots only (synthetic data)
 ├── ARCHITECTURE.md                # This document

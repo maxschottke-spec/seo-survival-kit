@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Added
+
+- **New skill wrapper: `recovery-audit`** ([SKILL.md](./plugins/seo-rescue/skills/recovery-audit/SKILL.md)) — the existing `commands/recovery-audit.md` spec is now plugin-discoverable and user-invokable like the other five recovery commands. recovery-audit is the documented **writer** of `recovery-gate.json` (Settlement-Gate state) and of the `hypothesis_registry` that `recovery-plan` consumes. Routed in the orchestrator and README. Skill count: seventeen → eighteen.
+- `recovery-full` workflow now includes the audit step: diagnose → crawl → **audit** → plan → monitor (5 steps, shared run_id). The audit always runs and degrades gracefully when no change history exists.
+
+### Fixed
+
+- **Hypothesis Verification Gate first-run deadlock** — `recovery-plan` Step 8a hard-stopped on missing `hypothesis_id` even when no `recovery-audit` output existed yet (the normal state on a first run). The gate now degrades gracefully: without audit output the full plan is still generated, all actions are segregated to `prepare_now_execute_later` (roadmap-only), warning `hypothesis_gate_no_audit_output` is recorded, and the gate block carries `audit_output_available: false`. Hard stops only apply when a `hypothesis_registry` is present.
+- **Settlement-Gate pre-check** in `recovery-plan` now documents who writes `recovery-gate.json` (recovery-audit) and warns `gate_state_possibly_stale` when change history suggests an un-audited Major Batch.
+- **`post-core-update-recovery`**: the "AI Citations as leading confirmation" acceleration factor was downgraded to an explicitly-marked N=1 hypothesis — the 2026-06-03 LESSONS correction rescinded exactly this claim (the observed +22 % trend was a pre-update plateau erased by the May 2026 Core Update).
+
 ### Security
 
 - `lib/safe.js` — `acquireLock` back-off no longer shells out (`execSync('sleep …')` replaced with `Atomics.wait`), honoring the repo's own "never `execSync` a string" rule; portable and spawns no process.

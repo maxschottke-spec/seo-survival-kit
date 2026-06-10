@@ -2,7 +2,7 @@
 
 ## What this repository is
 
-seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **seventeen skills and commands (one orchestrator plus sixteen sub-skills and recovery commands)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit. Canonical skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
+seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **eighteen skills and commands (one orchestrator plus seventeen sub-skills and recovery commands)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit. Canonical skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 
 Positioning: **Recovery Operating System for Ecommerce/D2C**. Recovery-first, decision-first, profit-aware, risk-aware. The framework supports operators making recovery and growth decisions; execution belongs to the operator's team, agency, or contractors. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the canonical source of truth.
 
@@ -24,6 +24,7 @@ seo-survival-kit/
 │       ├── commands/                 # Recovery workflow command specifications
 │       │   ├── recovery-diagnose.md
 │       │   ├── recovery-crawl.md
+│       │   ├── recovery-audit.md
 │       │   ├── recovery-plan.md
 │       │   ├── recovery-monitor.md
 │       │   └── recovery-full.md
@@ -46,7 +47,7 @@ seo-survival-kit/
 │       │   ├── FALLBACKS.md
 │       │   └── TROUBLESHOOTING.md
 │       ├── test-fixtures/            # Minimal test data for offline testing
-│       └── skills/                   # 17 skills/commands (1 orchestrator + 16 sub-skills/commands)
+│       └── skills/                   # 18 skills/commands (1 orchestrator + 17 sub-skills/commands)
 │           ├── rescue/                       # Orchestrator + routing table
 │           ├── seo-audit-free/
 │           ├── post-core-update-recovery/
@@ -59,7 +60,7 @@ seo-survival-kit/
 │           ├── gsc-deep-dive/                # v0.4 addition: one-call GSC API snapshot
 │           ├── sistrix-monday-recovery-check/  # v0.5.2: CSV-first weekly recovery review
 │           ├── subscription-monetization-audit/ # v0.5.2: recurring-revenue lever audit
-│           └── recovery-{diagnose,crawl,plan,monitor,full}/  # v0.5.2: thin wrappers for the recovery-workflow commands
+│           └── recovery-{diagnose,crawl,audit,plan,monitor,full}/  # v0.5.2: thin wrappers for the recovery-workflow commands
 ├── exports/                          # Platform-agnostic Markdown copies (Cursor / Custom GPT / Gemini / Aider / Codex)
 ├── examples/                         # Sample PDF + screenshots (synthetic data)
 ├── ARCHITECTURE.md                   # Canonical source of truth (vision, positioning, modules, governance, privacy)
@@ -82,7 +83,7 @@ The plugin has two layers:
 
 2. **Script-backed skills** — `seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, and parts of `seo-audit-free`. Plain Node.js scripts that the user (or Claude on their behalf) invokes with `node script.js`. No `package.json`, so no install step, so no npm supply-chain attack surface.
 
-3. **Recovery workflow commands** — `recovery-diagnose`, `recovery-crawl`, `recovery-plan`, `recovery-monitor`, `recovery-full`. Hybrid: Markdown command specifications in `commands/` with thin SKILL.md wrappers in `skills/` for plugin discovery. Script-backed commands (`recovery-crawl`, `recovery-monitor`) have Node.js helpers in `scripts/`. All commands share domain normalization, atomic write safety, and NDJSON history via `lib/safe.js`.
+3. **Recovery workflow commands** — `recovery-diagnose`, `recovery-crawl`, `recovery-audit`, `recovery-plan`, `recovery-monitor`, `recovery-full`. Hybrid: Markdown command specifications in `commands/` with thin SKILL.md wrappers in `skills/` for plugin discovery. Script-backed commands (`recovery-crawl`, `recovery-monitor`) have Node.js helpers in `scripts/`. All commands share domain normalization, atomic write safety, and NDJSON history via `lib/safe.js`.
 
 ## Routing
 

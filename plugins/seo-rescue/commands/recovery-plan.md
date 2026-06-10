@@ -20,6 +20,8 @@ Jede geplante Aenderung muss als Change Plan mit Risikopunkten ausgegeben werden
 Vor jeder Planung muss geprueft werden:
 
 1. **Gibt es einen aktiven Settlement Gate?** — Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`. Falls Datei existiert und `settlement_gate_active = true`: weiter mit Schritt 2. Sonst: normaler Planungs-Ablauf.
+
+   **Writer dieser Datei ist `recovery-audit`** (siehe `commands/recovery-audit.md`, Settlement Gate Detection) — recovery-plan liest sie nur. Fehlt die Datei, gilt der Gate als `never_triggered`. Ausnahme: Wenn `change-history.ndjson` existiert und Eintraege mit `triggered_settlement_gate: true` ODER einen un-auditierten Major Batch (Schwellenwerte per `SEO_SETTLEMENT_GATE.md` section 3) enthaelt, zuerst `/seo-rescue:recovery-audit` ausfuehren, damit der Gate-State materialisiert wird — sonst Warnung `gate_state_possibly_stale` eintragen.
 2. **Wann war der letzte Major Batch?** — Aus `change-history.ndjson` letzten Eintrag mit `triggered_settlement_gate: true` lesen.
 3. **Gibt es Re-Evaluation-Daten?** — Mindestens 2 von: GSC-Pull nach `started_at`, SF-Crawl nach `started_at`, Live-HTTP-Checks, DataForSEO-Snapshot, Sistrix-Signal, Backlink-Audit.
 4. **Sind Unlock-Kriterien erfuellt?** — Per `SEO_SETTLEMENT_GATE.md` section 9: time, data, stability, decision.
@@ -199,6 +201,17 @@ Bewerte jede Massnahme mit Recovery-Risiko:
 
 Bevor eine Massnahme in den ausfuehrbaren Plan-Teil aufgenommen wird (`live_changes_allowed: true`), muss die zugrundeliegende Root-Cause-Hypothese den Status `verified` oder `fixed` haben, gemaess `references/HYPOTHESIS_VERIFICATION_GATE.md` und `schemas/hypothesis-verification.schema.json`.
 
+**Quelle des `hypothesis_registry`:** der Output von `recovery-audit` (`~/.cache/seo-rescue/{slug}/change-audit.json`).
+
+**Graceful Degradation (First-Run / kein Audit-Output):** Wenn `change-audit.json` nicht existiert oder kein `hypothesis_registry` enthaelt, ist das Gate NICHT erfuellbar — das ist kein Fehler, sondern der Normalfall beim ersten Lauf. Verhalten:
+
+- KEIN Hard Stop. Der Plan wird vollstaendig erzeugt.
+- ALLE Massnahmen werden in `prepare_now_execute_later` segregiert (`live_changes_allowed: false` fuer den gesamten Plan)
+- Warnung eintragen: `hypothesis_gate_no_audit_output — Plan ist Roadmap-only. Fuer live-fix-eligible Aktionen zuerst /seo-rescue:recovery-audit ausfuehren.`
+- Top-Level-Gate-Block bekommt `"audit_output_available": false`
+
+Die folgenden Hard-Stop-Regeln gelten nur, wenn ein `hypothesis_registry` aus recovery-audit vorliegt:
+
 Regelwerk:
 
 - Jede geplante Massnahme im Output-Feld `planned_changes[]` muss ein `hypothesis_id`-Feld haben, das auf einen Eintrag im `hypothesis_registry` der zugehoerigen `recovery-audit`-Output verweist
@@ -223,6 +236,7 @@ Top-Level-Output-Feld:
 
 ```json
 "hypothesis_verification_gate": {
+  "audit_output_available": true,
   "all_planned_changes_verified": true,
   "below_verified_count": 0,
   "scope_expansions_blocked": [],
@@ -303,6 +317,7 @@ Nach erfolgreichem Schreiben des Plans, gib folgende Informationen aus:
 | `befund.json` fehlt | Warnung, Plan ohne Diagnose-Kontext | `partial` |
 | `befund.json` status=`failed` | Warnung, behandle wie fehlend | `partial` |
 | `issues.json` fehlt | Warnung, Plan nur auf Basis der Diagnose | `partial` |
+| `change-audit.json` fehlt (kein recovery-audit-Lauf) | Warnung `hypothesis_gate_no_audit_output`, Plan Roadmap-only (alle Massnahmen `prepare_now_execute_later`) | `partial` |
 | Beide fehlen, kein Import | Fehler, Abbruch | `failed` |
 | `data_quality = "poor"` in Inputs | Warnung, keine aggressiven Empfehlungen | `partial` |
 | Lock nicht erwerbbar (Timeout 30s) | Fehler eintragen, Abbruch | `failed` |
