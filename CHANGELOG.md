@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+## [0.5.3] — 2026-06-10
+
 ### Added
 
 - **`CORE_UPDATES.md` brought current** — added the May 2026 Core Update (2026-05-21 → 2026-06-02), March 2026 Spam, February 2026 Discover, December 2025 Core, August 2025 Spam, and June 2025 Core updates with rollout dates verified 2026-06-03 (Google Search Status Dashboard + Search Engine Land, 16-month historical scan). New `Type` and `Verified` columns; unverified pre-v0.5.2 seed entries are capped at `medium` correlation. New "Update types and correlation" section covers spam/discover semantics and the multi-update-sequence baseline-erosion caveat.
@@ -321,7 +323,14 @@ Initial public release.
 
 - Repository was previously named `seo-rescue-skills` and was renamed to `seo-survival-kit` on 2026-05-22.
 
-[Unreleased]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.5.2...v0.5.3
+[0.5.2]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.5.0...v0.5.2
+[0.5.0]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.4.1...v0.5.0
+[0.4.1]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.3.3...v0.4.0
+[0.3.3]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.3.2...v0.3.3
+[0.3.2]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.2.1...v0.2.2
