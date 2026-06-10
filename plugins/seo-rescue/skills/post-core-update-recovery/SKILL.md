@@ -134,7 +134,7 @@ Recovery CAN be significantly faster than the 3–4 month baseline when these co
 
 3. **Do-Not-Touch discipline maintained.** Sites that panic-edit recovering URLs reset their recovery timeline. Strict protection of winners lets the positive signal accumulate undisturbed.
 
-4. **AI Citations as leading confirmation.** Rising AI Overview / ChatGPT / Perplexity mentions while classical VI is still flat confirm that the authority work is being recognized. This is a confidence signal to continue, not a reason to change course.
+4. **AI Citations as a possible early signal (hypothesis, N=1, currently unproven).** Rising AI Overview / ChatGPT / Perplexity mentions while classical VI is still flat MAY indicate that authority work is being recognized. ⚠ This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see LESSONS.md, 2026-06-03 correction). Treat rising AI citations as worth logging, not as confirmation — do not change course or report recovery based on this signal alone.
 
 5. **Conversion rate improvement validates traffic quality.** If CR rises alongside or shortly after traffic increases, the recovery is bringing the RIGHT users. This rules out the "vanity recovery" scenario where positions improve on irrelevant queries.
 
