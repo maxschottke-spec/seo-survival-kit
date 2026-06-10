@@ -78,7 +78,7 @@ Three layers. New skills slot into the diagnostic layer; the decision and workfl
 
 **Workflow layer.** Recurring rhythms the operator follows. Today: weekly SISTRIX Monday Recovery Check, weekly PSI baseline, weekly AI citations tracking. Detail for the recovery rhythm in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) and [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md).
 
-Skills do not implement the decision layer themselves. They feed it. The user invokes a diagnostic skill; the decision layer evaluates the output against the active rule set and confidence model; the workflow layer wraps the result into a phased recommendation.
+Skills do not implement the decision layer themselves. They feed it. The user invokes a diagnostic skill; the decision layer evaluates the output against the active rule set and confidence model; the workflow layer wraps the result into a phased recommendation. The phasing follows the five-phase recovery sequencing (protect winners first, stabilize, then progressively more invasive work) — authoritative version: [RECOVERY_SYSTEM.md §11](./RECOVERY_SYSTEM.md#11-recovery-sequencing-five-phases). This document does not restate the phases.
 
 ---
 
@@ -114,8 +114,16 @@ Skills that explicitly do not belong in this umbrella: content writing, brand vo
 | `ai-search-rescue` | stable | domain + brand vars | Markdown framework | Low | None |
 | `ai-citations-tracker` | beta | brand vars + OpenAI key | NDJSON history | Low | Public mention |
 | `gsc-deep-dive` | beta | domain + GSC SA path | JSON snapshot | Medium | High (per-property) |
+| `sistrix-monday-recovery-check` | stable | SISTRIX CSV exports (current + previous week) | 17-section Markdown report | Low | User keyword data |
+| `subscription-monetization-audit` | beta | domain or Stripe/Chargebee/Recurly CSV | Markdown 5-lever playbook | Medium | High (financial) |
+| `recovery-diagnose` | beta | domain (+ provider creds optional) | befund.json | Low | User context |
+| `recovery-crawl` | beta | domain | issues.json | Low | Public crawl data |
+| `recovery-audit` | beta | domain + `--days` | change-audit.json + recovery-gate.json | Low | Change history |
+| `recovery-plan` | beta | cached befund/issues/audit | action-plan.json (proposed, human approval) | Medium | User context |
+| `recovery-monitor` | beta | domain + cached artifacts | history.ndjson + score | Low | User context |
+| `recovery-full` | beta | domain | all of the above, shared run_id | Medium | User context |
 
-Planned skills (`sistrix-monday-recovery-check`, all v0.6+ revenue/paid/tracking/CRO/Fiverr skills) inherit the schema; entries land when the skills do.
+Planned skills (the v0.6+ revenue/paid/tracking/CRO/Fiverr skills) inherit the schema; entries land when the skills do.
 
 ### Status definitions
 
@@ -332,12 +340,7 @@ The framework's recommendations are calibrated to the best available evidence. K
 
 ### Source quality (four levels)
 
-- **Level A**: official platform documentation (Google Search Central, Quality Rater Guidelines, PSI methodology, schema.org, DataForSEO docs, OpenAI/Perplexity API docs), first-party data from real projects, verified exports.
-- **Level B**: strong agency case studies with disclosed methodology, conference talks with evidence, reputable industry reports.
-- **Level C**: practitioner blog posts without before/after data, podcast commentary, single-case lessons from private experience not yet confirmed across multiple cases.
-- **Level D**: unverified claims, forum comments, competitor marketing, weak screenshots. Generally excluded from the source registry.
-
-Recommendations backed by A can be stated directly with high confidence. B-backed are stated as patterns. C-backed are stated as hypotheses with explicit medium confidence. D-backed are not used.
+Knowledge sources are weighted on a four-level A/B/C/D scale — from official platform documentation and first-party data (Level A, stated with high confidence) down to unverified claims (Level D, not used) — with the authoritative definitions in [DECISION_ENGINE.md §3 (Evidence weighting)](./DECISION_ENGINE.md#3-evidence-weighting).
 
 ### Evidence and data combined
 
@@ -495,7 +498,9 @@ These are out of scope for the framework. Knowing what is not built is as import
 - Automated buyer messaging
 - Guaranteed rankings or guaranteed revenue
 - Scraping against platform terms of service
+- Private client data in public repository files (handling rules in section 5)
 - Hidden personalization
+- Silent updates (the planned updater is review-first; see section 10)
 - Telemetry endpoints
 - Phone-home behavior
 
@@ -518,7 +523,7 @@ These are out of scope for the framework. Knowing what is not built is as import
 
 - Content writing, brand voice, ad creative, email sequences, copywriting (handed off per section 9)
 - Schema markup generation beyond what `seo-outreach-report` already checks (use `claude-seo:seo-schema`)
-- Comprehensive technical audit of hundreds of URLs (use `claude-seo:seo-audit`)
+- Comprehensive technical audit of hundreds of URLs (use `claude-seo:seo-audit`) — this kit complements comprehensive audit suites like `claude-seo`, it does not replace them
 - Tier-1 editorial coverage and brand-authority backlinks. Editorial relationships require sustained beat-coverage work over multiple years. The skill set can identify which publications a brand needs to be in and draft pitch briefs; it cannot make an editor open a stranger's email. Pair this kit with a digital-PR partner or in-house PR capacity when editorial authority is the bottleneck.
 
 ---

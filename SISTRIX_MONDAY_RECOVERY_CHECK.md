@@ -156,25 +156,9 @@ Classify the recovery into one of six stages. Each stage represents a milestone 
 
 The framework's operational finding is that AI Overview citations and ChatGPT/Perplexity mentions often move 2-6 weeks before classical SISTRIX VI does. The recovery stage classification reflects this: Stage 4 commonly arrives before Stage 5, and the operator should not panic when Stage 5 lags.
 
-#### Per-cluster stage classification
+#### Per-cluster stage classification (moved to Appendix B)
 
-Recovery does not progress uniformly across all keyword clusters. A site can be Stage 5 on its brand/authority cluster while Stage 1 on a competitive commercial cluster. The Monday check should output a stage classification **per keyword cluster**, not just a single global stage.
-
-Cluster identification:
-- Group keywords by the ranking URL's topic area (e.g., "brand terms", "authority guides", "product variants", "product features", "long-tail terms")
-- If URL-type classification is available, group by URL type (category, product, blog, brand)
-- Assign each cluster its own stage independently
-
-Output format per cluster:
-
-| Cluster | Stage | Key signal | Top keyword | Position | Trend |
-|---|---|---|---|---|---|
-| Brand terms | Stage 5 | Revenue follows | brand-anchor query | Pos 2 | Stable |
-| Authority guides | Stage 4 | Pos 1–5 on multiple guide queries | informational anchor query | Pos 1 | Rising |
-| Product variants | Stage 2 | Entering Top 20 | variant-specifier query | Pos 19 | New |
-| Long-tail terms | Stage 1 | Pos 40–90 test positions | various | Pos 40–90 | Volatile |
-
-The global stage classification remains as the minimum stage across commercially important clusters, or the weighted average if the operator prefers. The per-cluster view prevents the misleading conclusion that "recovery is at Stage X" when different parts of the site are at very different stages.
+See Appendix B — Per-cluster stage classification (cluster identification, per-cluster output table, global-stage derivation).
 
 ### 7. Recovery Signal Score
 
@@ -249,26 +233,9 @@ Interpretation patterns:
 - GSC impressions rise, clicks do not: rankings may still be outside high-click positions, snippets may be weak, SERP features may compress CTR.
 - GSC clicks rise, SISTRIX index flat: business signal may be better than the visibility index suggests. Trust the click data for revenue impact; trust the index for competitive positioning.
 
-### 12. Conversion rate validation layer
+### 12. Conversion rate validation layer (moved to Appendix A)
 
-If conversion rate (CR) or revenue data is available alongside the ranking data, the Monday check should include a CR validation that answers: is the recovery bringing the right traffic?
-
-#### Interpretation matrix
-
-| VI trend | CR trend | Interpretation |
-|---|---|---|
-| Rising | Rising | Genuine recovery. Rankings are attracting qualified users who convert. Strongest validation signal. |
-| Rising | Flat | Recovery traffic is reaching the site but not converting yet. Possible causes: landing page issues, pricing mismatch, product availability problems, wrong URL ranking for the intent. Investigate page experience on recovering URLs. |
-| Rising | Falling | Warning signal. Traffic is increasing but conversion quality is declining. Possible causes: recovery on informational rather than transactional queries, cannibalization sending users to wrong pages, or a UX regression coinciding with the recovery. Do not celebrate the VI improvement until CR stabilizes. |
-| Flat | Rising | Silent recovery. Rankings may not be dramatically improving, but the existing traffic is converting better — possibly due to technical fixes (page speed, checkout flow) or trust signal additions (reviews, schema). Track whether this CR gain holds as traffic grows. |
-
-#### CR baseline
-
-The operator should establish a CR baseline at the start of recovery work. The Monday check compares current-week CR against that baseline. A material CR improvement (>20 % relative) during recovery is a positive validation signal independent of VI movement.
-
-#### Stock-out interaction
-
-If a recovering product page has out-of-stock products (see decision rule `r-stockout-mutes-recovery` in [DECISION_ENGINE.md](./DECISION_ENGINE.md)), the CR for that URL should be excluded from the aggregate CR calculation or flagged separately. OOS pages will show zero conversions regardless of traffic quality, skewing the CR validation downward.
+See Appendix A — Conversion-rate validation layer (VI-trend × CR-trend interpretation matrix, CR baseline, stock-out interaction).
 
 ### 13. Output contract
 
@@ -335,3 +302,44 @@ It does not recommend rewriting winning content. The "What Not To Touch" section
 It does not require API keys.
 
 It does not send any data outside the user's machine.
+
+## Appendix A — Conversion-rate validation layer
+
+Referenced from §12 in the core analysis. If conversion rate (CR) or revenue data is available alongside the ranking data, the Monday check should include a CR validation that answers: is the recovery bringing the right traffic?
+
+### Interpretation matrix
+
+| VI trend | CR trend | Interpretation |
+|---|---|---|
+| Rising | Rising | Genuine recovery. Rankings are attracting qualified users who convert. Strongest validation signal. |
+| Rising | Flat | Recovery traffic is reaching the site but not converting yet. Possible causes: landing page issues, pricing mismatch, product availability problems, wrong URL ranking for the intent. Investigate page experience on recovering URLs. |
+| Rising | Falling | Warning signal. Traffic is increasing but conversion quality is declining. Possible causes: recovery on informational rather than transactional queries, cannibalization sending users to wrong pages, or a UX regression coinciding with the recovery. Do not celebrate the VI improvement until CR stabilizes. |
+| Flat | Rising | Silent recovery. Rankings may not be dramatically improving, but the existing traffic is converting better — possibly due to technical fixes (page speed, checkout flow) or trust signal additions (reviews, schema). Track whether this CR gain holds as traffic grows. |
+
+### CR baseline
+
+The operator should establish a CR baseline at the start of recovery work. The Monday check compares current-week CR against that baseline. A material CR improvement (>20 % relative) during recovery is a positive validation signal independent of VI movement.
+
+### Stock-out interaction
+
+If a recovering product page has out-of-stock products (see decision rule `r-stockout-mutes-recovery` in [DECISION_ENGINE.md](./DECISION_ENGINE.md)), the CR for that URL should be excluded from the aggregate CR calculation or flagged separately. OOS pages will show zero conversions regardless of traffic quality, skewing the CR validation downward.
+
+## Appendix B — Per-cluster stage classification
+
+Referenced from §6 in the core analysis. Recovery does not progress uniformly across all keyword clusters. A site can be Stage 5 on its brand/authority cluster while Stage 1 on a competitive commercial cluster. The Monday check should output a stage classification **per keyword cluster**, not just a single global stage.
+
+Cluster identification:
+- Group keywords by the ranking URL's topic area (e.g., "brand terms", "authority guides", "product variants", "product features", "long-tail terms")
+- If URL-type classification is available, group by URL type (category, product, blog, brand)
+- Assign each cluster its own stage independently
+
+Output format per cluster:
+
+| Cluster | Stage | Key signal | Top keyword | Position | Trend |
+|---|---|---|---|---|---|
+| Brand terms | Stage 5 | Revenue follows | brand-anchor query | Pos 2 | Stable |
+| Authority guides | Stage 4 | Pos 1–5 on multiple guide queries | informational anchor query | Pos 1 | Rising |
+| Product variants | Stage 2 | Entering Top 20 | variant-specifier query | Pos 19 | New |
+| Long-tail terms | Stage 1 | Pos 40–90 test positions | various | Pos 40–90 | Volatile |
+
+The global stage classification remains as the minimum stage across commercially important clusters, or the weighted average if the operator prefers. The per-cluster view prevents the misleading conclusion that "recovery is at Stage X" when different parts of the site are at very different stages.
