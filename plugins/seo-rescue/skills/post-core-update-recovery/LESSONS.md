@@ -91,8 +91,51 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 
 **Quelle:** Pilot-Domain Sistrix-Toolbox-UI 2026-05-22 (Screenshot, anonymisiert).
 
+**⚠ KORREKTUR 2026-06-03 zum 22.05.-Eintrag:** Der „+22 % UI-Trend"-Befund vom 22.05. war NICHT echte Recovery sondern Pre-Mai-Update-Plateau. Mai 2026 Core Update (21.05.-02.06.) hat die Pilot-Domain mit −47,7 % Klicks getroffen. Die „Recovery früher als Framework-Vorhersage"-Hypothese ist NICHT haltbar. AI-Citations-Hypothese bleibt offen. Siehe Eintrag 2026-06-03 unten für korrigierte Lese und Multi-Update-Sequenz-Befund.
+
+---
+
+## 2026-06-03 — Multi-Update-Sequence + Mai 2026 Core Update — Mid-size DE D2C Mattress
+
+**Kontext:** Historischer GSC-Tiefenscan (16-Monate-Voll-Pull) auf der Pilot-Domain aus den vorherigen Einträgen. Ergebnis: was als „1 Update + Recovery" diagnostiziert war, ist tatsächlich **5 Updates in 14 Monaten** plus 1 Major Gain.
+
+**Befund (alle Daten 28d-Pre vs Post normalisiert):**
+
+| Update | Δ Klicks | Verdict |
+|---|---:|---|
+| Juni 2025 Core Update | −1,1 % | neutral |
+| August 2025 Spam Update | −0,3 % Klicks, −18,8 % Impr. | Frühwarnung, ignoriert |
+| Dezember 2025 Core Update | **+20,6 %** | **major_gain** |
+| Februar 2026 Discover Update | −21,8 % | moderate_hit (in Originaldiagnose übersehen) |
+| März 2026 Spam Update | −32,2 % | major_hit |
+| März 2026 Core Update | −36,3 % | major_hit |
+| Mai 2026 Core Update | −47,7 % | major_hit (frisch) |
+
+**Pre-Hit-Baseline-Korrektur:** Original-Diagnose nutzte „letztes stabiles Plateau vor März-Hit" als Baseline (~1.077 Klicks/Woche im Februar 2026). Tiefenscan zeigt: das Februar-Plateau war bereits eroded — echter Pre-Hit war Sommer/Herbst 2025 (1.150-1.300 Klicks/Woche). Recovery-Stand wurde dadurch zu optimistisch berichtet (~62 % vom Pre-Hit statt tatsächlich ~37-40 %).
+
+**Fünf Framework-Lessons (N=1, candidate-stage):**
+
+1. **Pre-Hit-Baseline-Selection:** Framework sollte echten historischen Peak prüfen, nicht „letzte stabile Phase vor Hit". Bei Multi-Update-Sequenzen ist das letzte Plateau oft schon erodet.
+2. **Cumulative-Decline-Detection (Quiet Death):** Pilot-Domain hat 11 Queries die kontinuierlich über 6-60 Wochen sinken, OHNE Update-Korrelation. Brand-Query −80 % über 59 Wochen, generic-money-Queries ähnlich. Diese „quiet deaths" sind oft SERP-Feature-Absorption (AIO) oder Brand-Erosion — eigene Diagnose-Schicht nötig.
+3. **Phoenix-Query-Detection (selten):** Nur 2 von 14.000+ Queries kamen nach Tod zurück. Realitäts-Anker: einmal verlorene Rankings kehren selten zurück. Strategy = neue Cluster aufbauen statt verlorene reaktivieren.
+4. **Multi-Update-Sequence Stage Modeling:** Stage-Modell muss erlauben Stage 3 → Stage 1 (Re-Entry) bei neuem Hit. Aktuell linear modelliert. Plus: „Active update window" als Stage-Gate-Parameter („no progression during rollout").
+5. **Heterogene Page-Trajectory:** Site-Level −37-40 % verbirgt: einzelne Pages ranging von −90 % bis +621 %. Cluster-Analyse nötig (Format-Match-Slug Winner vs Broad-Adjective Loser).
+
+**Konsequenz für Pilot-Domain:**
+- Stage zurück auf 1 (Acute Damage) vom frischen Mai-Update
+- Settlement-Phase mindestens 28 Tage (echte Post-Daten erst Ende Juni)
+- Recovery-Operations (Schema-Fix, Canonical-Fix) konnten Update-Wirkung NICHT abfedern — notwendig aber nicht hinreichend
+- Editorial-Authority-Outreach als Mittelfrist-Hebel jetzt höhere Priorität (Dezember 2025 Gain zeigt: Authority wird belohnt)
+
+**Konsequenz für Framework:**
+- Diese 5 Lessons sind N=1 Stage (candidates). Move zu validated nach N=2 cross-case Confirmation
+- Implementation-Plan: siehe `private/cases/case-001/patterns/2026-06-03-multi-update-sequence-lessons.md` (case-internal)
+- Roadmap-Relevanz: Lesson 1, 2, 4 sind v0.6/v0.7 Material. Lesson 3, 5 sind kleinere Erweiterungen.
+
+**Quelle:** GSC-Tiefenscan via `searchAnalytics.query` mit 16-Monate-Range, Aggregation per Tag/Woche, Update-Daten via Search Engine Land Web-Verifikation.
+
 ---
 
 ## Konsolidierte Lessons (aus 3+ Einträgen ins Hauptskill übernommen)
 
-_(noch leer)_
+_(noch leer — die 5 Framework-Lessons aus dem 2026-06-03-Eintrag sind N=1 candidates und warten auf cross-case Bestätigung)_

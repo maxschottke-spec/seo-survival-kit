@@ -1,8 +1,8 @@
 # SISTRIX Monday Recovery Check
 
-CSV-first workflow for recurring Monday-morning recovery review during an active SEO recovery. Planned skill for v0.5.1. The skill specification is here; the runnable implementation ships in v0.5.1 or v0.6 depending on review feedback.
+CSV-first workflow for recurring Monday-morning recovery review during an active SEO recovery. Shipped as the `sistrix-monday-recovery-check` skill in v0.5.2.
 
-Companion doc: [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) carries the operational detail for Recovery Signal Score (section 7), Winner/Loser Neutralization (section 5), Money Keyword Protection (section 4), URL Recovery Analysis (section 6), and the five-phase recovery sequencing (section 8). [DECISION_ENGINE.md](./DECISION_ENGINE.md) carries the decision rules that fire during a Monday check.
+Companion doc: [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) carries the operational detail for Recovery Signal Score (section 10), Winner/Loser Neutralization (section 8), Money Keyword Protection (section 7), URL Recovery Analysis (section 9), and the five-phase recovery sequencing (section 11). [DECISION_ENGINE.md](./DECISION_ENGINE.md) carries the decision rules that fire during a Monday check.
 
 ## Why this exists
 

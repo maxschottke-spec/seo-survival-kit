@@ -93,9 +93,10 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 | `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
 | `/seo-rescue:recovery-diagnose <domain>` | Diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO + GSC CSV) | ~$0.05–$0.50 |
 | `/seo-rescue:recovery-crawl <domain>` | Crawl + severity-classified issues (Screaming Frog or local minimal-crawler fallback) | free |
+| `/seo-rescue:recovery-audit <domain> [--days 14]` | Read-only change audit: Settlement-Gate-State + hypothesis registry | free |
 | `/seo-rescue:recovery-plan <domain>` | Prioritized 30/60/90-day plan with Do-Not-Touch + human approval gate | free |
 | `/seo-rescue:recovery-monitor <domain>` | Weekly tracking with deterministic 0-100 recovery score | free |
-| `/seo-rescue:recovery-full <domain>` | Full sequence: diagnose → crawl → plan → monitor | ~$0.05–$0.50 |
+| `/seo-rescue:recovery-full <domain>` | Full sequence: diagnose → crawl → audit → plan → monitor | ~$0.05–$0.50 |
 | `/seo-rescue:sistrix-monday-recovery-check <current.csv> <previous.csv> [domain?]` | CSV-first weekly review, 17-section structured report | free |
 
 **Diagnostic and analysis**

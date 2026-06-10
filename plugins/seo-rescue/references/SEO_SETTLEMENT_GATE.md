@@ -175,6 +175,8 @@ Override is recorded in `change-history.ndjson` with `settlement_gate_override: 
 
 Override is never granted by phrases like "los", "mach", "passt", "alles" — those remain Hard Stop triggers per `SAFE_LIVE_CHANGE_RULES.md`.
 
+**Enforcement (v1.3.0):** the 7.C requirements are machine-checked twice: `schemas/change-budget.schema.json` (if/then on `override_type`) rejects plans missing `override_reason`, `approval_validation`, `post_change_checks`, per-change `rollback_method`/`pre_change_state_check` or confidence below medium; `lib/safe.js validateSettlementOverride()` returns the verdict with the explicit list of missing requirements (deny-by-default). For `technical_emergency` both layers require `pre_change_state_check.method` of `live_http` or `live_http_and_api` — API state alone is rejected.
+
 ---
 
 ## 8. Recovery Gate Status object

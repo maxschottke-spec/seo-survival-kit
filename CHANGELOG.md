@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Added
+
+- **New skill wrapper: `recovery-audit`** ([SKILL.md](./plugins/seo-rescue/skills/recovery-audit/SKILL.md)) — the existing `commands/recovery-audit.md` spec is now plugin-discoverable and user-invokable like the other five recovery commands. recovery-audit is the documented **writer** of `recovery-gate.json` (Settlement-Gate state) and of the `hypothesis_registry` that `recovery-plan` consumes. Routed in the orchestrator and README. Skill count: seventeen → eighteen.
+- `recovery-full` workflow now includes the audit step: diagnose → crawl → **audit** → plan → monitor (5 steps, shared run_id). The audit always runs and degrades gracefully when no change history exists.
+
+### Changed
+
+- **`change-budget.schema.json` v1.2.0 → v1.3.0** — three rule sets that were documentation-only are now schema-enforced via `if/then`: (1) per-change-type pre-check presence (`redirect` requires `seo_url_precheck` with `collision_detected`; `category_status`/`product_status` require `dreiscseo_precheck` with `would_create_301_to_404`; `cms_slot` requires `snapshot_paths.before_path`), (2) Settlement-Gate override requirements per `SEO_SETTLEMENT_GATE.md` section 7 (`explicit_emergency_approval` requires approval validation, post-change checks, per-change rollback method + pre-change state check + confidence ≥ medium; `technical_emergency` requires live-HTTP verification, API state alone is rejected), (3) Reserve-bleibt-Reserve during an active gate (`reserve_bleibt_reserve_acknowledged: true`, `unused_budget_handling: forfeit`). New per-change fields: `pre_change_state_check`, `hypothesis_id`, `hypothesis_status_snapshot`, `fix_scope_match`, `verified_by_source_tier`; new top-level `hypothesis_verification_gate` block.
+- **`lib/safe.js`: two new governance validators** — `checkHypothesisScopeMatch()` (Hypothesis Verification Gate incl. fix-scope-expansion detection and graceful first-run degradation) and `validateSettlementOverride()` (deny-by-default section-7 override verdict with explicit missing-requirements list; catches broad-trigger approval text even when `is_valid` was forged). 19 new tests in `lib-safe-primitives.test.js` (55 total).
+
+### Fixed
+
+- **Hypothesis Verification Gate first-run deadlock** — `recovery-plan` Step 8a hard-stopped on missing `hypothesis_id` even when no `recovery-audit` output existed yet (the normal state on a first run). The gate now degrades gracefully: without audit output the full plan is still generated, all actions are segregated to `prepare_now_execute_later` (roadmap-only), warning `hypothesis_gate_no_audit_output` is recorded, and the gate block carries `audit_output_available: false`. Hard stops only apply when a `hypothesis_registry` is present.
+- **Settlement-Gate pre-check** in `recovery-plan` now documents who writes `recovery-gate.json` (recovery-audit) and warns `gate_state_possibly_stale` when change history suggests an un-audited Major Batch.
+- **`post-core-update-recovery`**: the "AI Citations as leading confirmation" acceleration factor was downgraded to an explicitly-marked N=1 hypothesis — the 2026-06-03 LESSONS correction rescinded exactly this claim (the observed +22 % trend was a pre-update plateau erased by the May 2026 Core Update).
+
 ### Security
 
 - `lib/safe.js` — `acquireLock` back-off no longer shells out (`execSync('sleep …')` replaced with `Atomics.wait`), honoring the repo's own "never `execSync` a string" rule; portable and spawns no process.
@@ -15,6 +31,10 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ### Changed
 
+- **Version/consistency sweep (post-review):** `rescue` SKILL.md installable-version claim v0.5.0 → v0.5.2; RECOVERY_SYSTEM.md status note rewritten for v0.5.2 reality (sistrix-monday-recovery-check shipped, recovery commands partially implement the methodology); SISTRIX_MONDAY_RECOVERY_CHECK.md "planned v0.5.1" → shipped, companion-doc section numbers corrected (Recovery Signal Score §10, Winner/Loser §8, Money-KW §7, URL Recovery §9, sequencing §11).
+- **Score disambiguation:** the weekly CSV-first **Recovery Signal Score** (RECOVERY_SYSTEM.md §10 / sistrix-monday-recovery-check) and the automated 5-component **Recovery Score** (recovery-monitor) are now explicitly documented as two distinct, non-comparable metrics — both 0-100, never to be mixed in one time series.
+- **Batch-limit clarification:** structural changes are 3 URLs per **calendar day** (counted across sessions via change-history.ndjson), 4-5 only with an explicit batch plan, 5/day is the absolute ceiling; Governor Hard Stop rule 3 and SAFE_LIVE_CHANGE_RULES table now state the same rule.
+- **R1-R5 disambiguation:** `recovery_stage_estimate` (diagnose, VI-trend-based diagnostic stage) vs `current_phase` (plan, operational work phase) documented as intentionally distinct signals with divergence rules (phase ≤ stage+1, divergence must be warned and explained, phase is recomputed every run).
 - Documentation consistency sweep: reconciled the contradictory skill counts (was "eleven"/"ten"/"sixteen" across CLAUDE.md, ARCHITECTURE.md, and the orchestrator) to the canonical **seventeen skills/commands (one orchestrator + sixteen sub-skills and recovery commands)**; refreshed install pins and status lines to v0.5.2; aligned every per-skill `version:` frontmatter to 0.5.2.
 
 ## [0.5.2] — 2026-06-02

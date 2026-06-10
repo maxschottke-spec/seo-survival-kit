@@ -35,9 +35,10 @@ This is the entry point for the seo-rescue plugin. It routes to ten specialized 
 | `/seo-rescue:rescue monetization [domain \| --csv]` | Recurring-revenue lever audit (alias for `/seo-rescue:subscription-monetization-audit`) |
 | `/seo-rescue:recovery-diagnose <domain>` | Core Update diagnosis via Sistrix + DataForSEO (with CSV fallbacks) |
 | `/seo-rescue:recovery-crawl <domain>` | Screaming Frog crawl + issue classification |
+| `/seo-rescue:recovery-audit <domain> [--days 14]` | Read-only change audit: Settlement-Gate-State + hypothesis registry |
 | `/seo-rescue:recovery-plan <domain>` | Prioritized recovery action plan with human approval gate |
 | `/seo-rescue:recovery-monitor <domain>` | Weekly recovery tracking + score |
-| `/seo-rescue:recovery-full <domain>` | Full workflow: diagnose → crawl → plan → monitor |
+| `/seo-rescue:recovery-full <domain>` | Full workflow: diagnose → crawl → audit → plan → monitor |
 | `/seo-rescue:subscription-monetization-audit [domain \| --csv]` | 5-lever recurring-revenue playbook, optional Stripe/Chargebee/Recurly CSV import |
 | `/seo-rescue:rescue help` | Show this routing table |
 
@@ -110,7 +111,7 @@ CSV-first weekly recovery review during an active Core-Update recovery. No SISTR
 - **Plugin name:** `seo-rescue`
 - **Marketplace:** `seo-survival-kit`
 - **Repo:** https://github.com/maxschottke-spec/seo-survival-kit
-- **Latest installable version:** v0.5.0
+- **Latest installable version:** v0.5.2
 - **License:** MIT
 - **Dependencies:** zero npm packages
 - **Validation:** `claude plugin validate plugins/seo-rescue` passes

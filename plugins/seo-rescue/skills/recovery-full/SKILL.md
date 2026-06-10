@@ -1,6 +1,6 @@
 ---
 name: recovery-full
-description: 'Full recovery workflow orchestrator. Chains recovery-diagnose, recovery-crawl, recovery-plan, and recovery-monitor in sequence. One command for complete domain recovery analysis from diagnosis to monitoring setup. Gracefully degrades if individual steps fail.'
+description: 'Full recovery workflow orchestrator. Chains recovery-diagnose, recovery-crawl, recovery-audit, recovery-plan, and recovery-monitor in sequence. One command for complete domain recovery analysis from diagnosis to monitoring setup. Gracefully degrades if individual steps fail.'
 user-invokable: true
 argument-hint: '<domain>'
 allowed-tools: [Read, Write, Bash(node:*), Grep, Glob]

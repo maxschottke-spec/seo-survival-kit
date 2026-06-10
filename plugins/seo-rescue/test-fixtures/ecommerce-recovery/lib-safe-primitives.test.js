@@ -344,6 +344,172 @@ test('exports BROAD_APPROVAL_TRIGGERS array', () => {
 });
 
 // ---------------------------------------------------------------------------
+// checkHypothesisScopeMatch
+// ---------------------------------------------------------------------------
+section('checkHypothesisScopeMatch — Hypothesis Verification Gate');
+
+const REGISTRY = [
+  { hypothesis_id: 'hvg-canonical', hypothesis_status: 'verified', fix_scope: { affected_urls: ['/produkt-1/', '/produkt-2/'] } },
+  { hypothesis_id: 'hvg-redirects', hypothesis_status: 'likely', fix_scope: { affected_urls: ['/kategorie-a/'] } },
+  { hypothesis_id: 'hvg-noscope', hypothesis_status: 'fixed' },
+];
+
+test('no audit output: degrades to prepare_now_execute_later, no hard stop', () => {
+  const r = safe.checkHypothesisScopeMatch([{ id: 'act-001', target: '/produkt-1/', hypothesis_id: 'hvg-canonical' }], null);
+  assert.strictEqual(r.audit_output_available, false);
+  assert.strictEqual(r.hard_stops.length, 0);
+  assert.strictEqual(r.per_change[0].disposition, 'prepare_now_execute_later');
+  assert.strictEqual(r.per_change[0].stop_reason, 'hypothesis_gate_no_audit_output');
+});
+
+test('verified hypothesis + target in scope: allowed_now', () => {
+  const r = safe.checkHypothesisScopeMatch([{ id: 'act-001', target: '/produkt-1/', hypothesis_id: 'hvg-canonical' }], REGISTRY);
+  assert.strictEqual(r.per_change[0].disposition, 'allowed_now');
+  assert.strictEqual(r.all_planned_changes_verified, true);
+});
+
+test('verified hypothesis + target outside scope: fix_scope_expansion', () => {
+  const r = safe.checkHypothesisScopeMatch([{ id: 'act-002', target: '/produkt-99/', hypothesis_id: 'hvg-canonical' }], REGISTRY);
+  assert.strictEqual(r.per_change[0].disposition, 'prepare_now_execute_later');
+  assert.strictEqual(r.per_change[0].stop_reason, 'fix_scope_expansion');
+  assert.deepStrictEqual(r.scope_expansions_blocked, ['act-002']);
+});
+
+test('scope match normalizes scheme and slashes', () => {
+  const r = safe.checkHypothesisScopeMatch([{ id: 'act-003', target: 'https://example.test/produkt-2', hypothesis_id: 'hvg-canonical' }], [
+    { hypothesis_id: 'hvg-canonical', hypothesis_status: 'verified', fix_scope: { affected_urls: ['example.test/produkt-2/'] } },
+  ]);
+  assert.strictEqual(r.per_change[0].disposition, 'allowed_now');
+});
+
+test('likely hypothesis: prepare_now_execute_later, counted below verified', () => {
+  const r = safe.checkHypothesisScopeMatch([{ id: 'act-004', target: '/kategorie-a/', hypothesis_id: 'hvg-redirects' }], REGISTRY);
+  assert.strictEqual(r.per_change[0].disposition, 'prepare_now_execute_later');
+  assert.strictEqual(r.per_change[0].stop_reason, 'hypothesis_below_verified');
+  assert.strictEqual(r.below_verified_count, 1);
+});
+
+test('missing hypothesis_id: hard stop', () => {
+  const r = safe.checkHypothesisScopeMatch([{ id: 'act-005', target: '/x/' }], REGISTRY);
+  assert.strictEqual(r.per_change[0].disposition, 'hard_stop');
+  assert.strictEqual(r.per_change[0].stop_reason, 'hypothesis_id_missing');
+  assert.deepStrictEqual(r.hard_stops, ['act-005']);
+});
+
+test('hypothesis_id not in registry: hard stop', () => {
+  const r = safe.checkHypothesisScopeMatch([{ id: 'act-006', target: '/x/', hypothesis_id: 'hvg-ghost' }], REGISTRY);
+  assert.strictEqual(r.per_change[0].disposition, 'hard_stop');
+  assert.strictEqual(r.per_change[0].stop_reason, 'hypothesis_not_in_registry');
+});
+
+test('fixed hypothesis without fix_scope: allowed_now (no scope to violate)', () => {
+  const r = safe.checkHypothesisScopeMatch([{ id: 'act-007', target: '/anything/', hypothesis_id: 'hvg-noscope' }], REGISTRY);
+  assert.strictEqual(r.per_change[0].disposition, 'allowed_now');
+});
+
+test('throws on non-array plannedChanges', () => {
+  assert.throws(() => safe.checkHypothesisScopeMatch('nope', REGISTRY));
+});
+
+// ---------------------------------------------------------------------------
+// validateSettlementOverride
+// ---------------------------------------------------------------------------
+section('validateSettlementOverride — Settlement Gate section 7');
+
+const VALID_7C_PLAN = {
+  settlement_gate_override_requested: true,
+  override_type: 'explicit_emergency_approval',
+  override_reason: 'Live 404 cluster on money pages discovered during gate',
+  total_risk_points: 12,
+  post_change_checks: ['live_http_recheck', 'canonical_check'],
+  approval_validation: { approval_text: 'Fuehre genau diese 2 Redirect-Fixes auf /produkt-1/ aus, 12 Risikopunkte, Plan act-001', is_valid: true },
+  planned_changes: [{
+    id: 'act-001',
+    risk_points_final: 12,
+    data_sources: ['gsc', 'live_http'],
+    confidence: 'high',
+    rollback_method: 'deactivate redirect via API id',
+    pre_change_state_check: { method: 'live_http_and_api' },
+  }],
+};
+
+test('denies when no override requested', () => {
+  const r = safe.validateSettlementOverride({ planned_changes: [] });
+  assert.strictEqual(r.override_allowed, false);
+  assert.ok(r.missing_requirements.includes('settlement_gate_override_requested'));
+});
+
+test('denies unknown override_type', () => {
+  const r = safe.validateSettlementOverride({ settlement_gate_override_requested: true, override_type: 'because_i_want_to' });
+  assert.strictEqual(r.override_allowed, false);
+  assert.ok(r.missing_requirements.includes('override_type'));
+});
+
+test('allows complete 7.C plan', () => {
+  const r = safe.validateSettlementOverride(VALID_7C_PLAN);
+  assert.strictEqual(r.override_allowed, true);
+  assert.deepStrictEqual(r.missing_requirements, []);
+});
+
+test('7.C denies when rollback_method missing on a change', () => {
+  const plan = JSON.parse(JSON.stringify(VALID_7C_PLAN));
+  delete plan.planned_changes[0].rollback_method;
+  const r = safe.validateSettlementOverride(plan);
+  assert.strictEqual(r.override_allowed, false);
+  assert.ok(r.missing_requirements.includes('rollback_method:act-001'));
+});
+
+test('7.C denies low-confidence data basis', () => {
+  const plan = JSON.parse(JSON.stringify(VALID_7C_PLAN));
+  plan.planned_changes[0].confidence = 'low';
+  const r = safe.validateSettlementOverride(plan);
+  assert.strictEqual(r.override_allowed, false);
+  assert.ok(r.missing_requirements.includes('confidence_medium_or_higher:act-001'));
+});
+
+test('7.C denies missing post_change_checks', () => {
+  const plan = JSON.parse(JSON.stringify(VALID_7C_PLAN));
+  plan.post_change_checks = [];
+  const r = safe.validateSettlementOverride(plan);
+  assert.strictEqual(r.override_allowed, false);
+  assert.ok(r.missing_requirements.includes('post_change_checks'));
+});
+
+test('7.C denies broad-trigger approval text even with is_valid forged true', () => {
+  const plan = JSON.parse(JSON.stringify(VALID_7C_PLAN));
+  plan.approval_validation = { approval_text: 'alles', is_valid: true };
+  const r = safe.validateSettlementOverride(plan);
+  assert.strictEqual(r.override_allowed, false);
+  assert.ok(r.missing_requirements.includes('approval_text_is_broad_trigger'));
+});
+
+test('technical_emergency requires live HTTP verification, api_state alone denied', () => {
+  const r = safe.validateSettlementOverride({
+    settlement_gate_override_requested: true,
+    override_type: 'technical_emergency',
+    override_reason: 'noindex on homepage',
+    planned_changes: [{ id: 'act-009', pre_change_state_check: { method: 'api_state' } }],
+  });
+  assert.strictEqual(r.override_allowed, false);
+  assert.ok(r.missing_requirements.includes('live_http_verification:act-009'));
+});
+
+test('technical_emergency allows live_http verification', () => {
+  const r = safe.validateSettlementOverride({
+    settlement_gate_override_requested: true,
+    override_type: 'technical_emergency',
+    override_reason: 'noindex on homepage verified live',
+    planned_changes: [{ id: 'act-010', pre_change_state_check: { method: 'live_http' } }],
+  });
+  assert.strictEqual(r.override_allowed, true);
+});
+
+test('never throws on malformed plan', () => {
+  const r = safe.validateSettlementOverride(null);
+  assert.strictEqual(r.override_allowed, false);
+});
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(60)}`);

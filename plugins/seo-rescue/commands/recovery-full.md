@@ -1,5 +1,5 @@
 ---
-description: "Full recovery workflow: diagnose -> crawl -> plan -> monitor. Respects Change Governor mode."
+description: "Full recovery workflow: diagnose -> crawl -> audit -> plan -> monitor. Respects Change Governor mode."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 ---
 
@@ -7,7 +7,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 
 ## Zweck
 
-Verkettung aller vier Recovery-Commands in einem Durchlauf. Ein Befehl fuer den vollstaendigen Recovery-Workflow von Diagnose bis Monitoring-Setup. Alle Schritte teilen eine gemeinsame `run_id` fuer end-to-end Traceability.
+Verkettung aller fuenf Recovery-Commands in einem Durchlauf (Diagnose -> Crawl -> Audit -> Plan -> Monitor). Ein Befehl fuer den vollstaendigen Recovery-Workflow von Diagnose bis Monitoring-Setup. Alle Schritte teilen eine gemeinsame `run_id` fuer end-to-end Traceability.
 
 ## Change Governance
 
@@ -96,7 +96,7 @@ Diese `run_id` wird in ALLE Sub-Command-Outputs eingebettet (befund.json, issues
 
 ### Schritt 2: Diagnose ausfuehren
 
-Gib aus: `"[1/4] Starte Diagnose fuer {domain}..."`
+Gib aus: `"[1/5] Starte Diagnose fuer {domain}..."`
 
 Lies und befolge `commands/recovery-diagnose.md`. Uebergib die gemeinsame `run_id`.
 
@@ -111,7 +111,7 @@ Nach Abschluss:
 
 ### Schritt 3: Crawl ausfuehren
 
-Gib aus: `"[2/4] Starte Crawl..."`
+Gib aus: `"[2/5] Starte Crawl..."`
 
 Lies und befolge `commands/recovery-crawl.md`. Uebergib die gemeinsame `run_id`.
 
@@ -123,9 +123,25 @@ Nach Abschluss:
   - `"failed"` — Warnung eintragen. Versuche lokalen Crawler oder CSV-Import-Fallback (gemaess `commands/recovery-crawl.md`). Falls Fallback ebenfalls fehlschlaegt: Warnung, weiter mit Plan nur auf Basis der Diagnose.
   - `"partial"` / `"complete"` — Weitermachen.
 
-### Schritt 4: Action-Plan erstellen
+### Schritt 4: Audit ausfuehren
 
-Gib aus: `"[3/4] Erstelle Action-Plan..."`
+Gib aus: `"[3/5] Starte Change-Audit..."`
+
+Lies und befolge `commands/recovery-audit.md`. Uebergib die gemeinsame `run_id`.
+
+Dieser Schritt materialisiert den Settlement-Gate-State (`recovery-gate.json`) und das `hypothesis_registry`, das Schritt 5 (Plan) fuer das Hypothesis Verification Gate benoetigt. Er laeuft IMMER — auch ohne `change-history.ndjson` (dann per Reconstruction-Priority degradiert oder mit leerem Registry und `never_triggered`-Gate).
+
+Nach Abschluss:
+- Lies `~/.cache/seo-rescue/{slug}/change-audit.json`
+- Gib Kurz-Summary aus: Changes detected, Settlement-Gate-Status, hypothesis_registry-Groesse
+- Sammle `warnings` und `errors` fuer die Gesamtzusammenfassung
+- Pruefe status:
+  - `"failed"` — Warnung. Weiter mit Plan; der Plan degradiert dann gemaess `hypothesis_gate_no_audit_output` auf Roadmap-only.
+  - `"partial"` / `"complete"` — Weitermachen.
+
+### Schritt 5: Action-Plan erstellen
+
+Gib aus: `"[4/5] Erstelle Action-Plan..."`
 
 Lies und befolge `commands/recovery-plan.md`. Uebergib die gemeinsame `run_id`.
 
@@ -136,9 +152,9 @@ Nach Abschluss:
   - `"failed"` — Warnung. Weiter mit Monitoring. Manuellen Plan empfehlen.
   - `"partial"` / `"complete"` — Weitermachen.
 
-### Schritt 5: Monitoring einrichten
+### Schritt 6: Monitoring einrichten
 
-Gib aus: `"[4/4] Richte Monitoring ein..."`
+Gib aus: `"[5/5] Richte Monitoring ein..."`
 
 Lies und befolge `commands/recovery-monitor.md` (initialer Baseline-Check). Uebergib die gemeinsame `run_id`.
 
@@ -146,7 +162,7 @@ Nach Abschluss:
 - Gib Recovery-Score aus (oder Hinweis wenn `score: null`)
 - Sammle `warnings` und `errors` fuer die Gesamtzusammenfassung
 
-### Schritt 6: Zusammenfassung ausgeben
+### Schritt 7: Zusammenfassung ausgeben
 
 Gib aus: `"Recovery-Workflow abgeschlossen."`
 
@@ -159,8 +175,9 @@ Run-ID: full-a1b2c3d4-1716820000000
 SCHRITT-STATUS:
   [1] Diagnose:  complete  (data_quality: good)
   [2] Crawl:     partial   (data_quality: partial, crawler: screaming_frog_mcp)
-  [3] Plan:      complete  (data_quality: partial)
-  [4] Monitor:   complete  (data_quality: good)
+  [3] Audit:     complete  (gate: never_triggered, hypotheses: 3)
+  [4] Plan:      complete  (data_quality: partial)
+  [5] Monitor:   complete  (data_quality: good)
 
 TOP BEFUND:
   Diagnose:   core-update | Severity: high | VI-Drop: -34.2%
@@ -181,6 +198,7 @@ RECOVERY-SCORE: 62/100 | Phase: R2
 ARTIFACTS:
   ~/.cache/seo-rescue/example-com/befund.json
   ~/.cache/seo-rescue/example-com/issues.json
+  ~/.cache/seo-rescue/example-com/change-audit.json
   ~/.cache/seo-rescue/example-com/action-plan.json
   ~/.cache/seo-rescue/example-com/history.ndjson
 
@@ -210,7 +228,7 @@ NAECHSTE MANUELLE SCHRITTE:
 
 | Bedingung | Gesamtstatus |
 |-----------|-------------|
-| Alle 4 Commands = `complete` | `complete` |
+| Alle 5 Commands = `complete` | `complete` |
 | Mindestens ein nicht-kritischer Command = `partial` oder `failed`, aber Diagnose hat Daten | `partial` |
 | Diagnose = `failed` UND keine alternative Datenquelle (kein CSV-Import) | `failed` |
 | Diagnose = `failed` ABER CSV-Import vorhanden | `partial` (eingeschraenkter Workflow) |
@@ -222,6 +240,7 @@ NAECHSTE MANUELLE SCHRITTE:
 | Diagnose `failed`, kein CSV-Import | Abbruch des gesamten Workflows. Klarer Hinweis: Datenquellen einrichten oder CSV-Import anlegen. |
 | Diagnose `failed`, CSV-Import vorhanden | Warnung, eingeschraenkter Workflow mit CSV-Daten. |
 | Crawl `failed` | Warnung. Fallback-Versuch (lokaler Crawler oder CSV). Weiter mit Plan auf Basis der Diagnose. |
+| Audit `failed` | Warnung. Weiter mit Plan — Plan degradiert auf Roadmap-only (`hypothesis_gate_no_audit_output`). |
 | Plan `failed` | Warnung. Weiter mit Monitoring. Hinweis: Manuellen Plan erstellen. |
 | Monitor `failed` | Warnung. Workflow als `partial` abgeschlossen. Hinweis: Monitor manuell ausfuehren. |
 | Jeder Command `partial` | Weitermachen. Warnings sammeln und in Zusammenfassung ausgeben. |
@@ -233,7 +252,7 @@ Alle `warnings` und `errors` aus den Sub-Commands werden gesammelt und am Ende i
 
 ## Validierungsregeln
 
-- `run_id` ist in allen 4 Sub-Command-Outputs identisch
+- `run_id` ist in allen 5 Sub-Command-Outputs identisch
 - Gesamtstatus-Logik wird nach Abschluss aller Schritte deterministisch berechnet
 - Die Zusammenfassung listet immer: Status pro Schritt, Top-Befund, Top-Issues, Top-5 Aktionen, Score, Artifact-Pfade, Warnungen, Provider, fehlende Capabilities, eingeschraenkte Ergebnisse, naechste manuelle Schritte
 
@@ -241,9 +260,9 @@ Alle `warnings` und `errors` aus den Sub-Commands werden gesammelt und am Ende i
 
 - `commands/recovery-diagnose.md` — Schritt 2
 - `commands/recovery-crawl.md` — Schritt 3
-- `commands/recovery-plan.md` — Schritt 4
-- `commands/recovery-monitor.md` — Schritt 5
-- `commands/recovery-audit.md` — Pre-Write-Audit-Pflicht
+- `commands/recovery-audit.md` — Schritt 4 (Gate-State + hypothesis_registry; zusaetzlich Pre-Write-Audit-Pflicht)
+- `commands/recovery-plan.md` — Schritt 5
+- `commands/recovery-monitor.md` — Schritt 6
 - `references/SEO_SETTLEMENT_GATE.md` — Gate-Definition, Plan-After-Gate
 - `references/SEO_CHANGE_GOVERNOR.md` — Reserve bleibt Reserve
 - `references/SAFE_LIVE_CHANGE_RULES.md` — Standard Settlement-Gate Response

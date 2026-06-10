@@ -104,6 +104,8 @@ Falls keine aktuellen Daten vorhanden (weder VI noch Keywords):
 
 ## Recovery-Score-Formel (deterministisch)
 
+> **Abgrenzung:** Dies ist der automatisierte **Recovery Score** (5 Komponenten, kontinuierlich, aus gecachten Artifacts). Er ist NICHT identisch mit dem **Recovery Signal Score** aus `RECOVERY_SYSTEM.md` section 10 / `sistrix-monday-recovery-check` (woechentlich, CSV-first, andere Faktoren). Beide sind 0–100, duerfen aber nicht in einer Zeitreihe gemischt oder miteinander verglichen werden. In Reports immer benennen, welcher Score gemeint ist.
+
 Der Score wird aus 5 Komponenten berechnet. Jede Komponente liefert einen Wert 0–100. Der Gesamt-Score ist der gewichtete Durchschnitt ueber **alle verfuegbaren** Komponenten.
 
 | Komponente | Gewicht | Berechnung | Quelle |

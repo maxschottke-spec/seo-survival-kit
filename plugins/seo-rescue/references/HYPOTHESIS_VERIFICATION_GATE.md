@@ -159,6 +159,8 @@ A hypothesis is verified for a specific URL or route pattern. The operator wants
 
 The gate resets the expanded scope to `likely`. Verification of one URL is not verification of fifty. Either verify each URL (often infeasible), or run a small-batch live-fix on the verified URL with Stufe-1-Monitoring, then expand only after Stufe-3-Monitoring confirms recovery.
 
+**Enforcement (v1.3.0):** this reset is machine-checked, not just procedural. `lib/safe.js checkHypothesisScopeMatch()` compares every `planned_changes[].target` against the verified hypothesis' `fix_scope.affected_urls` and segregates out-of-scope targets to `prepare_now_execute_later` with stop reason `fix_scope_expansion`. recovery-plan Step 8a calls this check before emitting the plan.
+
 ## What this gate does not solve
 
 The Hypothesis Verification Gate is a procedural safeguard, not a magical correctness oracle. It cannot:

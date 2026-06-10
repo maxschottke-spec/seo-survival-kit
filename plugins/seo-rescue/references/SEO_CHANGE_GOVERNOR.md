@@ -53,7 +53,8 @@ Every planned change must be classified as one of three categories:
 
 Examples: category deactivation, canonical change, URL consolidation, content rewrite, template/sitewide change, broad internal link restructure.
 
-- Default batch limit: **3-5 URLs per day**
+- Default batch limit: **3 URLs per calendar day** (operator timezone); **4-5 URLs/day only with an explicit batch plan** (each URL listed with rollback method). More than 5 structural URLs in a day is always a Hard Stop (rule 3).
+- "Per day" means calendar day — multiple sessions on the same day share one budget; a new session does NOT reset it. Check `change-history.ndjson` for same-day structural changes before planning.
 - Small batches mandatory
 - High QA discipline required
 
@@ -207,8 +208,8 @@ Claude must immediately stop when:
 
 1. User says "alles", "mach alles", "ALLESS", "alles patchen", "ja alles", "passt", "ok", "go", "mach den Rest" — or similar broad/non-specific approval (see SAFE_LIVE_CHANGE_RULES.md for full list)
 2. Change budget exceeded
-3. More than 5 structural URLs in one step without explicit batch plan
-4. More than 10 repair-hygiene URLs in one step without explicit batch plan
+3. More than 3 structural URLs per calendar day without explicit batch plan, or more than 5 per calendar day at all (5 is the absolute ceiling — a batch plan extends 3 to 5, never beyond; counted across sessions via `change-history.ndjson`)
+4. More than 10 repair-hygiene URLs in one run without explicit batch plan
 5. More than 3 new internal links to a single blog post (in one run, without specific approval)
 6. Live test after a change returns 404
 7. A 301 -> 404 chain is created

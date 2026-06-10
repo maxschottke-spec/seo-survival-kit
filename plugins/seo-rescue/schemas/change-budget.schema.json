@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SEO Change Budget",
-  "description": "Pre-execution change plan with risk budget tracking. v1.2.0 adds Settlement Gate awareness on top of v1.1.0 Shopware/DreiscSeo pre-check requirements and DACH medical compliance.",
+  "description": "Pre-execution change plan with risk budget tracking. v1.3.0 enforces (via if/then) the pre-check presence per change type, the section-7.C override requirements, and Reserve-bleibt-Reserve during an active Settlement Gate — previously these were documentation-only. v1.2.0 added Settlement Gate awareness on top of v1.1.0 Shopware/DreiscSeo pre-check requirements and DACH medical compliance.",
   "type": "object",
   "required": ["schema_version", "mode", "change_budget", "planned_changes", "total_risk_points", "budget_remaining", "stop_required"],
   "properties": {
-    "schema_version": { "type": "string", "const": "1.2.0" },
+    "schema_version": { "type": "string", "const": "1.3.0" },
     "run_id": { "type": "string" },
     "domain": { "type": "string" },
     "mode": {
@@ -77,6 +77,26 @@
               "after_path": { "type": "string" }
             }
           },
+          "pre_change_state_check": {
+            "type": "object",
+            "description": "Pre-change live state verification. Required for every change in a Settlement-Gate override; technical_emergency overrides require method live_http or live_http_and_api (API state alone is not sufficient per SEO_SETTLEMENT_GATE.md 7.A).",
+            "required": ["method"],
+            "properties": {
+              "method": { "type": "string", "enum": ["live_http", "api_state", "live_http_and_api"] },
+              "checked_at": { "type": "string" },
+              "result": { "type": "string" }
+            }
+          },
+          "hypothesis_id": {
+            "type": "string",
+            "description": "Reference into the hypothesis_registry of the recovery-audit output (HYPOTHESIS_VERIFICATION_GATE.md). Required for live-fix-eligible actions in recovery-plan Step 8a."
+          },
+          "hypothesis_status_snapshot": {
+            "type": "string",
+            "enum": ["suspected", "likely", "verified", "fixed"]
+          },
+          "fix_scope_match": { "type": "boolean" },
+          "verified_by_source_tier": { "type": "string", "enum": ["strongest", "strong", "weak"] },
           "compliance_review": {
             "type": "string",
             "enum": ["none", "recommended", "required"]
@@ -92,7 +112,39 @@
               }
             }
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "type": { "const": "redirect" } }, "required": ["type"] },
+            "then": {
+              "required": ["requires_pre_check_for_duplicate_foreignkey_in_channel", "seo_url_precheck"],
+              "properties": {
+                "requires_pre_check_for_duplicate_foreignkey_in_channel": { "const": true },
+                "seo_url_precheck": { "required": ["foreignKey", "collision_detected"] }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "enum": ["category_status", "product_status"] } }, "required": ["type"] },
+            "then": {
+              "required": ["requires_dreiscseo_redirect_precheck", "dreiscseo_precheck"],
+              "properties": {
+                "requires_dreiscseo_redirect_precheck": { "const": true },
+                "dreiscseo_precheck": { "required": ["would_create_301_to_404"] }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "cms_slot" } }, "required": ["type"] },
+            "then": {
+              "required": ["requires_cms_slot_snapshot", "snapshot_paths"],
+              "properties": {
+                "requires_cms_slot_snapshot": { "const": true },
+                "snapshot_paths": { "required": ["before_path"] }
+              }
+            }
+          }
+        ]
       }
     },
     "total_risk_points": { "type": "integer", "minimum": 0 },
@@ -174,6 +226,67 @@
         "reason": { "type": "string" }
       }
     },
-    "post_change_checks": { "type": "array", "items": { "type": "string" } }
-  }
+    "post_change_checks": { "type": "array", "items": { "type": "string" } },
+    "hypothesis_verification_gate": {
+      "type": "object",
+      "description": "Result of the Hypothesis Verification Gate (recovery-plan Step 8a / lib/safe.js checkHypothesisScopeMatch). audit_output_available=false means no recovery-audit output existed — plan is roadmap-only, not an error.",
+      "properties": {
+        "audit_output_available": { "type": "boolean" },
+        "all_planned_changes_verified": { "type": "boolean" },
+        "below_verified_count": { "type": "integer", "minimum": 0 },
+        "scope_expansions_blocked": { "type": "array", "items": { "type": "string" } },
+        "missing_hypothesis_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "settlement_gate_override_requested": { "const": true } }, "required": ["settlement_gate_override_requested"] },
+      "then": { "required": ["override_reason", "override_type"] }
+    },
+    {
+      "if": { "properties": { "override_type": { "const": "explicit_emergency_approval" } }, "required": ["override_type"] },
+      "then": {
+        "required": ["override_reason", "total_risk_points", "approval_validation", "post_change_checks"],
+        "properties": {
+          "post_change_checks": { "minItems": 1 },
+          "approval_validation": { "required": ["approval_text", "is_valid"] },
+          "planned_changes": {
+            "minItems": 1,
+            "items": {
+              "required": ["rollback_method", "pre_change_state_check"],
+              "properties": { "confidence": { "enum": ["high", "medium"] } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "override_type": { "const": "technical_emergency" } }, "required": ["override_type"] },
+      "then": {
+        "properties": {
+          "planned_changes": {
+            "items": {
+              "required": ["pre_change_state_check"],
+              "properties": {
+                "pre_change_state_check": {
+                  "properties": { "method": { "enum": ["live_http", "live_http_and_api"] } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "settlement_gate_active": { "const": true } }, "required": ["settlement_gate_active"] },
+      "then": {
+        "required": ["reserve_bleibt_reserve_acknowledged"],
+        "properties": {
+          "reserve_bleibt_reserve_acknowledged": { "const": true },
+          "unused_budget_handling": { "const": "forfeit" }
+        }
+      }
+    }
+  ]
 }
