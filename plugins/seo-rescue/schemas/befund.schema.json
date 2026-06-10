@@ -89,6 +89,16 @@
     "diagnosis": { "type": "string", "enum": ["core-update", "technical", "content", "mixed", "healthy"] },
     "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
     "recovery_stage_estimate": { "type": ["string", "null"], "enum": ["R1", "R2", "R3", "R4", "R5", null] },
-    "summary_de": { "type": "string" }
+    "summary_de": { "type": "string" },
+    "settlement_gate_status": {
+      "type": "object",
+      "description": "Settlement-Gate awareness mirror (read from recovery-gate.json, written by recovery-audit). active:false when no gate file exists.",
+      "required": ["active"],
+      "properties": {
+        "active": { "type": "boolean" },
+        "next_allowed_review_date": { "type": "string" },
+        "unlock_status": { "type": "string", "enum": ["blocked", "partial", "open"] }
+      }
+    }
   }
 }
