@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ### Changed
 
+- **Version/consistency sweep (post-review):** `rescue` SKILL.md installable-version claim v0.5.0 → v0.5.2; RECOVERY_SYSTEM.md status note rewritten for v0.5.2 reality (sistrix-monday-recovery-check shipped, recovery commands partially implement the methodology); SISTRIX_MONDAY_RECOVERY_CHECK.md "planned v0.5.1" → shipped, companion-doc section numbers corrected (Recovery Signal Score §10, Winner/Loser §8, Money-KW §7, URL Recovery §9, sequencing §11).
+- **Score disambiguation:** the weekly CSV-first **Recovery Signal Score** (RECOVERY_SYSTEM.md §10 / sistrix-monday-recovery-check) and the automated 5-component **Recovery Score** (recovery-monitor) are now explicitly documented as two distinct, non-comparable metrics — both 0-100, never to be mixed in one time series.
+- **Batch-limit clarification:** structural changes are 3 URLs per **calendar day** (counted across sessions via change-history.ndjson), 4-5 only with an explicit batch plan, 5/day is the absolute ceiling; Governor Hard Stop rule 3 and SAFE_LIVE_CHANGE_RULES table now state the same rule.
+- **R1-R5 disambiguation:** `recovery_stage_estimate` (diagnose, VI-trend-based diagnostic stage) vs `current_phase` (plan, operational work phase) documented as intentionally distinct signals with divergence rules (phase ≤ stage+1, divergence must be warned and explained, phase is recomputed every run).
 - Documentation consistency sweep: reconciled the contradictory skill counts (was "eleven"/"ten"/"sixteen" across CLAUDE.md, ARCHITECTURE.md, and the orchestrator) to the canonical **seventeen skills/commands (one orchestrator + sixteen sub-skills and recovery commands)**; refreshed install pins and status lines to v0.5.2; aligned every per-skill `version:` frontmatter to 0.5.2.
 
 ## [0.5.2] — 2026-06-02

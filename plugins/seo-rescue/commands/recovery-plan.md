@@ -135,6 +135,8 @@ Phase-Kriterien:
 
 Falls VI-Daten fehlen: Phase aus Keyword-Daten schaetzen oder auf `null` setzen.
 
+**Abgrenzung zu `recovery_stage_estimate` aus recovery-diagnose:** Beide nutzen die Labels R1–R5, sind aber zwei verschiedene Signale. `recovery_stage_estimate` (diagnose) ist die rein VI-Trend-basierte **diagnostische Lage**; `current_phase` (plan) ist die **operative Arbeitsphase**, die zusaetzlich Keyword-Stabilitaet und Issue-Struktur gewichtet. Sie duerfen voneinander abweichen (z.B. Stage R2, aber Phase R1, weil die Winners noch ungeschuetzt sind). Regeln: (1) `current_phase` darf nie HOEHER sein als `recovery_stage_estimate` + 1; (2) bei Abweichung beide Werte im Output ausweisen und die Abweichung in `warnings` begruenden; (3) `current_phase` wird bei jedem Lauf (typisch woechentlich mit recovery-monitor-Daten) neu bestimmt — es ist keine Einmal-Festlegung.
+
 ### Schritt 5: Do-Not-Touch-Liste erstellen
 
 Identifiziere stabile Top-10 Keywords aus `befund.json`.

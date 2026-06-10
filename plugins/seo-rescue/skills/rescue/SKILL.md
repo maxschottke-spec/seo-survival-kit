@@ -111,7 +111,7 @@ CSV-first weekly recovery review during an active Core-Update recovery. No SISTR
 - **Plugin name:** `seo-rescue`
 - **Marketplace:** `seo-survival-kit`
 - **Repo:** https://github.com/maxschottke-spec/seo-survival-kit
-- **Latest installable version:** v0.5.0
+- **Latest installable version:** v0.5.2
 - **License:** MIT
 - **Dependencies:** zero npm packages
 - **Validation:** `claude plugin validate plugins/seo-rescue` passes

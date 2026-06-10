@@ -141,11 +141,11 @@ After every live write:
 
 | Category | Default Limit | Conditions |
 |---|---:|---|
-| Structural / Risky | 3-5 URLs/day | Categories, canonicals, content, templates |
+| Structural / Risky | 3 URLs per calendar day (4-5 only with explicit batch plan; >5/day never) | Categories, canonicals, content, templates |
 | Repair / Hygiene | Up to 10 URLs/run | All targets 200/self-canonical/index,follow, rollback docs, immediate QA |
 | Emergency Stabilization | Up to 30 risk points | Only stabilization, no new optimization |
 
-Exceeding these limits requires explicit batch approval naming the count and acknowledging the higher risk.
+"Per calendar day" is counted across all sessions of that day via `change-history.ndjson` — a new session does not reset the budget. Extending 3 to 5 requires explicit batch approval naming the count and acknowledging the higher risk; 5 structural URLs/day is the absolute ceiling (Hard Stop rule 3 in `SEO_CHANGE_GOVERNOR.md`).
 
 ## Settlement Gate · Operator-Pressure Response
 
