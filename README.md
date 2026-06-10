@@ -141,7 +141,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 Pinned to a tag (reproducible, survives upstream changes):
 
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.2
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.3
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
