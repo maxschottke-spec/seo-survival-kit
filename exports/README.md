@@ -10,7 +10,7 @@ This directory contains the **framework-only** skills of seo-survival-kit in a p
 
 These three files contain the same framework knowledge as the canonical Claude Code versions in `plugins/seo-rescue/skills/`, with the Claude-specific frontmatter (`allowed-tools`, `user-invokable`, `argument-hint`, plus `[[skill-name]]` cross-skill links) stripped.
 
-The **script-backed skills** (`seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`) remain Claude-Code-specific because their SKILL.md files describe slash-command invocations and `allowed-tools` permission scopes that have no equivalent outside Claude Code. The underlying Node scripts are platform-agnostic and can be run directly with `node` on any system — see each skill's `*.example.js` for inline documentation.
+The **script-backed and command-style skills** (`seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`, `sistrix-monday-recovery-check`, `subscription-monetization-audit`, and the six `recovery-*` workflow commands) remain Claude-Code-specific because their SKILL.md files describe slash-command invocations and `allowed-tools` permission scopes that have no equivalent outside Claude Code. The underlying Node scripts are platform-agnostic and can be run directly with `node` on any system — see each skill's `*.example.js` for inline documentation.
 
 ## Platform-specific install
 
@@ -144,7 +144,7 @@ The scripts are MIT-licensed Node.js with zero npm runtime dependencies — they
 
 ## Planned: full multi-LLM support via MCP
 
-The "real" cross-LLM solution is a Model Context Protocol (MCP) server exposing each script-backed skill as an MCP tool. This is planned for **v0.5.x**. With an MCP server, every MCP-aware client (Cursor, Codex, Continue, Aider, Claude Desktop, n8n, Goose) would get the full skill surface as tool calls — not just the framework markdown.
+The "real" cross-LLM solution is a Model Context Protocol (MCP) server exposing each script-backed skill as an MCP tool. This is planned for **v1.0+**. With an MCP server, every MCP-aware client (Cursor, Codex, Continue, Aider, Claude Desktop, n8n, Goose) would get the full skill surface as tool calls — not just the framework markdown.
 
 If you want to be notified when the MCP server lands: watch this repo on GitHub.
 
