@@ -7,7 +7,7 @@ allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.2'
+  version: '0.5.3'
   category: marketing
 ---
 
@@ -49,6 +49,7 @@ Per run, the script writes a single JSON file containing:
 | `crawl_errors_summary` | searchanalytics aggregates | Page-level errors (4xx, 5xx, soft-404) the last 30 days |
 | `crux_field_data` | from PSI v5 (cross-reference) | LCP / CLS / INP per top URL — field data, not lab |
 | `search_appearance` | searchanalytics with searchAppearance dimension | SERP feature breakdown (AMP, video, FAQ, How-to, Sitelinks, AI Overview where exposed) |
+| `query_weekly_series` | searchanalytics date+query, ISO-week-bucketed, top 200 by clicks | Per-query weekly click series over `weekly_series_days` (default 480) — input for quiet-death detection |
 
 ## Quick start
 
@@ -181,6 +182,30 @@ cat gsc-history/example-com-2026-05-22.json | \
   const items = (d.top_pages || []).filter(r => r.position > 10 && r.position < 21); \
   items.sort((a,b) => b.impressions - a.impressions).slice(0,15).forEach(r => console.log(r.page, '|', 'pos', r.position.toFixed(1), '|', r.impressions, 'imp'));"
 ```
+
+## Quiet-Death Detection (experimental, N=1)
+
+> **Maturity:** `experimental_n1` — abgeleitet aus einem einzigen Fall (case-001, Lesson 2). KEINE validierte Metrik. Promotion erst nach N=2.
+
+Manche Queries sterben **langsam** — 50–86 % Klick-Verlust über Wochen, ohne Korrelation zu einem Core Update (oft SERP-Feature-Absorption durch AI Overviews oder Brand-Erosion). Diese „stillen Tode" brauchen andere Gegenmaßnahmen als Update-Recovery und gehen in der Snapshot-Aggregation unter. Der Detector arbeitet auf der `query_weekly_series` und ist netzfrei.
+
+```bash
+node quiet-death-detect.example.js gsc-history/example-com-2026-06-13.json --brand verapur,meinemarke
+```
+
+Kriterien (alle müssen erfüllt sein), pro Query-Reihe:
+
+| Kriterium | Schwelle |
+|-----------|----------|
+| Start-Klicks (erstes 4-Wochen-Mittel) | ≥ 5 |
+| Verlust (letztes vs. erstes 4-Wochen-Mittel) | ≥ 50 % |
+| Monotoner Decline (längste nicht-steigende Spanne des rollierenden 4-Wochen-Mittels) | ≥ 6 Wochen |
+
+**Update-Korrelation:** Der größte Einzel-Wochen-Drop wird gegen `references/CORE_UPDATES.md` geprüft. Liegt er ±1 Woche in einem Update-Fenster → `update_correlation: "partial"` (gehört eher zur Update-Schadens-Analyse), sonst `"none"` (echtes Quiet-Death). Beide bleiben in der Liste — keine harte Filterung.
+
+**Pattern-Hinweis:** `brand_erosion` (Query enthält ein `--brand`-Token), `serp_feature_absorption` (AI-Overview-Signal im `search_appearance`), sonst `generic_erosion`.
+
+Output: `gsc-history/<site>-quiet-death-<date>.json` mit `quiet_death_queries[]` und `maturity: "experimental_n1"`.
 
 ## Security model
 
