@@ -1,0 +1,42 @@
+{
+  "site": "sc-domain:example.com",
+  "search_appearance": [],
+  "query_weekly_series": [
+    { "query": "matratzen marken", "weeks": [
+      { "iso_week": "2025-W40", "clicks": 48 },
+      { "iso_week": "2025-W41", "clicks": 40 },
+      { "iso_week": "2025-W42", "clicks": 34 },
+      { "iso_week": "2025-W43", "clicks": 29 },
+      { "iso_week": "2025-W44", "clicks": 25 },
+      { "iso_week": "2025-W45", "clicks": 22 },
+      { "iso_week": "2025-W46", "clicks": 20 },
+      { "iso_week": "2025-W47", "clicks": 18 },
+      { "iso_week": "2025-W48", "clicks": 15 },
+      { "iso_week": "2025-W49", "clicks": 12 }
+    ]},
+    { "query": "boxspringbett 180x200", "weeks": [
+      { "iso_week": "2026-W16", "clicks": 60 },
+      { "iso_week": "2026-W17", "clicks": 58 },
+      { "iso_week": "2026-W18", "clicks": 55 },
+      { "iso_week": "2026-W19", "clicks": 52 },
+      { "iso_week": "2026-W20", "clicks": 48 },
+      { "iso_week": "2026-W21", "clicks": 20 },
+      { "iso_week": "2026-W22", "clicks": 15 },
+      { "iso_week": "2026-W23", "clicks": 12 },
+      { "iso_week": "2026-W24", "clicks": 10 },
+      { "iso_week": "2026-W25", "clicks": 9 }
+    ]},
+    { "query": "lattenrost 90x200", "weeks": [
+      { "iso_week": "2026-W16", "clicks": 20 },
+      { "iso_week": "2026-W17", "clicks": 22 },
+      { "iso_week": "2026-W18", "clicks": 21 },
+      { "iso_week": "2026-W19", "clicks": 23 },
+      { "iso_week": "2026-W20", "clicks": 25 },
+      { "iso_week": "2026-W21", "clicks": 24 },
+      { "iso_week": "2026-W22", "clicks": 26 },
+      { "iso_week": "2026-W23", "clicks": 28 },
+      { "iso_week": "2026-W24", "clicks": 27 },
+      { "iso_week": "2026-W25", "clicks": 30 }
+    ]}
+  ]
+}
