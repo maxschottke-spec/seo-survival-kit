@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Fixed
+
+- **Recovery-command consistency sweep** — `recovery-plan`'s settlement-gate output now uses the nested `settlement_gate_status` mirror (`{ active, next_allowed_review_date, unlock_status }`) instead of flat fields, matching `recovery-diagnose` and `recovery-monitor`; `action-plan.schema.json` gained the matching `settlement_gate_status` property (byte-identical to `befund`/`history`). `recovery-monitor` gained the `Change Governance` and `Ausgabe an den User` sections for section parity with the other recovery commands. Docs/schema only — no runtime behavior change.
+
 ## [0.5.3] — 2026-06-10
 
 ### Added
