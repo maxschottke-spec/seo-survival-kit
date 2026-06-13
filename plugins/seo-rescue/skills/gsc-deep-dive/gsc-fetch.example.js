@@ -175,6 +175,47 @@ function mapRow(r, dims) {
   return out;
 }
 
+// --- Weekly per-query series (L2 quiet-death input) ---
+const WEEKLY_DAYS = Number(CFG.weekly_series_days) || 480;
+const WEEKLY_TOP_N = 200;
+
+function isoWeekLabel(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  const day = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - day + 3); // Thursday
+  const firstThu = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  const ftDay = (firstThu.getUTCDay() + 6) % 7;
+  firstThu.setUTCDate(firstThu.getUTCDate() - ftDay + 3);
+  const week = 1 + Math.round((d - firstThu) / (7 * 24 * 3600 * 1000));
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+}
+
+function buildWeeklySeries(rows) {
+  // rows: searchAnalytics ['date','query'] → keys [date, query]
+  const byQuery = new Map();
+  for (const r of rows || []) {
+    const [date, query] = r.keys || [];
+    if (!date || !query) continue;
+    const wk = isoWeekLabel(date);
+    if (!byQuery.has(query)) byQuery.set(query, { total: 0, weeks: new Map() });
+    const q = byQuery.get(query);
+    const c = Number(r.clicks) || 0;
+    q.total += c;
+    q.weeks.set(wk, (q.weeks.get(wk) || 0) + c);
+  }
+  const all = [...byQuery.entries()].map(([query, q]) => ({
+    query: sanitizeQuery(query),
+    total: q.total,
+    weeks: [...q.weeks.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([iso_week, clicks]) => ({ iso_week, clicks })),
+  }));
+  all.sort((a, b) => b.total - a.total);
+  const kept = all.slice(0, WEEKLY_TOP_N);
+  if (all.length > WEEKLY_TOP_N) {
+    console.error(`[quiet-death] weekly series capped to top ${WEEKLY_TOP_N} queries; ${all.length - WEEKLY_TOP_N} omitted`);
+  }
+  return kept.map(({ query, weeks }) => ({ query, weeks }));
+}
+
 // --- Main ---
 
 (async () => {
@@ -187,11 +228,15 @@ function mapRow(r, dims) {
   const token = await getAccessToken();
   console.error('  token obtained, fetching analytics...');
 
-  const [byQuery, byPage, byQueryPage, bySearchAppearance] = await Promise.all([
+  const weeklyStartObj = new Date(today); weeklyStartObj.setDate(weeklyStartObj.getDate() - WEEKLY_DAYS);
+  const weeklyStart = weeklyStartObj.toISOString().slice(0, 10);
+
+  const [byQuery, byPage, byQueryPage, bySearchAppearance, byDateQuery] = await Promise.all([
     searchAnalytics(token, ['query'], startDate, endDate, TOP_N),
     searchAnalytics(token, ['page'], startDate, endDate, TOP_N),
     searchAnalytics(token, ['query', 'page'], startDate, endDate, Math.min(TOP_N * 2, 1000)),
     searchAnalytics(token, ['searchAppearance'], startDate, endDate, 50).catch(e => ({ error: String(e) })),
+    searchAnalytics(token, ['date', 'query'], weeklyStart, endDate, 25000).catch(e => ({ error: String(e), rows: [] })),
   ]);
 
   const out = {
@@ -202,6 +247,7 @@ function mapRow(r, dims) {
     top_pages: (byPage.rows || []).map(r => mapRow(r, ['page'])),
     query_page_pairs: (byQueryPage.rows || []).map(r => mapRow(r, ['query', 'page'])),
     search_appearance: (bySearchAppearance.rows || []).map(r => mapRow(r, ['searchAppearance'])),
+    query_weekly_series: buildWeeklySeries(byDateQuery.rows),
   };
 
   // Derived summary
