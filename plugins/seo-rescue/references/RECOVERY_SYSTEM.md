@@ -188,6 +188,23 @@ This pattern suggests that when a site has strong editorial authority content th
 
 ---
 
+## 4b. Pre-Hit Baseline Selection (experimental, N=1)
+
+> **Maturity:** `experimental_n1` — abgeleitet aus einem einzigen Fall (case-001, Multi-Update-Sequenz über 14 Monate). KEINE validierte Methode. Promotion zu `validated` erst nach N=2-Bestätigung (zweiter Fall) + Reverse-ID-Check.
+
+Bei einer **Multi-Update-Sequenz** (mehrere Algorithmus-Updates über Monate) ist das „letzte stabile Plateau vor dem jüngsten Hit" oft selbst schon durch frühere Updates erodiert. Eine Recovery-Bewertung gegen dieses erodierte Plateau überschätzt die Erholung.
+
+`recovery-diagnose` (Schritt 9) wählt die Baseline daher als **historisches Peak-Plateau**:
+
+1. Längste verfügbare Zeitreihe nutzen (GSC-Klicks bevorzugt, sonst Sistrix-VI).
+2. Peak-Plateau = Maximum des rollierenden 4-Perioden-Mittelwerts (kein Einzel-Spike).
+3. Erosions-Flag: liegt das letzte stabile Plateau vor dem Hit > 15 % unter dem Peak, ist das ein Multi-Update-Erosions-Signal (`multi_update_erosion_detected`).
+4. Fortschritt wird gegen den wahren Peak gemeldet (`recovery_vs_baseline_pct`).
+
+**Abgrenzung:** Dieses Signal ist bisher reines Reporting im Feld `pre_hit_baseline`. Die R1–R5-Stage-Formel bleibt VI-Peak-basiert; die Umstellung der Stage-Logik auf baseline-relative Bewertung inkl. Stage-Re-Entry ist separat (Lesson 4).
+
+---
+
 ## 5. Recovery Risk Engine
 
 The Recovery Risk Engine prevents destructive changes during recovery by detecting recovering URLs, flagging proposed edits that would touch them, and surfacing the risk to the operator. It is the runtime expression of the Do-Not-Touch principle.
