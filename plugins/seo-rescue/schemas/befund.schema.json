@@ -99,6 +99,23 @@
         "next_allowed_review_date": { "type": "string" },
         "unlock_status": { "type": "string", "enum": ["blocked", "partial", "open"] }
       }
+    },
+    "pre_hit_baseline": {
+      "type": "object",
+      "description": "Pre-hit recovery baseline selection (Lesson 1, multi-update-sequence). EXPERIMENTAL N=1 — historical peak plateau, not last stable phase. Not used in the R1-R5 stage formula yet (see L4).",
+      "required": ["value", "method", "source", "maturity"],
+      "properties": {
+        "value": { "type": ["number", "null"] },
+        "unit": { "type": "string", "enum": ["clicks_per_week", "visibility_index"] },
+        "method": { "type": "string", "enum": ["historical_peak", "last_plateau", "unavailable"] },
+        "source": { "type": "string", "enum": ["gsc_csv", "sistrix_vi", "none"] },
+        "maturity": { "type": "string", "enum": ["experimental_n1"] },
+        "window_weeks": { "type": ["integer", "null"] },
+        "window_limited": { "type": "boolean" },
+        "erosion_vs_last_plateau_pct": { "type": ["number", "null"] },
+        "multi_update_erosion_detected": { "type": "boolean" },
+        "recovery_vs_baseline_pct": { "type": ["number", "null"] }
+      }
     }
   }
 }

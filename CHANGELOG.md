@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Added
+
+- **L1 Pre-Hit-Baseline-Selektion** (Phase 2, experimental N=1) — `recovery-diagnose` selects the recovery baseline as the historical peak plateau instead of the last stable phase before the hit, flags multi-update erosion (`multi_update_erosion_detected`), and reports progress against the true peak (`recovery_vs_baseline_pct`). New `pre_hit_baseline` field in `befund.schema.json`, marked `maturity: experimental_n1`. The R1-R5 stage formula is unchanged (stays VI-peak-based; baseline-relative staging is Lesson 4).
+
 ### Fixed
 
 - **Recovery-command consistency sweep** — `recovery-plan`'s settlement-gate output now uses the nested `settlement_gate_status` mirror (`{ active, next_allowed_review_date, unlock_status }`) instead of flat fields, matching `recovery-diagnose` and `recovery-monitor`; `action-plan.schema.json` gained the matching `settlement_gate_status` property (byte-identical to `befund`/`history`). `recovery-monitor` gained the `Change Governance` and `Ausgabe an den User` sections for section parity with the other recovery commands. Docs/schema only — no runtime behavior change.
