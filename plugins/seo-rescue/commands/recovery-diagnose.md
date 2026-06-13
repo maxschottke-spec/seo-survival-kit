@@ -331,6 +331,19 @@ Lies `../../references/RECOVERY_SYSTEM.md` fuer die Stage-Definitionen (R1–R5)
 | `R5` | Annaehernd erholt (vi_current >= 0.9 * vi_peak) |
 | `null` | Nicht bestimmbar (VI-Daten fehlen) |
 
+**Stage-State-Machine (`stage_status`, experimental, N=1):**
+
+Überlagert die rohe `recovery_stage_estimate` mit Freeze-/Re-Entry-Regeln (Lesson 4a). Markiert `maturity: "experimental_n1"`. Liest die Rollout-Fenster (Start/Ende) aus `../../references/CORE_UPDATES.md` — dieselbe Datei wie Schritt 8.
+
+1. **Kein/veraltetes CORE_UPDATES.md** (Datei fehlt oder > 90 Tage alt): keine Freezes — `stage = recovery_stage_estimate`, `raw_stage = recovery_stage_estimate`, `progression_allowed: true`, `frozen_reason: null`, `re_entry_detected: false`, `re_entry_from: null`, `active_update: null`, `days_since_rollout_end: null`, `maturity: "experimental_n1"`. Fertig.
+2. **active_update_window:** Liegt das heutige Datum innerhalb [Rollout-Start, Rollout-Ende] eines Eintrags → `frozen_reason: "active_update_window"`, `progression_allowed: false`, `active_update` = Update-Name.
+3. **post_update_settlement:** sonst, liegt heute in (Rollout-Ende, Rollout-Ende + 28 Tage] des jüngsten Eintrags → `frozen_reason: "post_update_settlement"`, `progression_allowed: false`, `days_since_rollout_end` = Tage seit Rollout-Ende. Sonst `frozen_reason: null`, `progression_allowed: true`.
+4. **Re-Entry:** endete das jüngste Update ≤ 28 Tage vor heute UND `vi_trend_4w_pct < -10` → `re_entry_detected: true`, `re_entry_from` = `recovery_stage_estimate`, effektive `stage = "R1"`. Sonst `re_entry_detected: false`, `re_entry_from: null`, `stage = recovery_stage_estimate`.
+   (Re-Entry und Freeze können gleichzeitig gelten: `stage = "R1"`, `progression_allowed` bleibt `false`.)
+5. `raw_stage` ist immer = `recovery_stage_estimate`.
+
+Dies ist NICHT der Settlement Gate (§12a / `SEO_SETTLEMENT_GATE.md`) — jener ist operator-batch-getriggert und blockt Live-Writes; `stage_status` friert nur die Stage-Bewertung ein.
+
 **Deutschsprachige Zusammenfassung (`summary_de`):**
 
 Schreibe 2–4 Saetze auf Deutsch, die die wichtigsten Befund-Punkte zusammenfassen:
