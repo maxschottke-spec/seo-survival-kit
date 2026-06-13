@@ -37,15 +37,18 @@ Wenn `settlement_gate_active = true`:
   - `emergency_only` — nur unter `SEO_SETTLEMENT_GATE.md` section 7.A oder 7.B
   - `prepare_now_execute_later` — Schema-Drafts, Title-Drafts, Rico-Tickets — Vorbereitung erlaubt, Live-Push verboten
 - `requires_human_approval: true` bleibt gesetzt, aber `live_changes_allowed: false`.
-- `next_allowed_review_date` aus dem Gate-Objekt uebernehmen.
+- `next_allowed_review_date` und `unlock_status` (`blocked | partial | open`) aus der Gate-Datei in den nested `settlement_gate_status`-Mirror uebernehmen (analog `recovery-diagnose`). Die operativen Plan-Felder (`live_changes_allowed`, `allowed_now`, `blocked_now`, `emergency_exceptions`, `reason`) bleiben flach daneben.
 
 ### Pflichtfelder im Output bei aktivem Gate
 
 ```json
 {
-  "settlement_gate_active": true,
+  "settlement_gate_status": {
+    "active": true,
+    "next_allowed_review_date": "2026-06-06",
+    "unlock_status": "blocked"
+  },
   "live_changes_allowed": false,
-  "next_allowed_review_date": "2026-06-06",
   "allowed_now": [
     "act-001 (audit)",
     "act-002 (rico-briefing)"
