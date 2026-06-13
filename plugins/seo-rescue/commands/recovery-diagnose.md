@@ -278,7 +278,22 @@ Setze `core_update_correlation = "unknown"` und `core_update_name = null`. Warnu
 
 **Nimm das am staerksten korrelierende Update** (hoechste Korrelation, bei Gleichstand das juengste). Setze `core_update_name` entsprechend.
 
-### Schritt 9: Diagnosis-Klassifikation
+### Schritt 9: Pre-Hit-Baseline-Selektion (experimental, N=1)
+
+Bestimmt die Recovery-Baseline als **historisches Peak-Plateau** statt als letztes stabiles Plateau vor dem Hit. Ergebnis geht ins Feld `pre_hit_baseline`. **Markiert als `maturity: "experimental_n1"`** — N=1-Heuristik (Lesson 1, case-001), KEINE validierte Metrik. Verändert die Stage-Schätzung (Schritt 10) NICHT.
+
+1. **Zeitreihe wählen (source-adaptiv, längste verfügbare Reihe):**
+   - GSC-CSV-Import `~/.cache/seo-rescue/{slug}/imports/gsc-performance.csv` mit Spalten `date,clicks` vorhanden → wöchentliche Klick-Reihe über den vollen CSV-Range. `source: "gsc_csv"`, `unit: "clicks_per_week"`.
+   - sonst die Sistrix-VI-Snapshots aus Schritt 4 → `source: "sistrix_vi"`, `unit: "visibility_index"`.
+   - sonst keine Reihe → `pre_hit_baseline: { "value": null, "unit": "clicks_per_week", "method": "unavailable", "source": "none", "maturity": "experimental_n1", "window_weeks": null, "window_limited": false, "erosion_vs_last_plateau_pct": null, "multi_update_erosion_detected": false, "recovery_vs_baseline_pct": null }`. Warnung eintragen. Weiter mit Schritt 10.
+2. **Mindestlänge:** Hat die Reihe < 8 Perioden, ist keine belastbare Plateau-Erkennung möglich → wie der „keine Reihe"-Fall behandeln (`method: "unavailable"`).
+3. **Peak-Plateau bestimmen:** Bilde den rollierenden 4-Perioden-Mittelwert über die Reihe. `value` = Maximum dieses Mittelwerts (höchstes *gehaltenes* Niveau, kein Einzel-Spike). `method: "historical_peak"`.
+4. **Letztes stabiles Plateau vor jüngstem Hit:** Identifiziere den letzten signifikanten Drop (Periode-über-Periode-Rückgang > 15 % ODER ein in `../../references/CORE_UPDATES.md` dokumentiertes Update-Fenster). `last_stable_plateau` = Mittelwert der ~4 Perioden direkt davor.
+5. **Erosion berechnen:** `erosion_vs_last_plateau_pct = round((last_stable_plateau - value) / value * 100)`. Ist der Wert `< -15`: `multi_update_erosion_detected: true`, Warnung `"pre_hit_baseline: stabile Phase vor Hit ist selbst >15% unter historischem Peak — Multi-Update-Erosion"` eintragen, und einen Satz dazu in `summary_de` aufnehmen. Sonst `false`.
+6. **Fortschritt melden:** `recovery_vs_baseline_pct = round((current - value) / value * 100)`, wobei `current` der jüngste Reihen-Wert ist (jüngster Klick-Wochenwert bzw. `vi_current`). Reines Reporting.
+7. **Fenster-Ehrlichkeit:** `window_weeks` = Anzahl Perioden der genutzten Reihe. `window_limited: true`, falls `window_weeks < 52` (z.B. Sistrix-6-Monats-Fenster) — signalisiert, dass ein früherer Peak abgeschnitten sein könnte.
+
+### Schritt 10: Diagnosis-Klassifikation
 
 Bestimme `diagnosis` und `severity` basierend auf allen gesammelten Daten.
 
@@ -324,7 +339,7 @@ Schreibe 2–4 Saetze auf Deutsch, die die wichtigsten Befund-Punkte zusammenfas
 - Wichtigste Keyword-Beobachtung
 - Naechste empfohlene Massnahme
 
-### Schritt 10: Befund schreiben
+### Schritt 11: Befund schreiben
 
 Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.json`.
 
