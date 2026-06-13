@@ -205,6 +205,26 @@ Bei einer **Multi-Update-Sequenz** (mehrere Algorithmus-Updates über Monate) is
 
 ---
 
+## 4c. Stage State Machine (experimental, N=1)
+
+> **Maturity:** `experimental_n1` — abgeleitet aus einem einzigen Fall (case-001, Lesson 4). KEINE validierte Methode. Promotion erst nach N=2.
+
+Die lineare R1→R5-Sequenz (§4) ist der Happy-Path. Bei Multi-Update-Sequenzen ist sie unvollständig: Schaden kann wiederkehren, während der Operator schon Erholung misst. Case-001 wurde als „Stage 3 stabil" bewertet — einen Tag später schloss ein neues Core Update seinen Rollout ab und warf die Site auf Stage 1.
+
+`recovery-diagnose` (Schritt 10) überlagert die rohe Stage daher mit einer State-Machine und schreibt das Ergebnis nach `stage_status`:
+
+- **active_update_window** — läuft heute ein Rollout (heute ∈ [Start, Ende] eines `CORE_UPDATES.md`-Eintrags), wird die Progression eingefroren (`progression_allowed: false`).
+- **post_update_settlement** — bis 28 Tage nach Rollout-Ende des jüngsten Updates bleibt die Progression eingefroren; Google justiert nach, die Stage-Bewertung ist unzuverlässig.
+- **Stage-Re-Entry** — ein frischer Major-Hit (jüngstes Update endete ≤ 28 Tage, VI-4-Wochen-Trend < −10 %) setzt die effektive Stage hart auf R1 zurück (`re_entry_detected`), statt die Erholung weiter hochzuzählen.
+
+`recovery_stage_estimate` bleibt der rohe VI-Trend-Wert (`stage_status.raw_stage`); `stage_status.stage` ist der effektive Wert nach den Regeln.
+
+**Abgrenzung zum Settlement Gate (§12a):** Der Settlement Gate ist operator-batch-getriggert und blockt Live-Writes. `post_update_settlement` ist rollout-getriggert und friert nur die Stage-Bewertung ein — kein Write-Block, andere Trigger.
+
+**Noch offen (Lesson 4b):** Kumulative Schadens-Verfolgung über Update-Sequenzen, Multi-Hit-Progressions-Formel (≥ 2 Hits / 90 Tage) und ein „time-since-last-major-hit"-Gate.
+
+---
+
 ## 5. Recovery Risk Engine
 
 The Recovery Risk Engine prevents destructive changes during recovery by detecting recovering URLs, flagging proposed edits that would touch them, and surfacing the risk to the operator. It is the runtime expression of the Do-Not-Touch principle.
