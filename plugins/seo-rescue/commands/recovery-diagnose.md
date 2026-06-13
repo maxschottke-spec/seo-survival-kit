@@ -331,6 +331,19 @@ Lies `../../references/RECOVERY_SYSTEM.md` fuer die Stage-Definitionen (R1–R5)
 | `R5` | Annaehernd erholt (vi_current >= 0.9 * vi_peak) |
 | `null` | Nicht bestimmbar (VI-Daten fehlen) |
 
+**Stage-State-Machine (`stage_status`, experimental, N=1):**
+
+Überlagert die rohe `recovery_stage_estimate` mit Freeze-/Re-Entry-Regeln (Lesson 4a). Markiert `maturity: "experimental_n1"`. Liest die Rollout-Fenster (Start/Ende) aus `../../references/CORE_UPDATES.md` — dieselbe Datei wie Schritt 8.
+
+1. **Kein/veraltetes CORE_UPDATES.md** (Datei fehlt oder > 90 Tage alt): keine Freezes — `stage = recovery_stage_estimate`, `raw_stage = recovery_stage_estimate`, `progression_allowed: true`, `frozen_reason: null`, `re_entry_detected: false`, `re_entry_from: null`, `active_update: null`, `days_since_rollout_end: null`, `maturity: "experimental_n1"`. Fertig.
+2. **active_update_window:** Liegt das heutige Datum innerhalb [Rollout-Start, Rollout-Ende] eines Eintrags → `frozen_reason: "active_update_window"`, `progression_allowed: false`, `active_update` = Update-Name.
+3. **post_update_settlement:** sonst, liegt heute in (Rollout-Ende, Rollout-Ende + 28 Tage] des jüngsten Eintrags → `frozen_reason: "post_update_settlement"`, `progression_allowed: false`, `days_since_rollout_end` = Tage seit Rollout-Ende. Sonst `frozen_reason: null`, `progression_allowed: true`.
+4. **Re-Entry:** endete das jüngste Update ≤ 28 Tage vor heute UND `vi_trend_4w_pct < -10` → `re_entry_detected: true`, `re_entry_from` = `recovery_stage_estimate`, effektive `stage = "R1"`. Sonst `re_entry_detected: false`, `re_entry_from: null`, `stage = recovery_stage_estimate`.
+   (Re-Entry und Freeze können gleichzeitig gelten: `stage = "R1"`, `progression_allowed` bleibt `false`.)
+5. `raw_stage` ist immer = `recovery_stage_estimate`.
+
+Dies ist NICHT der Settlement Gate (§12a / `SEO_SETTLEMENT_GATE.md`) — jener ist operator-batch-getriggert und blockt Live-Writes; `stage_status` friert nur die Stage-Bewertung ein.
+
 **Deutschsprachige Zusammenfassung (`summary_de`):**
 
 Schreibe 2–4 Saetze auf Deutsch, die die wichtigsten Befund-Punkte zusammenfassen:
@@ -396,6 +409,17 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
     "erosion_vs_last_plateau_pct": "<number|null>",
     "multi_update_erosion_detected": false,
     "recovery_vs_baseline_pct": "<number|null>"
+  },
+  "stage_status": {
+    "stage": "R1 | R2 | R3 | R4 | R5",
+    "raw_stage": "R1 | R2 | R3 | R4 | R5 | null",
+    "progression_allowed": false,
+    "frozen_reason": "active_update_window | post_update_settlement | null",
+    "re_entry_detected": false,
+    "re_entry_from": "R1 | R2 | R3 | R4 | R5 | null",
+    "active_update": "<string|null>",
+    "days_since_rollout_end": "<integer|null>",
+    "maturity": "experimental_n1"
   },
   "summary_de": "<deutschsprachige Zusammenfassung>"
 }
@@ -476,6 +500,17 @@ Ersetze `{slug}` durch den ermittelten Slug und `BEFUND_OBJECT` durch das vollst
     "next_allowed_review_date": "2026-06-06",
     "unlock_status": "blocked"
   },
+  "stage_status": {
+    "stage": "R1",
+    "raw_stage": "R2",
+    "progression_allowed": false,
+    "frozen_reason": "post_update_settlement",
+    "re_entry_detected": true,
+    "re_entry_from": "R2",
+    "active_update": null,
+    "days_since_rollout_end": 9,
+    "maturity": "experimental_n1"
+  },
   "summary_de": "Die Domain verzeichnete einen VI-Drop von 49.8% korrelierend mit dem March 2024 Core Update. ..."
 }
 ```
@@ -491,8 +526,9 @@ Nach erfolgreichem Schreiben des Befunds, gib folgende Informationen aus:
 5. **Keywords:** `Rankende Keywords: {keywords_total} | Quick Wins: {quick_wins.length}`
 6. **Fehlende Capabilities** (falls vorhanden): `Fehlende Daten: {missing_capabilities.join(', ')}`
 7. **Pre-Hit-Baseline** (experimentell, nur falls `pre_hit_baseline.method != "unavailable"`): `Pre-Hit-Baseline: {value} {unit} ({method} aus {source}, N=1 experimentell) | Erholung vs. Peak: {recovery_vs_baseline_pct}%`. Bei `multi_update_erosion_detected = true` zusaetzlich: `⚠ Multi-Update-Erosion: stabile Phase vor Hit {erosion_vs_last_plateau_pct}% unter historischem Peak`
-8. **Settlement Gate** (nur falls `settlement_gate_status.active = true`): `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Diagnose erlaubt, Live-Aenderungen blockiert`
-9. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
+8. **Stage-Status** (experimentell): `Stage: {stage_status.stage} (roh: {stage_status.raw_stage}) | Progression: {progression_allowed ? "erlaubt" : "eingefroren — " + frozen_reason}`. Bei `re_entry_detected = true` zusaetzlich: `⚠ Stage-Re-Entry: frischer Hit hat Stage von {re_entry_from} auf R1 zurueckgesetzt`
+9. **Settlement Gate** (nur falls `settlement_gate_status.active = true`): `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Diagnose erlaubt, Live-Aenderungen blockiert`
+10. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
    - `core-update` → `/seo-rescue:post-core-update-recovery`
    - `technical` → `/seo-rescue:seo-audit-free`
    - `content` → `/seo-rescue:recovery-plan`
@@ -537,6 +573,9 @@ Pruefe vor dem Schreiben:
 - `pre_hit_baseline.maturity` muss `"experimental_n1"` sein
 - Falls `pre_hit_baseline.value = null`, muss `pre_hit_baseline.method = "unavailable"` sein
 - `pre_hit_baseline.method`, `.source`, `.unit` muessen im jeweiligen Schema-Enum liegen
+- `stage_status.maturity` muss `"experimental_n1"` sein
+- `stage_status.re_entry_detected = true` ⇒ `stage_status.stage = "R1"`
+- `stage_status.frozen_reason != null` ⇒ `stage_status.progression_allowed = false`
 
 Bei einem Validierungsfehler: Warnung eintragen und Wert auf den naechsten gueltigen Wert korrigieren (z.B. negative t3 auf 0 setzen) oder Abbruch wenn Korrektur nicht moeglich.
 
@@ -550,6 +589,7 @@ Bei einem Validierungsfehler: Warnung eintragen und Wert auf den naechsten guelt
 | Alle Capabilities fehlen | `status = "failed"`, `data_quality = "poor"`, `confidence = "none"` |
 | Nur GSC-CSV als Quelle | `data_quality = "poor"`, `confidence = "low"` |
 | Keine verwertbare Zeitreihe / CSV ohne `date`-Spalte / Reihe < 8 Perioden | `pre_hit_baseline.method = "unavailable"`, `.value = null`, Warnung; Diagnose laeuft normal weiter |
+| CORE_UPDATES.md fehlt oder > 90 Tage alt | `stage_status` ohne Freezes: `progression_allowed = true`, `frozen_reason = null`, `re_entry_detected = false`, `stage = recovery_stage_estimate` |
 | CORE_UPDATES.md veraltet (> 90 Tage) | `core_update_correlation` max `"low"` oder `"unknown"` |
 
 ## Datenqualitaetsregeln
