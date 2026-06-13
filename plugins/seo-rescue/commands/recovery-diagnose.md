@@ -385,6 +385,18 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
   "severity": "critical | high | medium | low",
   "recovery_stage_estimate": "R1 | R2 | R3 | R4 | R5 | null",
   "settlement_gate_status": { "active": false },
+  "pre_hit_baseline": {
+    "value": "<number|null>",
+    "unit": "clicks_per_week | visibility_index",
+    "method": "historical_peak | last_plateau | unavailable",
+    "source": "gsc_csv | sistrix_vi | none",
+    "maturity": "experimental_n1",
+    "window_weeks": "<integer|null>",
+    "window_limited": false,
+    "erosion_vs_last_plateau_pct": "<number|null>",
+    "multi_update_erosion_detected": false,
+    "recovery_vs_baseline_pct": "<number|null>"
+  },
   "summary_de": "<deutschsprachige Zusammenfassung>"
 }
 ```
@@ -478,8 +490,9 @@ Nach erfolgreichem Schreiben des Befunds, gib folgende Informationen aus:
 4. **Core-Update-Korrelation:** `Core Update: {core_update_name} ({core_update_correlation})`
 5. **Keywords:** `Rankende Keywords: {keywords_total} | Quick Wins: {quick_wins.length}`
 6. **Fehlende Capabilities** (falls vorhanden): `Fehlende Daten: {missing_capabilities.join(', ')}`
-7. **Settlement Gate** (nur falls `settlement_gate_status.active = true`): `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Diagnose erlaubt, Live-Aenderungen blockiert`
-8. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
+7. **Pre-Hit-Baseline** (experimentell, nur falls `pre_hit_baseline.method != "unavailable"`): `Pre-Hit-Baseline: {value} {unit} ({method} aus {source}, N=1 experimentell) | Erholung vs. Peak: {recovery_vs_baseline_pct}%`. Bei `multi_update_erosion_detected = true` zusaetzlich: `⚠ Multi-Update-Erosion: stabile Phase vor Hit {erosion_vs_last_plateau_pct}% unter historischem Peak`
+8. **Settlement Gate** (nur falls `settlement_gate_status.active = true`): `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Diagnose erlaubt, Live-Aenderungen blockiert`
+9. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
    - `core-update` → `/seo-rescue:post-core-update-recovery`
    - `technical` → `/seo-rescue:seo-audit-free`
    - `content` → `/seo-rescue:recovery-plan`
@@ -521,6 +534,9 @@ Pruefe vor dem Schreiben:
 - `confidence` muss exakt einer sein von: `high | medium | low | none`
 - `providers_used` muss ein Array sein (darf leer sein wenn status = failed)
 - `missing_capabilities` muss ein Array sein
+- `pre_hit_baseline.maturity` muss `"experimental_n1"` sein
+- Falls `pre_hit_baseline.value = null`, muss `pre_hit_baseline.method = "unavailable"` sein
+- `pre_hit_baseline.method`, `.source`, `.unit` muessen im jeweiligen Schema-Enum liegen
 
 Bei einem Validierungsfehler: Warnung eintragen und Wert auf den naechsten gueltigen Wert korrigieren (z.B. negative t3 auf 0 setzen) oder Abbruch wenn Korrektur nicht moeglich.
 
@@ -533,6 +549,7 @@ Bei einem Validierungsfehler: Warnung eintragen und Wert auf den naechsten guelt
 | Kein Backlink-Profil | `backlink_profile = null`; kein Abbruch |
 | Alle Capabilities fehlen | `status = "failed"`, `data_quality = "poor"`, `confidence = "none"` |
 | Nur GSC-CSV als Quelle | `data_quality = "poor"`, `confidence = "low"` |
+| Keine verwertbare Zeitreihe / CSV ohne `date`-Spalte / Reihe < 8 Perioden | `pre_hit_baseline.method = "unavailable"`, `.value = null`, Warnung; Diagnose laeuft normal weiter |
 | CORE_UPDATES.md veraltet (> 90 Tage) | `core_update_correlation` max `"low"` oder `"unknown"` |
 
 ## Datenqualitaetsregeln
