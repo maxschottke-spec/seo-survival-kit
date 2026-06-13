@@ -3,5 +3,6 @@
   "site": "sc-domain:example.com",
   "days": 90,
   "output_dir": "./gsc-history",
-  "top_n": 500
+  "top_n": 500,
+  "weekly_series_days": 480
 }

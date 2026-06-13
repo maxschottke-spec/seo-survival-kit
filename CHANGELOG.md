@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ### Added
 
+- **L2 Quiet-Death-Detection** (Phase 2, experimental N=1) — `gsc-deep-dive` now pulls a per-query weekly click series (`query_weekly_series`, top 200, up to `weekly_series_days` days) and ships a zero-dep detector (`quiet-death-detect.example.js`) that flags slow non-update-driven declines (≥50 % loss over ≥6 monotonic weeks, ≥5 start clicks), annotated with `update_correlation` (none/partial vs `CORE_UPDATES.md`) and a `pattern_hint`. Marked `maturity: experimental_n1`.
 - **L1 Pre-Hit-Baseline-Selektion** (Phase 2, experimental N=1) — `recovery-diagnose` selects the recovery baseline as the historical peak plateau instead of the last stable phase before the hit, flags multi-update erosion (`multi_update_erosion_detected`), and reports progress against the true peak (`recovery_vs_baseline_pct`). New `pre_hit_baseline` field in `befund.schema.json`, marked `maturity: experimental_n1`. The R1-R5 stage formula is unchanged (stays VI-peak-based; baseline-relative staging is Lesson 4).
 
 ### Fixed
