@@ -9,6 +9,12 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 
 Woechentliches Recovery-Tracking. Holt aktuelle VI + Keyword-Daten, berechnet Recovery-Score, appendet an die History-Datei. Laeuft auch bei fehlenden Datenquellen durch und schreibt einen Partial-Eintrag — der Zeitstempel allein ist wertvoll fuer die Zeitreihe.
 
+## Change Governance
+
+Mode: `read_only`. Change Budget: 0. Keine Live-Shop-Writes. Schreibt nur History-Artefakte (`history.ndjson`, append-only, via `lib/safe.js`).
+
+Wenn `change-history.ndjson` existiert, wird sie fuer die Change-History-Integration gelesen und im Eintrag referenziert (siehe `## Change History Integration`). Jede Score-Bewegung traegt Quelle und Confidence.
+
 ## Settlement Gate Awareness
 
 Dieses Command ist read-only gegenueber dem Live-Shop (`audit_only`, Change Budget 0, schreibt nur Cache-Artefakte) — ein aktiver Settlement Gate (`references/SEO_SETTLEMENT_GATE.md`) blockiert es NIE. Es muss den Gate-State aber kennen und ausweisen:
@@ -205,6 +211,14 @@ Score-Komponenten:
 Datenqualitaet: good | Confidence: high
 Fehlende Capabilities: keine
 ```
+
+## Ausgabe an den User
+
+Nach erfolgreichem Append des History-Eintrags, gib folgende Informationen aus:
+
+1. **Delta-Report** im Format aus `## Delta-Report Format` — VI, Score mit Delta, Phase, Top-10-Keywords, Score-Komponenten, Datenqualitaet und Confidence.
+2. **Settlement-Gate-Zeile** (nur falls `settlement_gate_status.active = true`): `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Monitoring erlaubt, Live-Aenderungen blockiert`
+3. **Score-Bewegungs-Hinweis** bei Drop > 15 Punkten waehrend aktivem Gate: keinen korrigierenden Live-Vorschlag ausgeben, sondern die Beobachtung fuer die Gate-Re-Evaluation am `next_allowed_review_date` vermerken (siehe `## Settlement Gate Awareness`).
 
 ## Fehlerbehandlung
 
