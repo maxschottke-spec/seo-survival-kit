@@ -46,6 +46,20 @@ Scope:
 - Output follows the documented contract: executive summary, recovery stage, Recovery Signal Score, visibility-index interpretation, top winners, top losers, money keyword protection list, URL-level recovery table, GSC cross-check if available, recommended action (Observe/Protect/Strengthen/Investigate/Correct/Escalate), what not to touch, next-7-day monitoring plan, next-Monday checklist
 - Synthetic example folder `examples/synthetic-sistrix-monday-check/` with input shape and expected output
 
+## v0.5.4
+
+Recovery Hardening. Framework/methodology additions from real recovery-ops lessons (see `post-core-update-recovery/LESSONS.md`, entry 2026-06/07). No new runtime skill; pure-Markdown rules + methodology, low blast radius, shippable independent of proof cycles.
+
+Scope:
+
+- **Rendered-source verification** in `SAFE_LIVE_CHANGE_RULES.md` / Change Governor: before any meta/CMS edit, verify what actually *renders* (CMS field vs SEO-plugin/theme override). Field-based inventories overcount ("Karteileichen"), and field edits on plugin-overridden pages are no-ops. Extends the existing "verify live HTTP, not just the seo-url table" rule to meta/CMS fields.
+- **Governing-fact-before-editing-a-claim**: sequence rule — establish the governing fact (owner-confirmed) before editing any factual or wording claim. Editing on an unconfirmed fact introduces new errors that must later be reverted.
+- **Knocking-at-the-door cohort finder** in `recovery-diagnose` methodology: surface on-page-hardening targets via GSC filter (high impressions × low CTR × position ~8–15 × missing H1/FAQ). Action: H1 fix + PAA-as-H2 + FAQPage schema + CTR title/meta. Systematic cohort selection, not case-by-case.
+- **Gate append-only audit**: settlement-gate unlock/relock cycles append to a history array instead of overwriting scalar keys, so multi-cycle deploy sessions keep a full audit trail.
+- Contributes toward the v1.0 gate "5+ entries in each LESSONS.md".
+
+Deliberately deferred to v0.6: the `compliance-aware-recovery` runtime skill (factual-accuracy vs abmahn-wording, scan on rendered content) — gated on cross-case validation so it lands validated, not candidate.
+
 ## v0.5.5
 
 Commercial Model PR (separate from v0.5 to keep technical architecture review clean).
