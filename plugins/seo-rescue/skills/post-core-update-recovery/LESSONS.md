@@ -136,6 +136,31 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 
 ---
 
+## 2026-06/07 — Post-Deploy-Phase: Compliance-Nebenachse + 2 Prozess-Lehren + Cohort-Hardening (DE-Matratzen-Shop)
+
+**Kontext:** Nach Settlement-Unlock (Kriterien erfüllt → *sauberer* statt forcierter Unlock) erste On-Page-Recovery-Deploys + Wording-/Compliance-Bereinigung auf Schlüsselseiten. **Proof-Status ehrlich:** Deploys sauber ausgeführt, Google-Re-Crawl stand zum Doku-Zeitpunkt noch aus (Crawl-Lag, letzter Crawl vor Deploy) → **Kausal-Wirkung noch NICHT belegt**, Messfenster ~1 Woche später. Narrativ nicht vor Proof.
+
+**Lesson 1 — Rendered ≠ stored field (Meta/CMS-Trap).** Erweitert die bestehende „Never trust only the seo-url table"-Regel auf Meta-/CMS-Felder: `category.metaTitle/metaDescription` ist nicht immer die *gerenderte* Quelle — SEO-Plugins/Theme überschreiben teils pro Seite. Feld-Inventare überzählen (Karteileichen), Feld-Edits bleiben wirkungslos. **Regel:** vor jedem Meta-/CMS-Edit die *gerenderte* Seite live prüfen und auf der real rendernden Ebene editieren.
+
+**Lesson 2 — Governing fact before editing a claim.** Ein Wording-Edit auf Basis einer noch nicht verbindlich geklärten Tatsache erzeugte eine *neue* Ungenauigkeit (Kausativ „lässt fertigen" statt „fertigt selbst"), die zurückgedreht werden musste. **Regel:** maßgeblichen Fakt ZUERST (Owner) klären, dann editieren. Reihenfolge-Fehler = selbst eingeführter Fehler.
+
+**Lesson 3 — Compliance ist eine eigene Recovery-Nebenachse.** Erweitert die knappe „Medical/Legal"-Regel: Schlüsselseiten trugen (a) sachlich falsche Fakten-Claims (Fertigungs-Location, Eigen- vs Partner-Fertigung) und (b) abmahn-gefährdete Wording (DE-Beispiel „schadstofffrei" → sicher „schadstoffarm/OEKO-TEX-geprüft") + unbelegte Gesundheits-Claims. Trenne **Fakten-Genauigkeit** (muss wahr sein) von **Abmahn-Wording** (Verbotsliste); scanne **gerenderten** Content. Kein Ranking-Hebel, aber Rechts-/Trust-Risiko + besseres EEAT.
+
+**Lesson 4 — „Knocking-at-the-door"-Cohort für On-Page-Hardening.** Seiten mit hohen Impressionen × niedriger CTR × Position ~8–15 × fehlender H1/FAQ-Struktur = beste Hardening-Ziele (Substanz da, konvertiert nicht). Maßnahme: fehlende H1 + PAA-Fragen als H2 + FAQPage-Schema + CTR-Title/Meta. Systematische Kohorten-Auswahl aus GSC (Impr/CTR/Pos-Filter) statt Einzelfall; deckt sich mit „CTR-Rewrites 1–3 Wo".
+
+**Lesson 5 — Gate-Hygiene.** Sauberer Unlock (Kriterien erfüllt) > forcierter Unlock. Deploy-Muster: Dry-Run → Gate-Unlock → Patch → Re-Lock → Live-Verify + Rollback-Snapshot. Tooling-Nachtrag: Gate-Audit-Trail **append-only** (Zyklen anhängen statt Scalar-Keys überschreiben). Bestätigt die „No second wave until first measured (7d)"-Regel — Welle 2 wurde bewusst bis nach dem 7-Tage-Messfenster geparkt.
+
+**Konsequenz für Framework (Roadmap):**
+- L1 + L2 → `references/SAFE_LIVE_CHANGE_RULES.md` bzw. Change-Governor als Pflicht-Checks. v0.6.
+- L3 → neues Skill-Material `compliance-aware-recovery` (Fakten-Accuracy + Abmahn-Wording-Scan auf gerendertem Content). v0.6/0.7.
+- L4 → `recovery-diagnose`/Methodik: expliziter Cohort-Finder (GSC Impr×CTR×Pos). v0.6.
+- L5 → Gate-Skill härten (append-only audit).
+- N=1 candidates → validated nach cross-case Bestätigung.
+
+**Quelle:** case-001 Recovery-Ops 2026-06-30/07-01 (case-internes Detail in `private/cases/case-001/patterns/`), anonymisiert.
+
+---
+
 ## Konsolidierte Lessons (aus 3+ Einträgen ins Hauptskill übernommen)
 
 _(noch leer — die 5 Framework-Lessons aus dem 2026-06-03-Eintrag sind N=1 candidates und warten auf cross-case Bestätigung)_
