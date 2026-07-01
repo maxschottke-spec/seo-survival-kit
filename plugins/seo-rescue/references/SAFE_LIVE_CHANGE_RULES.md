@@ -123,6 +123,8 @@ Before every live write:
    - Flag High/Medium risk in `compliance_review`
 8. **Valid approval** received
 9. **Rollback method** documented
+10. **Rendered-source verification** for meta/CMS edits: confirm what actually *renders* (live fetch / view-source), not just the stored field. Category/CMS meta fields (metaTitle, metaDescription, slot content) can be overridden per page by SEO plugins or theme templates — editing the stored field is then a no-op. Field-based inventories overcount ("Karteileichen"); verify the page renders the field before counting it as a target and before editing. Extends "live HTTP, not just API state" to meta/CMS fields.
+11. **Governing fact confirmed** before any factual or wording claim edit: the underlying fact (production location, own-vs-partner manufacturing, certification, timeline) must be owner-confirmed *before* editing the claim. Editing on an unconfirmed fact introduces a new error that must later be reverted. Sequence: confirm the fact, then edit.
 
 ## Post-Change Checklist
 

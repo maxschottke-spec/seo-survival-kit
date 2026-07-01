@@ -242,6 +242,8 @@ Every command that touches `recovery_gate` state must emit or read the following
 
 The object is persisted at `~/.cache/seo-rescue/{slug}/recovery-gate.json` per the schema in `schemas/recovery-gate.schema.json`. It is the source of truth queried by every recovery command.
 
+**Audit trail is append-only.** Unlock and re-lock cycles append to a history array (`emergency_exceptions[]`, `superseded_history[]`), they never overwrite scalar keys. A single deploy day can run several clean-unlock → patch → re-lock cycles; overwriting a scalar `unlock`/`re_lock` field keeps only the last cycle and loses the record of the intermediate ones. Append every cycle so the full sequence stays auditable, and prefer a **clean unlock** (unlock criteria met) over a forced one — a forced unlock is an exception that must be logged with reason and rollback snapshot.
+
 ---
 
 ## 9. Unlock criteria

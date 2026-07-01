@@ -470,6 +470,14 @@ try {
 
 Ersetze `{slug}` durch den ermittelten Slug und `BEFUND_OBJECT` durch das vollstaendige JSON-Objekt als JavaScript-Literal.
 
+### Schritt 12: Knocking-at-the-door-Cohort (On-Page-Hardening-Kandidaten)
+
+Falls GSC verfuegbar: die Seiten-Kohorte surfacen, die knapp unter Top-10 "an der Tuer klopft" — **hohe Impressionen x niedrige CTR x Position ~8-15 x fehlende H1/FAQ-Struktur**. Das sind die besten On-Page-Hardening-Ziele: die Substanz rankt bereits, konvertiert aber nicht.
+
+Filter (Richtwerte, anpassbar): `position` 8-15, `impressions >= P75` der Domain, `ctr <= 0.5x` des Positions-Erwartungswerts. Pro Kandidat **gerendert** pruefen (siehe Rendered-Source-Verification in `SAFE_LIVE_CHANGE_RULES.md`): H1 vorhanden? FAQPage-Schema? PAA-Fragen als H2 abgedeckt?
+
+Massnahme je Kandidat (nach Change-Governor + Settlement-Gate + Approval, kein Auto-Write): fehlende **H1** setzen; **PAA-Fragen als H2** mit Direktantwort; **FAQPage-Schema**; **CTR-Title/Meta**. Erwartete Wirkung: CTR-Rewrites 1-3 Wochen, Ranking-Effekt ueber Wochen. Ausgabe als `hardening_candidates`-Liste im Befund (falls Schema-Feld vorhanden) oder als Klartext-Sektion. Read-only Diagnose; Umsetzung folgt der Live-Change-Discipline.
+
 ## Output-Pfad
 
 `~/.cache/seo-rescue/{slug}/befund.json`
