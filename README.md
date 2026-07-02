@@ -91,11 +91,11 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 | Command | What it does | Cost |
 |---|---|---|
 | `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
-| `/seo-rescue:recovery-diagnose <domain>` | Diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO + GSC CSV) | ~$0.05–$0.50 |
+| `/seo-rescue:recovery-diagnose <domain>` | Diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO + GSC, with CSV fallbacks) | ~$0.05–$0.50 |
 | `/seo-rescue:recovery-crawl <domain>` | Crawl + severity-classified issues (Screaming Frog MCP or CSV-import fallback) | free |
 | `/seo-rescue:recovery-audit <domain> [--days 14]` | Read-only change audit: Settlement-Gate-State + hypothesis registry | free |
 | `/seo-rescue:recovery-plan <domain>` | Prioritized 30/60/90-day plan with Do-Not-Touch + human approval gate | free |
-| `/seo-rescue:recovery-monitor <domain>` | Weekly tracking with deterministic 0-100 recovery score | free |
+| `/seo-rescue:recovery-monitor <domain>` | Weekly tracking with deterministic 0-100 recovery score (`null` when data is insufficient) | free |
 | `/seo-rescue:recovery-full <domain>` | Full sequence: diagnose → crawl → audit → plan → monitor | ~$0.05–$0.50 |
 | `/seo-rescue:sistrix-monday-recovery-check <current.csv> <previous.csv> [domain?]` | CSV-first weekly review, 17-section structured report | free |
 
@@ -113,7 +113,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 | Command | What it does | Cost |
 |---|---|---|
 | `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers | ~$0.05–$0.50 |
-| `/seo-rescue:channel-economics-analyzer` | Per-channel P&L across 30+ marketplaces | free (your CSVs) |
+| `/seo-rescue:channel-economics-analyzer` | Per-channel P&L from your marketplace CSVs (Amazon, OTTO, eBay, Zalando, …) | free (your CSVs) |
 | `/seo-rescue:subscription-monetization-audit [domain \| --csv]` | 5-lever recurring-revenue playbook; optional Stripe/Chargebee/Recurly CSV import for MRR / ARPU / churn / cohort analysis | free (your CSVs) |
 
 **AI surface (experimental visibility layer)**
@@ -158,13 +158,13 @@ See [SECURITY.md → How to verify before trusting](./SECURITY.md#how-to-verify-
 
 ### Outside Claude Code
 
-The three pure-Markdown framework skills (`rescue`, `post-core-update-recovery`, `ai-search-rescue`) are available as platform-agnostic Markdown in [`exports/`](./exports/) with install snippets for Cursor, OpenAI Custom GPT, Gemini CLI, Aider, Continue.dev, and Codex. Script-backed skills remain Claude-Code-specific; MCP wrapper planned for v1.0+.
+The three pure-Markdown framework skills (`post-core-update-recovery`, `ai-search-rescue`, and the orchestrator overview `seo-rescue-overview`) are available as platform-agnostic Markdown in [`exports/`](./exports/) with install snippets for Cursor, OpenAI Custom GPT, Gemini CLI, Aider, Continue.dev, and Codex. Script-backed skills remain Claude-Code-specific; MCP wrapper planned for v1.0+.
 
 ## Before you run anything
 
 | File | Why |
 |---|---|
-| [COSTS.md](./COSTS.md) | `seo-outreach-report` uses three paid APIs. €0.05–€0.50 per domain typical. |
+| [COSTS.md](./COSTS.md) | `seo-outreach-report` uses three paid APIs. ~$0.05–$0.50 per domain typical. |
 | [SECURITY.md](./SECURITY.md) | What the scripts access, what they don't, how to verify. |
 | [MATURITY.md](./MATURITY.md) | Honest comparison with mature alternatives. |
 | [ONBOARDING.md](./ONBOARDING.md) | Install to first PDF in 15 minutes. |
@@ -190,7 +190,7 @@ Full sample: [examples/sample-audit.pdf](./examples/sample-audit.pdf). The use-c
 
 ## When not to use
 
-- The site is brand new (< 6 months). That is an aufbau-phase, not a rescue-phase.
+- The site is brand new (< 6 months). That is a build-up phase, not a rescue phase.
 - You need a deep technical audit (crawlability, schema validation, CWV across hundreds of URLs). Use `claude-seo` instead. This complements it.
 - You need 4-week magic recovery. The framework is explicit about 6-12 month horizons for Core Update damage.
 - You need production-grade guarantees, SLAs, or enterprise contracts. Public beta, single-maintainer.
@@ -228,7 +228,7 @@ The plugin is MIT and self-serve. If you'd rather have someone with operational 
 | Engagement | What you get | Typical scope |
 |---|---|---|
 | **Recovery Audit (fixed)** | Full diagnose-PDF + 60-min strategy call + 4-phase 6-12 month plan | One domain, one Core-Update or AI-search problem |
-| **Recovery Begleitung (retainer)** | Monthly reviews, plan adjustments, prioritization help | 3-6 months, weekly to bi-weekly cadence |
+| **Recovery Retainer (ongoing advisory)** | Monthly reviews, plan adjustments, prioritization help | 3-6 months, weekly to bi-weekly cadence |
 | **Outreach pipeline setup** | Configured pipeline + first 5 PDFs + handoff | One-time, for agencies that want decision-maker deliverables |
 
 Contact: open a [Discussion](https://github.com/maxschottke-spec/seo-survival-kit/discussions) or reach the maintainer via the email on the [GitHub profile](https://github.com/maxschottke-spec). The framework comes from a specific recovery case still in active recovery; engaging means getting context on which patterns apply to your situation and which do not.
@@ -244,4 +244,4 @@ Single-maintainer open-source project. No SLA, no commercial support. Issue resp
 
 ## License, security, contributing
 
-MIT. See [LICENSE](./LICENSE), [SECURITY.md](./SECURITY.md), [CONTRIBUTING (open an issue first for larger changes)](https://github.com/maxschottke-spec/seo-survival-kit/issues).
+MIT. See [LICENSE](./LICENSE) and [SECURITY.md](./SECURITY.md). Contributing: no CONTRIBUTING.md yet — please [open an issue](https://github.com/maxschottke-spec/seo-survival-kit/issues) first for larger changes.

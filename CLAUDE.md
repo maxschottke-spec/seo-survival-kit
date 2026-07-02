@@ -61,7 +61,7 @@ seo-survival-kit/
 │           ├── sistrix-monday-recovery-check/  # v0.5.2: CSV-first weekly recovery review
 │           ├── subscription-monetization-audit/ # v0.5.2: recurring-revenue lever audit
 │           └── recovery-{diagnose,crawl,audit,plan,monitor,full}/  # v0.5.2: thin wrappers for the recovery-workflow commands
-├── exports/                          # Platform-agnostic Markdown copies (Cursor / Custom GPT / Gemini / Aider / Codex)
+├── exports/                          # Platform-agnostic Markdown copies (Cursor / Custom GPT / Gemini / Aider / Continue.dev / Codex)
 ├── examples/                         # Sample PDF + screenshots (synthetic data)
 ├── ARCHITECTURE.md                   # Canonical source of truth (vision, positioning, modules, governance, privacy)
 ├── RECOVERY_SYSTEM.md                # Pointer stub — canonical copy: plugins/seo-rescue/references/RECOVERY_SYSTEM.md

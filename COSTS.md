@@ -45,4 +45,4 @@ For DataForSEO: their dashboard shows real-time spend.
 
 ## TL;DR
 
-If you're an SEO agency or freelancer doing client work, these costs are negligible compared to the value (one polished outreach PDF that lands a client = ROI in 1 deal). If you're casually testing on your own site, expect roughly €0.50 per audit and run it sparingly.
+If you're an SEO agency or freelancer doing client work, these costs are negligible compared to the value (one polished outreach PDF that lands a client = ROI in 1 deal). If you're casually testing on your own site, expect roughly $0.50 per audit and run it sparingly.
