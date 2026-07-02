@@ -377,6 +377,6 @@ PDF landet in `~/Downloads/SEO-Auswertung-<domain>-<date>.pdf`.
 ## Quer-Referenz
 
 - [TOOLS.md](./TOOLS.md) — Alternative Tools (Ahrefs/SEMrush/XOVI etc.)
-- [../../../../COSTS.md](../../../../COSTS.md) — was kostet die Pipeline pro Domain
-- [../../../../SECURITY.md](../../../../SECURITY.md) — was die Scripts dürfen/nicht
-- [../../../../ONBOARDING.md](../../../../ONBOARDING.md) — generelles 15-Min-Setup
+- `COSTS.md` (Repo-Root, nicht im Plugin-Paket) — was kostet die Pipeline pro Domain
+- `SECURITY.md` (Repo-Root, nicht im Plugin-Paket) — was die Scripts dürfen/nicht
+- `ONBOARDING.md` (Repo-Root, nicht im Plugin-Paket) — generelles 15-Min-Setup

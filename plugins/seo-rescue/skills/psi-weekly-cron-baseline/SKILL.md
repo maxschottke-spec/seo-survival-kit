@@ -1,13 +1,13 @@
 ---
 name: psi-weekly-cron-baseline
 description: 'Use when setting up automated weekly PageSpeed Insights tracking for a set of URLs — to catch performance regressions before users notice, or to validate that performance optimizations actually stuck over time. Triggers from "weekly PSI tracking", "PageSpeed monitoring", "Core Web Vitals over time", "PSI cron", "performance drift detection", "set up automated lighthouse runs". Uses the free Google PSI v5 API (25k calls/day quota with API key). Stores historical data as NDJSON for trend analysis and triggers alerts on regressions.'
-user-invokable: true
+user-invocable: true
 argument-hint: '[setup | run | analyze]'
 allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*), Bash(launchctl:*), Bash(crontab:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.2'
+  version: '0.5.3'
   category: marketing
 ---
 

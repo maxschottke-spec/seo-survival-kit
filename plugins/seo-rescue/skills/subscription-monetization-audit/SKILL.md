@@ -1,13 +1,13 @@
 ---
 name: subscription-monetization-audit
 description: 'Use when analyzing a subscription or recurring-revenue business (news site, paywall publisher, SaaS-light, membership platform, e-commerce with subscription tier) for monetization gaps and revenue-growth levers. Combines outside-in detection (paywall structure, tier visibility, ad density, trust signals) with optional inside-out import of MRR / churn / cohort data from a Stripe / Chargebee / Recurly CSV export. Triggers include "wir verbrennen Geld und wissen nicht woher das Wachstum kommen soll", "MRR stagniert", "Abo-Konversion ist zu niedrig", "subscription revenue model review", "premium tier evaluation", "warum wachsen wir nicht mehr", "Burn-Rate vs. Revenue-Lücke schließen". Anti-Use: NICHT für reine transaktionale E-Commerce-Shops ohne Subscription (`channel-economics-analyzer` ist dafür), NICHT für B2B-Enterprise-SaaS mit Custom-Pricing (anderes Playbook), NICHT für Pre-Revenue-Startups (Skill setzt eine bestehende Subscription-Basis voraus).'
-user-invokable: true
+user-invocable: true
 argument-hint: '[domain | --csv path-to-export.csv]'
 allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.2'
+  version: '0.5.3'
   category: marketing
 ---
 

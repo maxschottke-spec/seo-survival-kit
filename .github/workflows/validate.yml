@@ -129,3 +129,72 @@ jobs:
           done < <(find plugins/seo-rescue -name '*.example.json' -print0)
           [ "$fail" -eq 0 ] || exit 1
           echo "✔ All example JSON configs parse"
+
+      # Version consistency: plugin.json is the single source of truth for the
+      # installable version. Every skill's metadata.version, the rescue
+      # orchestrator's "Latest installable version" claim, and the README's
+      # shipped/install-tag lines must agree with it. Bonus: the recovery
+      # output contract (schema_version literals in commands/ and
+      # test-fixtures/) must match the const in befund.schema.json.
+      - name: Check version consistency (plugin.json vs skills, README, schema_version)
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const v = JSON.parse(fs.readFileSync('plugins/seo-rescue/.claude-plugin/plugin.json', 'utf8')).version;
+            let failed = 0;
+            const err = (msg) => { console.error('::error::' + msg); failed = 1; };
+            const skillsDir = 'plugins/seo-rescue/skills';
+            for (const name of fs.readdirSync(skillsDir)) {
+              const f = path.join(skillsDir, name, 'SKILL.md');
+              if (!fs.existsSync(f)) continue;
+              const m = fs.readFileSync(f, 'utf8').match(/^  version: '([^']+)'/m);
+              if (!m) { err(f + ' — missing metadata.version'); continue; }
+              if (m[1] !== v) err(f + ' — metadata.version ' + m[1] + ' != plugin.json ' + v);
+            }
+            const rescue = fs.readFileSync(path.join(skillsDir, 'rescue/SKILL.md'), 'utf8');
+            if (!rescue.includes('**Latest installable version:** v' + v))
+              err('rescue/SKILL.md — \"Latest installable version\" claim != v' + v);
+            const readme = fs.readFileSync('README.md', 'utf8');
+            if (!readme.includes('**v' + v + ' shipped.**'))
+              err('README.md — \"vX shipped\" line != v' + v);
+            if (!readme.includes('#v' + v))
+              err('README.md — install tag #vX != v' + v);
+            // schema_version consistency of the recovery output contract
+            const schemaConst = JSON.parse(fs.readFileSync('plugins/seo-rescue/schemas/befund.schema.json', 'utf8')).properties.schema_version.const;
+            const scan = (dir) => {
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const p = path.join(dir, entry.name);
+                if (entry.isDirectory()) { scan(p); continue; }
+                if (!/\.(md|json|ndjson)$/.test(entry.name)) continue;
+                const src = fs.readFileSync(p, 'utf8');
+                for (const m of src.matchAll(/\"schema_version\"\s*:\s*\"([^\"]+)\"/g)) {
+                  if (m[1] !== schemaConst) err(p + ' — schema_version ' + m[1] + ' != ' + schemaConst + ' (befund.schema.json const)');
+                }
+              }
+            };
+            scan('plugins/seo-rescue/commands');
+            scan('plugins/seo-rescue/test-fixtures');
+            if (failed) process.exit(1);
+            console.log('✔ Version consistency OK (plugin.json v' + v + ', schema_version ' + schemaConst + ')');
+          "
+
+      # Path portability: nothing under plugins/*/skills/ may reach above the
+      # plugin root with a ../../../ relative path — such references break in
+      # the installed plugin package (use \${CLAUDE_PLUGIN_ROOT}/... instead,
+      # or mark repo-root docs as \"in the repository, not in the plugin package\").
+      - name: Check path portability (no ../../../ escapes in skills)
+        run: |
+          if grep -rn '\.\./\.\./\.\./' plugins/*/skills/; then
+            echo "::error::found ../../../ path escape(s) above the plugin root in plugins/*/skills/ (see lines above)"
+            exit 1
+          fi
+          echo "✔ No path escapes above the plugin root in skills"
+
+      # Export sync: normalized diff between exports/skills/*.md and their
+      # canonical SKILL.md counterparts, compared against the accepted
+      # baseline. New drift (canonical edited without syncing the export, or
+      # vice versa) fails; intentional divergence is re-accepted via
+      # `node scripts/check-export-sync.js --update`.
+      - name: Check export sync (exports/skills vs canonical SKILL.md)
+        run: node scripts/check-export-sync.js

@@ -1,13 +1,13 @@
 ---
 name: seo-outreach-report
 description: 'Use when generating a polished single-PDF SEO snapshot for a third-party domain owner. The output is a decision-maker-friendly document in plain language for non-SEO-experts (shop owners, founders, executives), not a technical site audit. Triggers include "send the owner of X.de an SEO snapshot", "generate a report for the owner", "show X.de their SEO status", "make a PDF for a non-technical decision maker about their SEO". Complements `claude-seo:seo-audit` when the goal is communication for a non-technical audience rather than technical depth. Complements `make-pdf` when the input is a domain (not a markdown file) and the workflow needs editorial narrative integrated with Sistrix / DataForSEO / PSI data.'
-user-invokable: true
+user-invocable: true
 argument-hint: '[domain | comma-separated-slugs]'
 allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.2'
+  version: '0.5.3'
   category: marketing
 ---
 

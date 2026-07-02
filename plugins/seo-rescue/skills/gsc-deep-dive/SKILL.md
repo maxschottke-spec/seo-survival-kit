@@ -1,7 +1,7 @@
 ---
 name: gsc-deep-dive
 description: 'Use when the user wants Google Search Console data pulled directly into the session instead of manually screenshotting / CSV-exporting from search.google.com. Pulls top queries, top pages, coverage status, manual actions, security issues, and Core Web Vitals field data via the GSC API in one call. Triggers from "pull GSC data for example.com", "Search Console deep dive", "GSC queries last 90 days", "GSC coverage report", "GSC indexing status", "GSC manual actions check", "GSC Core Web Vitals field data". Removes the manual GSC click-through that is the friction point of every recovery / audit session.'
-user-invokable: true
+user-invocable: true
 argument-hint: '[domain] [days?]'
 allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*)]
 license: MIT
@@ -190,7 +190,7 @@ cat gsc-history/example-com-2026-05-22.json | \
 Manche Queries sterben **langsam** — 50–86 % Klick-Verlust über Wochen, ohne Korrelation zu einem Core Update (oft SERP-Feature-Absorption durch AI Overviews oder Brand-Erosion). Diese „stillen Tode" brauchen andere Gegenmaßnahmen als Update-Recovery und gehen in der Snapshot-Aggregation unter. Der Detector arbeitet auf der `query_weekly_series` und ist netzfrei.
 
 ```bash
-node quiet-death-detect.example.js gsc-history/example-com-2026-06-13.json --brand verapur,meinemarke
+node quiet-death-detect.example.js gsc-history/example-com-2026-06-13.json --brand meinemarke,zweitmarke
 ```
 
 Kriterien (alle müssen erfüllt sein), pro Query-Reihe:

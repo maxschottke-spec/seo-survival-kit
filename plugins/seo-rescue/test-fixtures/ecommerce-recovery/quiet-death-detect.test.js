@@ -30,7 +30,7 @@ check('boxspringbett flagged', !!byq['boxspringbett 180x200']);
 check('boxspringbett correlation partial', byq['boxspringbett 180x200'] && byq['boxspringbett 180x200'].update_correlation === 'partial');
 check('lattenrost NOT flagged', !byq['lattenrost 90x200']);
 
-check('classifyPattern brand', det.classifyPattern('verapur matratze', ['verapur'], false) === 'brand_erosion');
+check('classifyPattern brand', det.classifyPattern('meinemarke matratze', ['meinemarke'], false) === 'brand_erosion');
 check('classifyPattern serp_feature', det.classifyPattern('matratze 90x200', [], true) === 'serp_feature_absorption');
 check('classifyPattern generic', det.classifyPattern('matratze 90x200', [], false) === 'generic_erosion');
 

@@ -66,7 +66,7 @@ seo-survival-kit/
 ├── ARCHITECTURE.md                   # Canonical source of truth (vision, positioning, modules, governance, privacy)
 ├── RECOVERY_SYSTEM.md                # Pointer stub — canonical copy: plugins/seo-rescue/references/RECOVERY_SYSTEM.md
 ├── DECISION_ENGINE.md                # Decision rules, prioritization, sequencing, cross-channel signals
-├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Weekly workflow specification (skill ships in v0.5.2)
+├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Pointer stub — canonical copy: plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md
 ├── ROADMAP.md                        # Version-by-version product plan
 ├── ROADMAP-2026.md                   # Google search future-watch (separate from product roadmap)
 ├── CHANGELOG.md                      # Per-release notes
@@ -92,7 +92,7 @@ The `rescue` skill is the orchestrator. Users can either:
 - Type `/seo-rescue:rescue` to see the routing table and let Claude choose the right sub-skill, or
 - Call any sub-skill directly via `/seo-rescue:<skill-name>` (e.g. `/seo-rescue:seo-audit-free example.com`)
 
-Each sub-skill has `user-invokable: true` and an `argument-hint` in its YAML frontmatter so Claude Code's autocomplete shows it.
+Each sub-skill has `user-invocable: true` and an `argument-hint` in its YAML frontmatter so Claude Code's autocomplete shows it.
 
 ## Skill-naming convention
 
@@ -136,7 +136,7 @@ See [SECURITY.md](./SECURITY.md). Highlights:
 
 When adding a new skill:
 
-1. Create `plugins/seo-rescue/skills/<name>/SKILL.md` with frontmatter containing `name`, `description`, `user-invokable: true`, `argument-hint`, `license: MIT`, `metadata: { author, version, category }`.
+1. Create `plugins/seo-rescue/skills/<name>/SKILL.md` with frontmatter containing `name`, `description`, `user-invocable: true`, `argument-hint`, `license: MIT`, `metadata: { author, version, category }`.
 2. Wrap any `description:` containing double-quotes in single quotes (`description: '...'`) — YAML 1.2 strict parsers reject unquoted scalars with internal double-quotes.
 3. If the skill has a script, place it in the skill folder (not at plugin root). Read shared safety primitives from `../../lib/safe.js`.
 4. Add a row to the `rescue` skill's Quick Reference table.
@@ -200,7 +200,7 @@ When working on this repository, the source-of-truth docs are:
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — vision, positioning, modules, governance, privacy, adaptive onboarding, knowledge layer, plugin architecture, compatibility, what is NOT implemented
 - [plugins/seo-rescue/references/RECOVERY_SYSTEM.md](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md) — six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase recovery sequencing, Settlement Gate (this is the canonical copy the recovery commands read; the root `RECOVERY_SYSTEM.md` is a pointer stub)
 - [DECISION_ENGINE.md](./DECISION_ENGINE.md) — decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals
-- [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow (skill ships in v0.5.2)
+- [plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md](./plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow (skill shipped in v0.5.2; this is the canonical copy the plugin skills read, the root `SISTRIX_MONDAY_RECOVERY_CHECK.md` is a pointer stub)
 - [ROADMAP.md](./ROADMAP.md) — version-by-version product plan
 
 Anti-bloat rule for new top-level docs: a new doc must pass the standalone test (own workflow / own inputs / own outputs / own user interaction / meaningful implementation complexity / independent future evolution). Otherwise it becomes a section in one of the existing docs.

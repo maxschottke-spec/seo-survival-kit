@@ -1,13 +1,13 @@
 ---
 name: ai-citations-tracker
 description: 'Use when you need to **measure** (not just describe) brand citation frequency across AI search surfaces over time. Runs a configurable brand-mention prompt set weekly against ChatGPT (OpenAI API), Perplexity (Sonar API), and optionally Google AI Mode / AI Overviews / Bing Copilot / Claude.ai (manual workflow). Stores NDJSON history for trend analysis. Triggers from "track AI citations", "AI Overview citation tracker", "ChatGPT brand mention monitoring", "Perplexity citation tracking", "AI-Sichtbarkeit messen", "wie oft erwähnt ChatGPT meine Marke". Complements [[ai-search-rescue]]: that skill is the framework, this skill is the measurement loop.'
-user-invokable: true
+user-invocable: true
 argument-hint: '[setup | run | analyze]'
 allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*), Bash(launchctl:*), Bash(crontab:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.2'
+  version: '0.5.3'
   category: marketing
 ---
 
@@ -50,7 +50,7 @@ The script is **opt-in per AI surface**: skip surfaces where you don't have API 
 
 ## Config template
 
-`ai-citations-config.json` (gitignored — see [SECURITY.md](../../../../SECURITY.md)):
+`ai-citations-config.json` (gitignored — see `SECURITY.md` at the repo root, in the repository, not shipped in the plugin package):
 
 ```json
 {

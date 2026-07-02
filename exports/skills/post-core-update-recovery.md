@@ -2,7 +2,7 @@
 
 > **Source:** `plugins/seo-rescue/skills/post-core-update-recovery/SKILL.md` (canonical Claude Code version).
 > **Use case:** Diagnose and recover from a Google Core Update visibility drop. Authority-first, 6–12 month timeline, not a quick technical fix.
-> **Use this exported version when:** you're running Cursor, an OpenAI Custom GPT, Gemini CLI, Aider, or any LLM tool that isn't Claude Code. The framework content is identical — only the Claude-specific frontmatter (`allowed-tools`, `user-invokable`, `argument-hint`) has been stripped.
+> **Use this exported version when:** you're running Cursor, an OpenAI Custom GPT, Gemini CLI, Aider, or any LLM tool that isn't Claude Code. The framework content is identical — only the Claude-specific frontmatter (`allowed-tools`, `user-invocable`, `argument-hint`) has been stripped.
 
 ## When this framework applies
 

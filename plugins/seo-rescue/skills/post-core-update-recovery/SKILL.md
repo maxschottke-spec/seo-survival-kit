@@ -1,13 +1,13 @@
 ---
 name: post-core-update-recovery
-description: 'Use when a website experienced a sudden visibility/ranking drop that correlates with a published Google Core Update — symptoms include broad ranking loss across many keywords in a short window (1–6 weeks), Sistrix VI dropping 30 %+ from peak, sales/leads falling despite no technical changes, the owner saying "we used to rank, now we don''t" but pages still load and index normally. Distinguishes Core-Update damage from CWV/technical drops and produces a phased 6–12 month recovery plan focused on Authority and EEAT.'
-user-invokable: true
+description: 'Use when a website experienced a sudden visibility/ranking drop that correlates with a published Google Core Update — symptoms include broad ranking loss across many keywords in a short window (1–6 weeks), Sistrix VI dropping 30 %+ from peak, sales/leads falling despite no technical changes, the owner saying "we used to rank, now we don''t" but pages still load and index normally. Distinguishes Core-Update damage from CWV/technical drops and produces a phased 6–12 month recovery plan focused on Authority and EEAT. Pure-Markdown framework, no tools or MCP access needed — for a data-driven diagnosis via Sistrix/DataForSEO MCP that writes befund.json use recovery-diagnose instead.'
+user-invocable: true
 argument-hint: '[domain]'
 allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.2'
+  version: '0.5.3'
   category: marketing
 ---
 
@@ -121,7 +121,7 @@ These are **NOT** the recovery lever — Core Updates don't penalize tech, they 
 
 - **Baseline expectation: visible movement starts after 3–4 months.** Google needs time to re-evaluate authority signals. Full recovery usually takes 9–18 months.
 - **Accelerated recovery is possible** when multiple acceleration factors are present simultaneously (see next section). The 3–4 month baseline assumes authority-only work without structural cleanup.
-- **Recovery outcome in observed cases is in the 50–80 % range** of pre-drop visibility. Full recovery to 100 % seems to require structural changes (new content lines, new authority sources), not just optimization of what existed before.
+- **Recovery outcome in observed cases is in the 50–80 % range** of pre-drop visibility. Full recovery to 100 % seems to require structural changes (new content lines, new authority sources), not just optimization of what existed before. These percentages are observations from a small case-base, not population statistics — treat them as input hypotheses, not predictions.
 - **Pattern: recovery comes in jumps**, often timed with the next Core Update rather than gradually. A single week can deliver +30–50 % VI gain after weeks of flat movement.
 
 ## Recovery acceleration factors

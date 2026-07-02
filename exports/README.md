@@ -8,7 +8,7 @@ This directory contains the **framework-only** skills of seo-survival-kit in a p
 - [`skills/post-core-update-recovery.md`](./skills/post-core-update-recovery.md) — diagnose + 4-phase recovery plan for sites hit by a Google Core Update
 - [`skills/ai-search-rescue.md`](./skills/ai-search-rescue.md) — 7 tactics + 3-layer measurement for AI search citation visibility
 
-These three files contain the same framework knowledge as the canonical Claude Code versions in `plugins/seo-rescue/skills/`, with the Claude-specific frontmatter (`allowed-tools`, `user-invokable`, `argument-hint`, plus `[[skill-name]]` cross-skill links) stripped.
+These three files contain the same framework knowledge as the canonical Claude Code versions in `plugins/seo-rescue/skills/`, with the Claude-specific frontmatter (`allowed-tools`, `user-invocable`, `argument-hint`, plus `[[skill-name]]` cross-skill links) stripped.
 
 The **script-backed and command-style skills** (`seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`, `sistrix-monday-recovery-check`, `subscription-monetization-audit`, and the six `recovery-*` workflow commands) remain Claude-Code-specific because their SKILL.md files describe slash-command invocations and `allowed-tools` permission scopes that have no equivalent outside Claude Code. The underlying Node scripts are platform-agnostic and can be run directly with `node` on any system — see each skill's `*.example.js` for inline documentation.
 

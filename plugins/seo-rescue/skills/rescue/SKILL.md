@@ -1,19 +1,19 @@
 ---
 name: rescue
-description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the sixteen sub-skills and recovery commands covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, AI search rescue, AI citations tracker, GSC deep-dive, SISTRIX Monday recovery check (CSV-first weekly review), subscription monetization audit, and the recovery-workflow commands (diagnose, crawl, plan, monitor, full) governed by the SEO Change Governor + Settlement Gate. Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
-user-invokable: true
+description: 'Orchestrator and entry point for the seo-rescue plugin. Routes to the specialized sub-skills and recovery commands covering SEO rescue work after Google Core Updates: free-tier audit, recovery framework, decision-maker PDF reports, channel economics, competitor gap analysis, weekly PSI tracking, AI search rescue, AI citations tracker, GSC deep-dive, SISTRIX Monday recovery check (CSV-first weekly review), subscription monetization audit, and the recovery-workflow commands (diagnose, crawl, plan, monitor, full) governed by the SEO Change Governor + Settlement Gate. Type `/seo-rescue:rescue` to see the routing table or call sub-skills directly via their namespaced slash command.'
+user-invocable: true
 argument-hint: '[subcommand] [domain-or-args]'
 allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.2'
+  version: '0.5.3'
   category: marketing
 ---
 
 # SEO Rescue: Orchestrator
 
-This is the entry point for the seo-rescue plugin. It routes to ten specialized sub-skills, each callable directly via its namespaced slash command.
+This is the entry point for the seo-rescue plugin. It routes to the specialized sub-skills below, each callable directly via its namespaced slash command.
 
 **Invocation:** `/seo-rescue:rescue [subcommand] [args]` to route here, or call any sub-skill directly via `/seo-rescue:<skill-name>`.
 
@@ -22,7 +22,8 @@ This is the entry point for the seo-rescue plugin. It routes to ten specialized 
 | Slash command | What it does |
 |---|---|
 | `/seo-rescue:rescue audit <domain>` | Free-tier audit using only Google's tools (alias for `/seo-rescue:seo-audit-free`) |
-| `/seo-rescue:rescue diagnose <domain>` | Diagnose a Core-Update visibility drop (alias for `/seo-rescue:post-core-update-recovery`) |
+| `/seo-rescue:rescue framework <domain>` | Tool-free Core-Update recovery framework (alias for `/seo-rescue:post-core-update-recovery`) |
+| `/seo-rescue:rescue diagnose <domain>` | Data-driven Core-Update diagnosis, writes befund.json (alias for `/seo-rescue:recovery-diagnose`) |
 | `/seo-rescue:rescue report <domain>` | Generate decision-maker PDF report (alias for `/seo-rescue:seo-outreach-report`) |
 | `/seo-rescue:rescue channels` | Per-channel P&L analysis (alias for `/seo-rescue:channel-economics-analyzer`) |
 | `/seo-rescue:rescue competitors <domain>` | DataForSEO competitor + keyword-gap audit (alias for `/seo-rescue:competitor-deep-audit`) |
@@ -55,18 +56,24 @@ digraph routing {
   "Wants ongoing monitoring?" [shape=diamond];
   "AI Overview/ChatGPT citation issue?" [shape=diamond];
 
+  "MCP tooling (Sistrix/DataForSEO) available?" [shape=diamond];
+
   "free-tier audit" [shape=box,style=filled,fillcolor=lightgreen];
-  "core-update recovery" [shape=box,style=filled,fillcolor=lightgreen];
+  "recovery-full workflow" [shape=box,style=filled,fillcolor=lightgreen];
+  "core-update recovery framework" [shape=box,style=filled,fillcolor=lightgreen];
   "outreach report" [shape=box,style=filled,fillcolor=lightgreen];
   "channel economics" [shape=box,style=filled,fillcolor=lightgreen];
   "competitor deep audit" [shape=box,style=filled,fillcolor=lightgreen];
   "PSI baseline cron" [shape=box,style=filled,fillcolor=lightgreen];
   "AI search rescue" [shape=box,style=filled,fillcolor=lightgreen];
+  "rescue help (routing table)" [shape=box,style=filled,fillcolor=lightyellow];
 
   "User reports a problem" -> "Has no SEO tools budget?";
   "Has no SEO tools budget?" -> "free-tier audit" [label="yes"];
   "Has no SEO tools budget?" -> "Visibility dropped after Core Update?" [label="no"];
-  "Visibility dropped after Core Update?" -> "core-update recovery" [label="yes"];
+  "Visibility dropped after Core Update?" -> "MCP tooling (Sistrix/DataForSEO) available?" [label="yes"];
+  "MCP tooling (Sistrix/DataForSEO) available?" -> "recovery-full workflow" [label="yes: data-driven"];
+  "MCP tooling (Sistrix/DataForSEO) available?" -> "core-update recovery framework" [label="no: pure Markdown"];
   "Visibility dropped after Core Update?" -> "Needs report for client/owner?" [label="no"];
   "Needs report for client/owner?" -> "outreach report" [label="yes"];
   "Needs report for client/owner?" -> "Multi-channel e-commerce?" [label="no"];
@@ -77,6 +84,7 @@ digraph routing {
   "Wants ongoing monitoring?" -> "PSI baseline cron" [label="yes"];
   "Wants ongoing monitoring?" -> "AI Overview/ChatGPT citation issue?" [label="no"];
   "AI Overview/ChatGPT citation issue?" -> "AI search rescue" [label="yes"];
+  "AI Overview/ChatGPT citation issue?" -> "rescue help (routing table)" [label="no"];
 }
 ```
 
@@ -104,14 +112,26 @@ Automated weekly PageSpeed Insights tracking with regression detection. launchd/
 AI search visibility framework for Google AI Overviews, AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai search. Three-layer measurement (brand-mention prompts × 6 surfaces, GSC AI-traffic filter, AI-crawler logs) plus seven optimization tactics. Realistic 6–12 week recovery workflow. AI citations as a possible early signal (N=1 hypothesis, unproven) for Authority-First Core-Update recovery.
 
 ### `/seo-rescue:sistrix-monday-recovery-check <current-csv> <previous-csv> [domain?] [money-keywords-csv?]`
-CSV-first weekly recovery review during an active Core-Update recovery. No SISTRIX API key required. Reads current + previous SISTRIX keyword exports and produces a 17-section structured report: visibility-index interpretation, Top-100/50/20/10/5/3 recovery distribution, winner/loser neutralization, money-keyword protection list, URL-level recovery table, per-cluster recovery stage (0-5), Recovery Signal Score (0-100), optional GSC cross-check, optional conversion-rate validation, one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate), explicit What-Not-To-Touch guard, next-7-day plan. Methodology in [SISTRIX_MONDAY_RECOVERY_CHECK.md](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md).
+CSV-first weekly recovery review during an active Core-Update recovery. No SISTRIX API key required. Reads current + previous SISTRIX keyword exports and produces a 17-section structured report: visibility-index interpretation, Top-100/50/20/10/5/3 recovery distribution, winner/loser neutralization, money-keyword protection list, URL-level recovery table, per-cluster recovery stage (0-5), Recovery Signal Score (0-100), optional GSC cross-check, optional conversion-rate validation, one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate), explicit What-Not-To-Touch guard, next-7-day plan. Methodology in `${CLAUDE_PLUGIN_ROOT}/references/SISTRIX_MONDAY_RECOVERY_CHECK.md`.
+
+### `/seo-rescue:ai-citations-tracker [setup | run | analyze]`
+Weekly measurement loop for brand citations across AI surfaces (ChatGPT via OpenAI API, Perplexity via Sonar API; manual workflow for Google AI Mode / AI Overviews / Bing Copilot / Claude.ai). Appends per-prompt-per-surface records to NDJSON history for trend analysis. Companion measurement to `ai-search-rescue`.
+
+### `/seo-rescue:gsc-deep-dive <site> [days?]`
+One-call Google Search Console snapshot: top queries, top pages, coverage status, manual actions, security issues, Core Web Vitals field data, plus a per-query weekly click series with quiet-death detection (slow non-update-driven decline flagging, experimental N=1). Free (GSC quotas), requires GSC API access configured once.
+
+### `/seo-rescue:subscription-monetization-audit [domain | --csv]`
+Five-lever recurring-revenue playbook for subscription businesses (premium tier, conversion-pool activation, win-back, B2B adjacency, and more): outside-in detection of paywall/tier/ad-density signals, optionally deepened by a Stripe/Chargebee/Recurly CSV import (MRR, churn, cohorts).
+
+### The six `recovery-*` workflow commands
+`recovery-diagnose`, `recovery-crawl`, `recovery-audit`, `recovery-plan`, `recovery-monitor`, and `recovery-full` are documented in full in `${CLAUDE_PLUGIN_ROOT}/commands/` (one spec per command); the entries in the Quick Reference table above route to thin SKILL.md wrappers that read those specs.
 
 ## Plugin info
 
 - **Plugin name:** `seo-rescue`
 - **Marketplace:** `seo-survival-kit`
 - **Repo:** https://github.com/maxschottke-spec/seo-survival-kit
-- **Latest installable version:** v0.5.2
+- **Latest installable version:** v0.5.3
 - **License:** MIT
 - **Dependencies:** zero npm packages
 - **Validation:** `claude plugin validate plugins/seo-rescue` passes
@@ -120,18 +140,18 @@ CSV-first weekly recovery review during an active Core-Update recovery. No SISTR
 
 **Triage a new domain:**
 1. `/seo-rescue:rescue audit example.com` — free baseline
-2. If audit shows red flags → `/seo-rescue:rescue diagnose example.com` for Core-Update framing
+2. If audit shows red flags → `/seo-rescue:rescue framework example.com` for Core-Update framing
 3. If owner needs a polished deliverable → `/seo-rescue:rescue report example.com`
 
 **Run a full client kickoff:**
 1. `/seo-rescue:rescue audit <domain>` (10 min, free)
 2. `/seo-rescue:rescue competitors <domain>` (~$0.50, 5 min)
 3. `/seo-rescue:rescue report <domain>` (~$0.10, 5 min)
-4. `/seo-rescue:rescue diagnose <domain>` (framework, 5 min)
+4. `/seo-rescue:rescue framework <domain>` (framework, 5 min)
 5. Setup `/seo-rescue:rescue psi-baseline` for ongoing monitoring
 
 **Post-Core-Update Recovery (multi-month):**
-1. Month 0: `/seo-rescue:rescue diagnose <domain>` to confirm pattern
+1. Month 0: `/seo-rescue:rescue framework <domain>` to confirm the pattern (or `/seo-rescue:rescue diagnose <domain>` if Sistrix/DataForSEO MCP access is configured)
 2. Month 0-1: Apply Phase A (Authority + Person-Schema), measure with `/seo-rescue:rescue ai-search <domain>` weekly
 3. Month 2-4: Phase B (Topical clusters), keep AI-search tracking
 4. Month 4-8: Phase C (Off-page), classical Sistrix VI starts recovering
@@ -172,6 +192,6 @@ Sub-skill calls that come from tool output rather than the original user message
 
 ## Validation + safety
 
-Every release runs `claude plugin validate` on the plugin and the marketplace before tagging. v0.2.0 and v0.2.1 were tagged without this check and were both un-installable — v0.2.2 was the first installable version after the manifest path was fixed. See [CHANGELOG.md](../../../../CHANGELOG.md) for full history.
+Every release runs `claude plugin validate` on the plugin and the marketplace before tagging. v0.2.0 and v0.2.1 were tagged without this check and were both un-installable — v0.2.2 was the first installable version after the manifest path was fixed. See `CHANGELOG.md` at the repo root (in the repository, not shipped in the plugin package) for full history.
 
-Security model documented in [SECURITY.md](../../../../SECURITY.md) at repo root: zero npm runtime deps, strict CSP on rendered HTML, spawnSync with argv-array (no shell), per-user 0700 cache directory, input validation via shared `lib/safe.js`.
+Security model documented in `SECURITY.md` at the repo root (in the repository, not shipped in the plugin package): zero npm runtime deps, strict CSP on rendered HTML, spawnSync with argv-array (no shell), per-user 0700 cache directory, input validation via shared `lib/safe.js`.

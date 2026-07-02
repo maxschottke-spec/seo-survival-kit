@@ -6,7 +6,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
 [![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
-**v0.5.2 shipped.** Public beta. Breaking changes possible before v1.0. Pin to a tag for reproducible installs. See [CHANGELOG.md](./CHANGELOG.md).
+**v0.5.3 shipped.** Public beta. Breaking changes possible before v1.0. Pin to a tag for reproducible installs. See [CHANGELOG.md](./CHANGELOG.md).
 
 ## Start here
 
@@ -132,7 +132,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Canonical source of truth: vision, positioning, system shape, modules, governance, privacy, adaptive onboarding, knowledge layer, what is NOT implemented |
 | [RECOVERY_SYSTEM.md](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md) | Six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase sequencing, Settlement Gate. Canonical copy lives in the plugin (`plugins/seo-rescue/references/`); the root [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) is a pointer stub |
 | [DECISION_ENGINE.md](./DECISION_ENGINE.md) | Decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals |
-| [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) | Weekly CSV-first workflow specification — runnable skill at [`plugins/seo-rescue/skills/sistrix-monday-recovery-check/`](./plugins/seo-rescue/skills/sistrix-monday-recovery-check/) (v0.5.2) with synthetic example at [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) |
+| [SISTRIX_MONDAY_RECOVERY_CHECK.md](./plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md) | Weekly CSV-first workflow specification (canonical copy; the root file is a pointer stub) — runnable skill at [`plugins/seo-rescue/skills/sistrix-monday-recovery-check/`](./plugins/seo-rescue/skills/sistrix-monday-recovery-check/) (v0.5.3) with synthetic example at [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) |
 | [ROADMAP.md](./ROADMAP.md) | Version-by-version product plan |
 | [ROADMAP-2026.md](./ROADMAP-2026.md) | Google search future-watch (separate from product roadmap) |
 

@@ -58,3 +58,4 @@ gsc-exports/
 money-keywords*.csv
 *-keywords*.csv
 !**/examples/**/*.example.csv
+.gstack/

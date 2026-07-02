@@ -76,9 +76,9 @@ Three layers. New skills slot into the diagnostic layer; the decision and workfl
 
 **Decision layer.** Rules that turn evidence into prioritized actions. Decision rules, evidence weighting, data quality layer, profitability signals, cross-channel signals, prioritization, sequencing. Detail in [DECISION_ENGINE.md](./DECISION_ENGINE.md).
 
-**Workflow layer.** Recurring rhythms the operator follows. Today: weekly SISTRIX Monday Recovery Check, weekly PSI baseline, weekly AI citations tracking. Detail for the recovery rhythm in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) and [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md).
+**Workflow layer.** Recurring rhythms the operator follows. Today: weekly SISTRIX Monday Recovery Check, weekly PSI baseline, weekly AI citations tracking. Detail for the recovery rhythm in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md) and [RECOVERY_SYSTEM.md](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md).
 
-Skills do not implement the decision layer themselves. They feed it. The user invokes a diagnostic skill; the decision layer evaluates the output against the active rule set and confidence model; the workflow layer wraps the result into a phased recommendation. The phasing follows the five-phase recovery sequencing (protect winners first, stabilize, then progressively more invasive work) — authoritative version: [RECOVERY_SYSTEM.md §11](./RECOVERY_SYSTEM.md#11-recovery-sequencing-five-phases). This document does not restate the phases.
+Skills do not implement the decision layer themselves. They feed it. The user invokes a diagnostic skill; the decision layer evaluates the output against the active rule set and confidence model; the workflow layer wraps the result into a phased recommendation. The phasing follows the five-phase recovery sequencing (protect winners first, stabilize, then progressively more invasive work) — authoritative version: [RECOVERY_SYSTEM.md §11](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md#11-recovery-sequencing-five-phases). This document does not restate the phases.
 
 ---
 
@@ -386,7 +386,7 @@ seo-survival-kit/                  # Repository / marketplace name
 ├── ARCHITECTURE.md                # This document
 ├── RECOVERY_SYSTEM.md             # Recovery operational detail
 ├── DECISION_ENGINE.md             # Decision logic
-├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Weekly workflow specification
+├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Pointer stub — canonical copy in plugins/seo-rescue/references/
 ├── ROADMAP.md                     # Version-by-version plan
 ├── ROADMAP-2026.md                # Google search future-watch (separate)
 ├── README.md, CLAUDE.md, ONBOARDING.md, MATURITY.md, SECURITY.md, COSTS.md, CHANGELOG.md, LICENSE
@@ -566,7 +566,7 @@ Version-by-version plan lives in [ROADMAP.md](./ROADMAP.md). Highlights:
 | **ARCHITECTURE.md** | This file. Canonical source of truth. |
 | **RECOVERY_SYSTEM.md** | Recovery framework operational detail: protection rules, signal score, neutralization, URL recovery, recovery sequencing. |
 | **DECISION_ENGINE.md** | Decision rules catalog, evidence weighting, data quality, prioritization, sequencing, cross-channel integration, profitability signals. |
-| **SISTRIX_MONDAY_RECOVERY_CHECK.md** | Weekly workflow specification (CSV-first, no API). |
+| **SISTRIX_MONDAY_RECOVERY_CHECK.md** | Weekly workflow specification (CSV-first, no API). Root file is a pointer stub; canonical copy in `plugins/seo-rescue/references/`. |
 | **ROADMAP.md** | Version-by-version product plan. |
 | **ROADMAP-2026.md** | Google search and AI search future-watch. Separate from product roadmap. |
 | **CLAUDE.md** | Project instructions for Claude Code sessions. |

@@ -90,14 +90,14 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 ### r-sistrix-vi-flat-money-keywords-recovered
 
 - **Condition.** Visibility index flat or slightly negative; 200+ keywords returned; important transactional money keywords moved into Top 5 or Top 3.
-- **Sequences.** Classify as positive recovery signal with visibility lag or neutralization. Switch to Protect mode. Investigate possible loser neutralization per [RECOVERY_SYSTEM.md section 8](./RECOVERY_SYSTEM.md#8-winnerloser-neutralization).
+- **Sequences.** Classify as positive recovery signal with visibility lag or neutralization. Switch to Protect mode. Investigate possible loser neutralization per [RECOVERY_SYSTEM.md section 8](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md#8-winnerloser-neutralization).
 - **Reason.** Visibility index is volume-weighted; a few high-volume losses can mask broad mid-volume recovery. Money keyword recovery is the leading revenue indicator, not the VI.
 - **Confidence.** Medium-High.
 
 ### r-money-keywords-top3-protect
 
 - **Condition.** Important money keywords back in Top 3 or Top 10 on intended URLs.
-- **Sequences.** Recommend Protect before further aggressive SEO changes. Do not edit winning URLs beyond the safe-to-make list in [RECOVERY_SYSTEM.md section 7](./RECOVERY_SYSTEM.md#7-money-keyword-protection).
+- **Sequences.** Recommend Protect before further aggressive SEO changes. Do not edit winning URLs beyond the safe-to-make list in [RECOVERY_SYSTEM.md section 7](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md#7-money-keyword-protection).
 - **Confidence.** High.
 
 ### r-ai-citations-leading-indicator
@@ -283,7 +283,7 @@ Overrides are logged. After several overrides on the same pattern, the framework
 
 ## 7. Sequencing across phases
 
-Authoritative sequencing — the five recovery phases (R1–R5), phase advancement criteria, and the six sequencing constraints — lives in [RECOVERY_SYSTEM.md §11](./RECOVERY_SYSTEM.md#11-recovery-sequencing-five-phases). The engine's specific contribution is the binding to decision rules and skill output: every skill producing actionable recommendations runs them through a sequencer before output; the constraints map to engine rules where they exist (protection blocks optimization beyond the safe-to-make list per [RECOVERY_SYSTEM.md section 7](./RECOVERY_SYSTEM.md#7-money-keyword-protection); margin work before paid scaling per `r-margin-unknown-no-scale`; tracking work before paid scaling per the future rule `r-paid-tracking-low-no-scale`, v0.8 codification); and the sequenced output names the current recovery phase (R0 to R5), this week's recommended actions, actions for the upcoming 2-4 weeks, actions explicitly deferred to a later phase (with phase label), actions blocked by sequencing constraints (with constraint cited), and the phase advancement criteria — so the operator sees the full plan but only the current-week actions are immediately actionable. When v0.6 ships Revenue Rescue and v0.8 ships paid media, the same sequencer extends cross-channel (recovery work on the dominant channel before scaling minor channels; CRO work before paid scaling on weak landing pages).
+Authoritative sequencing — the five recovery phases (R1–R5), phase advancement criteria, and the six sequencing constraints — lives in [RECOVERY_SYSTEM.md §11](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md#11-recovery-sequencing-five-phases). The engine's specific contribution is the binding to decision rules and skill output: every skill producing actionable recommendations runs them through a sequencer before output; the constraints map to engine rules where they exist (protection blocks optimization beyond the safe-to-make list per [RECOVERY_SYSTEM.md section 7](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md#7-money-keyword-protection); margin work before paid scaling per `r-margin-unknown-no-scale`; tracking work before paid scaling per the future rule `r-paid-tracking-low-no-scale`, v0.8 codification); and the sequenced output names the current recovery phase (R0 to R5), this week's recommended actions, actions for the upcoming 2-4 weeks, actions explicitly deferred to a later phase (with phase label), actions blocked by sequencing constraints (with constraint cited), and the phase advancement criteria — so the operator sees the full plan but only the current-week actions are immediately actionable. When v0.6 ships Revenue Rescue and v0.8 ships paid media, the same sequencer extends cross-channel (recovery work on the dominant channel before scaling minor channels; CRO work before paid scaling on weak landing pages).
 
 ---
 

@@ -1,13 +1,13 @@
 ---
 name: sistrix-monday-recovery-check
-description: 'CSV-first weekly recovery review during an active SEO recovery. No SISTRIX API key required. Compares current and previous SISTRIX keyword exports and produces a structured Monday Check report with Recovery Signal Score, per-cluster recovery stage, winner/loser neutralization analysis, money-keyword protection list, URL-level recovery table, optional GSC cross-check, optional conversion-rate validation, and one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate) with an explicit What-Not-To-Touch guard for winning URLs. Triggers from "Monday recovery check", "SISTRIX recovery review", "weekly Monday SEO ritual", "compare this Monday SISTRIX to last Monday", "is the visibility index lagging behind ranking gains", "winner-loser neutralization check", "are my money keywords protected". Full output contract in SISTRIX_MONDAY_RECOVERY_CHECK.md; operational detail in RECOVERY_SYSTEM.md sections 4-10.'
-user-invokable: true
+description: 'CSV-first weekly recovery review during an active SEO recovery. No SISTRIX API key required. Compares current and previous SISTRIX keyword exports and produces a structured Monday Check report with Recovery Signal Score, per-cluster recovery stage, winner/loser neutralization analysis, money-keyword protection list, URL-level recovery table, optional GSC cross-check, optional conversion-rate validation, and one of six recommended actions (Observe / Protect / Strengthen / Investigate / Correct / Escalate) with an explicit What-Not-To-Touch guard for winning URLs. Triggers from "Monday recovery check", "SISTRIX recovery review", "weekly Monday SEO ritual", "compare this Monday SISTRIX to last Monday", "is the visibility index lagging behind ranking gains", "winner-loser neutralization check", "are my money keywords protected". Full output contract in SISTRIX_MONDAY_RECOVERY_CHECK.md; operational detail in RECOVERY_SYSTEM.md sections 4-10. CSV-only weekly review, no API access needed — for API-driven weekly tracking with a scored NDJSON history use recovery-monitor instead.'
+user-invocable: true
 argument-hint: '[current-csv] [previous-csv] [domain?] [money-keywords-csv?]'
 allowed-tools: [Read, Write, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.2'
+  version: '0.5.3'
   category: marketing
 ---
 
@@ -17,7 +17,7 @@ metadata:
 
 During an active SEO recovery, every Monday the operator asks the same questions: did rankings recover, are money keywords holding, are winners and losers offsetting each other, is the visibility index lagging behind actual ranking gains. Without structure, the answer is ad-hoc and biased toward whatever the operator opens first in the SISTRIX UI.
 
-This skill turns the Monday review into a fixed 17-section report so the same questions get answered consistently week over week. The full methodology lives in [SISTRIX_MONDAY_RECOVERY_CHECK.md](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md) (canonical spec) and [RECOVERY_SYSTEM.md](../../../../RECOVERY_SYSTEM.md) (operational detail for sections 4-10). This SKILL.md is the runnable skill that executes that workflow against the operator's CSV exports.
+This skill turns the Monday review into a fixed 17-section report so the same questions get answered consistently week over week. The full methodology lives in `${CLAUDE_PLUGIN_ROOT}/references/SISTRIX_MONDAY_RECOVERY_CHECK.md` (canonical spec) and `${CLAUDE_PLUGIN_ROOT}/references/RECOVERY_SYSTEM.md` (operational detail for sections 4-10). All later `SISTRIX_MONDAY_RECOVERY_CHECK.md §N` / `RECOVERY_SYSTEM.md §N` / `DECISION_ENGINE.md` mentions in this file refer to those files under `${CLAUDE_PLUGIN_ROOT}/references/`. This SKILL.md is the runnable skill that executes that workflow against the operator's CSV exports.
 
 ## When to use
 
@@ -56,7 +56,7 @@ If money keyword tracking is desired:
 /seo-rescue:sistrix-monday-recovery-check ./sistrix-exports/current.csv ./sistrix-exports/previous.csv example-shop.test ./money-keywords.csv
 ```
 
-The CSVs themselves are gitignored under the existing `sistrix-exports/`, `*_sistrix*.csv`, `*_keywords*.csv` rules in [.gitignore](../../../../.gitignore). Do not commit operator exports.
+The CSVs themselves are gitignored under the existing `sistrix-exports/`, `*_sistrix*.csv`, `*_keywords*.csv` rules in the repository's `.gitignore` (repo root, not shipped in the plugin package). Do not commit operator exports.
 
 ## How Claude executes the workflow
 
@@ -71,7 +71,7 @@ This is a pure-Markdown framework skill. Claude reads the two CSVs via the Read 
 
 ### Step 2 — Visibility Index interpretation
 
-If the operator provided current and previous VI values inline (the SISTRIX UI shows them on the domain overview), classify the delta as `Rising / Falling / Flat / Lagging / Neutralized` per [SISTRIX_MONDAY_RECOVERY_CHECK.md §1](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md). The "Lagging" diagnosis fires when individual keyword positions improve materially but the index does not yet reflect the gains. The "Neutralized" diagnosis fires when winners exist but are offset by larger losses on a few head terms.
+If the operator provided current and previous VI values inline (the SISTRIX UI shows them on the domain overview), classify the delta as `Rising / Falling / Flat / Lagging / Neutralized` per SISTRIX_MONDAY_RECOVERY_CHECK.md §1. The "Lagging" diagnosis fires when individual keyword positions improve materially but the index does not yet reflect the gains. The "Neutralized" diagnosis fires when winners exist but are offset by larger losses on a few head terms.
 
 If no VI value is supplied, mark the VI section "(value not supplied; infer from keyword distribution only)".
 
@@ -89,7 +89,7 @@ Output as a single table with current-week, previous-week, delta, and delta-perc
 
 ### Step 4 — Winner/Loser neutralization
 
-Apply the detection logic from [RECOVERY_SYSTEM.md §5](../../../../RECOVERY_SYSTEM.md). The pattern: many small gains being offset by a few large head-term losses. Output:
+Apply the detection logic from RECOVERY_SYSTEM.md §5. The pattern: many small gains being offset by a few large head-term losses. Output:
 
 - Top 10 winners by position gain
 - Top 10 winners by commercial value (`search_volume * intent_weight`)
@@ -98,11 +98,11 @@ Apply the detection logic from [RECOVERY_SYSTEM.md §5](../../../../RECOVERY_SYS
 - Top 10 losers by visibility impact
 - A 1-2 sentence interpretation of why the index might be flat or moving counter to keyword direction
 
-The CTR curve uses the standard SISTRIX position-to-CTR curve as documented in [RECOVERY_SYSTEM.md §5](../../../../RECOVERY_SYSTEM.md); if the operator provided GSC CTR data per query, prefer that.
+The CTR curve uses the standard SISTRIX position-to-CTR curve as documented in RECOVERY_SYSTEM.md §5; if the operator provided GSC CTR data per query, prefer that.
 
 ### Step 5 — Money keyword protection
 
-If the operator provided a money-keywords CSV (schema: `keyword,intent,priority,notes`), join against the current export and emit the protection table per [SISTRIX_MONDAY_RECOVERY_CHECK.md §4](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md). For each money keyword:
+If the operator provided a money-keywords CSV (schema: `keyword,intent,priority,notes`), join against the current export and emit the protection table per SISTRIX_MONDAY_RECOVERY_CHECK.md §4. For each money keyword:
 
 | Keyword | Current Pos | Previous Pos | Δ | URL | Intent | Priority | Recommendation | What Not To Change |
 
@@ -123,7 +123,7 @@ Group all current-export keywords by ranking URL. For each URL with ≥3 keyword
 
 ### Step 7 — Per-cluster recovery stage classification
 
-Cluster the keyword set by URL type, by URL path prefix, or by topic heuristic (whichever is most coherent given the data). For each cluster, assign Stage 0-5 per [SISTRIX_MONDAY_RECOVERY_CHECK.md §6](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md):
+Cluster the keyword set by URL type, by URL path prefix, or by topic heuristic (whichever is most coherent given the data). For each cluster, assign Stage 0-5 per SISTRIX_MONDAY_RECOVERY_CHECK.md §6:
 
 - Stage 0: no recovery signal
 - Stage 1: keywords return to Top 100 / Top 50
@@ -136,7 +136,7 @@ Output the per-cluster table from the spec. Also emit a global stage as the mini
 
 ### Step 8 — Recovery Signal Score (0-100)
 
-Apply the twelve-factor scoring from [RECOVERY_SYSTEM.md §10](../../../../RECOVERY_SYSTEM.md). Interpretation buckets:
+Apply the twelve-factor scoring from RECOVERY_SYSTEM.md §10. Interpretation buckets:
 
 - 0-20: no meaningful recovery
 - 21-40: weak early signal
@@ -148,7 +148,7 @@ If a factor's input data is missing, mark the factor `n/a` and renormalize the s
 
 ### Step 9 — Optional GSC cross-check
 
-If the operator provided a GSC export covering the same period (queries + pages with impressions, clicks, CTR, average position), join against the SISTRIX data and apply the interpretation patterns from [SISTRIX_MONDAY_RECOVERY_CHECK.md §11](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md):
+If the operator provided a GSC export covering the same period (queries + pages with impressions, clicks, CTR, average position), join against the SISTRIX data and apply the interpretation patterns from SISTRIX_MONDAY_RECOVERY_CHECK.md §11:
 
 - SISTRIX keywords improve but GSC impressions do not → likely low-volume keyword recovery or ranking volatility; check date range
 - GSC impressions rise but clicks do not → snippets or SERP features may be compressing CTR
@@ -158,13 +158,13 @@ If [[gsc-deep-dive]] data is present (`gsc-history/<sanitized-site>-<YYYY-MM-DD>
 
 ### Step 10 — Conversion-rate validation layer (optional)
 
-If the operator supplied conversion-rate or revenue data (per URL or aggregate, with a baseline value), apply the VI-trend × CR-trend interpretation matrix from [SISTRIX_MONDAY_RECOVERY_CHECK.md §12](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md). Honor the `r-stockout-mutes-recovery` rule in [DECISION_ENGINE.md](../../../../DECISION_ENGINE.md): out-of-stock product pages get excluded from aggregate CR or flagged separately.
+If the operator supplied conversion-rate or revenue data (per URL or aggregate, with a baseline value), apply the VI-trend × CR-trend interpretation matrix from SISTRIX_MONDAY_RECOVERY_CHECK.md §12. Honor the `r-stockout-mutes-recovery` rule in `${CLAUDE_PLUGIN_ROOT}/references/DECISION_ENGINE.md`: out-of-stock product pages get excluded from aggregate CR or flagged separately.
 
 If no CR data is provided, skip this section entirely (do not invent a placeholder).
 
 ### Step 11 — Recommended action
 
-Output one of six actions per [SISTRIX_MONDAY_RECOVERY_CHECK.md §8](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md):
+Output one of six actions per SISTRIX_MONDAY_RECOVERY_CHECK.md §8:
 
 - **Observe** — positive early signal, do not make large changes yet
 - **Protect** — important rankings are back, avoid risky edits
@@ -177,11 +177,11 @@ The action class is derived from the combination of Recovery Signal Score, Stage
 
 ### Step 12 — What Not To Touch
 
-If important keywords are in Top 3 or Top 10, explicitly enumerate the operations the operator should NOT do on the winning URLs this week (title rewrites, H1 rewrites, URL changes, canonical changes, noindex changes, removing internal links, radical content restructuring, deleting supporting content, changing templates without reason). See [SISTRIX_MONDAY_RECOVERY_CHECK.md §9](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md).
+If important keywords are in Top 3 or Top 10, explicitly enumerate the operations the operator should NOT do on the winning URLs this week (title rewrites, H1 rewrites, URL changes, canonical changes, noindex changes, removing internal links, radical content restructuring, deleting supporting content, changing templates without reason). See SISTRIX_MONDAY_RECOVERY_CHECK.md §9.
 
 ### Step 13 — Next-7-day monitoring plan
 
-Concrete items per [SISTRIX_MONDAY_RECOVERY_CHECK.md §10](../../../../SISTRIX_MONDAY_RECOVERY_CHECK.md): monitor 48-72h for stability, protect winning URLs, strengthen internal links, check snippets, confirm product availability, check price/trust/delivery elements, track GSC impressions and clicks, document changes and dates.
+Concrete items per SISTRIX_MONDAY_RECOVERY_CHECK.md §10: monitor 48-72h for stability, protect winning URLs, strengthen internal links, check snippets, confirm product availability, check price/trust/delivery elements, track GSC impressions and clicks, document changes and dates.
 
 ### Step 14 — Next-Monday checklist
 
@@ -227,7 +227,7 @@ Inputs that were not provided are marked `(not provided)` in the relevant sectio
 
 ## Privacy
 
-The CSVs the operator feeds in stay on the operator's machine. The skill writes its output to a gitignored directory by default. Files protected by [.gitignore](../../../../.gitignore):
+The CSVs the operator feeds in stay on the operator's machine. The skill writes its output to a gitignored directory by default. Files protected by the repository's `.gitignore` (repo root, not shipped in the plugin package):
 
 - `sistrix-exports/`
 - `gsc-exports/`
@@ -240,11 +240,11 @@ The CSVs the operator feeds in stay on the operator's machine. The skill writes 
 
 Synthetic `.example.csv` files inside `examples/` are explicitly allow-listed via a negation rule in `.gitignore` so contributors can ship demonstration data without it being shadowed by the keyword-list rules above.
 
-If the operator is running in a sensitive-client-data mode (see [ARCHITECTURE.md §5](../../../../ARCHITECTURE.md#5-privacy-and-client-data)), the output filename is hashed and the path is mode-0700. If you run this skill in a fork or derived repository, verify the `output/` rule is present in your `.gitignore` before the first run.
+If the operator is running in a sensitive-client-data mode (see `ARCHITECTURE.md` §5 "Privacy and client data" at the repo root — not shipped in the plugin package), the output filename is hashed and the path is mode-0700. If you run this skill in a fork or derived repository, verify the `output/` rule is present in your `.gitignore` before the first run.
 
 ## What this skill does not do
 
-- Does not call the SISTRIX API. CSV-first only (as of v0.5.2, still true). Optional API integration is planned for the v0.9 beta.
+- Does not call the SISTRIX API. CSV-first only (as of v0.5.3, still true). Optional API integration is planned for the v0.9 beta.
 - Does not predict rankings with certainty. The Recovery Signal Score is a calibrated heuristic; treat it as one input, not as a forecast.
 - Does not recommend rewriting winning content. The What-Not-To-Touch section is explicit about this.
 - Does not require API keys.
@@ -269,7 +269,7 @@ If the operator is running in a sensitive-client-data mode (see [ARCHITECTURE.md
 
 ## Synthetic example
 
-A worked example with synthetic data ships at [`examples/synthetic-sistrix-monday-check/`](../../../../examples/synthetic-sistrix-monday-check/). The example uses:
+A worked example with synthetic data ships at `examples/synthetic-sistrix-monday-check/` in the repository (repo root, not shipped in the plugin package). The example uses:
 
 - Domain: `example-furniture-shop.test`
 - Important keyword: `office chair ergonomic 27 inch`
