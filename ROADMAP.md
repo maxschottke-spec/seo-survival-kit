@@ -46,7 +46,7 @@ Scope:
 - Output follows the documented contract: executive summary, recovery stage, Recovery Signal Score, visibility-index interpretation, top winners, top losers, money keyword protection list, URL-level recovery table, GSC cross-check if available, recommended action (Observe/Protect/Strengthen/Investigate/Correct/Escalate), what not to touch, next-7-day monitoring plan, next-Monday checklist
 - Synthetic example folder `examples/synthetic-sistrix-monday-check/` with input shape and expected output
 
-## v0.5.4
+## v0.5.4 (shipped 2026-07-02)
 
 Recovery Hardening. Framework/methodology additions from real recovery-ops lessons (see `post-core-update-recovery/LESSONS.md`, entry 2026-06/07). No new runtime skill; pure-Markdown rules + methodology, low blast radius, shippable independent of proof cycles.
 

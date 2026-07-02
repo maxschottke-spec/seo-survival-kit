@@ -190,7 +190,7 @@ These rules are derived from real recovery operations and apply to all commands 
 
 - Repository: https://github.com/maxschottke-spec/seo-survival-kit
 - Anthropic community marketplace: pending review at claude-plugins-community
-- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.3`
+- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.4`
 - Pilot-domain recovery case (anonymized): see `post-core-update-recovery/LESSONS.md` for the dated lesson entries that source the framework
 
 ## Canonical doc map

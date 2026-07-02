@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "seo-rescue",
-  "version": "0.5.3",
-  "description": "SEO recovery skills + orchestrator. Type /seo-rescue:rescue for the routing table. NEW in v0.5.3: /seo-rescue:recovery-audit (Settlement-Gate state + hypothesis registry), machine-enforced governance (change-budget schema v1.3.0 + safe.js validators), current Core-Update reference data incl. May 2026, gate-aware diagnose/monitor. Recovery workflow: /seo-rescue:recovery-full (diagnose → crawl → audit → plan → monitor) plus recovery-diagnose, recovery-crawl, recovery-audit, recovery-plan, recovery-monitor. Plus: seo-audit-free, post-core-update-recovery, seo-outreach-report, channel-economics-analyzer, competitor-deep-audit, psi-weekly-cron-baseline, ai-search-rescue, ai-citations-tracker, gsc-deep-dive, sistrix-monday-recovery-check, subscription-monetization-audit.",
+  "version": "0.5.4",
+  "description": "SEO recovery skills + orchestrator. Type /seo-rescue:rescue for the routing table. NEW in v0.5.4: Recovery Hardening — spec/schema/script reconciliation (score engine now matches its spec), stage state machine + quiet-death detection + pre-hit baseline selection (experimental N=1), knocking-at-the-door cohort finder in recovery-diagnose, path-portable skills via CLAUDE_PLUGIN_ROOT, three CI consistency checks. Recovery workflow: /seo-rescue:recovery-full (diagnose → crawl → audit → plan → monitor) plus recovery-diagnose, recovery-crawl, recovery-audit, recovery-plan, recovery-monitor. Plus: seo-audit-free, post-core-update-recovery, seo-outreach-report, channel-economics-analyzer, competitor-deep-audit, psi-weekly-cron-baseline, ai-search-rescue, ai-citations-tracker, gsc-deep-dive, sistrix-monday-recovery-check, subscription-monetization-audit.",
   "author": {
     "name": "Max Schottke",
     "url": "https://github.com/maxschottke-spec"

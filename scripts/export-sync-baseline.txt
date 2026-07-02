@@ -187,7 +187,7 @@
 < - Plugin name: `seo-rescue`
 < - Marketplace: `seo-survival-kit`
 < - Repo: https://github.com/maxschottke-spec/seo-survival-kit
-< - Latest installable version: v0.5.3
+< - Latest installable version: v0.5.4
 < - Dependencies: zero npm packages
 < - Validation: `claude plugin validate plugins/seo-rescue` passes
 < ## Workflow patterns

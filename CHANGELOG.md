@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+## [0.5.4] — 2026-07-02
+
 ### Added
 
 - **L4a Stage-State-Machine** (Phase 2, experimental N=1) — `recovery-diagnose` overlays a stage state machine on the raw `recovery_stage_estimate`: it freezes stage progression during an active update rollout (`active_update_window`) or its 28-day settlement (`post_update_settlement`), and hard-resets the effective stage to R1 on a fresh major hit (`re_entry_detected`). New `stage_status` field in `befund.schema.json`, marked `maturity: experimental_n1`. Distinct from the §12a Settlement Gate (operator-batch write-block). Cumulative-damage / multi-hit formula is the follow-up slice (L4b).
@@ -349,7 +351,8 @@ Initial public release.
 
 - Repository was previously named `seo-rescue-skills` and was renamed to `seo-survival-kit` on 2026-05-22.
 
-[Unreleased]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.5.0...v0.5.2
 [0.5.0]: https://github.com/maxschottke-spec/seo-survival-kit/compare/v0.4.1...v0.5.0

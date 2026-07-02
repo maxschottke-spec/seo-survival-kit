@@ -7,7 +7,7 @@ allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.3'
+  version: '0.5.4'
   category: marketing
 ---
 
@@ -131,7 +131,7 @@ Five-lever recurring-revenue playbook for subscription businesses (premium tier,
 - **Plugin name:** `seo-rescue`
 - **Marketplace:** `seo-survival-kit`
 - **Repo:** https://github.com/maxschottke-spec/seo-survival-kit
-- **Latest installable version:** v0.5.3
+- **Latest installable version:** v0.5.4
 - **License:** MIT
 - **Dependencies:** zero npm packages
 - **Validation:** `claude plugin validate plugins/seo-rescue` passes
