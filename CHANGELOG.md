@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Changed
+
+- **recovery-audit ported to the shared German command template** — `commands/recovery-audit.md` now follows the same structure as the other five recovery commands: Zweck / Change Governance / Settlement Gate Awareness (documenting its special role as the sole writer of `recovery-gate.json`), a 9-step Ablauf with domain normalization, orchestrator-aware run-ID (`aud-` prefix), explicit `--days` default 14, and `lib/safe.js` write discipline (`acquireLock`/`atomicWriteJSON`/`releaseLock`) for `change-audit.json`/`change-audit.md`, plus Fehlerbehandlung, Validierungsregeln, Graceful-Degradation and Ausgabe-an-den-User sections. All existing semantics preserved (reconstruction priority, gap markers incl. `hypothesis_verification_missing`, retroactive gate activation, hypothesis registry); cross-references in diagnose/plan/monitor updated to the new section name. Docs only, no behavior change. Closes the TODO deferred from the 2026-07-02 consistency pass (removed from the ROADMAP v0.5.4 block).
+
 ## [0.5.4] — 2026-07-02
 
 ### Added

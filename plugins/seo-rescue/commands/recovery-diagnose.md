@@ -19,7 +19,7 @@ Wenn `change-history.ndjson` existiert, wird sie am Anfang gelesen und im Befund
 
 Dieses Command ist read-only (`audit_only`, Change Budget 0) — ein aktiver Settlement Gate (`../../references/SEO_SETTLEMENT_GATE.md`) blockiert es NIE. Es muss den Gate-State aber kennen und ausweisen:
 
-1. Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`, falls vorhanden. **Writer dieser Datei ist `recovery-audit`** (siehe `commands/recovery-audit.md`, Settlement Gate Detection) — recovery-diagnose liest sie nur. Fehlt die Datei, gilt der Gate als `never_triggered`: keine Warnung, normaler Ablauf.
+1. Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`, falls vorhanden. **Writer dieser Datei ist `recovery-audit`** (siehe `commands/recovery-audit.md`, Schritt 7: Settlement-Gate-Detection) — recovery-diagnose liest sie nur. Fehlt die Datei, gilt der Gate als `never_triggered`: keine Warnung, normaler Ablauf.
 2. Falls `settlement_gate_active = true`:
    - Diagnose laeuft normal weiter — read-only Analyse ist waehrend eines aktiven Gates immer erlaubt.
    - In den Befund (Top-Level) das Feld `settlement_gate_status` aufnehmen, gespiegelt aus der Gate-Datei:

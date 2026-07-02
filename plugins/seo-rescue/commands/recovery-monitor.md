@@ -19,7 +19,7 @@ Wenn `change-history.ndjson` existiert, wird sie fuer die Change-History-Integra
 
 Dieses Command ist read-only gegenueber dem Live-Shop (`audit_only`, Change Budget 0, schreibt nur Cache-Artefakte) — ein aktiver Settlement Gate (`references/SEO_SETTLEMENT_GATE.md`) blockiert es NIE. Es muss den Gate-State aber kennen und ausweisen:
 
-1. Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`, falls vorhanden. **Writer dieser Datei ist `recovery-audit`** (siehe `commands/recovery-audit.md`, Settlement Gate Detection) — recovery-monitor liest sie nur. Fehlt die Datei, gilt der Gate als `never_triggered`: keine Warnung, normaler Ablauf.
+1. Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`, falls vorhanden. **Writer dieser Datei ist `recovery-audit`** (siehe `commands/recovery-audit.md`, Schritt 7: Settlement-Gate-Detection) — recovery-monitor liest sie nur. Fehlt die Datei, gilt der Gate als `never_triggered`: keine Warnung, normaler Ablauf.
 2. Falls `settlement_gate_active = true`:
    - Monitoring laeuft normal weiter — read-only Tracking ist waehrend eines aktiven Gates immer erlaubt und ausdruecklich erwuenscht (der Gate braucht Re-Evaluation-Daten).
    - In den History-Eintrag (Top-Level) das Feld `settlement_gate_status` aufnehmen, gespiegelt aus der Gate-Datei:

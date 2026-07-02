@@ -57,7 +57,6 @@ Scope:
 - **Knocking-at-the-door cohort finder** in `recovery-diagnose` methodology: surface on-page-hardening targets via GSC filter (high impressions × low CTR × position ~8–15 × missing H1/FAQ). Action: H1 fix + PAA-as-H2 + FAQPage schema + CTR title/meta. Systematic cohort selection, not case-by-case.
 - **Gate append-only audit**: settlement-gate unlock/relock cycles append to a history array instead of overwriting scalar keys, so multi-cycle deploy sessions keep a full audit trail.
 - Contributes toward the v1.0 gate "5+ entries in each LESSONS.md".
-- TODO (deferred from the 2026-07-02 consistency pass): port `commands/recovery-audit.md` to the German command template used by the other five recovery commands (Ablauf-/Output-Schema-/Fehlerbehandlung-/Graceful-Degradation-/Ausgabe-Sektionen, atomicWriteJSON + Lock, `--days` default 14).
 
 Deliberately deferred to v0.6: the `compliance-aware-recovery` runtime skill (factual-accuracy vs abmahn-wording, scan on rendered content) — gated on cross-case validation so it lands validated, not candidate.
 
