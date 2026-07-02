@@ -219,4 +219,3 @@ If after 12 weeks of rewrites you still see no citation movement, the issue is r
 ---
 
 **Where to apply this on each platform:** see `exports/README.md` in this repo.
-
