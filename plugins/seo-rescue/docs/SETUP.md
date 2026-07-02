@@ -14,7 +14,7 @@ Nach Installation liegt das Plugin unter dem Claude Code Plugin-Verzeichnis. Die
 
 ### Screaming Frog MCP (optional)
 
-Fuer `recovery-crawl` im Voll-Modus. Ohne SF MCP wird der lokale Minimal-Crawler oder manuelle CSV-Imports genutzt.
+Fuer `recovery-crawl` im Voll-Modus. Ohne SF MCP werden manuelle CSV-Imports genutzt; ohne CSV-Import bricht `recovery-crawl` mit Status `failed` ab.
 
 ### DataForSEO MCP (optional)
 

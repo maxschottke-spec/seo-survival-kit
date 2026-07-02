@@ -92,7 +92,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 |---|---|---|
 | `/seo-rescue:post-core-update-recovery <domain>` | Core-Update diagnose tree + 4-phase Authority-First recovery plan | free |
 | `/seo-rescue:recovery-diagnose <domain>` | Diagnosis with capability-based provider fallbacks (Sistrix + DataForSEO + GSC CSV) | ~$0.05–$0.50 |
-| `/seo-rescue:recovery-crawl <domain>` | Crawl + severity-classified issues (Screaming Frog or local minimal-crawler fallback) | free |
+| `/seo-rescue:recovery-crawl <domain>` | Crawl + severity-classified issues (Screaming Frog MCP or CSV-import fallback) | free |
 | `/seo-rescue:recovery-audit <domain> [--days 14]` | Read-only change audit: Settlement-Gate-State + hypothesis registry | free |
 | `/seo-rescue:recovery-plan <domain>` | Prioritized 30/60/90-day plan with Do-Not-Touch + human approval gate | free |
 | `/seo-rescue:recovery-monitor <domain>` | Weekly tracking with deterministic 0-100 recovery score | free |
@@ -130,7 +130,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 | Doc | Purpose |
 |---|---|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Canonical source of truth: vision, positioning, system shape, modules, governance, privacy, adaptive onboarding, knowledge layer, what is NOT implemented |
-| [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) | Six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase sequencing |
+| [RECOVERY_SYSTEM.md](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md) | Six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase sequencing, Settlement Gate. Canonical copy lives in the plugin (`plugins/seo-rescue/references/`); the root [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) is a pointer stub |
 | [DECISION_ENGINE.md](./DECISION_ENGINE.md) | Decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals |
 | [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) | Weekly CSV-first workflow specification — runnable skill at [`plugins/seo-rescue/skills/sistrix-monday-recovery-check/`](./plugins/seo-rescue/skills/sistrix-monday-recovery-check/) (v0.5.2) with synthetic example at [`examples/synthetic-sistrix-monday-check/`](./examples/synthetic-sistrix-monday-check/) |
 | [ROADMAP.md](./ROADMAP.md) | Version-by-version product plan |

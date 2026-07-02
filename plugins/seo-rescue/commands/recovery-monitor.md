@@ -116,15 +116,43 @@ Hinweis: Wenn `issue_data_fresh = false`, wird `issues_fixed` im Score auf `null
 
 ### Schritt 7: Score berechnen und History schreiben
 
-Rufe das Helper-Script auf:
+Rufe das Helper-Script auf. Die reale Signatur ist `writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings, errors, options = {})`:
 
 ```bash
 node -e "
 const { writeMonitorEntry, formatDeltaReport } = require('./plugins/seo-rescue/scripts/recovery-monitor.js');
-const { entry, lastEntry } = writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, keywordsTotal, issueDataFresh, warnings, errors);
+const { entry, lastEntry } = writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings, errors, {
+  runId,
+  keywordsTotal,
+  issueDataFresh,
+  viTrend4wPct,
+  backlinkSpamScore,
+  sourceNotes,
+  settlementGateStatus,
+  changeEffects,
+  auditHealth,
+  providersUsed,
+  missingCapabilities,
+});
 console.log(formatDeltaReport(entry, lastEntry));
 "
 ```
+
+Unterstuetzte `options`-Keys (alle optional, null-Defaults; nur diese werden vom Script gelesen):
+
+| Key | Default | Bedeutung |
+|-----|---------|-----------|
+| `runId` | neu generiert | Run-ID aus Schritt 3 |
+| `keywordsTotal` | `null` | Gesamtzahl rankender Keywords (Schritt 5) → `keywords_total` |
+| `issueDataFresh` | `false` | Ergebnis aus Schritt 6; nur bei `true` fliesst `issue_reduction` in den Score |
+| `viTrend4wPct` | `null` | 4-Wochen-VI-Trend in Prozent (Sistrix); Primaer-Input fuer die `vi_trend`-Komponente |
+| `backlinkSpamScore` | `null` | Spam-Score 0–100 (DataForSEO Backlinks); ohne echten Wert faellt `backlink_quality` aus dem Score |
+| `sourceNotes` | `[]` | → `source_notes` |
+| `settlementGateStatus` | `{ "active": false }` | Gate-Spiegel aus `recovery-gate.json` (siehe `## Settlement Gate Awareness`) → `settlement_gate_status` |
+| `changeEffects` | `null` | Effekt-Tracking-Array (siehe `## Change History Integration`) → `change_effects` |
+| `auditHealth` | `null` | Audit-Gap-Objekt (siehe `## Change History Integration`) → `audit_health` |
+| `providersUsed` | `[]` | Provider-Liste fuer das Output-Schema |
+| `missingCapabilities` | `[]` | Fehlende Capabilities fuer das Output-Schema |
 
 Falls keine aktuellen Daten vorhanden (weder VI noch Keywords):
 - Schreibe trotzdem einen Eintrag mit `status: "partial"`, `data_quality: "poor"`
@@ -139,19 +167,22 @@ Der Score wird aus 5 Komponenten berechnet. Jede Komponente liefert einen Wert 0
 
 | Komponente | Gewicht | Berechnung | Quelle |
 |-----------|---------|-----------|--------|
-| `vi_trend` | 30% | `100 * clamp((vi_trend_4w_pct + 50) / 100, 0, 1)` — 50% Trend = Score 100 | Sistrix |
-| `keyword_stability` | 25% | `100 * (keywords_t10_current / keywords_t10_baseline)` — capped at 100 | DataForSEO |
-| `quick_win_progress` | 20% | `100 * (quick_wins_moved_up / quick_wins_total)` — Anteil Quick-Wins die Positionen gewonnen haben | DataForSEO Delta |
-| `issue_reduction` | 15% | `100 * clamp(1 - (open_issues / baseline_issues), 0, 1)` — nur wenn `issue_data_fresh = true` | issues.json |
-| `backlink_quality` | 10% | `100 * clamp(1 - (spam_score / 100), 0, 1)` | DataForSEO Backlinks |
+| `vi_trend` | 30% | `100 * clamp((vi_trend_4w_pct + 50) / 100, 0, 1)` — 50% Trend = Score 100. **Fallback** (wenn `viTrend4wPct` nicht uebergeben): `clamp(50 + 5 * vi_delta_pct_vs_befund, 0, 100)` gegen die `vi_current`-Baseline aus `befund.json` (±10 % ↦ 0–100) | Sistrix |
+| `keyword_stability` | 25% | `100 * (keywords_t10_current / keywords_t10_baseline)` — capped at 100; Baseline = `position_distribution.t10` aus `befund.json` | DataForSEO |
+| `quick_win_progress` | 20% | Proxy-Implementierung: `clamp(50 + 10 * keywords_t10_delta, 0, 100)` gegenueber dem letzten History-Eintrag. (Ideal-Formel `100 * quick_wins_moved_up / quick_wins_total` ist nicht implementiert — der Proxy nutzt das Top-10-Delta) | DataForSEO Delta |
+| `issue_reduction` | 15% | `100 * clamp(1 - (open_issues / baseline_issues), 0, 1)` — nur wenn `issue_data_fresh = true`; Baseline = `issues_critical + issues_high` aus `befund.json` | issues.json |
+| `backlink_quality` | 10% | `100 * clamp(1 - (spam_score / 100), 0, 1)` — nur wenn `backlinkSpamScore` als echter Wert uebergeben wurde; kein Neutralwert ohne Daten | DataForSEO Backlinks |
 
 **Score-Regeln:**
 
 - Mindestens 2 Komponenten muessen verfuegbar sein, sonst `score: null`
-- Fehlende Komponenten werden aus dem gewichteten Durchschnitt herausgerechnet (normalisierte Gewichte)
+- Fehlende Komponenten werden aus dem gewichteten Durchschnitt herausgerechnet (normalisierte Gewichte; Summe der emittierten Gewichte = 1.0)
+- Jede verfuegbare Komponente wird als `{ "value": <0-100>, "weight": <normalisiert> }` emittiert; nicht verfuegbare Komponenten als `null`
 - `issue_reduction` wird auf `null` gesetzt wenn `issue_data_fresh = false`
+- `backlink_quality` wird auf `null` gesetzt wenn kein echter Spam-Score vorliegt (kein hartkodierter Neutralwert)
 - `score` ist immer 0–100 oder `null`
 - Beim ersten Lauf (kein Baseline): `quick_win_progress = null`, `keyword_stability` basiert auf absolutem Wert vs. befund.json-Baseline
+- `phase` wird aus Score-Baendern abgeleitet (`< 20` R1, `< 40` R2, `< 60` R3, `< 80` R4, sonst R5); ohne `befund.json`-Baseline oder ohne Score: `phase: null`
 
 ## Output-Pfad
 
@@ -163,7 +194,7 @@ Jeder History-Eintrag in der NDJSON-Datei:
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "1.0.0",
   "run_id": "mon-d4e5f6a7-1716820000000",
   "status": "complete",
   "data_quality": "good",
@@ -239,10 +270,10 @@ Wichtig: Falls keine aktuellen Daten vorhanden sind (alle Quellen nicht erreichb
 ## Validierungsregeln
 
 - `score`: 0–100 oder `null`
-- `phase`: `R1 | R2 | R3 | R4 | R5 | null`
+- `phase`: `R1 | R2 | R3 | R4 | R5 | null` (`null` wenn keine Baseline oder kein Score)
 - `vi`: > 0 oder `null`
 - Jede NDJSON-Zeile mit `\n` terminiert und als JSON parsebar
-- `schema_version` muss `"2.0"` sein
+- `schema_version` muss `"1.0.0"` sein
 - `run_id` muss gesetzt und non-empty sein
 - `issue_data_fresh` muss Boolean sein
 - `component_scores` muss fuer alle verfuegbaren Komponenten gesetzt sein

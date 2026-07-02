@@ -271,7 +271,7 @@ Assembliere alle Daten in JSON gemaess `schemas/action-plan.schema.json`. Atomic
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "1.0.0",
   "run_id": "plan-c3d4e5f6-1716820000000",
   "status": "complete",
   "data_quality": "partial",
@@ -337,7 +337,7 @@ Nach erfolgreichem Schreiben des Plans, gib folgende Informationen aus:
 - `batch_limit` gesetzt wenn `risk != "green"` bei mindestens einer Aktion
 - `requires_human_approval`: immer `true`
 - `implementation_status`: immer `"proposed"` (nie auto-implementiert)
-- `schema_version` muss `"2.0"` sein
+- `schema_version` muss `"1.0.0"` sein
 - `run_id` muss gesetzt und non-empty sein
 - Jede Aktion mit `risk = "green"` muss mindestens einen `evidence`-Eintrag mit Hard-Data haben
 - Aktionen ohne Hard-Data erhalten `risk` mind. `"yellow"`

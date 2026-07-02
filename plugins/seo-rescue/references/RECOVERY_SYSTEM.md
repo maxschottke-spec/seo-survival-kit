@@ -2,7 +2,7 @@
 
 Operational methodology for SEO recovery within the [Recovery Operating System](./ARCHITECTURE.md). This document defines what an operator does during SEO recovery: how decisions get made, what gets protected, what does not get touched, how risk is evaluated, and how time windows shape conclusions. The aim is operator-grade methodology, not a feature list.
 
-> **Status note (v0.4.1).** This document is methodology specification. Sections 5 (Recovery Risk Engine), 6 (Risk Matrix), 7 (Money Keyword Protection), 8 (Winner/Loser Neutralization), 9 (URL Recovery Analysis), 10 (Recovery Signal Score), and 12 (Time-based Recovery Logic) describe behavior intended for the planned `sistrix-monday-recovery-check` skill (v0.5.1) and subsequent skill versions. **They are not implemented as runtime in v0.4.1.** Existing v0.4.1 skills (10 listed in [ARCHITECTURE.md §4](./ARCHITECTURE.md#4-modules-and-skill-registry)) follow the methodology in concept but do not emit the structured outputs described here. Apply the methodology manually by reading these sections; runnable skill ships in v0.5.1 per [ROADMAP.md](./ROADMAP.md).
+> **Status note (v0.5.2).** This document is methodology specification. Sections 5 (Recovery Risk Engine), 6 (Risk Matrix), 7 (Money Keyword Protection), 8 (Winner/Loser Neutralization), 9 (URL Recovery Analysis), 10 (Recovery Signal Score), and 12 (Time-based Recovery Logic) are exercised by the `sistrix-monday-recovery-check` skill (shipped in v0.5.2, CSV-first weekly workflow). The recovery workflow commands (`recovery-diagnose/crawl/audit/plan/monitor/full`, also v0.5.2) implement parts of the methodology in runtime form: Do-Not-Touch and batch limits in `recovery-plan`, stage estimation in `recovery-diagnose`, and an **automated 5-component Recovery Score in `recovery-monitor` that is a separate metric from the section-10 Recovery Signal Score** (see section 10 note). Sections without a runtime are applied manually by reading them; the skill registry is in [ARCHITECTURE.md §4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 
 Companion docs: [ARCHITECTURE.md](./ARCHITECTURE.md) for system shape, [DECISION_ENGINE.md](./DECISION_ENGINE.md) for the decision rules consumed here, [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) for the weekly workflow that exercises this methodology.
 
@@ -243,19 +243,19 @@ The Recovery Risk Engine prevents destructive changes during recovery by detecti
 
 Per section 3 Do-Not-Touch principle. Warnings are loud and explicit, with the affected URLs and the recovery state spelled out, so the operator decides knowing the cost.
 
-### Trigger conditions (planned)
+### Trigger conditions
 
-**Planned for v0.5.1+ when the `sistrix-monday-recovery-check` skill ships.** The Recovery Risk Engine will be on by default during:
+The `sistrix-monday-recovery-check` skill shipped in v0.5.2. The Recovery Risk Engine is on by default during:
 
 - The 90 days following a detected Core Update impact
 - Any session where the SISTRIX Monday Recovery Check produces a Recovery Signal Score above 40
-- Any session where the user profile's `intent.current_task` is `recover-from-traffic-drop` (profile schema also planned for v0.6+ per ARCHITECTURE.md §6)
+- Any session where the user profile's `intent.current_task` is `recover-from-traffic-drop` (profile schema still planned for v0.6+ per ARCHITECTURE.md §6)
 
 It can be toggled off explicitly when the operator confirms the recovery is established (Stage 5 sustained for 30+ days).
 
 ### What it does not do
 
-It does not block edits. It surfaces risk; the operator decides. It does not predict ranking impact of specific edits. It does not protect against unrelated work — non-recovering URLs can be edited freely while the engine is on.
+It does not block edits by default, except when a Settlement Gate is active (section 12a). It surfaces risk; the operator decides. It does not predict ranking impact of specific edits. It does not protect against unrelated work — non-recovering URLs can be edited freely while the engine is on.
 
 ---
 
@@ -508,9 +508,11 @@ If the operator provided a list of URLs changed since the previous export, the f
 
 ## 10. Recovery Signal Score
 
-**Planned for v0.5.1.** The Score is the output of the planned `sistrix-monday-recovery-check` skill. No v0.4.1 skill computes it. The factor list, weights, and calculation below are the specification.
+**Shipped in v0.5.2** as the output of the `sistrix-monday-recovery-check` skill. The factor list, weights, and calculation below are the canonical specification for that skill.
 
 Composite 0-100 score summarizing strength of recovery signal from a SISTRIX Monday comparison.
+
+> **Disambiguation — two scores exist by design.** This section defines the **Recovery Signal Score**: weekly, CSV-first, multi-factor, computed by `sistrix-monday-recovery-check` from SISTRIX Monday exports. The `recovery-monitor` command computes a different metric — the **Recovery Score**: automated, 5-component (VI trend 30 % / keyword stability 25 % / quick-win progress 20 % / issue reduction 15 % / backlink quality 10 %), continuous, from cached artifacts. Both are 0-100 but are NOT comparable with each other and must not be mixed in one time series. When reporting, always name which score is meant.
 
 ### Why a score
 

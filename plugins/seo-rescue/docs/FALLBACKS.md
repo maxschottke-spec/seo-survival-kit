@@ -46,14 +46,7 @@ Lege Screaming-Frog-kompatible Exporte ab unter:
 ~/.cache/seo-rescue/{domain-slug}/imports/crawl/
 ```
 
-### Lokaler Minimal-Crawler
-
-Wenn keine Crawl-Daten vorhanden sind, nutzt `recovery-crawl` automatisch einen lokalen Crawler:
-- Liest `/sitemap.xml`
-- Prueft bis zu 100 URLs
-- Extrahiert Status, Title, H1, Meta Description, Canonical, robots
-- Respektiert robots.txt
-- 1 Request pro Sekunde
+Ohne Screaming Frog MCP und ohne Crawl-CSV bricht `recovery-crawl` mit Status `failed` ab — es gibt keinen eingebauten lokalen Crawler.
 
 ## Was ist mit Fallbacks moeglich?
 
@@ -62,7 +55,7 @@ Wenn keine Crawl-Daten vorhanden sind, nutzt `recovery-crawl` automatisch einen 
 | Diagnose | Ja | Keine VI-Daten, keine Core-Update-Korrelation |
 | Keywords | Ja (GSC/CSV) | Kein Suchvolumen, keine Intent-Daten |
 | Backlinks | Ja (GSC/CSV) | Kein Spam-Score, keine Autoritaet |
-| Crawl | Ja (Lokal/CSV) | Max 100 URLs, kein JS-Rendering |
+| Crawl | Ja (CSV) | Kein Live-Crawl, kein JS-Rendering |
 | Monitoring | Ja (CSV/History) | Score nur mit verfuegbaren Komponenten |
 
 ## Wichtige Regel

@@ -360,7 +360,7 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "1.0.0",
   "run_id": "<diag-xxxxxxxx-timestamp>",
   "status": "complete | partial | failed",
   "data_quality": "good | partial | poor",
@@ -486,7 +486,7 @@ Massnahme je Kandidat (nach Change-Governor + Settlement-Gate + Approval, kein A
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "1.0.0",
   "run_id": "diag-a1b2c3d4-1716820000000",
   "status": "partial",
   "data_quality": "partial",
@@ -572,7 +572,7 @@ Pruefe vor dem Schreiben:
 - `severity` muss exakt einer der Werte sein: `critical | high | medium | low`
 - `slug` muss dem Pattern `^[a-z0-9][a-z0-9_-]{0,63}$` entsprechen
 - `timestamp` muss ein gueltiges ISO-8601-Datum mit Uhrzeit sein
-- `schema_version` muss `"2.0"` sein
+- `schema_version` muss `"1.0.0"` sein
 - `run_id` muss gesetzt und non-empty sein
 - `data_quality` muss exakt einer sein von: `good | partial | poor`
 - `confidence` muss exakt einer sein von: `high | medium | low | none`

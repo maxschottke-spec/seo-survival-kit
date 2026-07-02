@@ -120,7 +120,7 @@ Nach Abschluss:
 - Gib Issue-Summary aus: critical/high/medium/low, crawler_provider
 - Sammle `warnings` und `errors` fuer die Gesamtzusammenfassung
 - Pruefe status:
-  - `"failed"` — Warnung eintragen. Versuche lokalen Crawler oder CSV-Import-Fallback (gemaess `commands/recovery-crawl.md`). Falls Fallback ebenfalls fehlschlaegt: Warnung, weiter mit Plan nur auf Basis der Diagnose.
+  - `"failed"` — Warnung eintragen. Versuche CSV-Import-Fallback (gemaess `commands/recovery-crawl.md`). Falls Fallback ebenfalls fehlschlaegt: Warnung, weiter mit Plan nur auf Basis der Diagnose.
   - `"partial"` / `"complete"` — Weitermachen.
 
 ### Schritt 4: Audit ausfuehren
@@ -239,7 +239,7 @@ NAECHSTE MANUELLE SCHRITTE:
 |--------|----------|
 | Diagnose `failed`, kein CSV-Import | Abbruch des gesamten Workflows. Klarer Hinweis: Datenquellen einrichten oder CSV-Import anlegen. |
 | Diagnose `failed`, CSV-Import vorhanden | Warnung, eingeschraenkter Workflow mit CSV-Daten. |
-| Crawl `failed` | Warnung. Fallback-Versuch (lokaler Crawler oder CSV). Weiter mit Plan auf Basis der Diagnose. |
+| Crawl `failed` | Warnung. Fallback-Versuch (CSV-Import). Weiter mit Plan auf Basis der Diagnose. |
 | Audit `failed` | Warnung. Weiter mit Plan — Plan degradiert auf Roadmap-only (`hypothesis_gate_no_audit_output`). |
 | Plan `failed` | Warnung. Weiter mit Monitoring. Hinweis: Manuellen Plan erstellen. |
 | Monitor `failed` | Warnung. Workflow als `partial` abgeschlossen. Hinweis: Monitor manuell ausfuehren. |

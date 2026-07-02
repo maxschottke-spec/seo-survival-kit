@@ -9,7 +9,7 @@
 **Loesung:**
 - Pruefen ob Screaming Frog MCP Server laeuft
 - Pruefen ob DataForSEO MCP Server konfiguriert ist
-- Der Command laeuft trotzdem weiter mit Fallback-Daten (CSV, lokaler Crawler)
+- Der Command laeuft trotzdem weiter mit Fallback-Daten (CSV-Import)
 
 ### API-Keys fehlen
 

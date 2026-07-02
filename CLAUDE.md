@@ -64,7 +64,7 @@ seo-survival-kit/
 ├── exports/                          # Platform-agnostic Markdown copies (Cursor / Custom GPT / Gemini / Aider / Codex)
 ├── examples/                         # Sample PDF + screenshots (synthetic data)
 ├── ARCHITECTURE.md                   # Canonical source of truth (vision, positioning, modules, governance, privacy)
-├── RECOVERY_SYSTEM.md                # Recovery operational detail
+├── RECOVERY_SYSTEM.md                # Pointer stub — canonical copy: plugins/seo-rescue/references/RECOVERY_SYSTEM.md
 ├── DECISION_ENGINE.md                # Decision rules, prioritization, sequencing, cross-channel signals
 ├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Weekly workflow specification (skill ships in v0.5.2)
 ├── ROADMAP.md                        # Version-by-version product plan
@@ -198,7 +198,7 @@ These rules are derived from real recovery operations and apply to all commands 
 When working on this repository, the source-of-truth docs are:
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — vision, positioning, modules, governance, privacy, adaptive onboarding, knowledge layer, plugin architecture, compatibility, what is NOT implemented
-- [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) — six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase recovery sequencing
+- [plugins/seo-rescue/references/RECOVERY_SYSTEM.md](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md) — six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase recovery sequencing, Settlement Gate (this is the canonical copy the recovery commands read; the root `RECOVERY_SYSTEM.md` is a pointer stub)
 - [DECISION_ENGINE.md](./DECISION_ENGINE.md) — decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals
 - [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow (skill ships in v0.5.2)
 - [ROADMAP.md](./ROADMAP.md) — version-by-version product plan

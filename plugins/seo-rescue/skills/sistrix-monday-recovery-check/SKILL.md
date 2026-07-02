@@ -244,7 +244,7 @@ If the operator is running in a sensitive-client-data mode (see [ARCHITECTURE.md
 
 ## What this skill does not do
 
-- Does not call the SISTRIX API. CSV-first only in v0.5.1. Optional API integration is planned for the v0.9 beta.
+- Does not call the SISTRIX API. CSV-first only (as of v0.5.2, still true). Optional API integration is planned for the v0.9 beta.
 - Does not predict rankings with certainty. The Recovery Signal Score is a calibrated heuristic; treat it as one input, not as a forecast.
 - Does not recommend rewriting winning content. The What-Not-To-Touch section is explicit about this.
 - Does not require API keys.

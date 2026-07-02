@@ -7,7 +7,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 
 ## Zweck
 
-Screaming Frog MCP Crawl durchfuehren und die Ergebnisse in eine strukturierte, priorisierte Issues-Liste transformieren. Identifiziert technische SEO-Probleme die Recovery blockieren. Falls Screaming Frog MCP nicht verfuegbar ist, Fallback auf lokalen Minimal-Crawler oder CSV-Import.
+Screaming Frog MCP Crawl durchfuehren und die Ergebnisse in eine strukturierte, priorisierte Issues-Liste transformieren. Identifiziert technische SEO-Probleme die Recovery blockieren. Falls Screaming Frog MCP nicht verfuegbar ist, Fallback auf CSV-Import; ohne CSV-Import bricht das Command mit Status `failed` ab.
 
 ## Trigger
 
@@ -49,7 +49,6 @@ Normalisierung gemaess Schritt 1 des Ablaufs. `www.` wird NICHT entfernt.
 
 | Capability | Free/Lokal Fallback |
 |-----------|-------------------|
-| `crawl_issues` | Lokaler Minimal-Crawler (100 URLs, 1 req/s, respektiert robots.txt) via `scripts/recovery-crawl.js` |
 | `crawl_issues` | Manuelle Crawl-CSV unter `~/.cache/seo-rescue/{slug}/imports/crawl.csv` |
 | `page_metadata` | Manuelle Crawl-CSV mit H1/Meta-Spalten |
 
@@ -121,7 +120,7 @@ Speichere die Crawl-ID aus der Antwort fuer die nachfolgende Fortschrittsueberwa
 
 Falls `sf_crawl` nicht verfuegbar ist oder sofort einen Fehler zurueckgibt:
 - Warnung in `warnings` eintragen: `"Screaming Frog MCP nicht verfuegbar — Fallback wird versucht"`
-- Weiter mit Schritt 5 (Fallback-Strategie)
+- Weiter mit Schritt 7 (Fallback-Strategie)
 
 ### Schritt 5: Fortschritt ueberwachen (Screaming Frog MCP)
 
@@ -156,17 +155,15 @@ Fuer jeden Export:
 
 Falls ein einzelner Export fehlschlaegt: Warnung eintragen (`"Export fuer {filter} fehlgeschlagen — Issue-Typ wird uebersprungen"`), weiter mit naechstem Filter.
 
-Falls alle SF-Exports fehlschlagen: Warnung eintragen, weiter mit Schritt 7 (lokaler Fallback).
+Falls alle SF-Exports fehlschlagen: Warnung eintragen, weiter mit Schritt 7 (CSV-Fallback).
 
 **Orphan-Pages-Erkennung:**
 
 Vergleiche alle gecrawlten URLs aus dem `Internal:All`-Export mit den intern verlinkten URLs. URLs die gecrawlt wurden, aber keine eingehenden internen Links haben (ausser der Startseite), sind Orphan-Pages. Mappe diese als `orphan_page`-Issues.
 
-### Schritt 7: Fallback — Lokaler Minimal-Crawler oder CSV-Import
+### Schritt 7: Fallback — CSV-Import
 
 Nur wenn SF-Crawl nicht verfuegbar oder alle Exports fehlgeschlagen:
-
-**Option A: CSV-Import**
 
 Pruefe ob `~/.cache/seo-rescue/{slug}/imports/crawl.csv` existiert. Falls ja:
 - Lade Issues aus CSV (erwartete Spalten: `url`, `status_code`, `h1`, `meta_description`, `canonical`)
@@ -174,23 +171,8 @@ Pruefe ob `~/.cache/seo-rescue/{slug}/imports/crawl.csv` existiert. Falls ja:
 - `crawler_provider = "csv_import"`, `local_crawler_used = false`
 - Status = `partial`
 
-**Option B: Lokaler Minimal-Crawler**
-
-Falls kein CSV-Import vorhanden, starte den lokalen Minimal-Crawler via Script:
-
-```bash
-node scripts/recovery-crawl.js --domain {domain} --cache-dir ~/.cache/seo-rescue/{slug} --max-urls 100 --rate 1
-```
-
-Hinweise:
-- Max. 100 URLs
-- Rate: 1 Request/Sekunde
-- Respektiert `robots.txt`
-- `crawler_provider = "local"`, `local_crawler_used = true`
-- Status = `partial`
-
-Falls weder CSV-Import noch lokaler Crawler verfuegbar:
-- Fehler eintragen: `"Kein Crawl-Provider verfuegbar — weder SF MCP, CSV-Import noch lokaler Crawler"`
+Falls kein CSV-Import vorhanden:
+- Fehler eintragen: `"Kein Crawl-Provider verfuegbar — weder SF MCP noch CSV-Import"`
 - Status = `failed`, Abbruch
 
 ### Schritt 8: Issues klassifizieren
@@ -206,17 +188,39 @@ Assembliere die `rawIssues` als Array von Objekten mit folgender Struktur pro Is
 }
 ```
 
-Rufe dann den Helper-Script auf um Issues zu klassifizieren und die `issues.json` zu schreiben:
+Rufe dann den Helper-Script auf um Issues zu klassifizieren und die `issues.json` zu schreiben. Die reale Signatur ist `writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warnings, errors, options = {})`:
 
 ```bash
 node -e "
 const { writeIssuesJSON } = require('./plugins/seo-rescue/scripts/recovery-crawl.js');
-const result = writeIssuesJSON(domain, slug, inputDomain, crawlLimit, crawledInternalHtmlUrls, exportedRowsTotal, rawIssues, warnings, errors, crawlerProvider, localCrawlerUsed, rawExportsUsed);
+const result = writeIssuesJSON(domain, slug, inputDomain, crawledInternalHtmlUrls, rawIssues, warnings, errors, {
+  runId,
+  crawlLimit,
+  exportedRowsTotal,
+  rawExportsUsed,
+  crawlerProvider,
+  localCrawlerUsed: false,
+  providersUsed,
+  missingCapabilities,
+});
 console.log(JSON.stringify(result.summary));
 "
 ```
 
 Ersetze alle Variablen durch die in den vorigen Schritten gesammelten Werte als JavaScript-Literale.
+
+Unterstuetzte `options`-Keys (alle optional; nur diese werden vom Script gelesen):
+
+| Key | Default | Bedeutung |
+|-----|---------|-----------|
+| `runId` | neu generiert | Run-ID aus Schritt 3 (immer uebergeben, damit der Lauf konsistent getaggt ist) |
+| `crawlLimit` | `500` | Crawl-Limit aus Schritt 4 |
+| `exportedRowsTotal` | `crawledUrls` | Summe exportierter Zeilen ueber alle Bulk-Exports |
+| `rawExportsUsed` | `[]` | Liste der verwendeten Export-Filter-Namen |
+| `crawlerProvider` | `"unknown"` | Immer explizit setzen (`screaming_frog_mcp` oder `csv_import`) |
+| `localCrawlerUsed` | `false` | Immer `false` (Legacy-Feld, siehe Validierungsregeln) |
+| `providersUsed` | `[]` | Provider-Liste fuer das Output-Schema |
+| `missingCapabilities` | `[]` | Fehlende Capabilities fuer das Output-Schema |
 
 ## Issue-Typen und Severity-Mapping
 
@@ -240,7 +244,7 @@ Hinweis: Traffic-basierte Severity-Upgrades (z.B. fuer hochfrequentierte URLs) w
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "1.0.0",
   "run_id": "crawl-b2c3d4e5-1716820000000",
   "status": "partial",
   "data_quality": "partial",
@@ -274,7 +278,7 @@ Hinweis: Traffic-basierte Severity-Upgrades (z.B. fuer hochfrequentierte URLs) w
 Nach erfolgreichem Schreiben der Issues, gib folgende Informationen aus:
 
 1. **Status-Zeile:** `[recovery-crawl] {domain} — Status: {status} | Gecrawlte URLs: {crawled_internal_html_urls} (Limit: {crawl_limit})`
-2. **Provider:** `Crawler: {crawler_provider} | Lokaler Crawler: {local_crawler_used}`
+2. **Provider:** `Crawler: {crawler_provider}`
 3. **Issues-Summary:** `Critical: {critical} | High: {high} | Medium: {medium} | Low: {low} | Gesamt: {total_issues}`
 4. **Top-Issues:** Liste die 3 schwerwiegendsten Issues mit Typ, Severity und Anzahl betroffener URLs
 5. **Fehlende Capabilities** (falls vorhanden): `Fehlende Daten: {missing_capabilities.join(', ')}`
@@ -288,14 +292,13 @@ Nach erfolgreichem Schreiben der Issues, gib folgende Informationen aus:
 
 | Fehler | Verhalten | Status |
 |--------|-----------|--------|
-| SF MCP nicht verfuegbar (`sf_crawl` schlaegt fehl) | Warnung, Fallback-Versuch (CSV oder lokaler Crawler). | `partial` |
+| SF MCP nicht verfuegbar (`sf_crawl` schlaegt fehl) | Warnung, Fallback-Versuch (CSV-Import). | `partial` |
 | SF MCP nicht verfuegbar, kein Fallback | Fehler eintragen, Abbruch. | `failed` |
 | Crawl bricht ab (Status `aborted`) | Warnung eintragen, weiter mit partiellen Daten falls `crawled_internal_html_urls > 0`. | `partial` |
 | Crawl-Timeout (> 10 Minuten) | Warnung eintragen, weiter mit partiellen Daten. | `partial` |
 | Einzelner Bulk-Export fehlgeschlagen | Warnung eintragen, Issue-Typ auf 0 setzen, weiter. | `partial` |
-| Alle SF-Exports fehlgeschlagen | Warnung, Fallback-Versuch (CSV oder lokaler Crawler). | `partial` |
-| Lokaler Crawler schlaegt fehl | Warnung, CSV-Import-Versuch. | `partial` |
-| Kein Provider verfuegbar (SF + lokal + CSV) | Fehler eintragen, Abbruch. | `failed` |
+| Alle SF-Exports fehlgeschlagen | Warnung, Fallback-Versuch (CSV-Import). | `partial` |
+| Kein Provider verfuegbar (SF + CSV) | Fehler eintragen, Abbruch. | `failed` |
 | `crawled_internal_html_urls = 0` nach Crawl | Fehler eintragen, Abbruch. Domain moeglicherweise nicht erreichbar. | `failed` |
 | Domain nicht aufloesbar oder leerer Input | Fehler eintragen, Abbruch. | `failed` |
 | `safeSlug()` schlaegt fehl | Fehler eintragen, Abbruch. Hinweis: Domain-Format ueberpruefen. | `failed` |
@@ -313,17 +316,16 @@ Pruefe vor dem Schreiben via `writeIssuesJSON`:
 - `type` muss exakt einer sein von: `broken_internal_link | redirect_chain | non_indexable_canonical | missing_h1 | duplicate_h1 | missing_meta_description | orphan_page`
 - `slug` muss dem Pattern `^[a-z0-9][a-z0-9_-]{0,63}$` entsprechen
 - `timestamp` muss ein gueltiges ISO-8601-Datum mit Uhrzeit sein
-- `schema_version` muss `"2.0"` sein
+- `schema_version` muss `"1.0.0"` sein
 - `run_id` muss gesetzt und non-empty sein
-- `crawler_provider` muss gesetzt sein: `screaming_frog_mcp | sitebulb | csv_import | local`
-- `local_crawler_used` muss Boolean sein
+- `crawler_provider` muss gesetzt sein: `screaming_frog_mcp | sitebulb | csv_import`
+- `local_crawler_used` muss Boolean sein (immer `false` — Legacy-Feld aus Schema-Kompatibilitaet; es gibt keinen lokalen Crawler)
 
 ## Graceful-Degradation-Regeln
 
 | Szenario | Verhalten |
 |---------|-----------|
-| SF MCP nicht verfuegbar | `partial`; Fallback auf lokalen Crawler oder CSV |
-| Lokaler Crawler nicht verfuegbar | `partial`; Fallback auf CSV |
+| SF MCP nicht verfuegbar | `partial`; Fallback auf CSV-Import |
 | Nur CSV-Import verfuegbar | `partial`; `data_quality = "poor"` |
 | Kein Provider verfuegbar | `failed` |
 | Einzelne Exports fehlgeschlagen | Issue-Typ auf 0; `partial` |
@@ -332,7 +334,7 @@ Pruefe vor dem Schreiben via `writeIssuesJSON`:
 ## Datenqualitaetsregeln
 
 - `"good"`: SF-MCP-Crawl vollstaendig, alle Exports erfolgreich
-- `"partial"`: SF-Crawl partial ODER einzelne Exports fehlgeschlagen ODER lokaler Crawler verwendet
+- `"partial"`: SF-Crawl partial ODER einzelne Exports fehlgeschlagen
 - `"poor"`: Nur CSV-Import; keine Live-Crawl-Daten
 
 Bei `data_quality = "poor"`: Expliziter Hinweis an den User, dass Issues-Liste auf manuellen Daten basiert und moeglicherweise unvollstaendig ist.
@@ -359,7 +361,7 @@ Bei Shopware-Shops muessen zusaetzlich folgende Patterns erkannt und klassifizie
 
 ## Referenzen
 
-- `scripts/recovery-crawl.js` — Issue-Klassifikation + atomares Schreiben via `writeIssuesJSON()`; lokaler Minimal-Crawler
+- `scripts/recovery-crawl.js` — Issue-Klassifikation + atomares Schreiben via `writeIssuesJSON()` (kein Crawler — verarbeitet nur bereits gesammelte Crawl-Daten)
 - `schemas/issues.schema.json` — vollstaendiges JSON-Schema des Output-Objekts
 - `lib/safe.js` — `normalizeDomain()`, `safeSlug()`, `ensureDomainDir()`, `acquireLock()`, `releaseLock()`, `atomicWriteJSON()`
 - `references/SHOPWARE_SEO_PATTERNS.md` — Shopware-spezifische URL-Resolver-Patterns, DreiscSeo-Verhalten, Blog-Canonical-Trap

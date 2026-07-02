@@ -23,21 +23,39 @@
     "vi": { "type": ["number", "null"] },
     "vi_delta_pct": { "type": ["number", "null"] },
     "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
-    "phase": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
+    "phase": { "type": ["string", "null"], "enum": ["R1", "R2", "R3", "R4", "R5", null], "description": "null when no befund.json baseline exists or no score could be computed." },
     "keywords_t10": { "type": ["integer", "null"] },
     "keywords_t10_delta": { "type": ["integer", "null"] },
+    "keywords_total": { "type": ["integer", "null"] },
     "top_losers_recovered": { "type": ["integer", "null"] },
     "issues_open": { "type": ["integer", "null"] },
     "issues_fixed": { "type": ["integer", "null"] },
     "issue_data_fresh": { "type": "boolean" },
+    "source_notes": { "type": "array", "items": { "type": "string" } },
+    "change_effects": {
+      "type": ["array", "null"],
+      "description": "Effect tracking per change from change-history.ndjson (read-only integration); null when no change history exists.",
+      "items": { "type": "object" }
+    },
+    "audit_health": {
+      "type": ["object", "null"],
+      "description": "Audit-gap summary from the Change History Integration; null when no change history exists.",
+      "properties": {
+        "change_history_present": { "type": "boolean" },
+        "total_tracked_changes_28d": { "type": ["integer", "null"] },
+        "untracked_changes_detected": { "type": ["integer", "null"] },
+        "anomalies_detected": { "type": ["integer", "null"] }
+      }
+    },
     "component_scores": {
       "type": "object",
+      "description": "Per-component { value, weight } objects. Unavailable components are null. Weights are normalized over the available components and sum to 1.0.",
       "properties": {
-        "vi_trend_score": { "type": ["number", "null"] },
-        "keyword_stability_score": { "type": ["number", "null"] },
-        "quick_win_score": { "type": ["number", "null"] },
-        "issue_reduction_score": { "type": ["number", "null"] },
-        "backlink_quality_score": { "type": ["number", "null"] }
+        "vi_trend": { "$ref": "#/$defs/scoreComponent" },
+        "keyword_stability": { "$ref": "#/$defs/scoreComponent" },
+        "quick_win_progress": { "$ref": "#/$defs/scoreComponent" },
+        "issue_reduction": { "$ref": "#/$defs/scoreComponent" },
+        "backlink_quality": { "$ref": "#/$defs/scoreComponent" }
       }
     },
     "settlement_gate_status": {
@@ -48,6 +66,16 @@
         "active": { "type": "boolean" },
         "next_allowed_review_date": { "type": "string" },
         "unlock_status": { "type": "string", "enum": ["blocked", "partial", "open"] }
+      }
+    }
+  },
+  "$defs": {
+    "scoreComponent": {
+      "type": ["object", "null"],
+      "required": ["value", "weight"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0, "maximum": 100 },
+        "weight": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
       }
     }
   }

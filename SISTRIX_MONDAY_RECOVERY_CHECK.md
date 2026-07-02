@@ -24,7 +24,7 @@ Alternative shorter alias:
 /sistrix:monday-recovery-check
 ```
 
-Runnable skill implementation ships in v0.5.1.
+Runnable skill implementation shipped in v0.5.2.
 
 ## Important constraints
 
@@ -293,7 +293,7 @@ When the user runs the skill in private-local-data or sensitive-client-data mode
 
 ## What this skill does not do
 
-It does not call the SISTRIX API in v0.5.1. CSV-first only.
+It does not call the SISTRIX API (as of v0.5.2, still true). CSV-first only.
 
 It does not predict ranking with certainty. The Recovery Signal Score is a calibrated heuristic, not a forecast.
 

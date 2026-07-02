@@ -66,4 +66,4 @@ All values are synthetic. The TLD is `.test` (RFC 2606 reserved). Money figures,
 
 ## Notes for skill development
 
-This folder is also the regression check during v0.5.1 polish: any change to the skill output contract that would break the shape of `expected-output.example.md` must be reflected here, and the example should be re-rendered. A future v0.6+ evaluation harness will diff the actual skill output against this expected file as a structural assertion (not a numeric equality check — the numbers in the expected file are themselves heuristic).
+This folder is also the regression check during the v0.5.2 polish cycle (planned as v0.5.1): any change to the skill output contract that would break the shape of `expected-output.example.md` must be reflected here, and the example should be re-rendered. A future v0.6+ evaluation harness will diff the actual skill output against this expected file as a structural assertion (not a numeric equality check — the numbers in the expected file are themselves heuristic).

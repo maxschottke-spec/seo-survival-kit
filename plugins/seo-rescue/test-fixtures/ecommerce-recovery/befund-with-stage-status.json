@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0",
+  "schema_version": "1.0.0",
   "run_id": "diag-fixture1-1718280000000",
   "status": "complete",
   "data_quality": "partial",

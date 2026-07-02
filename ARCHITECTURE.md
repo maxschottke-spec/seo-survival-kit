@@ -533,7 +533,7 @@ These are out of scope for the framework. Knowing what is not built is as import
 Version-by-version plan lives in [ROADMAP.md](./ROADMAP.md). Highlights:
 
 - **v0.5** (this PR): architecture, governance, privacy, adaptive onboarding, knowledge layer documented in ARCHITECTURE.md + RECOVERY_SYSTEM.md + DECISION_ENGINE.md. SISTRIX Monday Recovery Check workflow specification.
-- **v0.5.1**: SISTRIX Monday Recovery Check ships as runnable skill.
+- **v0.5.2**: SISTRIX Monday Recovery Check shipped as runnable skill (planned as v0.5.1; no standalone v0.5.1 release).
 - **v0.5.5**: Commercial Model PR (Revenue Rescue positioning, pricing logic, offer validation, Fiverr interface, buyer-objection log, GTM experiment template). Kept separate from technical architecture for review clarity.
 - **v0.6**: Revenue Rescue runtime + safe updater implementation.
 - **v0.7**: Growth Survival Kit umbrella architecture for paid-media expansion.
