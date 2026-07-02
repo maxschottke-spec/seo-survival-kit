@@ -58,6 +58,7 @@ Normalisierung gemaess Schritt 1 des Ablaufs. `www.` wird NICHT entfernt.
 | `backlink_summary` | optional | Backlink-Profil, Spam-Score |
 | `core_update_dates` | optional | Korrelation mit Drop-Timing |
 | `serp_snapshot` | optional | Intent-Klassifikation fuer Keywords |
+| `gsc_search_analytics` | optional | Knocking-at-the-door-Kohorte (`hardening_candidates`, Schritt 11) |
 
 ## Bevorzugte Provider
 
@@ -66,6 +67,7 @@ Normalisierung gemaess Schritt 1 des Ablaufs. `www.` wird NICHT entfernt.
 - **backlink_summary**: DataForSEO MCP (`backlinks/summary/live`)
 - **core_update_dates**: `../../references/CORE_UPDATES.md`
 - **serp_snapshot**: DataForSEO MCP (`serp/google/organic/live`)
+- **gsc_search_analytics**: GSC MCP/API (Query-Page-Paare mit Impressionen/CTR/Position); Free-Fallback: GSC-Performance-CSV unter `~/.cache/seo-rescue/{slug}/imports/`
 
 ## Fallback-Provider
 
@@ -122,7 +124,7 @@ Ersetze `{slug}` durch den in Schritt 1 ermittelten Slug. Das Verzeichnis wird m
 
 ### Schritt 3: Run-ID generieren
 
-Generiere eine eindeutige Run-ID fuer diesen Lauf:
+Falls eine `run_id` vom Orchestrator (`recovery-full`) uebergeben wurde: diese unveraendert verwenden, KEIN eigenes Prefix erzeugen. Sonst generiere eine eindeutige Run-ID fuer diesen Lauf:
 
 ```bash
 node -e "const { randomUUID } = require('crypto'); console.log('diag-' + randomUUID().slice(0,8) + '-' + Date.now())"
@@ -142,7 +144,7 @@ Rufe folgende Endpoints auf:
    - Parameter: `domain={domain}`, `country=de`
    - Extrahiere: `vi_current` (neuester Wert)
 
-2. VI-History fuer 18 monatliche Snapshots (6 Monate) via Einzelabfragen
+2. VI-History fuer 26 woechentliche Snapshots (6 Monate) via Einzelabfragen des Endpoints `domain.sichtbarkeitsindex` mit `date`-Parameter (ein Call pro Kalenderwoche: `domain={domain}`, `country=de`, `date=YYYY-MM-DD`)
    - Berechne: `vi_peak` (Maximum ueber alle Snapshots)
    - Berechne: `vi_drop_pct = ((vi_current - vi_peak) / vi_peak) * 100` (negativ wenn gefallen)
    - Berechne: `vi_trend_4w_pct` (Prozentaenderung letzte 4 Wochen)
@@ -307,6 +309,8 @@ Bestimme `diagnosis` und `severity` basierend auf allen gesammelten Daten.
 | `mixed` | Kombination aus mehreren Faktoren (z.B. Core-Update-Timing + strukturelle Probleme) |
 | `healthy` | Kein signifikanter Drop; stabile Rankings; `vi_drop_pct > -10` |
 
+Erste zutreffende Zeile gewinnt (Tabellen werden von oben nach unten gelesen, spezifischste Bedingung zuerst); `mixed` nur setzen, wenn zwei Einzeldiagnosen unabhaengig voneinander belegt sind.
+
 **Severity:**
 
 | Wert | Bedingung |
@@ -320,16 +324,18 @@ Bestimme `diagnosis` und `severity` basierend auf allen gesammelten Daten.
 
 **Recovery-Stage-Schaetzung (`recovery_stage_estimate`):**
 
-Lies `../../references/RECOVERY_SYSTEM.md` fuer die Stage-Definitionen (R1–R5).
+Die diagnostische Stage (R1–R5) ist HIER definiert — die folgende Tabelle ist die Definition. `../../references/RECOVERY_SYSTEM.md` enthaelt die Vokabular-Uebersicht der drei Namespaces (Stage 0–5, diagnostic stage R1–R5, work phase R1–R5) und verweist fuer die diagnostische Stage hierher.
 
-| Stage | Indikation |
+| Stage | Bedingung (Default-Baender) |
 |-------|-----------|
-| `R1` | Frischer Drop, keine positiven Signale, vi_trend_4w_pct stark negativ |
-| `R2` | Drop stabilisiert, aber kein Wachstum, vi_trend_4w_pct nahe 0 |
-| `R3` | Erste positive Bewegung sichtbar, vi_trend_4w_pct leicht positiv |
-| `R4` | Klares Wachstum, aber noch unter vi_peak |
-| `R5` | Annaehernd erholt (vi_current >= 0.9 * vi_peak) |
+| `R1` | Frischer Drop, keine positiven Signale: `vi_trend_4w_pct < -10` |
+| `R2` | Drop stabilisiert, aber kein Wachstum: `-10 <= vi_trend_4w_pct <= +2` |
+| `R3` | Erste positive Bewegung sichtbar: `+2 < vi_trend_4w_pct <= +10` |
+| `R4` | Klares Wachstum, aber noch unter Peak: `vi_trend_4w_pct > +10` UND `vi_current < 0.9 * vi_peak` |
+| `R5` | Annaehernd erholt: `vi_current >= 0.9 * vi_peak` |
 | `null` | Nicht bestimmbar (VI-Daten fehlen) |
+
+Pruefreihenfolge: zuerst `R5` (der `vi_current`-Check hat Vorrang vor den Trend-Baendern), danach R1–R4 von oben nach unten — erste zutreffende Zeile gewinnt. Die numerischen Baender sind **Default-Werte (experimentell, kalibrierbar)** — sie stammen aus einer kleinen Fallbasis und koennen pro Engagement angepasst werden. Konsistenz-Anker: die R1-Schwelle `vi_trend_4w_pct < -10` ist dieselbe wie die L4a-Re-Entry-Regel in der Stage-State-Machine (unten, Punkt 4).
 
 **Stage-State-Machine (`stage_status`, experimental, N=1):**
 
@@ -352,7 +358,32 @@ Schreibe 2–4 Saetze auf Deutsch, die die wichtigsten Befund-Punkte zusammenfas
 - Wichtigste Keyword-Beobachtung
 - Naechste empfohlene Massnahme
 
-### Schritt 11: Befund schreiben
+### Schritt 11: Knocking-at-the-door-Kohorte (On-Page-Hardening-Kandidaten) (experimental, N=1)
+
+> **Maturity:** `experimental_n1` — abgeleitet aus einem einzigen Fall (post-deploy Lessons 2026-06/07, knocking-at-the-door cohort). KEINE validierte Methode. Promotion erst nach N=2.
+
+Falls GSC verfuegbar (`gsc_search_analytics`-Capability: GSC MCP/API oder GSC-Performance-CSV mit Query-Page-Paaren): die Seiten-Kohorte surfacen, die knapp unter Top-10 "an der Tuer klopft" — **hohe Impressionen x niedrige CTR x Position ~8-15 x fehlende H1/FAQ-Struktur**. Das sind die besten On-Page-Hardening-Ziele: die Substanz rankt bereits, konvertiert aber nicht.
+
+Filter (Richtwerte, anpassbar): `position` 8-15, `impressions >= P75` der Domain, `ctr <= 0.5x` des Positions-Erwartungswerts (Expected-CTR-Kurve unten). Pro Kandidat **gerendert** pruefen (siehe Rendered-Source-Verification in `SAFE_LIVE_CHANGE_RULES.md`): H1 vorhanden? FAQPage-Schema? PAA-Fragen als H2 abgedeckt?
+
+**Expected-CTR-Kurve (Faustwerte, keine gemessene Kurve — als Richtwerte kennzeichnen):**
+
+| Position | Expected CTR |
+|----------|--------------|
+| 1 | ~28 % |
+| 2 | ~15 % |
+| 3 | ~10 % |
+| 4–5 | ~6–8 % |
+| 6–10 | ~2–4 % |
+| 11–20 | ~1–2 % |
+
+Diese Tabelle ist die EINE kanonische Stelle fuer die Position-CTR-Kurve der Recovery-Commands; `RECOVERY_SYSTEM.md` §8 (Winner/Loser Neutralization, "position-CTR curve") referenziert hierher.
+
+Massnahme je Kandidat (nach Change-Governor + Settlement-Gate + Approval, kein Auto-Write): fehlende **H1** setzen; **PAA-Fragen als H2** mit Direktantwort; **FAQPage-Schema**; **CTR-Title/Meta**. Erwartete Wirkung: CTR-Rewrites 1-3 Wochen, Ranking-Effekt ueber Wochen. Ausgabe als `hardening_candidates`-Array im Befund (Schema-Feld in `../../schemas/befund.schema.json`, max 10 Eintraege, sortiert nach Impressionen absteigend). Pro Eintrag: `query`, `url`, `position`, `impressions`, `ctr`, `expected_ctr`, optional `has_h1`, `has_faq_schema`, `paa_covered` (Booleans oder `null`, aus dem gerenderten Check). Read-only Diagnose; Umsetzung folgt der Live-Change-Discipline.
+
+**Graceful Degradation:** Kein GSC-Zugriff (weder MCP/API noch CSV-Import) → Schritt ueberspringen, `hardening_candidates: null`, Warnung `"GSC nicht verfuegbar — hardening_candidates uebersprungen"` eintragen. Weiter mit Schritt 12.
+
+### Schritt 12: Befund schreiben
 
 Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.json`.
 
@@ -398,6 +429,19 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
   "severity": "critical | high | medium | low",
   "recovery_stage_estimate": "R1 | R2 | R3 | R4 | R5 | null",
   "settlement_gate_status": { "active": false },
+  "hardening_candidates": [
+    {
+      "query": "<string>",
+      "url": "<string>",
+      "position": "<number>",
+      "impressions": "<integer>",
+      "ctr": "<number 0-1>",
+      "expected_ctr": "<number 0-1>",
+      "has_h1": "<boolean|null>",
+      "has_faq_schema": "<boolean|null>",
+      "paa_covered": "<boolean|null>"
+    }
+  ],
   "pre_hit_baseline": {
     "value": "<number|null>",
     "unit": "clicks_per_week | visibility_index",
@@ -411,7 +455,7 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
     "recovery_vs_baseline_pct": "<number|null>"
   },
   "stage_status": {
-    "stage": "R1 | R2 | R3 | R4 | R5",
+    "stage": "R1 | R2 | R3 | R4 | R5 | null",
     "raw_stage": "R1 | R2 | R3 | R4 | R5 | null",
     "progression_allowed": false,
     "frozen_reason": "active_update_window | post_update_settlement | null",
@@ -425,7 +469,7 @@ Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.j
 }
 ```
 
-Hinweis: `backlink_profile`-Beispielwerte sind illustrativ. Tatsaechliche Werte kommen aus dem API-Aufruf oder CSV-Import.
+Hinweis: `backlink_profile`-Beispielwerte sind illustrativ. Tatsaechliche Werte kommen aus dem API-Aufruf oder CSV-Import. `hardening_candidates` ist `null`, wenn GSC nicht verfuegbar war (Schritt 11), sonst ein Array mit max. 10 Eintraegen.
 
 **Status-Regeln:**
 
@@ -470,14 +514,6 @@ try {
 
 Ersetze `{slug}` durch den ermittelten Slug und `BEFUND_OBJECT` durch das vollstaendige JSON-Objekt als JavaScript-Literal.
 
-### Schritt 12: Knocking-at-the-door-Cohort (On-Page-Hardening-Kandidaten)
-
-Falls GSC verfuegbar: die Seiten-Kohorte surfacen, die knapp unter Top-10 "an der Tuer klopft" — **hohe Impressionen x niedrige CTR x Position ~8-15 x fehlende H1/FAQ-Struktur**. Das sind die besten On-Page-Hardening-Ziele: die Substanz rankt bereits, konvertiert aber nicht.
-
-Filter (Richtwerte, anpassbar): `position` 8-15, `impressions >= P75` der Domain, `ctr <= 0.5x` des Positions-Erwartungswerts. Pro Kandidat **gerendert** pruefen (siehe Rendered-Source-Verification in `SAFE_LIVE_CHANGE_RULES.md`): H1 vorhanden? FAQPage-Schema? PAA-Fragen als H2 abgedeckt?
-
-Massnahme je Kandidat (nach Change-Governor + Settlement-Gate + Approval, kein Auto-Write): fehlende **H1** setzen; **PAA-Fragen als H2** mit Direktantwort; **FAQPage-Schema**; **CTR-Title/Meta**. Erwartete Wirkung: CTR-Rewrites 1-3 Wochen, Ranking-Effekt ueber Wochen. Ausgabe als `hardening_candidates`-Liste im Befund (falls Schema-Feld vorhanden) oder als Klartext-Sektion. Read-only Diagnose; Umsetzung folgt der Live-Change-Discipline.
-
 ## Output-Pfad
 
 `~/.cache/seo-rescue/{slug}/befund.json`
@@ -503,6 +539,7 @@ Massnahme je Kandidat (nach Change-Governor + Settlement-Gate + Approval, kein A
   "diagnosis": "core-update",
   "severity": "critical",
   "recovery_stage_estimate": "R2",
+  "hardening_candidates": null,
   "settlement_gate_status": {
     "active": true,
     "next_allowed_review_date": "2026-06-06",
@@ -535,6 +572,7 @@ Nach erfolgreichem Schreiben des Befunds, gib folgende Informationen aus:
 6. **Fehlende Capabilities** (falls vorhanden): `Fehlende Daten: {missing_capabilities.join(', ')}`
 7. **Pre-Hit-Baseline** (experimentell, nur falls `pre_hit_baseline.method != "unavailable"`): `Pre-Hit-Baseline: {value} {unit} ({method} aus {source}, N=1 experimentell) | Erholung vs. Peak: {recovery_vs_baseline_pct}%`. Bei `multi_update_erosion_detected = true` zusaetzlich: `⚠ Multi-Update-Erosion: stabile Phase vor Hit {erosion_vs_last_plateau_pct}% unter historischem Peak`
 8. **Stage-Status** (experimentell): `Stage: {stage_status.stage} (roh: {stage_status.raw_stage}) | Progression: {progression_allowed ? "erlaubt" : "eingefroren — " + frozen_reason}`. Bei `re_entry_detected = true` zusaetzlich: `⚠ Stage-Re-Entry: frischer Hit hat Stage von {re_entry_from} auf R1 zurueckgesetzt`
+8a. **Hardening-Kandidaten** (experimentell, nur falls `hardening_candidates != null` und nicht leer): `On-Page-Hardening-Kandidaten (knocking-at-the-door, N=1 experimentell): {hardening_candidates.length}` gefolgt von einer Kurzliste (Query, URL, Position, Impressionen, CTR vs. Expected-CTR)
 9. **Settlement Gate** (nur falls `settlement_gate_status.active = true`): `Settlement Gate: AKTIV bis {next_allowed_review_date} — read-only Diagnose erlaubt, Live-Aenderungen blockiert`
 10. **Naechster Schritt:** Empfehle basierend auf der Diagnose das naechste /seo-rescue:-Command:
    - `core-update` → `/seo-rescue:post-core-update-recovery`
@@ -584,6 +622,8 @@ Pruefe vor dem Schreiben:
 - `stage_status.maturity` muss `"experimental_n1"` sein
 - `stage_status.re_entry_detected = true` ⇒ `stage_status.stage = "R1"`
 - `stage_status.frozen_reason != null` ⇒ `stage_status.progression_allowed = false`
+- `stage_status.stage` darf `null` sein (nur wenn `recovery_stage_estimate = null`, d.h. VI-Daten fehlen)
+- `hardening_candidates` muss `null` oder ein Array mit maximal 10 Eintraegen sein; jeder Eintrag benoetigt `query`, `url`, `position`, `impressions`, `ctr`, `expected_ctr`
 
 Bei einem Validierungsfehler: Warnung eintragen und Wert auf den naechsten gueltigen Wert korrigieren (z.B. negative t3 auf 0 setzen) oder Abbruch wenn Korrektur nicht moeglich.
 
@@ -599,6 +639,8 @@ Bei einem Validierungsfehler: Warnung eintragen und Wert auf den naechsten guelt
 | Keine verwertbare Zeitreihe / CSV ohne `date`-Spalte / Reihe < 8 Perioden | `pre_hit_baseline.method = "unavailable"`, `.value = null`, Warnung; Diagnose laeuft normal weiter |
 | CORE_UPDATES.md fehlt oder > 90 Tage alt | `stage_status` ohne Freezes: `progression_allowed = true`, `frozen_reason = null`, `re_entry_detected = false`, `stage = recovery_stage_estimate` |
 | CORE_UPDATES.md veraltet (> 90 Tage) | `core_update_correlation` max `"low"` oder `"unknown"` |
+| VI fehlt (kein `recovery_stage_estimate`) | `stage_status.stage = null`, `raw_stage = null`; kein Abbruch |
+| Kein GSC-Zugriff (weder MCP/API noch CSV-Import) | Schritt 11 ueberspringen; `hardening_candidates = null`, Warnung |
 
 ## Datenqualitaetsregeln
 

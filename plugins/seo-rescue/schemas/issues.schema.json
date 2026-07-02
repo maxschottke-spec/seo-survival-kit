@@ -23,7 +23,7 @@
     "crawled_internal_html_urls": { "type": "integer", "minimum": 0 },
     "exported_rows_total": { "type": "integer", "minimum": 0 },
     "raw_exports_used": { "type": "array", "items": { "type": "string" } },
-    "crawler_provider": { "type": "string" },
+    "crawler_provider": { "type": ["string", "null"], "description": "Set by the caller (e.g. screaming_frog_mcp, csv_import). null when the caller did not declare a provider — data_quality is then capped at partial." },
     "local_crawler_used": { "type": "boolean" },
     "issues": {
       "type": "array",
@@ -33,7 +33,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["broken_internal_link", "redirect_chain", "non_indexable_canonical", "missing_h1", "duplicate_h1", "missing_meta_description", "orphan_page"]
+            "enum": ["broken_internal_link", "redirect_chain", "non_indexable_canonical", "missing_h1", "duplicate_h1", "missing_meta_description", "orphan_page", "shopware_url_resolver_conflict", "dreisc_301_404_chain", "duplicate_canonical_blog"]
           },
           "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
           "count": { "type": "integer", "minimum": 0 },

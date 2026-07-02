@@ -255,7 +255,7 @@ If the operator is running in a sensitive-client-data mode (see [ARCHITECTURE.md
 - [[post-core-update-recovery]] — the initial diagnostic that decides whether the situation is a Core-Update pattern at all. Run this before starting weekly Monday checks.
 - [[gsc-deep-dive]] — the GSC cross-check data source if the operator has GSC API access configured. The Monday check reads `gsc-history/<sanitized-site>-*.json` directly when present (same filename pattern that skill writes).
 - [[psi-weekly-cron-baseline]] — the technical-health weekly pulse that runs alongside the Monday ranking pulse.
-- [[ai-citations-tracker]] — AI citations are the leading-indicator companion. AI mentions often move 2-6 weeks before classical SISTRIX VI does, which is the operational reason the Monday check ships per-cluster Stage classification rather than a single global stage.
+- [[ai-citations-tracker]] — AI citations are the possible-early-signal companion (hypothesis, N=1, currently unproven: AI mentions MAY move 2-6 weeks before classical SISTRIX VI; the pilot-case observation was rescinded on 2026-06-03 — log the signal, do not act on it alone). Per-cluster Stage classification exists because recovery propagates unevenly across clusters, independent of that hypothesis.
 - [[seo-outreach-report]] — the 10-chapter PDF deliverable. The Monday check feeds the recovery section.
 
 ## Realistic expectations

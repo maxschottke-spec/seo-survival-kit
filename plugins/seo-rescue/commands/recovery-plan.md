@@ -74,6 +74,7 @@ Wenn der User auf Live-Aenderung waehrend Gate drueckt, **muss** Claude die Stan
 |------|--------|---------|
 | `domain` | CLI-Argument | ja |
 | `befund.json` | Cache (recovery-diagnose) | nein (degradiert) |
+| `befund.json.hardening_candidates` | Cache (recovery-diagnose, Schritt 11 — experimental N=1) | nein (optional; `null` wenn GSC fehlte) |
 | `issues.json` | Cache (recovery-crawl) | nein (degradiert) |
 
 **Input-Flexibilitaet:**
@@ -98,7 +99,7 @@ Normalisiere den Input via `normalizeDomain()` aus `lib/safe.js`.
 
 ### Schritt 2: Run-ID generieren
 
-Generiere eine eindeutige Run-ID fuer diesen Lauf:
+Falls eine `run_id` vom Orchestrator (`recovery-full`) uebergeben wurde: diese unveraendert verwenden, KEIN eigenes Prefix erzeugen. Sonst generiere eine eindeutige Run-ID fuer diesen Lauf:
 
 ```bash
 node -e "const { randomUUID } = require('crypto'); console.log('plan-' + randomUUID().slice(0,8) + '-' + Date.now())"
@@ -179,6 +180,8 @@ Jede Aktion im Plan benoetigt ein `evidence`-Array mit mindestens einem Eintrag:
 
 Aktionen ohne Hard-Data (keine Zahlen aus befund.json oder issues.json) erhalten `risk = "yellow"` oder hoeher — niemals automatisch `"green"`.
 
+**Hardening-Kandidaten als Quick-Win-Evidenz (optional, experimental N=1):** Enthaelt `befund.json` ein non-null `hardening_candidates`-Array (knocking-at-the-door-Kohorte aus recovery-diagnose Schritt 11), werden diese Eintraege als Evidenz fuer Quick-Win-Aktionen der Kategorie On-Page-Hardening konsumiert (H1 setzen, PAA-als-H2, FAQPage-Schema, CTR-Title/Meta). Evidence-Format: `"befund.json: hardening_candidates — {query} @ pos {position}, {impressions} Impressionen, CTR {ctr} vs. erwartet {expected_ctr}"`. Da die Kohorten-Heuristik `experimental_n1` ist, erhalten daraus abgeleitete Aktionen `risk` mindestens `"yellow"`. Fehlt das Feld oder ist es `null`: kein Fehler, keine Warnung — normales Quick-Win-Vorgehen ueber `quick_wins`.
+
 ### Schritt 7: 30/60/90-Tage-Plan generieren
 
 Ordne jede Massnahme einem Zeitfenster zu:
@@ -215,18 +218,18 @@ Bevor eine Massnahme in den ausfuehrbaren Plan-Teil aufgenommen wird (`live_chan
 - Warnung eintragen: `hypothesis_gate_no_audit_output — Plan ist Roadmap-only. Fuer live-fix-eligible Aktionen zuerst /seo-rescue:recovery-audit ausfuehren.`
 - Top-Level-Gate-Block bekommt `"audit_output_available": false`
 
-Die folgenden Hard-Stop-Regeln gelten nur, wenn ein `hypothesis_registry` aus recovery-audit vorliegt. Die Pruefung ist als `checkHypothesisScopeMatch(plannedChanges, hypothesisRegistry)` in `lib/safe.js` implementiert — nutze sie statt manueller Abgleiche:
+Die folgenden Hard-Stop-Regeln gelten nur, wenn ein `hypothesis_registry` aus recovery-audit vorliegt. Die Pruefung ist als `checkHypothesisScopeMatch(plannedChanges, hypothesisRegistry)` in `lib/safe.js` implementiert — nutze sie statt manueller Abgleiche (uebergib das `actions[]`-Array als `plannedChanges`):
 
 Regelwerk:
 
-- Jede geplante Massnahme im Output-Feld `planned_changes[]` muss ein `hypothesis_id`-Feld haben, das auf einen Eintrag im `hypothesis_registry` der zugehoerigen `recovery-audit`-Output verweist
+- Jede geplante Massnahme im Output-Feld `actions[]` muss ein `hypothesis_id`-Feld haben, das auf einen Eintrag im `hypothesis_registry` der zugehoerigen `recovery-audit`-Output verweist
 - Der referenzierte Hypothesen-Eintrag muss `hypothesis_status` in `verified` oder `fixed` haben
 - Bei `hypothesis_status` in `suspected` oder `likely` wird die Massnahme in `prepare_now_execute_later` segregiert, **nicht** in `allowed_now`
-- Bei `hypothesis_status = verified` aber `fix_scope` aus dem Hypothesen-Eintrag ueberschritten (z.B. mehr URLs in `planned_changes[]` als in `fix_scope.affected_urls`): die ueberzaehligen URLs werden auf `prepare_now_execute_later` zurueckgesetzt mit Stop-Reason `fix_scope_expansion`
+- Bei `hypothesis_status = verified` aber `fix_scope` aus dem Hypothesen-Eintrag ueberschritten (z.B. mehr URLs in `actions[]` als in `fix_scope.affected_urls`): die ueberzaehligen URLs werden auf `prepare_now_execute_later` zurueckgesetzt mit Stop-Reason `fix_scope_expansion`
 - Bei verweistem `hypothesis_id`, der im `hypothesis_registry` nicht existiert: Hard Stop mit Stop-Reason `hypothesis_not_in_registry`
 - Bei Massnahme ohne `hypothesis_id`: Hard Stop mit Stop-Reason `hypothesis_id_missing`
 
-Output-Feld pro Massnahme:
+Output-Felder pro Massnahme (im jeweiligen `actions[]`-Eintrag):
 
 ```json
 {
@@ -298,7 +301,9 @@ Assembliere alle Daten in JSON gemaess `schemas/action-plan.schema.json`. Atomic
       "risk": "green",
       "phase": "30d",
       "evidence": ["issues.json: broken_internal_link — 14 URLs mit 404"],
-      "affected_urls": 14
+      "affected_urls": 14,
+      "hypothesis_id": "hvg-broken-internal-links",
+      "hypothesis_status_snapshot": "verified"
     }
   ]
 }

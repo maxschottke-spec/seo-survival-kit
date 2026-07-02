@@ -122,7 +122,7 @@
       "description": "Stage state machine (Lesson 4a, multi-update-sequence). EXPERIMENTAL N=1. Overlays freeze/re-entry rules on the raw recovery_stage_estimate.",
       "required": ["stage", "progression_allowed", "maturity"],
       "properties": {
-        "stage": { "type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"] },
+        "stage": { "type": ["string", "null"], "enum": ["R1", "R2", "R3", "R4", "R5", null] },
         "raw_stage": { "type": ["string", "null"], "enum": ["R1", "R2", "R3", "R4", "R5", null] },
         "progression_allowed": { "type": "boolean" },
         "frozen_reason": { "type": ["string", "null"], "enum": ["active_update_window", "post_update_settlement", null] },
@@ -131,6 +131,26 @@
         "active_update": { "type": ["string", "null"] },
         "days_since_rollout_end": { "type": ["integer", "null"] },
         "maturity": { "type": "string", "enum": ["experimental_n1"] }
+      }
+    },
+    "hardening_candidates": {
+      "type": ["array", "null"],
+      "description": "Knocking-at-the-door cohort (on-page hardening targets from GSC: high impressions x low CTR x position ~8-15 x missing H1/FAQ structure). EXPERIMENTAL N=1 (experimental_n1) — derived from a single case (post-deploy lessons 2026-06/07); not a validated method. null when GSC is unavailable.",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["query", "url", "position", "impressions", "ctr", "expected_ctr"],
+        "properties": {
+          "query": { "type": "string" },
+          "url": { "type": "string" },
+          "position": { "type": "number" },
+          "impressions": { "type": "integer" },
+          "ctr": { "type": "number" },
+          "expected_ctr": { "type": "number" },
+          "has_h1": { "type": ["boolean", "null"] },
+          "has_faq_schema": { "type": ["boolean", "null"] },
+          "paa_covered": { "type": ["boolean", "null"] }
+        }
       }
     }
   }

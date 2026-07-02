@@ -120,11 +120,27 @@ A URL leaves protected state when:
 - No money keyword regressions in that window, AND
 - Operator explicitly confirms recovery is established
 
+**"Stable rankings" (definition, used throughout this document):** no position swing of ≥5 between consecutive Monday snapshots AND no money-keyword regression, sustained over N consecutive snapshots (default N=3). Both the Do-Not-Touch exit above and the phase-advancement criteria in §11 use this definition.
+
 The default is "stay protected longer". Lifting protection prematurely is more costly than keeping it on too long.
 
 ### Override
 
 The operator can override Do-Not-Touch with context the framework does not have. When the override happens, the decision is logged (see [ARCHITECTURE.md section 5](./ARCHITECTURE.md#5-privacy-and-client-data) decision memory), the specific risk acknowledged, and the result watched closely at the next Monday cycle.
+
+---
+
+## Stage & phase vocabulary — three namespaces
+
+Three distinct vocabularies share similar labels in this framework. They are NOT interchangeable:
+
+| Namespace | Labels | Defined in | Meaning |
+|---|---|---|---|
+| **Recovery stages** | Stage 0–5 | §4 (this document) | Keyword-milestone sequence: how far recovery has propagated, from Top-100 returns to aligned revenue |
+| **Diagnostic stage** | R1–R5 | `commands/recovery-diagnose.md`, Schritt 10 (`recovery_stage_estimate` / `stage_status.stage`) | VI-trend-based diagnostic state of the domain (numeric default bands over `vi_trend_4w_pct` and `vi_current` vs `vi_peak`) |
+| **Work phase** | R1–R5 | §11 (this document); operative value `current_phase` in `commands/recovery-plan.md`, Schritt 4 | Which kind of recovery work is appropriate now (Protect → Stabilize → Links → Intent → Expansion) |
+
+Both R-namespaces are strictly ordered: **R1 < R2 < R3 < R4 < R5**. Diagnostic stage and work phase may legitimately differ for the same domain (e.g. diagnostic stage R2 but work phase R1 while winners are still unprotected); `recovery-plan` constrains `current_phase` to at most `recovery_stage_estimate` + 1 and reports both values with a warning when they diverge (see `commands/recovery-plan.md`, Schritt 4). When reporting, always name which namespace is meant.
 
 ---
 
@@ -139,7 +155,7 @@ Recovery follows a sequence. Each stage represents a milestone in how recovery p
 - **Stage 4.** Money keywords move into Top 5 / Top 3. Revenue signals begin to follow.
 - **Stage 5.** Visibility index, GSC clicks, and revenue all move in alignment. Recovery is established.
 
-The operational finding from the framework's case library: AI Overview citations and ChatGPT/Perplexity mentions often move 2-6 weeks before classical SISTRIX VI does. Stage 4 commonly arrives before Stage 5. Operators should not panic when Stage 5 lags; AI citation tracking via the `ai-citations-tracker` skill provides a leading indicator that the underlying Authority-First work is being recognized.
+A possible early signal (hypothesis, N=1, currently unproven): rising AI Overview / ChatGPT / Perplexity mentions while classical SISTRIX VI is still flat MAY indicate that authority work is being recognized. This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see `post-core-update-recovery/LESSONS.md`, 2026-06-03 correction). Treat rising AI citations as worth logging via the `ai-citations-tracker` skill, not as confirmation — do not change course or report recovery based on this signal alone. Independent of that hypothesis: Stage 4 commonly arrives before Stage 5, and operators should not panic when Stage 5 lags.
 
 Recovery does not always follow the sequence linearly. A site can be at Stage 4 on its highest-priority keyword cluster while Stage 1 on a secondary cluster. Stage classification is per-cluster as well as global.
 
@@ -172,6 +188,8 @@ Crawl all indexable pages (Screaming Frog, Sitebulb, or manual curl audit) and c
 | 60–80 % | Moderate structural debt | Fix broken/thin pages in parallel with Phase A authority work; expect faster recovery than authority-only |
 | <60 % | Severe structural debt | Structural cleanup is a recovery accelerator, not just hygiene. Prioritize fixing broken pages before investing in new content. Recovery timeline shortens materially when structural baseline improves |
 
+These threshold bands are derived from one observed case (N=1) plus practitioner heuristics — treat them as starting defaults to calibrate per engagement, not as validated cutoffs.
+
 ### Operational pattern
 
 In observed cases with severe structural debt (>50 % non-healthy pages), recovery has been materially faster when structural cleanup ran in parallel with authority work. The structural fixes did not cause the recovery but removed the multiplier that was suppressing it. Specific timelines and recovery percentages are case-dependent and should be documented in engagement-specific private playbooks.
@@ -184,7 +202,7 @@ In one observed case, ~95 % recovery to pre-update average visibility was achiev
 - **Page 5+ rankings grew significantly** (from ~17 % to ~32 %), indicating Google was testing many new positions simultaneously
 - **Blog/editorial pages carried the recovery** at 6–8x more clicks per URL than category/product pages, confirming that pre-existing authority content serves as the trust anchor
 
-This pattern suggests that when a site has strong editorial authority content that survived the Core Update, the recovery propagates FROM that content outward to commercial pages via internal link signals. The editorial content acts as a trust bridge. Operators should protect these trust-anchor pages with the highest Do-Not-Touch priority and use them as internal-link sources to commercial pages that need to recover.
+In one observed case (N=1), this pattern suggests that when a site has strong editorial authority content that survived the Core Update, the recovery propagates FROM that content outward to commercial pages via internal link signals. The editorial content acts as a trust bridge. The generalization — protect trust-anchor pages with the highest Do-Not-Touch priority and use them as internal-link sources to commercial pages that need to recover — is a single-case inference, not a validated rule; apply it as a sensible default and log deviations.
 
 ---
 
@@ -209,7 +227,7 @@ Bei einer **Multi-Update-Sequenz** (mehrere Algorithmus-Updates über Monate) is
 
 > **Maturity:** `experimental_n1` — abgeleitet aus einem einzigen Fall (case-001, Lesson 4). KEINE validierte Methode. Promotion erst nach N=2.
 
-Die lineare R1→R5-Sequenz (§4) ist der Happy-Path. Bei Multi-Update-Sequenzen ist sie unvollständig: Schaden kann wiederkehren, während der Operator schon Erholung misst. Case-001 wurde als „Stage 3 stabil" bewertet — einen Tag später schloss ein neues Core Update seinen Rollout ab und warf die Site auf Stage 1.
+Die lineare Erholungssequenz — die Keyword-Meilensteine Stage 0–5 (§4) ebenso wie die diagnostische Stage R1→R5 (definiert in `commands/recovery-diagnose.md`, Schritt 10; siehe Vokabular-Tabelle oben) — ist der Happy-Path. Bei Multi-Update-Sequenzen ist sie unvollständig: Schaden kann wiederkehren, während der Operator schon Erholung misst. Case-001 wurde als „Stage 3 stabil" bewertet (Keyword-Meilenstein-Namespace, §4) — einen Tag später schloss ein neues Core Update seinen Rollout ab und warf die Site auf Stage 1 (§4).
 
 `recovery-diagnose` (Schritt 10) überlagert die rohe Stage daher mit einer State-Machine und schreibt das Ergebnis nach `stage_status`:
 
@@ -300,7 +318,7 @@ Practical risk framework. Every proposed action during recovery gets scored on s
 
 ### Batch-change velocity rule
 
-During active recovery, limit URL changes to 3–5 per day. CMS template switches (changing which layout a category uses) count as high-impact changes because Google sees a different rendered HTML structure on the same URL — even if the text content is unchanged.
+During active recovery, limit URL changes to **3 per calendar day** — 4–5 only with an explicit batch plan naming the count and acknowledging the higher risk, more than 5 never (see the "Batch Limits by Change Category" table in `SAFE_LIVE_CHANGE_RULES.md`, which is the binding rule; "per calendar day" is counted across all sessions of that day via `change-history.ndjson`). CMS template switches (changing which layout a category uses) count as high-impact changes because Google sees a different rendered HTML structure on the same URL — even if the text content is unchanged.
 
 Observed pattern: switching 5 category pages to new dedicated CMS layouts in a single day during Stage 3-4 recovery caused a same-day live visibility drop of ~11 %. The weekly trend remained positive, and the drop corrected within days, but the intraday signal was measurable and avoidable.
 
@@ -397,7 +415,7 @@ Neutralization detection makes both views visible simultaneously.
 
 ### Detection logic
 
-1. **Classify by visibility weight.** Each keyword gets a visibility weight from search volume × position-CTR curve at its previous position. A position-3 keyword with 10k monthly searches is ~20x heavier than a position-30 keyword with 1k searches.
+1. **Classify by visibility weight.** Each keyword gets a visibility weight from search volume × position-CTR curve at its previous position. A position-3 keyword with 10k monthly searches is ~20x heavier than a position-30 keyword with 1k searches. The canonical position-CTR reference values (rule-of-thumb expected-CTR table) live in `commands/recovery-diagnose.md`, Schritt 11 — use that single table wherever a position-CTR curve is needed.
 
 2. **Separate winners and losers.** Winner = position improved. Loser = position worsened. Newly returned keyword = winner with previous treated as out-of-range. Lost keyword = loser with current treated as out-of-range.
 
@@ -623,6 +641,8 @@ Most invasive. Only when underlying recovery is established. Phase R5 in a fragi
 - R2 → R3: 2+ additional weeks of stable rankings, no money keyword regressions
 - R3 → R4: 4+ weeks of stable rankings, no new cannibalization
 - R4 → R5: 4+ weeks of stable rankings, intent conflicts resolved
+
+"Stable rankings" as defined in §3 (Do-Not-Touch exit): no ≥5-position swing between consecutive Monday snapshots and no money-keyword regression over N consecutive snapshots (default N=3).
 
 Minimum durations. Real cases may require longer. The framework biases toward staying in earlier phases longer rather than advancing prematurely.
 

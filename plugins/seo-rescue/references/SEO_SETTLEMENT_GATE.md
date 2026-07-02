@@ -235,14 +235,24 @@ Every command that touches `recovery_gate` state must emit or read the following
       "stability_check"
     ],
     "emergency_exceptions": [],
-    "next_allowed_review_date": "2026-06-06"
+    "next_allowed_review_date": "2026-06-06",
+    "gate_history": [
+      {
+        "timestamp": "2026-05-27T19:43:00Z",
+        "event": "gate_activated",
+        "run_id": "audit-a1b2c3d4-1716840000000",
+        "detail": "major_batch_on_2026-05-27"
+      }
+    ]
   }
 }
 ```
 
 The object is persisted at `~/.cache/seo-rescue/{slug}/recovery-gate.json` per the schema in `schemas/recovery-gate.schema.json`. It is the source of truth queried by every recovery command.
 
-**Audit trail is append-only.** Unlock and re-lock cycles append to a history array (`emergency_exceptions[]`, `superseded_history[]`), they never overwrite scalar keys. A single deploy day can run several clean-unlock → patch → re-lock cycles; overwriting a scalar `unlock`/`re_lock` field keeps only the last cycle and loses the record of the intermediate ones. Append every cycle so the full sequence stays auditable, and prefer a **clean unlock** (unlock criteria met) over a forced one — a forced unlock is an exception that must be logged with reason and rollback snapshot.
+**Audit trail is append-only** (experimental, N=1 — **Maturity:** `experimental_n1`, derived from a single observed deploy day, 2026-06/07 post-deploy lessons; promotion after N=2). Unlock and re-lock cycles append to a history array (`emergency_exceptions[]`, `gate_history[]` per `schemas/recovery-gate.schema.json`), they never overwrite scalar keys. A single deploy day can run several clean-unlock → patch → re-lock cycles; overwriting a scalar `unlock`/`re_lock` field keeps only the last cycle and loses the record of the intermediate ones. Append every cycle so the full sequence stays auditable, and prefer a **clean unlock** (unlock criteria met) over a forced one — a forced unlock is an exception that must be logged with reason and rollback snapshot.
+
+Three audit surfaces, one event: a gate transition is recorded in `gate_history[]` here (§8, machine state), the unlock decision is documented in `change-history.ndjson` as `recovery_gate_unlock` (§13, operator log), and a per-hypothesis override is documented in the hypothesis entry's `settlement_gate_override` (§11.A, hypothesis registry) — all three refer to the same event from different ledgers.
 
 ---
 

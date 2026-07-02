@@ -109,7 +109,7 @@ The audit output must include a `settlement_gate` block:
 ```json
 {
   "settlement_gate": {
-    "active": true,
+    "settlement_gate_active": true,
     "started_at": "2026-05-27T19:43:00Z",
     "minimum_until": "2026-06-02T00:00:00Z",
     "recommended_until": "2026-06-06T00:00:00Z",
@@ -120,13 +120,13 @@ The audit output must include a `settlement_gate` block:
       "screaming_frog_post_batch_crawl",
       "re_evaluation_report_written"
     ],
-    "allowed_now": [
+    "allowed_actions": [
       "read_only_analysis",
       "rollback_plan",
       "schema_draft",
       "briefing"
     ],
-    "blocked_now": [
+    "blocked_actions": [
       "title_rewrite",
       "new_internal_links",
       "cms_slot_patch",
@@ -191,7 +191,6 @@ This registry feeds downstream commands: `recovery-plan` reads it to determine w
 
 ## Integration with Other Commands
 
-- `recovery-diagnose` calls `recovery-audit` at the start if change-history exists
 - `recovery-plan` references audit findings when planning next steps
 - `recovery-full` must run `recovery-audit` before executing any changes
 - `recovery-monitor` checks whether changes are producing expected effects, using audit baseline

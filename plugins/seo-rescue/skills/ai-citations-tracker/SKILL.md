@@ -17,10 +17,10 @@ metadata:
 
 Most "AI search visibility" advice is descriptive ("you should rank in AI Overviews"). This skill is the measurement loop: a weekly cron job that asks the same brand-mention prompts to AI surfaces, parses the answers for your brand vs competitors, and logs results to NDJSON for trend analysis.
 
-This is the **leading-indicator** companion to [[post-core-update-recovery]]:
+This is the **possible-early-signal** companion to [[post-core-update-recovery]]:
 - Classical Sistrix VI / GSC clicks lag Google by 3-5 days
-- AI citation counts often start moving **2-6 weeks before** classical SERP recovery shows up
-- If your AI citations are climbing while VI is flat, recovery is on track. If both are flat, the authority signals from [[ai-search-rescue]] Tactic 4 (Author + Person-Schema) need more time or aren't reaching the model retrieval layer.
+- Hypothesis (N=1, currently unproven): AI citation counts MAY start moving **2-6 weeks before** classical SERP recovery shows up. In the pilot case this pattern suffered a setback — the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see `post-core-update-recovery/LESSONS.md`, 2026-06-03 correction). Log the signal; do not report recovery based on it alone.
+- If your AI citations are climbing while VI is flat, that is worth logging — not confirmation that recovery is on track. If both are flat, the authority signals from [[ai-search-rescue]] Tactic 4 (Author + Person-Schema) need more time or aren't reaching the model retrieval layer.
 
 ## When to use
 
@@ -166,7 +166,7 @@ The numbers are most useful **week-over-week**, not absolute — citation models
 ## Related skills
 
 - [[ai-search-rescue]] — the *framework* this skill measures. Read it first to know which prompts to track.
-- [[post-core-update-recovery]] — AI citations are the leading indicator of Phase A (Authority foundation) actually working.
+- [[post-core-update-recovery]] — AI citations as a possible early signal (N=1 hypothesis, see above) that Phase A (Authority foundation) is being recognized.
 - [[psi-weekly-cron-baseline]] — same architecture pattern (config → fetch → NDJSON → cron). Pair both for full Recovery telemetry.
 - [[seo-outreach-report]] — once you have 4+ weeks of citation history, the trend chart can be added as an extra chapter in the outreach PDF.
 

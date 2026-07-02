@@ -19,6 +19,10 @@ const SEVERITY_MAP = {
   duplicate_h1: { default: 'low', upgrade: (d, count) => count > 10 ? 'medium' : null },
   missing_meta_description: { default: 'low', upgrade: () => null },
   orphan_page: { default: 'medium', upgrade: () => null },
+  // Shopware-specific patterns (see commands/recovery-crawl.md, "Shopware-spezifische Crawl-Patterns")
+  shopware_url_resolver_conflict: { default: 'high', upgrade: () => null },
+  dreisc_301_404_chain: { default: 'high', upgrade: () => null },
+  duplicate_canonical_blog: { default: 'high', upgrade: (d) => (d && d.top10_ranking === true) ? 'critical' : null },
 };
 
 function parseCLI() {
@@ -65,8 +69,14 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
   try {
     const issues = classifyIssues(rawIssues);
     const summary = buildSummary(issues);
+    // crawler_provider must be declared by the caller (e.g. 'screaming_frog_mcp', 'csv_import').
+    // No silent 'unknown' default: a missing provider is warned and data_quality stays conservative.
+    const crawlerProvider = options.crawlerProvider || null;
+    if (!crawlerProvider) {
+      warnings.push('crawler_provider missing — caller must pass options.crawlerProvider; data_quality capped at "partial"');
+    }
     const status = errors.length > 0 ? 'failed' : warnings.length > 0 ? 'partial' : 'complete';
-    const dataQuality = options.localCrawlerUsed ? 'poor' : (options.crawlerProvider === 'manual_csv' ? 'partial' : 'good');
+    const dataQuality = options.localCrawlerUsed ? 'poor' : ((crawlerProvider === 'csv_import' || !crawlerProvider) ? 'partial' : 'good');
     const output = {
       schema_version: '1.0.0',
       run_id: options.runId || generateRunId(),
@@ -86,7 +96,7 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
       crawled_internal_html_urls: crawledUrls,
       exported_rows_total: options.exportedRowsTotal || crawledUrls,
       raw_exports_used: options.rawExportsUsed || [],
-      crawler_provider: options.crawlerProvider || 'unknown',
+      crawler_provider: crawlerProvider,
       local_crawler_used: options.localCrawlerUsed || false,
       issues,
       summary,

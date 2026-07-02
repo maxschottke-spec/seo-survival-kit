@@ -94,7 +94,7 @@ node -e "const { randomUUID } = require('crypto'); console.log('full-' + randomU
 
 Diese `run_id` wird in ALLE Sub-Command-Outputs eingebettet (befund.json, issues.json, action-plan.json, history.ndjson-Eintrag). Sie ermoeglichen spaetere Korrelation aller Artifacts aus einem Full-Run.
 
-### Schritt 2: Diagnose ausfuehren
+### Schritt 2 [1/5]: Diagnose ausfuehren
 
 Gib aus: `"[1/5] Starte Diagnose fuer {domain}..."`
 
@@ -102,14 +102,14 @@ Lies und befolge `commands/recovery-diagnose.md`. Uebergib die gemeinsame `run_i
 
 Nach Abschluss:
 - Lies `~/.cache/seo-rescue/{slug}/befund.json`
-- Gib Kurz-Befund aus: VI, Diagnosis, Severity, data_quality
+- Gib Kurz-Befund aus: VI, Diagnosis, Severity, data_quality; falls `hardening_candidates` non-null und nicht leer: zusaetzlich `Hardening-Kandidaten: {n} (knocking-at-the-door, N=1 experimentell)` — recovery-plan konsumiert sie in Schritt 5 als Quick-Win-Evidenz
 - Sammle `warnings` und `errors` fuer die Gesamtzusammenfassung
 - Pruefe status:
   - `"failed"` — Pruefe ob alternative Datenquellen (CSV-Imports) vorhanden sind. Falls JA: Warnung, weiter mit eingeschraenktem Workflow. Falls NEIN: Abbruch des gesamten Workflows. Ohne jede Datengrundlage kein sinnvoller Fortschritt.
   - `"partial"` — Warnung, weitermachen.
   - `"complete"` — Weitermachen.
 
-### Schritt 3: Crawl ausfuehren
+### Schritt 3 [2/5]: Crawl ausfuehren
 
 Gib aus: `"[2/5] Starte Crawl..."`
 
@@ -123,7 +123,7 @@ Nach Abschluss:
   - `"failed"` — Warnung eintragen. Versuche CSV-Import-Fallback (gemaess `commands/recovery-crawl.md`). Falls Fallback ebenfalls fehlschlaegt: Warnung, weiter mit Plan nur auf Basis der Diagnose.
   - `"partial"` / `"complete"` — Weitermachen.
 
-### Schritt 4: Audit ausfuehren
+### Schritt 4 [3/5]: Audit ausfuehren
 
 Gib aus: `"[3/5] Starte Change-Audit..."`
 
@@ -139,7 +139,7 @@ Nach Abschluss:
   - `"failed"` — Warnung. Weiter mit Plan; der Plan degradiert dann gemaess `hypothesis_gate_no_audit_output` auf Roadmap-only.
   - `"partial"` / `"complete"` — Weitermachen.
 
-### Schritt 5: Action-Plan erstellen
+### Schritt 5 [4/5]: Action-Plan erstellen
 
 Gib aus: `"[4/5] Erstelle Action-Plan..."`
 
@@ -152,7 +152,7 @@ Nach Abschluss:
   - `"failed"` — Warnung. Weiter mit Monitoring. Manuellen Plan empfehlen.
   - `"partial"` / `"complete"` — Weitermachen.
 
-### Schritt 6: Monitoring einrichten
+### Schritt 6 [5/5]: Monitoring einrichten
 
 Gib aus: `"[5/5] Richte Monitoring ein..."`
 
@@ -244,7 +244,7 @@ NAECHSTE MANUELLE SCHRITTE:
 | Plan `failed` | Warnung. Weiter mit Monitoring. Hinweis: Manuellen Plan erstellen. |
 | Monitor `failed` | Warnung. Workflow als `partial` abgeschlossen. Hinweis: Monitor manuell ausfuehren. |
 | Jeder Command `partial` | Weitermachen. Warnings sammeln und in Zusammenfassung ausgeben. |
-| Run-ID nicht generierbar | Warnun, UUID-Fallback `full-fallback-{timestamp}` verwenden. |
+| Run-ID nicht generierbar | Warnung, UUID-Fallback `full-fallback-{timestamp}` verwenden. |
 
 ## Gesammelte Warnings/Errors
 
@@ -258,11 +258,11 @@ Alle `warnings` und `errors` aus den Sub-Commands werden gesammelt und am Ende i
 
 ## Referenzen
 
-- `commands/recovery-diagnose.md` — Schritt 2
-- `commands/recovery-crawl.md` — Schritt 3
-- `commands/recovery-audit.md` — Schritt 4 (Gate-State + hypothesis_registry; zusaetzlich Pre-Write-Audit-Pflicht)
-- `commands/recovery-plan.md` — Schritt 5
-- `commands/recovery-monitor.md` — Schritt 6
+- `commands/recovery-diagnose.md` — Schritt 2 [1/5]
+- `commands/recovery-crawl.md` — Schritt 3 [2/5]
+- `commands/recovery-audit.md` — Schritt 4 [3/5] (Gate-State + hypothesis_registry; zusaetzlich Pre-Write-Audit-Pflicht)
+- `commands/recovery-plan.md` — Schritt 5 [4/5]
+- `commands/recovery-monitor.md` — Schritt 6 [5/5]
 - `references/SEO_SETTLEMENT_GATE.md` — Gate-Definition, Plan-After-Gate
 - `references/SEO_CHANGE_GOVERNOR.md` — Reserve bleibt Reserve
 - `references/SAFE_LIVE_CHANGE_RULES.md` — Standard Settlement-Gate Response

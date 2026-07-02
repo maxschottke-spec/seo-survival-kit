@@ -101,7 +101,7 @@ Ersetze `{slug}` durch den in Schritt 1 ermittelten Slug. Das Verzeichnis wird m
 
 ### Schritt 3: Run-ID generieren
 
-Generiere eine eindeutige Run-ID fuer diesen Lauf:
+Falls eine `run_id` vom Orchestrator (`recovery-full`) uebergeben wurde: diese unveraendert verwenden, KEIN eigenes Prefix erzeugen. Sonst generiere eine eindeutige Run-ID fuer diesen Lauf:
 
 ```bash
 node -e "const { randomUUID } = require('crypto'); console.log('crawl-' + randomUUID().slice(0,8) + '-' + Date.now())"
@@ -217,7 +217,7 @@ Unterstuetzte `options`-Keys (alle optional; nur diese werden vom Script gelesen
 | `crawlLimit` | `500` | Crawl-Limit aus Schritt 4 |
 | `exportedRowsTotal` | `crawledUrls` | Summe exportierter Zeilen ueber alle Bulk-Exports |
 | `rawExportsUsed` | `[]` | Liste der verwendeten Export-Filter-Namen |
-| `crawlerProvider` | `"unknown"` | Immer explizit setzen (`screaming_frog_mcp` oder `csv_import`) |
+| `crawlerProvider` | `null` + Warnung | Immer explizit setzen (`screaming_frog_mcp` oder `csv_import`). Fehlt der Wert, schreibt das Script eine Warnung und `data_quality` bleibt konservativ auf `partial` gedeckelt |
 | `localCrawlerUsed` | `false` | Immer `false` (Legacy-Feld, siehe Validierungsregeln) |
 | `providersUsed` | `[]` | Provider-Liste fuer das Output-Schema |
 | `missingCapabilities` | `[]` | Fehlende Capabilities fuer das Output-Schema |

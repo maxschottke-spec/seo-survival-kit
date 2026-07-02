@@ -103,9 +103,9 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 ### r-ai-citations-leading-indicator
 
 - **Condition.** Recovery work is multi-week into Phase R1 or R2; AI citation counts rising while classical SISTRIX VI flat.
-- **Sequences.** Continue Authority-First recovery. Do not abandon strategy because VI is flat. Expect 2-6 weeks for VI to follow.
-- **Reason.** Operational finding: AI citation growth has been observed as a leading indicator of Authority-First recovery being recognized; classical VI typically follows on a 2-6 week lag.
-- **Confidence.** Medium (one case-class observation; consistent with platform direction toward EEAT-weighted signals informing AI surfaces).
+- **Sequences.** Continue Authority-First recovery on its own merits and log the AI-citation signal. Do not abandon strategy because VI is flat — but also do not report recovery or change course based on rising AI citations alone.
+- **Reason.** Hypothesis (N=1, currently unproven): AI citation growth MAY be an early signal of Authority-First recovery being recognized, with classical VI following on a 2-6 week lag. The pilot-case observation behind this rule was rescinded on 2026-06-03 — the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see `post-core-update-recovery/LESSONS.md`).
+- **Confidence.** Low (single rescinded case observation; direction consistent with EEAT-weighted signals informing AI surfaces, but unvalidated).
 
 ### r-csv-first-no-api-claim
 

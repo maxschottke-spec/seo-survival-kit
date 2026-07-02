@@ -154,7 +154,7 @@ Classify the recovery into one of six stages. Each stage represents a milestone 
 - Stage 4: money keywords move into Top 5 / Top 3
 - Stage 5: visibility index, GSC clicks, and revenue follow
 
-The framework's operational finding is that AI Overview citations and ChatGPT/Perplexity mentions often move 2-6 weeks before classical SISTRIX VI does. The recovery stage classification reflects this: Stage 4 commonly arrives before Stage 5, and the operator should not panic when Stage 5 lags.
+A possible early signal (hypothesis, N=1, currently unproven): rising AI Overview / ChatGPT / Perplexity mentions while classical SISTRIX VI is still flat MAY indicate that authority work is being recognized — but in the pilot case the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (2026-06-03 correction, see `post-core-update-recovery/LESSONS.md`). Log the signal, do not act on it alone. Independent of that hypothesis: Stage 4 commonly arrives before Stage 5, and the operator should not panic when Stage 5 lags.
 
 #### Per-cluster stage classification (moved to Appendix B)
 

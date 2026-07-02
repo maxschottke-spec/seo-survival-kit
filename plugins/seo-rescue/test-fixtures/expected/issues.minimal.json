@@ -17,7 +17,7 @@
   "crawled_internal_html_urls": 5,
   "exported_rows_total": 5,
   "raw_exports_used": ["response-codes", "h1", "meta-descriptions", "canonicals"],
-  "crawler_provider": "manual_csv",
+  "crawler_provider": "csv_import",
   "local_crawler_used": false,
   "issues": [
     { "type": "broken_internal_link", "severity": "high", "count": 2, "affected_urls": 2, "details": [] },

@@ -73,7 +73,7 @@ Normalisiere den Input via `normalizeDomain()` aus `lib/safe.js` — gibt `input
 
 ### Schritt 3: Run-ID generieren
 
-Generiere eine eindeutige Run-ID fuer diesen Lauf:
+Falls eine `run_id` vom Orchestrator (`recovery-full`) uebergeben wurde: diese unveraendert verwenden, KEIN eigenes Prefix erzeugen. Sonst generiere eine eindeutige Run-ID fuer diesen Lauf:
 
 ```bash
 node -e "const { randomUUID } = require('crypto'); console.log('mon-' + randomUUID().slice(0,8) + '-' + Date.now())"
@@ -301,6 +301,8 @@ Wichtig: Falls keine aktuellen Daten vorhanden sind (alle Quellen nicht erreichb
 ~/.cache/seo-rescue/{slug}/change-history.ndjson
 ~/.cache/seo-rescue/{slug}/snapshots/cms-slots/*.json (read-only references)
 ```
+
+Die `snapshots/cms-slots/*.json` werden von externem Tooling erzeugt (Operator-Skripte, die vor CMS-Slot-Aenderungen einen Before-Snapshot exportieren — kein Command dieses Plugins schreibt sie). `recovery-monitor` und `recovery-audit` lesen sie nur, wenn vorhanden (read-if-present); fehlende Snapshots sind kein Fehler.
 
 ### Was der Monitor mit Change-History tut
 

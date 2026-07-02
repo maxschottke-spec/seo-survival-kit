@@ -52,10 +52,31 @@
           "inlinks_recovered": { "type": "integer" },
           "source_issue": { "type": "string" },
           "batch_limit": { "type": "string" },
-          "evidence": { "type": "array", "items": { "type": "string" } }
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "hypothesis_id": { "type": ["string", "null"], "description": "Reference into the recovery-audit hypothesis_registry (Hypothesis Verification Gate, Step 8a)" },
+          "hypothesis_status_snapshot": { "type": ["string", "null"], "enum": ["suspected", "likely", "verified", "fixed", null] },
+          "fix_scope_match": { "type": ["boolean", "null"] },
+          "verified_by_source_tier": { "type": ["string", "null"] }
         }
       }
     },
+    "hypothesis_verification_gate": {
+      "type": ["object", "null"],
+      "description": "Top-level Hypothesis Verification Gate block (Step 8a). Optional for backward compatibility.",
+      "properties": {
+        "audit_output_available": { "type": "boolean" },
+        "all_planned_changes_verified": { "type": "boolean" },
+        "below_verified_count": { "type": "integer" },
+        "scope_expansions_blocked": { "type": "array", "items": { "type": "string" } },
+        "missing_hypothesis_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "batch_limit": { "type": ["integer", "null"], "description": "Recommended max URL changes per calendar day for non-green actions" },
+    "live_changes_allowed": { "type": ["boolean", "null"], "description": "false while a Settlement Gate is active or the plan is roadmap-only" },
+    "allowed_now": { "type": ["array", "null"], "items": { "type": "string" }, "description": "Action IDs allowed during an active Settlement Gate" },
+    "blocked_now": { "type": ["array", "null"], "items": { "type": "string" }, "description": "Action IDs blocked until gate re-evaluation" },
+    "emergency_exceptions": { "type": ["array", "null"], "items": { "type": "string" } },
+    "reason": { "type": ["string", "null"], "description": "Gate reason, e.g. major_batch_settlement_window" },
     "expected_impact": {
       "type": "object",
       "properties": {

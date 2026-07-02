@@ -253,7 +253,7 @@ If after 12 weeks of rewrites you still see no citation movement, the issue is r
 
 ## Related skills
 
-- [[post-core-update-recovery]] — Phase A (author + EEAT) overlaps directly with Tactic 4; AI-citations are the leading indicator of Phase A success
+- [[post-core-update-recovery]] — Phase A (author + EEAT) overlaps directly with Tactic 4; AI-citations as a possible early signal (N=1 hypothesis, see Overview finding 1) of Phase A success
 - [[seo-outreach-report]] — for measuring classical SERP visibility in the same report
 - [[competitor-deep-audit]] — to find which competitors are actually getting the AI citations you're not
 - `claude-seo:seo-geo` — alternative implementation in the claude-seo plugin (different methodology)

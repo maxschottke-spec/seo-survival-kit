@@ -60,6 +60,22 @@
         }
       }
     },
+    "settlement_gate": {
+      "type": ["object", "null"],
+      "description": "Settlement-Gate status block mirrored from ~/.cache/seo-rescue/{slug}/recovery-gate.json. Field names per schemas/recovery-gate.schema.json. Emitted even when no gate is active (all flags false/null/never_triggered).",
+      "properties": {
+        "settlement_gate_active": { "type": "boolean" },
+        "started_at": { "type": ["string", "null"], "format": "date-time" },
+        "minimum_until": { "type": ["string", "null"], "format": "date-time" },
+        "recommended_until": { "type": ["string", "null"], "format": "date-time" },
+        "unlock_status": { "type": ["string", "null"] },
+        "missing_unlock_criteria": { "type": ["array", "null"], "items": { "type": "string" } },
+        "allowed_actions": { "type": ["array", "null"], "items": { "type": "string" } },
+        "blocked_actions": { "type": ["array", "null"], "items": { "type": "string" } },
+        "next_allowed_review_date": { "type": ["string", "null"] },
+        "retroactively_activated": { "type": ["boolean", "null"] }
+      }
+    },
     "summary": {
       "type": "object",
       "properties": {
