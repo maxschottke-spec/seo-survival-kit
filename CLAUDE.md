@@ -65,7 +65,7 @@ seo-survival-kit/
 ├── examples/                         # Sample PDF + screenshots (synthetic data)
 ├── ARCHITECTURE.md                   # Canonical source of truth (vision, positioning, modules, governance, privacy)
 ├── RECOVERY_SYSTEM.md                # Pointer stub — canonical copy: plugins/seo-rescue/references/RECOVERY_SYSTEM.md
-├── DECISION_ENGINE.md                # Decision rules, prioritization, sequencing, cross-channel signals
+├── DECISION_ENGINE.md                # Pointer stub — canonical copy: plugins/seo-rescue/references/DECISION_ENGINE.md
 ├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Pointer stub — canonical copy: plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md
 ├── ROADMAP.md                        # Version-by-version product plan
 ├── ROADMAP-2026.md                   # Google search future-watch (separate from product roadmap)
@@ -199,7 +199,7 @@ When working on this repository, the source-of-truth docs are:
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — vision, positioning, modules, governance, privacy, adaptive onboarding, knowledge layer, plugin architecture, compatibility, what is NOT implemented
 - [plugins/seo-rescue/references/RECOVERY_SYSTEM.md](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md) — six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase recovery sequencing, Settlement Gate (this is the canonical copy the recovery commands read; the root `RECOVERY_SYSTEM.md` is a pointer stub)
-- [DECISION_ENGINE.md](./DECISION_ENGINE.md) — decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals
+- [plugins/seo-rescue/references/DECISION_ENGINE.md](./plugins/seo-rescue/references/DECISION_ENGINE.md) — decision rules catalog, evidence weighting, data quality, profitability signals, prioritization, sequencing, cross-channel signals (this is the canonical copy the plugin skills read; the root `DECISION_ENGINE.md` is a pointer stub)
 - [plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md](./plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md) — weekly CSV-first workflow (skill shipped in v0.5.2; this is the canonical copy the plugin skills read, the root `SISTRIX_MONDAY_RECOVERY_CHECK.md` is a pointer stub)
 - [ROADMAP.md](./ROADMAP.md) — version-by-version product plan
 

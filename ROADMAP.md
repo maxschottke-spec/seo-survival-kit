@@ -18,7 +18,7 @@ Scope:
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) as canonical source of truth: vision, positioning (ecommerce/D2C wedge), system shape, modules, skill registry, governance, privacy posture, adaptive onboarding, knowledge layer, plugin architecture, compatibility, versioning, what is intentionally not implemented
 - [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) for recovery operational detail: six-stage recovery framework, Recovery Risk Engine, Money Keyword Protection, Winner/Loser Neutralization, URL Recovery Analysis, Recovery Signal Score, five-phase recovery sequencing
-- [DECISION_ENGINE.md](./DECISION_ENGINE.md) for decision logic: decision rules catalog, evidence weighting, data quality layer, profitability signals, prioritization, sequencing constraints, cross-channel signals, channel conflict resolution
+- [DECISION_ENGINE.md](./plugins/seo-rescue/references/DECISION_ENGINE.md) for decision logic: decision rules catalog, evidence weighting, data quality layer, profitability signals, prioritization, sequencing constraints, cross-channel signals, channel conflict resolution
 - [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) workflow specification (skill shipped in v0.5.2)
 - README, CLAUDE, MATURITY reconciled: skill count fixed to 10, version status updated to v0.5.0 shipped / v0.5.1 in flight, ecommerce/D2C positioning, anti-overclaim wording
 - `.gitignore` extended for private data paths

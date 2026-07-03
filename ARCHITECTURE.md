@@ -1,6 +1,6 @@
 # Architecture
 
-Canonical source of truth for the seo-survival-kit and the larger Recovery Operating System that grows out of it. This document defines the vision, positioning, system shape, modules, governance, privacy posture, onboarding model, and what is intentionally not built. Operational detail for the recovery and decision layers lives in [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) and [DECISION_ENGINE.md](./DECISION_ENGINE.md). The version-by-version product plan lives in [ROADMAP.md](./ROADMAP.md).
+Canonical source of truth for the seo-survival-kit and the larger Recovery Operating System that grows out of it. This document defines the vision, positioning, system shape, modules, governance, privacy posture, onboarding model, and what is intentionally not built. Operational detail for the recovery and decision layers lives in [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) and [DECISION_ENGINE.md](./plugins/seo-rescue/references/DECISION_ENGINE.md). The version-by-version product plan lives in [ROADMAP.md](./ROADMAP.md).
 
 Read this document first if you want to understand the system shape. Read the others when you need detail.
 
@@ -74,7 +74,7 @@ Three layers. New skills slot into the diagnostic layer; the decision and workfl
 
 **Diagnostic layer.** Skills that pull data and produce evidence. Today: SISTRIX recovery analysis, GSC deep dive, AI citations tracker, PSI weekly baseline, channel economics analyzer, competitor deep audit, post-Core-Update recovery framework, AI search rescue, SEO outreach report, free-tier audit. Roadmap: paid-media CSV audits (v0.8), GA4 read-only (v0.9), Merchant Center (v0.8), additional cross-channel data sources.
 
-**Decision layer.** Rules that turn evidence into prioritized actions. Decision rules, evidence weighting, data quality layer, profitability signals, cross-channel signals, prioritization, sequencing. Detail in [DECISION_ENGINE.md](./DECISION_ENGINE.md).
+**Decision layer.** Rules that turn evidence into prioritized actions. Decision rules, evidence weighting, data quality layer, profitability signals, cross-channel signals, prioritization, sequencing. Detail in [DECISION_ENGINE.md](./plugins/seo-rescue/references/DECISION_ENGINE.md).
 
 **Workflow layer.** Recurring rhythms the operator follows. Today: weekly SISTRIX Monday Recovery Check, weekly PSI baseline, weekly AI citations tracking. Detail for the recovery rhythm in [SISTRIX_MONDAY_RECOVERY_CHECK.md](./plugins/seo-rescue/references/SISTRIX_MONDAY_RECOVERY_CHECK.md) and [RECOVERY_SYSTEM.md](./plugins/seo-rescue/references/RECOVERY_SYSTEM.md).
 
@@ -209,7 +209,7 @@ The framework draws on actual recovery work. The conversion from private observa
 2. Extract the lesson in one sentence.
 3. Strip identifying detail. Numbers become magnitude bands ("low five-figure budget"), dates lose specificity ("a published Core Update"), names become roles ("the shop owner").
 4. Tag with an allowed abstraction label (German D2C ecommerce case, marketplace-heavy ecommerce case, Core Update recovery case, etc.) and add applicability + non-applicability conditions and a confidence level.
-5. Land the public artifact in a skill's `LESSONS.md` or in [DECISION_ENGINE.md](./DECISION_ENGINE.md). The private source stays local and is not referenced by path or hash.
+5. Land the public artifact in a skill's `LESSONS.md` or in [DECISION_ENGINE.md](./plugins/seo-rescue/references/DECISION_ENGINE.md). The private source stays local and is not referenced by path or hash.
 
 ### Test for anonymization
 
@@ -223,7 +223,7 @@ Patterns from real recovery work progress through five maturity stages before th
 - **Stage 2.** Observed repeatedly in the same case at different time points.
 - **Stage 3.** Cross-channel confirmation (the pattern explains signals visible in more than one channel).
 - **Stage 4.** Reliable sequencing evidence (the pattern's recommended sequence reliably produces the expected next-stage signal).
-- **Stage 5.** Operational rule candidate (the pattern can be codified into a decision rule in [DECISION_ENGINE.md](./DECISION_ENGINE.md) section 2).
+- **Stage 5.** Operational rule candidate (the pattern can be codified into a decision rule in [DECISION_ENGINE.md](./plugins/seo-rescue/references/DECISION_ENGINE.md) section 2).
 
 Only Stage 4 and Stage 5 patterns influence public recommendations with medium confidence or higher. Earlier stages are local-only.
 
@@ -340,7 +340,7 @@ The framework's recommendations are calibrated to the best available evidence. K
 
 ### Source quality (four levels)
 
-Knowledge sources are weighted on a four-level A/B/C/D scale — from official platform documentation and first-party data (Level A, stated with high confidence) down to unverified claims (Level D, not used) — with the authoritative definitions in [DECISION_ENGINE.md §3 (Evidence weighting)](./DECISION_ENGINE.md#3-evidence-weighting).
+Knowledge sources are weighted on a four-level A/B/C/D scale — from official platform documentation and first-party data (Level A, stated with high confidence) down to unverified claims (Level D, not used) — with the authoritative definitions in [DECISION_ENGINE.md §3 (Evidence weighting)](./plugins/seo-rescue/references/DECISION_ENGINE.md#3-evidence-weighting).
 
 ### Evidence and data combined
 
@@ -385,7 +385,7 @@ seo-survival-kit/                  # Repository / marketplace name
 ├── examples/                      # Sample PDF + screenshots only (synthetic data)
 ├── ARCHITECTURE.md                # This document
 ├── RECOVERY_SYSTEM.md             # Recovery operational detail
-├── DECISION_ENGINE.md             # Decision logic
+├── DECISION_ENGINE.md             # Pointer stub — canonical: plugins/seo-rescue/references/
 ├── SISTRIX_MONDAY_RECOVERY_CHECK.md  # Pointer stub — canonical copy in plugins/seo-rescue/references/
 ├── ROADMAP.md                     # Version-by-version plan
 ├── ROADMAP-2026.md                # Google search future-watch (separate)
@@ -555,7 +555,7 @@ Version-by-version plan lives in [ROADMAP.md](./ROADMAP.md). Highlights:
 - **Money keyword.** A keyword where a ranking improvement directly translates to revenue (commercial intent, transactional pattern, ranks on a conversion-capable URL).
 - **Recovery Signal Score.** Composite 0-100 score summarizing the strength of a recovery signal from a SISTRIX Monday comparison. Detail in [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md).
 - **Winner/Loser Neutralization.** Pattern where many small/mid keyword gains are offset by a few large losses, producing a flat visibility index despite real ranking improvements. Detail in [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md).
-- **Decision rule.** A short, named, source-cited rule that gates or sequences recommendations under specific conditions. Catalog in [DECISION_ENGINE.md](./DECISION_ENGINE.md).
+- **Decision rule.** A short, named, source-cited rule that gates or sequences recommendations under specific conditions. Catalog in [DECISION_ENGINE.md](./plugins/seo-rescue/references/DECISION_ENGINE.md).
 - **Confidence (Low/Medium/High).** Output-level statement of how strong the evidence backing a recommendation is. Drops to the minimum of evidence quality and data quality.
 
 ### B. Document map
