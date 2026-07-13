@@ -114,6 +114,21 @@ Recommended path convention: `~/.config/seo-outreach-report/.env` or `./.env` in
 9. **Trust + backlinks** — backlink KPIs + top referring domains
 10. **Conclusion + action plan 30/60/90 days** — per item: what, why, how, who, cost, expected impact
 
+## Weekly mode (recurring client report)
+
+Besides the one-shot 10-chapter pitch PDF there is a **recurring 1-page weekly report** for clients/prospects you already talk to — designed as a trust-builder that shows data competence without giving away an executable playbook (recommendations are WHAT+WHY, never step-by-step HOW).
+
+```bash
+node seo-weekly-gen.js <slug>      # after fetch/extract/onpage — renders the weekly PDF
+node seo-weekly-review.js <slug>   # deterministic review gate (exit 0 = PASS)
+```
+
+- **Deltas:** every run stores a snapshot under `<cache-dir>/<slug>-weekly/`; from run #2 on the report shows week-over-week changes per KPI plus keyword movers (▲/▼) and dropped rankings.
+- **Branding + editorial** live in `config.weekly[slug]` (see `audit-config.example.json`): `logo_file`, `footer_brand`, CI colors, a run-#1-only `intro`, standing `recommendations`, and optionally curated `observations_current` that are only used when `observations_date` matches the run date — unattended cron runs fall back to auto-generated observations from the data, so stale week-specific claims can never repeat.
+- **Review gate** (`seo-weekly-review.js`) is built for fail-closed automation: it rejects placeholder strings (`undefined`/`NaN`), em-dashes, stale artifacts, missing dates, and data glitches (VI jump >60 %, keyword-count jump >40 %, halved referring domains week-over-week — almost always provider outliers, never send those to a client).
+- **Full automation:** `weekly-runner.example.sh` is a copy-and-fill template for a launchd/cron chain: render → deterministic gate → LLM editorial gate (Claude headless, PASS/FAIL) → send or draft via Apple Mail. It defaults to **draft mode** (`AUTO_SEND=0`); flipping to unattended sending is a deliberate governance decision — start with drafts for a few weeks first. A duplicate-send flag makes reruns idempotent. Pair with a failure-alert wrapper and a staleness heartbeat so "quiet" never means "broken".
+- **Costs:** the fetch stage now caches immutable past months of the Sistrix VI history in the cache dir, so a weekly run costs ~2 Sistrix credits + 5 DataForSEO calls (≈ $0.30) instead of 20 credits.
+
 ## Language rule
 
 Written for decision-makers without SEO knowledge. No unexplained abbreviations (LCP/CLS/INP/TBT/CWV → expand on first mention). For examples of good sentences, see `seo-report-gen.js` → functions `lightLCP`, `lightCLS` and the per-domain conclusion text.

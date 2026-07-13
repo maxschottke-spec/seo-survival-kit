@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Added
+
+- **seo-outreach-report: Weekly mode** — new recurring 1-page client report (`seo-weekly-gen.js`) with week-over-week deltas from local snapshots, keyword movers, an 18-month VI sparkline, configurable branding (`config.weekly[slug]`: logo, footer, CI colors) and date-gated curated observations (unattended cron runs can never repeat stale week-specific claims). Ships with a fail-closed review gate (`seo-weekly-review.js`: placeholder/em-dash/staleness checks + week-over-week data-glitch detection) and a copy-and-fill automation template (`weekly-runner.example.sh`: render → deterministic gate → LLM editorial gate → Apple-Mail send/draft, draft-mode default, idempotent via sent-flag). Designed as a trust-builder: recommendations are WHAT+WHY, never executable step-by-step playbooks.
+- **seo-audit-fetch-v2: Sistrix VI-history cache** — immutable past months of the 18-month VI history are cached per slug in the user cache dir; only missing months plus the current month hit the API. Cuts recurring runs from 20 to ~2 Sistrix credits.
+
 ### Changed
 
 - **recovery-audit ported to the shared German command template** — `commands/recovery-audit.md` now follows the same structure as the other five recovery commands: Zweck / Change Governance / Settlement Gate Awareness (documenting its special role as the sole writer of `recovery-gate.json`), a 9-step Ablauf with domain normalization, orchestrator-aware run-ID (`aud-` prefix), explicit `--days` default 14, and `lib/safe.js` write discipline (`acquireLock`/`atomicWriteJSON`/`releaseLock`) for `change-audit.json`/`change-audit.md`, plus Fehlerbehandlung, Validierungsregeln, Graceful-Degradation and Ausgabe-an-den-User sections. All existing semantics preserved (reconstruction priority, gap markers incl. `hypothesis_verification_missing`, retroactive gate activation, hypothesis registry); cross-references in diagnose/plan/monitor updated to the new section name. Docs only, no behavior change. Closes the TODO deferred from the 2026-07-02 consistency pass (removed from the ROADMAP v0.5.4 block).

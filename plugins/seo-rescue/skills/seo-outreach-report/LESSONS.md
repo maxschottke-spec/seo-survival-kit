@@ -92,3 +92,19 @@ Diese Falle gilt für alle Shopware-Redirect-Plugins die case-insensitive arbeit
 ## Konsolidierte Lessons (aus 3+ Einträgen ins Hauptskill übernommen)
 
 _(noch leer — Einträge werden hierhin verschoben wenn Pattern stabilisiert ist)_
+
+---
+
+## 2026-07-13 — Weekly-Modus: Erstanwendung (Camper-Matratzen-Marke)
+
+**Kontext:** Erster produktiver Weekly-Report als Trust-Builder für einen Prospect, inkl. Vollautomatisierung (launchd + Guard + Staleness-Heartbeat + Auto-Versand hinter doppeltem Review-Gate).
+
+**Befunde + Konsequenzen:**
+
+1. **Sistrix-Credits im Wochentakt:** 18 History-Calls pro Lauf für unveränderliche Vergangenheits-Monate sind Verschwendung. → VI-History-Cache in `seo-audit-fetch-v2.js` (nur fehlende + laufender Monat gegen die API, ~2 statt 20 Credits).
+2. **Kuratierte Beobachtungen veralten:** Ein Cron, der handgeschriebene "diese Woche"-Aussagen wiederholt, verschickt nach 2 Wochen falsche Fakten. → `observations_date`-Gate: kuratiertes Editorial gilt nur am exakten Lauf-Datum, sonst Auto-Fallback aus der Datenlage.
+3. **Kunden-Logos aus Stock-/Fiverr-Quellen prüfen:** Die einzige PNG-Version des Absender-Logos trug ein halbtransparentes Fiverr-Preview-Wasserzeichen — auf dem Bildschirm leicht zu übersehen, auf einem Kundenreport fatal. → Logo IMMER gerendert sichtprüfen, Vektor-Original (SVG/AI) bevorzugen.
+4. **Auto-Versand nur fail-closed:** Provider-Ausreißer (halbiertes Linkprofil, VI-Sprünge) sind fast immer Messfehler. → Deterministisches Gate mit Woche-zu-Woche-Plausibilität VOR dem LLM-Gate; jedes rote Gate = kein Versand + Notification, Draft-Modus als Default der Vorlage.
+5. **Em-Dash-Normalisierung im Generator UND im Gate:** Editorial-Texte aus LLM-Sessions schleppen Geviertstriche ein (KI-Tell). Der Generator ersetzt sie (→ Halbgeviertstrich), das Review-Gate blockt Reste.
+
+**Konsolidierungs-Status:** In SKILL.md (Abschnitt "Weekly mode") übernommen.
