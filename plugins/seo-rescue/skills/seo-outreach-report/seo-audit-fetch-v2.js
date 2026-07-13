@@ -56,18 +56,36 @@ async function psi(url, strategy) {
 }
 
 // Sistrix VI history: fetch one call per month for the last N months.
-async function sistrixViHistory(domain, country='de', months=18) {
-  const dates = [];
+// Abgeschlossene Monate sind unveränderlich → Cache im User-Cache-Dir, damit
+// wiederkehrende Läufe (Weekly-Reports, Crons) nicht 18 Credits pro Lauf verbrennen:
+// nur fehlende Monate + der laufende Monat gehen gegen die API (~2 Credits/Lauf).
+async function sistrixViHistory(slug, domain, country='de', months=18) {
+  const cacheFile = cachePath(slug, `-vi-cache-${country}.json`);
+  let cache = {};
+  try { cache = JSON.parse(safeReadFile(cacheFile)); } catch { /* first run */ }
+
   const now = new Date();
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+  const dates = [];
   for (let i = months - 1; i >= 0; i--) {
     const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
     dates.push(dt.toISOString().slice(0, 10));
   }
   const series = [];
+  let cacheDirty = false;
   for (const date of dates) {
+    if (cache[date] && date !== currentMonth) { series.push(cache[date]); continue; }
     const j = await sistrix('domain.sichtbarkeitsindex', { domain, country, date }).catch(() => ({}));
     const v = j.answer?.[0]?.sichtbarkeitsindex?.[0];
-    if (v) series.push({ date: v.date, value: parseFloat(v.value) });
+    if (v) {
+      const entry = { date: v.date, value: parseFloat(v.value) };
+      series.push(entry);
+      cache[date] = entry;
+      cacheDirty = true;
+    }
+  }
+  if (cacheDirty) {
+    try { fs.rmSync(cacheFile, { force: true }); writeFileExclusive(cacheFile, JSON.stringify(cache, null, 1)); } catch { /* cache is best effort */ }
   }
   return series;
 }
@@ -79,7 +97,7 @@ async function fetchOne(target) {
   const [sxVi, sxViOverview, viHist, d4sRanked, d4sBacklinks, d4sDomainInfo, d4sCompetitors, d4sBacklinkDomains, psiMobile, psiDesktop] = await Promise.all([
     sistrix('domain.sichtbarkeitsindex', { domain: target.domain, country: 'de' }).catch(e => ({ error: String(e) })),
     sistrix('domain.sichtbarkeitsindex.overview', { domain: target.domain, country: 'de' }).catch(e => ({ error: String(e) })),
-    sistrixViHistory(target.domain).catch(e => []),
+    sistrixViHistory(target.slug, target.domain).catch(e => []),
     // limit:1000 + SV-desc sampling gives a realistic position distribution.
     // The previous limit:100 + rank_group asc only returned the best-ranking 100
     // keywords, which made the position-distribution chart in the PDF show 100 %

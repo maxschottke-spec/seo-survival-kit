@@ -43,5 +43,24 @@
         }
       ]
     }
+  },
+  "weekly": {
+    "client-a": {
+      "logo_file": "/absolute/path/to/your-logo.svg",
+      "footer_brand": "Your Agency · Your Name",
+      "accent": "#1f4bd8",
+      "intro": "Run-#1-only welcome paragraph explaining the weekly cadence and that all data comes from external sources.",
+      "observations_date": "2026-01-01",
+      "observations_current": [
+        "Curated observation for exactly this run date — unattended runs after this date fall back to auto-generated observations."
+      ],
+      "recommendations": [
+        {
+          "title": "WHAT to fix (no how-to)",
+          "text": "WHY it matters and why it needs a professional — never step-by-step instructions."
+        }
+      ],
+      "mail_comment": "Recipient/sender/body live in your private runner copy (weekly-runner.example.sh), never in this repo."
+    }
   }
 }
