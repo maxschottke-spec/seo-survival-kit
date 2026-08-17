@@ -117,7 +117,17 @@ if (PREV && PREV.keywords) {
       ${gone.map(k => `<tr><td>${esc(k.keyword)}</td><td class="r">${de(k.sv)}</td><td class="r">–</td><td class="r"><span class="d down">aus Top-Erfassung gefallen</span></td></tr>`).join('')}
     </table>`;
   } else {
-    moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Keine nennenswerten Positionsveränderungen in den Top-Rankings – in einer ruhigen Woche ist das ein gutes Zeichen.</p>`;
+    // Der Fallback darf keine "ruhige Woche" behaupten, wenn der VI im selben
+    // Fenster deutlich sprang (Editorial-Gate-Befund 10.08.2026): Positionen
+    // stabil UND VI-Bewegung sind gleichzeitig möglich — beides benennen,
+    // keine Ursache behaupten.
+    const viPrev = PREV?.vi;
+    const viRel = viPrev ? (S.vi_current - viPrev) / viPrev : null;
+    if (viRel != null && Math.abs(viRel) >= 0.05) {
+      moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Die Einzelpositionen der Top-Rankings blieben stabil (keine Veränderung oberhalb der Erfassungsschwelle). Die Sichtbarkeit insgesamt ${viRel > 0 ? 'stieg' : 'sank'} im selben Zeitraum um ${de(Math.abs(viRel) * 100, 1)} % (VI ${de(viPrev, 3)} → ${de(S.vi_current, 3)}).</p>`;
+    } else {
+      moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Keine nennenswerten Positionsveränderungen in den Top-Rankings – in einer ruhigen Woche ist das ein gutes Zeichen.</p>`;
+    }
   }
 }
 
@@ -129,8 +139,19 @@ const topKw = (S.d4s_top_keywords || []).slice().sort((a, b) => (b.sv || 0) - (a
 let observations = (W.observations_date === today && W.observations_current) || null;
 if (!observations) {
   observations = [];
-  if (S.psi_mobile?.perf != null && S.psi_mobile.perf < 60)
-    observations.push(`Die mobile Ladeleistung liegt im Labor-Test bei ${S.psi_mobile.perf}/100 (größtes Element nach ${de(S.psi_mobile.lcp / 1000, 1)} s sichtbar; Google-Richtwert: unter 2,5 s). Die echten Nutzerdaten sind aktuell noch im grünen Bereich – das Labor zeigt aber, wie wenig Puffer bleibt.`);
+  if (S.psi_mobile?.perf != null && S.psi_mobile.perf < 60) {
+    // Lab-LCP nie ungeprüft als Fakt zitieren (Editorial-Gate-Befund 10.08.2026):
+    // Lighthouse-Lantern kann Ausreißer simulieren (gemessen: 45,4 s Lab bei
+    // 1,15 s Feld/FAST). Ab 15 s gilt der Lab-Wert als Simulationsartefakt und
+    // wird als solches benannt statt als Nutzererlebnis.
+    const lcpS = S.psi_mobile.lcp != null ? S.psi_mobile.lcp / 1000 : null;
+    const feld = { FAST: 'gut (grün)', AVERAGE: 'mittel', SLOW: 'langsam' }[S.psi_mobile.crux_lcp] || null;
+    if (lcpS != null && lcpS >= 15) {
+      observations.push(`Der mobile Labor-Score liegt bei ${S.psi_mobile.perf}/100, gedrückt von einem LCP-Laborwert von ${de(lcpS, 1)} s. Dieser Wert ist ein Ausreißer der Labor-Simulation, kein echtes Nutzererlebnis${feld ? ` – die echten Nutzerdaten stehen auf „${feld}"` : ''}. Für Priorisierungen stützen wir uns deshalb auf die Feld-Daten; der Laborwert bleibt unter Beobachtung.`);
+    } else {
+      observations.push(`Die mobile Ladeleistung liegt im Labor-Test bei ${S.psi_mobile.perf}/100${lcpS != null ? ` (größtes Element nach ${de(lcpS, 1)} s sichtbar; Google-Richtwert: unter 2,5 s)` : ''}. Die echten Nutzerdaten sind aktuell${feld ? ` mit „${feld}"` : ''} noch im grünen Bereich – das Labor zeigt aber, wie wenig Puffer bleibt.`);
+    }
+  }
   if (ONP.schema_types && ONP.schema_types.length === 0)
     observations.push('Die Startseite liefert kein strukturiertes Markup aus. Rich-Results in der Google-Suche (Preise, Bewertungssterne, Produktdaten) bleiben damit ungenutzt – ein Feld, auf dem Wettbewerber sichtbar präsenter sind.');
   if (S.vi_all_time_max && S.vi_current < S.vi_all_time_max.value * 0.9)
