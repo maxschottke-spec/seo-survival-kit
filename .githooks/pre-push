@@ -2,4 +2,4 @@
 # pre-push — refuse to push client identifiers into this PUBLIC repository.
 # Activate once per clone:  git config core.hooksPath .githooks
 # The denylist is private/denylist.txt (gitignored); without it the check is a no-op.
-exec node "$(git rev-parse --show-toplevel)/scripts/check-no-private-names.js"
+exec node "$(git rev-parse --show-toplevel)/scripts/check-no-private-names.js" --require

@@ -38,10 +38,22 @@ TODAY=$(date +%Y-%m-%d)
 CACHE="${SEO_CACHE_DIR:-$HOME/.cache/seo-rescue}"
 STATE_DIR="$CACHE/$SLUG-weekly"
 SENT_FLAG="$STATE_DIR/sent-$TODAY.flag"
-notify() { osascript -e "display notification \"$1\" with title \"SEO-Weekly $SLUG\" sound name \"Basso\"" 2>/dev/null || true; }
+# Benachrichtigung: Text und Titel als ARGUMENTE, nie in den Skriptquelltext
+# interpoliert — ein Anführungszeichen im Betreff (Domain aus der Config) wäre
+# sonst AppleScript-Code (Codex-Befund 07.09.2026). Auf Nicht-macOS still.
+notify() { command -v osascript >/dev/null 2>&1 && osascript -e 'on run argv' -e 'display notification (item 1 of argv) with title (item 2 of argv) sound name "Basso"' -e 'end run' -- "$1" "SEO-Weekly $SLUG" >/dev/null 2>&1 || true; }
 
 [ -f "$SENT_FLAG" ] && { echo "Heute bereits versendet — skip."; exit 0; }
 [ "${FORCE_DRAFT:-0}" = "1" ] && AUTO_SEND=0
+
+# Exklusiver Lauf: Zwei gleichzeitig gestartete Läufe (Cron + Hand, oder ein
+# Nachholer beim Aufwachen) bestehen beide die Flag-Prüfung oben und würden
+# beide senden. mkdir ist atomar; der Lock-Ordner stirbt mit dem Lauf
+# (Codex-Befund 07.09.2026).
+LOCK_DIR="$STATE_DIR/.run-$TODAY.lock"
+mkdir -p "$STATE_DIR"
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then echo "Läuft bereits (Lock $LOCK_DIR) — abgebrochen."; exit 0; fi
+trap 'rmdir "$LOCK_DIR" 2>/dev/null' EXIT
 
 # PDF NICHT nach ~/Downloads rendern: Der Ordner ist unter macOS TCC-geschützt,
 # und ein unter launchd laufender Prozess darf dort unter Umständen nicht lesen
@@ -51,8 +63,9 @@ export SEO_PDF_OUTPUT_DIR="$STATE_DIR"
 
 # ---- 1) Render-Pipeline
 HOST=$("$NODE" -e 'console.log(require(process.env.SEO_AUDIT_CONFIG).targets.find(t=>t.slug==="'"$SLUG"'").host)')
+case "$HOST" in https://*) ;; *) echo "host in der Config muss mit https:// beginnen: $HOST" >&2; exit 1;; esac
 curl -s --fail --max-time 60 -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36" \
-  "$HOST" -o "$CACHE/$SLUG-home.html"
+  -o "$CACHE/$SLUG-home.html" -- "$HOST"
 # Hinweis: curl rc=6 hier heißt "Host nicht auflösbar" — nach dem Aufwachen des
 # Rechners ist DNS manchmal noch nicht da. Ein Wrapper, der bei rc=6 nach
 # 60 s einmal neu startet, fängt das ab.
@@ -144,17 +157,26 @@ if [ "$AUTO_SEND" = "1" ]; then
   # raus ist und der Nachweis fehlt — in der Folgewoche wäre erneut gesendet
   # worden. Diese Lücke wurde im Live-Betrieb sichtbar.
   touch "$SENT_FLAG"
-  if python3 "$SKILL/weekly-send-smtp.py" --pdf "$PDF" --subject "$SUBJECT" --slug "$SLUG"; then
-    cp "$PDF" "$HOME/Downloads/" 2>/dev/null || true   # Best-Effort (TCC unter launchd)
-    notify "Report versendet ($SUBJECT)."
-  else
-    rm -f "$SENT_FLAG"
-    notify "VERSAND FEHLGESCHLAGEN — Report liegt im Cache."
-    exit 1
-  fi
+  set +e; python3 "$SKILL/weekly-send-smtp.py" --pdf "$PDF" --subject "$SUBJECT" --slug "$SLUG"; SEND_RC=$?; set -e
+  case "$SEND_RC" in
+    0) cp "$PDF" "$HOME/Downloads/" 2>/dev/null || true   # Best-Effort (TCC unter launchd)
+       notify "Report versendet ($SUBJECT)." ;;
+    3) # Fehler NACH dem Login: Nachricht kann beim Server angekommen sein.
+       # Flag bleibt stehen — ein Wiederholungslauf wäre ein möglicher
+       # Doppelversand. Mensch prüft Postausgang (Codex-Befund 07.09.2026).
+       touch "$STATE_DIR/sent-$TODAY.UNGEWISS"
+       notify "VERSAND UNGEWISS — Postausgang von Hand prüfen, Flag bleibt."
+       echo "Versand ungewiss (rc 3). Flag bleibt, kein automatischer Neuversuch." >&2
+       exit 1 ;;
+    *) rm -f "$SENT_FLAG"
+       notify "VERSAND FEHLGESCHLAGEN (nichts raus) — Report liegt im Cache."
+       exit 1 ;;
+  esac
 else
   # Trockenlauf: Der Versender baut die Nachricht vollständig und sendet nicht.
-  python3 "$SKILL/weekly-send-smtp.py" --pdf "$PDF" --subject "$SUBJECT" --slug "$SLUG" --dry-run || true
+  # Sein Rückgabewert zählt trotzdem — eine kaputte Mailkonfiguration soll im
+  # Trockenlauf auffallen, nicht erst am Versandtag (Codex-Befund 07.09.2026).
+  python3 "$SKILL/weekly-send-smtp.py" --pdf "$PDF" --subject "$SUBJECT" --slug "$SLUG" --dry-run
   notify "Report NICHT versendet (AUTO_SEND=0) — PDF im Cache."
   echo "Kein Versand (AUTO_SEND=0). PDF: $PDF"
 fi

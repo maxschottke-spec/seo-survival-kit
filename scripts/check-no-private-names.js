@@ -45,7 +45,14 @@ function git(args) {
   return r.stdout;
 }
 
+// --require (vom Pre-Push-Hook gesetzt): Fehlende Sperrliste oder nicht
+// bestimmbare Push-Range sind dann ein FEHLER, kein No-op. Ohne --require
+// (CI, fremder Clone) bleibt der Check ein No-op — dort gibt es die Liste
+// nicht, und das ist gewollt. (Codex-Befund 07.09.2026: ein frischer Clone
+// des Betreuers hätte sonst still ohne Guard gepusht.)
+const REQUIRE = process.argv.includes('--require');
 if (!fs.existsSync(DENYLIST)) {
+  if (REQUIRE) { console.error(`check-no-private-names: ${path.relative(ROOT, DENYLIST)} fehlt — im Hook-Modus ist das ein Fehler (Liste anlegen oder Push mit --no-verify ausdruecklich erzwingen).`); process.exit(1); }
   console.log(`check-no-private-names: no ${path.relative(ROOT, DENYLIST)} — nothing to check (author-side guard).`);
   process.exit(0);
 }
@@ -56,23 +63,45 @@ const terms = fs.readFileSync(DENYLIST, 'utf8')
   .filter(Boolean);
 
 if (!terms.length) {
+  if (REQUIRE) { console.error('check-no-private-names: denylist is empty — im Hook-Modus ist das ein Fehler.'); process.exit(1); }
   console.log('check-no-private-names: denylist is empty — nothing to check.');
   process.exit(0);
 }
 
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const patterns = terms.map((t) => ({ term: t, re: new RegExp(`(^|[^\\p{L}\\p{N}_])${escape(t)}(?=$|[^\\p{L}\\p{N}_])`, 'iu') }));
+// Wortgrenzen NUR dort, wo der Begriff selbst mit einem Wortzeichen endet
+// bzw. beginnt. "x.y@" endet mit "@": eine erzwungene Grenze danach hätte
+// "x.y@example.com" NICHT getroffen — genau die Adresse, wegen der es diesen
+// Guard gibt (Codex-Befund 07.09.2026).
+const isWord = (c) => /[\p{L}\p{N}_]/u.test(c);
+const patterns = terms.map((t) => {
+  const left = isWord(t[0]) ? '(^|[^\\p{L}\\p{N}_])' : '';
+  const right = isWord(t[t.length - 1]) ? '(?=$|[^\\p{L}\\p{N}_])' : '';
+  return { term: t, re: new RegExp(`${left}${escape(t)}${right}`, 'iu') };
+});
 
 const hits = [];
 
-// 1) tracked files
+// 1) tracked files — the PATH is checked for every file (a binary named
+//    after a client leaks the name just as well), the CONTENT for text files.
+//    A read error other than "deleted but still tracked" is a hit, not a
+//    skip: silently skipping is fail-open (Codex-Befund 07.09.2026).
 const tracked = (git(['ls-files', '-z']) || '').split('\0').filter(Boolean);
+let binaries = 0;
 for (const rel of tracked) {
+  for (const { term, re } of patterns) {
+    if (re.test(rel)) hits.push({ where: rel, term, line: `(Dateipfad) ${rel}` });
+  }
   const abs = path.join(ROOT, rel);
   let buf;
-  try { buf = fs.readFileSync(abs); } catch { continue; }
-  // skip binaries: a NUL byte in the first 8 KiB is a good enough tell
-  if (buf.subarray(0, 8192).includes(0)) continue;
+  try { buf = fs.readFileSync(abs); } catch (e) {
+    if (e && e.code === 'ENOENT') continue; // deleted in the working tree, still tracked: no content to leak
+    hits.push({ where: rel, term: '(Lesefehler)', line: `nicht lesbar: ${e && e.code ? e.code : e}` });
+    continue;
+  }
+  // binaries: a NUL byte in the first 8 KiB is a good enough tell — content is
+  // not scanned (no text extraction here); the path was checked above
+  if (buf.subarray(0, 8192).includes(0)) { binaries++; continue; }
   const text = buf.toString('utf8');
   const lines = text.split('\n');
   for (const { term, re } of patterns) {
@@ -86,6 +115,10 @@ for (const rel of tracked) {
 let range = null;
 if (git(['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'])) range = '@{upstream}..HEAD';
 else if (git(['rev-parse', '--verify', 'origin/main'])) range = 'origin/main..HEAD';
+if (!range && REQUIRE) {
+  console.error('check-no-private-names: Push-Range nicht bestimmbar (kein Upstream, kein origin/main) — im Hook-Modus ist das ein Fehler; erst `git fetch origin`.');
+  process.exit(1);
+}
 if (range) {
   const log = git(['log', range, '--format=%H%x00%B%x00']) || '';
   const entries = log.split('\0').filter((s) => s.trim());
@@ -105,4 +138,4 @@ if (hits.length) {
   console.error('\nRemove the identifier (anonymize) or rewrite the commit before pushing.');
   process.exit(1);
 }
-console.log(`check-no-private-names: clean (${terms.length} term(s), ${tracked.length} tracked files${range ? `, commits ${range}` : ''}).`);
+console.log(`check-no-private-names: clean (${terms.length} term(s), ${tracked.length} tracked files${binaries ? `, ${binaries} binary paths checked, content not scanned` : ''}${range ? `, commits ${range}` : ''}).`);

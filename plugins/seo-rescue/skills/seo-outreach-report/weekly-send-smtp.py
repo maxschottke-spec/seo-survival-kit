@@ -24,7 +24,10 @@ Zugangsdaten: NIE in einer Datei, NIE im Repo. Reihenfolge:
 --dry-run baut die Nachricht vollständig und sendet NICHT — zum Prüfen der
 Kette, ohne dass etwas den Rechner verlässt.
 
-Ausgang: 0 gesendet (oder Trockenlauf) · 1 Versand fehlgeschlagen · 2 Aufruffehler.
+Ausgang: 0 gesendet (oder Trockenlauf) · 1 nicht gesendet (Verbindung/Login
+fehlgeschlagen, sicher nichts raus) · 2 Aufruffehler · 3 VERSAND UNGEWISS (Fehler
+nach dem Login, der Server kann die Nachricht angenommen haben — NICHT automatisch
+wiederholen, von Hand prüfen).
 Ein Fehlschlag ist bewusst laut und ungleich null: Ein stiller Fehlschlag beim
 Versand ist genau das, was hier drei Wochen lang passiert ist.
 """
@@ -34,6 +37,7 @@ import json
 import mimetypes
 import os
 import smtplib
+import ssl
 import subprocess
 import sys
 from email.message import EmailMessage
@@ -116,12 +120,25 @@ def main() -> int:
     # Passwort VOR dem Verbindungsaufbau auflösen: Ein Konfigurationsfehler soll
     # scheitern, bevor irgendetwas das Netz berührt.
     pw = password(cfg["from"], service)
+    # Expliziter, verifizierender TLS-Kontext: Zertifikatskette UND Hostname
+    # werden geprüft, unabhängig von der Python-Version (Codex-Befund 07.09.2026).
+    ctx = ssl.create_default_context()
+    logged_in = False
     try:
-        with smtplib.SMTP_SSL(host, port, timeout=TIMEOUT_S) as s:
+        with smtplib.SMTP_SSL(host, port, timeout=TIMEOUT_S, context=ctx) as s:
             s.login(cfg["from"], pw)
+            logged_in = True
             s.send_message(msg)
     except Exception as e:  # noqa: BLE001 — jeder Fehler hier muss laut sein
-        print(f"VERSAND FEHLGESCHLAGEN: {type(e).__name__}: {e}", file=sys.stderr)
+        if logged_in:
+            # Fehler NACH dem Login: Der Server kann die Nachricht bereits
+            # angenommen haben (Abbruch zwischen DATA-Accept und Antwort).
+            # Ein Wiederholungsversuch wäre ein möglicher Doppelversand —
+            # deshalb eigener Ausgang 3, den der Runner NICHT als "nichts
+            # raus" behandeln darf (Codex-Befund 07.09.2026).
+            print(f"VERSAND UNGEWISS (Fehler nach Login): {type(e).__name__}: {e} — Postausgang/Server von Hand prüfen, NICHT automatisch wiederholen.", file=sys.stderr)
+            return 3
+        print(f"VERSAND FEHLGESCHLAGEN (nichts gesendet): {type(e).__name__}: {e}", file=sys.stderr)
         return 1
 
     print("Gesendet.")
