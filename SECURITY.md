@@ -88,6 +88,27 @@ No data is sent to the plugin author or any third party beyond these named APIs.
 - Does not execute code from the audited target domain (HTML is parsed via regex, not executed by Chrome — Chrome only renders the locally generated report)
 - Does not require sudo/root
 
+### Client identifiers must not reach this public repository
+
+This kit is built from real client work, and the repository is public. The
+established practice is to anonymize ("Pilot-domain recovery case
+(anonymized)"). Since 2026-09-07 a pre-push guard enforces it on the
+maintainer's machine, after two commits on a feature branch had carried a
+prospect's domain and first name in code comments and commit messages —
+caught before the push, but by chance.
+
+- `scripts/check-no-private-names.js` scans every tracked file and every
+  not-yet-pushed commit message for terms from `private/denylist.txt`
+  (word-boundary, case-insensitive).
+- The denylist is **gitignored on purpose**: the knowledge of who the clients
+  are stays with the maintainer. Without the file the check is a no-op, so
+  CI and fresh clones are unaffected.
+- Activate once per clone: `git config core.hooksPath .githooks`.
+
+This guards the maintainer, not the world. It does not scan the working tree
+(so gitignored material is never read) and it cannot know a name that is not
+on the list.
+
 ## Trust model
 
 When you install **any** Claude Code plugin from a third-party marketplace, you are granting it the ability to:
