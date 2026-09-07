@@ -131,7 +131,7 @@
 > - Same shop: GPTBot crawl frequency on top 50 URLs went from 2×/week to 8×/week after `llms.txt` publication. ChatGPT citation count rose proportionally.
 > ---
 ## plugins/seo-rescue/skills/rescue/SKILL.md <-> exports/skills/seo-rescue-overview.md
-### only in canonical (100)
+### only in canonical (103)
 < # SEO Rescue: Orchestrator
 < This is the entry point for the seo-rescue plugin. It routes to the specialized sub-skills below, each callable directly via its namespaced slash command.
 < Invocation: `/seo-rescue:rescue [subcommand] [args]` to route here, or call any sub-skill directly via `/seo-rescue:<skill-name>`.
@@ -143,6 +143,7 @@
 < | `/seo-rescue:rescue report <domain>` | Generate decision-maker PDF report (alias for `/seo-rescue:seo-outreach-report`) |
 < | `/seo-rescue:rescue channels` | Per-channel P&L analysis (alias for `/seo-rescue:channel-economics-analyzer`) |
 < | `/seo-rescue:rescue competitors <domain>` | DataForSEO competitor + keyword-gap audit (alias for `/seo-rescue:competitor-deep-audit`) |
+< | `/seo-rescue:rescue targets <domain>` | Agreed target keyword set from existing rankings, grouped by kind of work (alias for `/seo-rescue:target-keyword-set`) |
 < | `/seo-rescue:rescue psi-baseline` | Set up weekly PSI cron baseline (alias for `/seo-rescue:psi-weekly-cron-baseline`) |
 < | `/seo-rescue:rescue ai-search <domain>` | AI search visibility recovery (alias for `/seo-rescue:ai-search-rescue`) |
 < | `/seo-rescue:rescue ai-citations` | Track AI citations weekly (alias for `/seo-rescue:ai-citations-tracker`) |
@@ -170,6 +171,8 @@
 < Per-channel P&L for multi-marketplace e-commerce. ~30 channels supported across DACH (Amazon, OTTO, Kaufland.de, eBay, Zalando, About You, Galeria, Avocadostore, manomano, Limango, Bonprix, MyToys), EU (Bol.com, CDiscount, Allegro, Mirakl, Spartoo), US (Amazon US, Walmart, Etsy, Wayfair, Target Plus), social commerce (TikTok Shop, Instagram, Pinterest, YouTube, Live-Commerce), B2B/Wholesale (Alibaba, Faire, Ankorstore), direct-shop PSPs, and affiliate channels. Output: Healthy/Risky/Loss-Making scorecard with action thresholds.
 < ### `/seo-rescue:competitor-deep-audit [domain]`
 < DataForSEO SERP-overlap competitor identification + keyword-gap analysis. Output: prioritized 30–50-item opportunity list per audit with opportunity scores. Cost: ~$0.10–$0.50 per audit.
+< ### `/seo-rescue:target-keyword-set <domain>`
+< Derives 20–30 target terms from where the domain already ranks (positions 3–20, minimum volume, purchase intent or strong seasonality, no brand), clustered by core keyword and grouped by the kind of work each needs: hold/advance/wrong page type (an editorial page holds a buying query)/seasonal window (peak month + window width). Quantifies the share of commercial value sitting on editorial pages. Built for contract annexes and weekly reports that need positions instead of a noisy traffic delta. One DataForSEO Labs call (~$0.01–0.10); offline via `--fixture`.
 < ### `/seo-rescue:psi-weekly-cron-baseline`
 < Automated weekly PageSpeed Insights tracking with regression detection. launchd/systemd/GitHub-Actions compatible. NDJSON history. Free (uses PSI v5 25k-call daily quota).
 < ### `/seo-rescue:ai-search-rescue [domain]`
@@ -232,10 +235,10 @@
 < ## Validation + safety
 < Every release runs `claude plugin validate` on the plugin and the marketplace before tagging. v0.2.0 and v0.2.1 were tagged without this check and were both un-installable — v0.2.2 was the first installable version after the manifest path was fixed. See `CHANGELOG.md` at the repo root (in the repository, not shipped in the plugin package) for full history.
 < Security model documented in `SECURITY.md` at the repo root (in the repository, not shipped in the plugin package): zero npm runtime deps, strict CSP on rendered HTML, spawnSync with argv-array (no shell), per-user 0700 cache directory, input validation via shared `lib/safe.js`.
-### only in export (36)
+### only in export (37)
 > # SEO Rescue — Framework Overview
 > > Source: `plugins/seo-rescue/skills/rescue/SKILL.md` (canonical Claude Code orchestrator). This export is a platform-agnostic overview for non-Claude-Code LLMs — the slash-command-based routing in the original (`/seo-rescue:rescue audit <domain>` etc.) does not apply outside Claude Code.
-> This document describes the overall SEO-Rescue framework so any LLM (Cursor, OpenAI Custom GPT, Gemini, Aider) can route the user to the right sub-framework. Two of the sub-frameworks (`post-core-update-recovery`, `ai-search-rescue`) are also available as exported markdown in this directory. The remaining sub-frameworks (`seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`, `sistrix-monday-recovery-check`, `subscription-monetization-audit`, plus the six `recovery-*` workflow commands) remain Claude-Code-specific — see "Script-backed skills" below.
+> This document describes the overall SEO-Rescue framework so any LLM (Cursor, OpenAI Custom GPT, Gemini, Aider) can route the user to the right sub-framework. Two of the sub-frameworks (`post-core-update-recovery`, `ai-search-rescue`) are also available as exported markdown in this directory. The remaining sub-frameworks (`seo-outreach-report`, `competitor-deep-audit`, `target-keyword-set`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`, `sistrix-monday-recovery-check`, `subscription-monetization-audit`, plus the six `recovery-*` workflow commands) remain Claude-Code-specific — see "Script-backed skills" below.
 > ## Routing — pick the right sub-framework by symptom
 > | User says | Apply |
 > | "Sistrix VI dropped 30 %+ after a Google update" | post-core-update-recovery |
@@ -244,6 +247,7 @@
 > | "Generate a decision-maker PDF for shop owner X.de" | seo-outreach-report (Claude Code only — Node-pipeline script) |
 > | "Which sales channel actually makes money?" | channel-economics-analyzer (Claude Code only — Node-pipeline script) |
 > | "Who outranks me, what keywords am I missing?" | competitor-deep-audit (Claude Code only — Node-pipeline script) |
+> | "Which keywords should we commit to in the contract/measure weekly?" | target-keyword-set (Claude Code only — Node-pipeline script) |
 > | "Set up weekly PSI tracking with regression alerts" | psi-weekly-cron-baseline (Claude Code only — Node-pipeline script) |
 > | "Track ChatGPT/Perplexity brand-citation frequency weekly" | ai-citations-tracker (Claude Code only — Node-pipeline script) |
 > | "Pull Google Search Console data in one call" | gsc-deep-dive (Claude Code only — Node-pipeline script) |
