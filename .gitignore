@@ -59,3 +59,4 @@ money-keywords*.csv
 *-keywords*.csv
 !**/examples/**/*.example.csv
 .gstack/
+__pycache__/
