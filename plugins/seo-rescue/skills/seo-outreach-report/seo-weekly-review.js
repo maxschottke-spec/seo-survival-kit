@@ -69,5 +69,63 @@ if (fs.existsSync(snapFile)) {
   }
 }
 
+// --- Zeitraum-Labels: sagt das Label, was die Daten hergeben?
+//
+// Am 07.09.2026 stand "+9,3 % Sichtbarkeit 4 Wochen" im Bericht. Die Zahl war
+// richtig, das Label nicht: Die Sistrix-Historie ist monatlich getaktet, der
+// Vergleich umfasste 126 Tage, und die echte Vierwochenveränderung betrug
+// −24,5 %. Der Fehler ging seit mindestens dem 24.08.2026 an den Kunden.
+// Aufgehalten hat ihn erst das Editorial-Gate — und das beschrieb ihn als
+// "verwirrend", nicht als falsch. Ein Sprachmodell prüft Kohärenz, keine
+// Einheiten.
+//
+// Zwei Prüfungen, beide deterministisch und in Millisekunden:
+//   1. Der berechnete Zeitraum muss zum ausgewiesenen Label passen.
+//   2. Im Reporttext darf kein fest verdrahtetes Zeitraum-Label mehr stehen.
+//      Das ist der eigentliche Regressionsschutz: Die Ableitung aus den
+//      Datumsangaben nützt nichts, wenn jemand daneben wieder "4 Wochen"
+//      schreibt.
+const summaryFile = path.join(getCacheDir(), `${slug}-summary.json`);
+if (fs.existsSync(summaryFile)) {
+  const S = JSON.parse(safeReadFile(summaryFile));
+  // Dieselben Grenzen wie die Ableitung in seo-extract-v2.js.
+  const erwartetesLabel = (days) => {
+    if (days == null) return null;
+    if (days < 11) return `${days} Tage`;
+    if (days < 46) return `${Math.round(days / 7)} Wochen`;
+    return `${Math.round(days / 30.44)} Monate`;
+  };
+  for (const [wert, tage, label, name] of [
+    [S.vi_trend_4w, S.vi_trend_short_days, S.vi_trend_short_label, 'Kurzfristtrend'],
+    [S.vi_trend_12w, S.vi_trend_long_days, S.vi_trend_long_label, 'Langfristtrend'],
+  ]) {
+    if (wert == null) continue; // wird nicht ausgewiesen, also nichts zu prüfen
+    check(tage != null && label != null,
+      `${name} wird ausgewiesen (${wert} %), aber ohne bestimmbaren Zeitraum — Label fehlt`);
+    if (tage != null && label != null) {
+      check(label === erwartetesLabel(tage),
+        `${name}: Label "${label}" passt nicht zu ${tage} Tagen (erwartet "${erwartetesLabel(tage)}")`);
+    }
+  }
+}
+if (fs.existsSync(htmlFile) && fs.existsSync(summaryFile)) {
+  const text = safeReadFile(htmlFile)
+    .replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>|<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ');
+  const S = JSON.parse(safeReadFile(summaryFile));
+  const erlaubt = new Set([S.vi_trend_short_label, S.vi_trend_long_label].filter(Boolean));
+  // Geprüft wird nur ein Zeitraum, der an einer PROZENTZAHL klebt — also eine
+  // Kennzahl beschriftet. Freie Zeitangaben im Text (etwa die Unterschrift
+  // "Sichtbarkeitsverlauf (18 Monate)" am Diagramm) beschreiben keinen
+  // Kennzahlenvergleich und sind nicht gemeint.
+  const treffer = text.match(/\d[\d.,]*\s*%[^%]{0,60}?\b\d{1,2}\s*(?:Wochen|Wo\.?|Monaten?|Tagen?)\b/g) || [];
+  for (const t of treffer) {
+    const label = (t.match(/\b\d{1,2}\s*(?:Wochen|Wo\.?|Monaten?|Tagen?)\b/g) || []).pop();
+    check(erlaubt.has(label),
+      `Zeitraum "${label}" beschriftet eine Kennzahl, stammt aber nicht aus den Daten `
+      + `(abgeleitet: ${[...erlaubt].join(', ') || 'keine'}) — fest verdrahtetes Label?`);
+  }
+}
+
 if (fails.length) { console.log(fails.map(f => `FAIL: ${f}`).join('\n')); process.exit(1); }
 console.log('PASS');
