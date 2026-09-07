@@ -2,7 +2,7 @@
 name: target-keyword-set
 description: 'Use when a client engagement, a contract annex, or a recurring report needs an AGREED target keyword set instead of a traffic number — e.g. "which keywords should we commit to", "Zielbegriffe für den Vertrag", "Anlage 2", "striking distance keywords", "what can we measure weekly", "why does the weekly report say +12 % one week and −15 % the next". Derives 20–30 terms from where the domain ALREADY ranks (positions 3–20, minimum volume, purchase intent or strong seasonality, no brand), clustered by core keyword and grouped by the KIND OF WORK each needs: hold, advance, wrong page type (a blog post holds a buying query), seasonal window (with peak month and how wide the window is). Also quantifies how much of the commercial value sits on editorial pages. Requires DataForSEO credentials; offline mode via --fixture.'
 user-invocable: true
-argument-hint: '<domain> [--limit 30] [--min-volume 100] [--pos-min 3] [--pos-max 20] [--brand a,b]'
+argument-hint: '<domain> [--limit 30] [--min-volume 100] [--pos-min 3] [--pos-max 20] [--brand a,b] [--no-auto-brand]'
 allowed-tools: [Read, Write, Bash(node:*)]
 license: MIT
 metadata:
@@ -26,9 +26,9 @@ One DataForSEO Labs call (`ranked_keywords`, up to 1000 rows, filtered server-si
 1. **The domain already ranks between `--pos-min` and `--pos-max`** (default 3–20). Only there does work turn into measurable movement within weeks. Terms without a ranking are a build-up project, not a target with a deadline.
 2. **Minimum monthly volume** (default 100, twelve-month average).
 3. **Purchase intent** per the provider's intent label — **or strong seasonality** (peak ≥ 1.8 × annual average). Seasonal terms often carry the label "informational" while the SERP is all shops; the SERP decides, not the label. The script cannot see the SERP, so it keeps seasonal terms *with a flag* rather than dropping them.
-4. **No brand terms.** Brand is not moved by work; putting it in a target set is a gifted target. Default brand term = the domain stem (`example` for `example.de`), extend with `--brand`.
+4. **No brand terms.** Brand is not moved by work; putting it in a target set is a gifted target. Default brand term = the domain stem (`example` for `example.de`), matched **as a whole word**, only if it is at least four characters and not generic (`shop`, `bett`, `home`, … are never auto-brand — `bett.de` must not silently drop `bettdeckenbezug`). Extend with `--brand`, disable auto-derivation with `--no-auto-brand`. **Every term dropped as brand is listed in the output** so a human sees what the machine took for a brand.
 
-Spelling variants are clustered by the provider's `core_keyword`; the highest-volume member represents the cluster, the best position of any member counts. Intent is decided **per cluster** (any member commercial or seasonal keeps the cluster) — filtering per keyword would drop a variant labelled "navigational" before it reached its cluster.
+Spelling variants are clustered by the provider's `core_keyword`. The cluster is *named* after its highest-volume member, but position, URL and page type come **together from the best-ranking member** (`ranking_variant`) — mixing the head's URL with another variant's position produced impossible rows. Volume and value are **summed over all variants** (three spellings at 500 outrank one term at 1,000). Intent is decided **per cluster** (any member commercial or seasonal keeps the cluster) — filtering per keyword would drop a variant labelled "navigational" before it reached its cluster. Seasonality needs **twelve distinct months** of data; numeric strings are accepted.
 
 ### Four groups, by kind of work
 
@@ -36,8 +36,8 @@ Spelling variants are clustered by the provider's `core_keyword`; the highest-vo
 |---|---|---|
 | **A — hold** | position ≤ 10, non-editorial page ranks | Nothing is broken. Observe, do not damage. |
 | **B — advance** | position 11–max, non-editorial page ranks | The work backlog: the right page exists, it just sits too far back. |
-| **C — wrong page type** | purchase intent, but an *editorial* URL holds it | The customer wants to buy, Google serves a guide. It sells nothing and depresses CTR. |
-| **D — seasonal window** | peak ≥ 1.8 × average | With peak month and window width in months. A page built today rarely makes a one-month window. |
+| **C — wrong page type** | purchase intent *or* seasonal, but an *editorial* URL holds it | The customer wants to buy, Google serves a guide. It sells nothing and depresses CTR. **C wins over D**: a seasonal buying query on a blog post is first of all a wrong-page finding; its season stays visible as a flag and in the calendar. |
+| **D — seasonal window** | peak ≥ 1.8 × average, non-editorial page | With peak month and window width in months. A page built today rarely makes a one-month window. |
 
 Plus one number that usually surprises: **share of commercial value sitting on editorial pages** (volume × CPC as a ranking proxy, not euros).
 
