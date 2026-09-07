@@ -66,6 +66,22 @@ if (fs.existsSync(snapFile)) {
     check(rel(snap.kw_total, prev.kw_total) <= 0.4, `Keyword-Sprung >40 % (${prev.kw_total} → ${snap.kw_total}) — Datenglitch?`);
     check(!(prev.ref_domains && snap.ref_domains < prev.ref_domains * 0.5),
       `Ref-Domains halbiert (${prev.ref_domains} → ${snap.ref_domains}) — Datenglitch?`);
+
+    // --- Rauschband (weekly-noise.js, seit 07.09.2026): Eine Wochenbewegung
+    // INNERHALB der gemessenen Schwankung ist Zufall. Der Generator darf sie
+    // benennen, aber keine Richtung daraus erzählen. Das Gate prüft das
+    // unabhängig vom Generator nach — gegen dessen eigenes Versprechen.
+    if (snap.noise && snap.noise.verdict !== 'unbekannt' && prev.vi > 0 && snap.vi != null && fs.existsSync(htmlFile)) {
+      const { withinBand } = require('./weekly-noise.js');
+      const rel = (snap.vi - prev.vi) / prev.vi;
+      if (withinBand(rel, snap.noise) === true) {
+        const text = safeReadFile(htmlFile).replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>|<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+        check(!/Die Sichtbarkeit insgesamt (stieg|sank)/.test(text),
+          `Sichtbarkeit bewegte sich ${(rel * 100).toFixed(1)} % — innerhalb der Wochenschwankung ±${snap.noise.noise_pct} %, der Report erzählt aber eine Richtung`);
+        check(!/außerhalb der üblichen Schwankung/.test(text),
+          `Kachel behauptet "außerhalb der üblichen Schwankung", Modell sagt innerhalb (${(rel * 100).toFixed(1)} % bei ±${snap.noise.noise_pct} %)`);
+      }
+    }
   }
 }
 

@@ -29,6 +29,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { safeSlug, validateConfigTargets, safeReadFile, cachePath, getCacheDir, mkRunDir, writeFileExclusive } = require('../../lib/safe.js');
+const { noiseModel, withinBand } = require('./weekly-noise.js');
 
 const CONFIG_PATH = process.env.SEO_AUDIT_CONFIG || './audit-config.json';
 const CONFIG = JSON.parse(safeReadFile(CONFIG_PATH));
@@ -60,6 +61,22 @@ const snap = {
   psi_mobile_perf: S.psi_mobile?.perf, psi_desktop_perf: S.psi_desktop?.perf,
   keywords: (S.d4s_top_keywords || []).map(k => ({ keyword: k.keyword, position: k.position, sv: k.sv })),
 };
+
+// ---- Rauschmodell der Sichtbarkeit (weekly-noise.js)
+// Aus allen bisherigen Wochen-Snapshots plus dieser Woche: Wie stark streuen
+// die Wochenschritte um den Trend? Unterhalb dieses Bandes ist eine
+// Wochenbewegung Zufall und wird im Bericht nicht als Entwicklung erzählt.
+// Ohne genug Wochen (< 8) bleibt das Urteil "unbekannt", und der Bericht
+// fällt auf die bisherige feste 5-%-Schwelle zurück.
+const viSeries = fs.readdirSync(SNAP_DIR)
+  .filter(f => /^snap-\d{4}-\d{2}-\d{2}\.json$/.test(f) && f !== `snap-${today}.json`)
+  .sort()
+  .map(f => { try { const d = JSON.parse(safeReadFile(path.join(SNAP_DIR, f))); return { date: f.slice(5, 15), value: d.vi }; } catch { return null; } })
+  .filter(Boolean)
+  .concat(S.vi_current != null ? [{ date: today, value: S.vi_current }] : []);
+const NOISE = noiseModel(viSeries);
+snap.noise = NOISE;
+
 const snapFile = path.join(SNAP_DIR, `snap-${today}.json`);
 fs.rmSync(snapFile, { force: true });
 writeFileExclusive(snapFile, JSON.stringify(snap, null, 2));
@@ -123,8 +140,17 @@ if (PREV && PREV.keywords) {
     // keine Ursache behaupten.
     const viPrev = PREV?.vi;
     const viRel = viPrev ? (S.vi_current - viPrev) / viPrev : null;
-    if (viRel != null && Math.abs(viRel) >= 0.05) {
-      moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Die Einzelpositionen der Top-Rankings blieben stabil (keine Veränderung oberhalb der Erfassungsschwelle). Die Sichtbarkeit insgesamt ${viRel > 0 ? 'stieg' : 'sank'} im selben Zeitraum um ${de(Math.abs(viRel) * 100, 1)} % (VI ${de(viPrev, 3)} → ${de(S.vi_current, 3)}).</p>`;
+    // "Deutlich" heißt seit 07.09.2026: außerhalb des GEMESSENEN Bandes der
+    // Wochenschwankung (weekly-noise.js), nicht außerhalb einer gesetzten
+    // 5-%-Schwelle. Erst wenn das Modell noch keine acht Wochen hat, gilt die
+    // alte Schwelle als Rückfall.
+    const inBand = viRel != null ? withinBand(viRel, NOISE) : null;
+    const deutlich = viRel != null && (inBand == null ? Math.abs(viRel) >= 0.05 : inBand === false);
+    if (deutlich) {
+      moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Die Einzelpositionen der Top-Rankings blieben stabil (keine Veränderung oberhalb der Erfassungsschwelle). Die Sichtbarkeit insgesamt ${viRel > 0 ? 'stieg' : 'sank'} im selben Zeitraum um ${de(Math.abs(viRel) * 100, 1)} % (VI ${de(viPrev, 3)} → ${de(S.vi_current, 3)})${NOISE.noise_pct != null && NOISE.verdict !== 'unbekannt' ? ` – das liegt außerhalb der üblichen Wochenschwankung von ±${de(NOISE.noise_pct, 1)} %` : ''}.</p>`;
+    } else if (viRel != null && inBand === true && Math.abs(viRel) >= 0.02) {
+      // Bewegung sichtbar, aber innerhalb des Bandes: benennen, nicht deuten.
+      moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Keine nennenswerten Positionsveränderungen in den Top-Rankings. Die Sichtbarkeit bewegte sich um ${de(Math.abs(viRel) * 100, 1)} % (VI ${de(viPrev, 3)} → ${de(S.vi_current, 3)}) – das liegt innerhalb der üblichen Wochenschwankung von ±${de(NOISE.noise_pct, 1)} % und ist keine Entwicklung.</p>`;
     } else {
       moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Keine nennenswerten Positionsveränderungen in den Top-Rankings – in einer ruhigen Woche ist das ein gutes Zeichen.</p>`;
     }
@@ -221,7 +247,15 @@ const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><style>
 ${intro ? `<p>${esc(intro)}</p>` : ''}
 
 <div class="kpis">
-  <div class="kpi"><div class="v">${de(S.vi_current, 3)}</div><div class="l">Sichtbarkeit (Sistrix)</div>${delta(S.vi_current, PREV?.vi, 3)}</div>
+  <div class="kpi"><div class="v">${de(S.vi_current, 3)}</div><div class="l">Sichtbarkeit (Sistrix)</div>${delta(S.vi_current, PREV?.vi, 3)}${(() => {
+    // Wochenschwankung ans Delta heften, sobald das Modell steht: Ein
+    // "−0,027" ohne Band liest sich wie ein Befund. Mit "übliche Schwankung
+    // ±7,6 %" liest es sich wie das, was es ist.
+    if (!PREV || PREV.vi == null || S.vi_current == null || NOISE.verdict === 'unbekannt') return '';
+    const rel = (S.vi_current - PREV.vi) / PREV.vi;
+    const inBand = withinBand(rel, NOISE);
+    return `<div class="l" style="margin-top:2px">${inBand ? 'innerhalb' : 'außerhalb'} der üblichen Schwankung (±${de(NOISE.noise_pct, 1)} %)</div>`;
+  })()}</div>
   <div class="kpi"><div class="v">${de(S.d4s_kw_total)}</div><div class="l">Keywords Top-100</div>${delta(S.d4s_kw_total, PREV?.kw_total)}</div>
   ${S.vi_trend_4w != null && S.vi_trend_short_label ? `<div class="kpi"><div class="v">${S.vi_trend_4w > 0 ? '+' : ''}${de(S.vi_trend_4w, 1)}%</div><div class="l">Sichtbarkeit ${S.vi_trend_short_label}${S.vi_trend_as_of ? ` (Stand ${deDate(S.vi_trend_as_of)})` : ''}</div></div>` : ''}
   <div class="kpi"><div class="v">${de(S.backlinks?.referring_domains)}</div><div class="l">Verlinkende Domains</div>${delta(S.backlinks?.referring_domains, PREV?.ref_domains)}</div>
