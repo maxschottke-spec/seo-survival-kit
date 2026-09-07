@@ -124,6 +124,51 @@ if (fs.existsSync(summaryFile)) {
     }
   }
 }
+// --- Strukturprüfung der KPI-Kacheln (Codex-Befund 07.09.2026): Die
+// Textabstands-Prüfung unten kennt nicht, WELCHER Kennzahl ein Label gehört —
+// "4 Monate" wäre am Langfristwert genauso "erlaubt" wie am Kurzfristwert.
+// Deshalb hier je Kachel: Die Trend-Kachel muss exakt das Kurzfrist-Label
+// tragen, und eine PageSpeed-Kachel darf keinen Punktwert zeigen, wenn die
+// Messung als nicht belastbar markiert ist.
+if (fs.existsSync(htmlFile) && fs.existsSync(summaryFile) && fs.existsSync(snapFile)) {
+  const html = safeReadFile(htmlFile);
+  const S = JSON.parse(safeReadFile(summaryFile));
+  const snap = JSON.parse(safeReadFile(snapFile));
+  const strip = (h) => h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  // Kachel-Container ausschneiden (vom Template-Anker <div class="kpis"> bis zum
+  // nächsten Abschnitt) und an jeder Kachel teilen. Lookahead-Regexe über
+  // verschachtelte <div>s waren zweimal falsch — Ankertext ist verlässlicher.
+  // Fehlt der Container, ist das selbst ein FAIL: Das Template hat sich
+  // geändert, und diese Prüfung weiß nicht mehr, was sie prüft.
+  const kStart = html.indexOf('<div class="kpis">');
+  const kEnd = kStart >= 0 ? html.indexOf('Sichtbarkeitsverlauf', kStart) : -1;
+  check(kStart >= 0 && kEnd > kStart, 'KPI-Container (<div class="kpis"> … Sichtbarkeitsverlauf) nicht gefunden — Template geändert?');
+  const kpis = kStart >= 0 && kEnd > kStart ? html.slice(kStart, kEnd).split('<div class="kpi">').slice(1) : [];
+  const field = (block, cls) => strip((block.match(new RegExp(`class="${cls}">([\\s\\S]*?)(?:<\\/div>|$)`)) || [])[1] || '');
+  const trendTiles = kpis.filter((k) => /class="l">Sichtbarkeit (?!\(Sistrix\))/.test(k));
+  if (S.vi_trend_4w != null && S.vi_trend_short_label) {
+    check(trendTiles.length === 1, `Trend-Kachel: ${trendTiles.length} statt 1 gefunden`);
+    for (const t of trendTiles) {
+      const label = field(t, 'l');
+      check(label.startsWith(`Sichtbarkeit ${S.vi_trend_short_label}`),
+        `Trend-Kachel trägt "${label}", erwartet "Sichtbarkeit ${S.vi_trend_short_label} …"`);
+      const val = field(t, 'v');
+      const erwartet = `${S.vi_trend_4w > 0 ? '+' : ''}${Number(S.vi_trend_4w).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+      check(val === erwartet, `Trend-Kachel zeigt "${val}", summary sagt ${erwartet}`);
+    }
+  } else {
+    check(trendTiles.length === 0, 'Trend-Kachel vorhanden, obwohl kein Trend mit Zeitraum in der summary steht');
+  }
+  for (const [key, label] of [['psi_mobile', 'PageSpeed mobil'], ['psi_desktop', 'PageSpeed Desktop']]) {
+    const tile = kpis.find((k) => k.includes(`class="l">${label}<`));
+    const degraded = !!(S[key] && S[key].degraded) || !!snap[`${key}_degraded`];
+    if (tile && degraded) {
+      const val = field(tile, 'v');
+      check(!/\d/.test(val), `${label}: Messung als nicht belastbar markiert (${S[key]?.degraded_reason || 'degraded'}), Kachel zeigt aber "${val}"`);
+    }
+  }
+}
+
 if (fs.existsSync(htmlFile) && fs.existsSync(summaryFile)) {
   const text = safeReadFile(htmlFile)
     .replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>|<[^>]+>/g, ' ')

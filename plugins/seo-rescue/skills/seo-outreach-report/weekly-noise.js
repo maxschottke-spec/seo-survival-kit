@@ -64,44 +64,48 @@ function noiseModel(series, opts = {}) {
   const base = { weeks: pts.length, noise_pct: null, trend_pct_per_week: null, ratio: null, verdict: 'unbekannt', pairs: 0 };
   if (pts.length < 2) return base;
 
-  // Trend zuerst: lineare Regression über Wochen seit dem ersten Punkt,
-  // Steigung relativ zum Mittelwert.
+  // Trend und Rauschen im LOG-Raum. Grund (Codex-Befund 07.09.2026): Der
+  // vorige Entwurf zog von jedem relativen Wochenschritt einen KONSTANTEN
+  // relativen Trendschritt (slope/Mittelwert) ab. Für eine lineare Reihe ist
+  // der erwartete relative Schritt aber slope/vorherigerWert und variiert —
+  // deterministische Bewegung wurde so teilweise als Rauschen gezählt. Im
+  // Log-Raum ist ein konstanter Prozenttrend eine Gerade, der Residuen-Schritt
+  // ist skalenfrei, und "±x % um den Trend" ist genau das, was der Bericht
+  // behauptet.
   const x = pts.map((p) => days(pts[0].date, p.date) / 7);
-  const y = pts.map((p) => p.value);
+  const ly = pts.map((p) => Math.log(p.value));
   const mx = x.reduce((s, v) => s + v, 0) / x.length;
-  const my = y.reduce((s, v) => s + v, 0) / y.length;
+  const my = ly.reduce((s, v) => s + v, 0) / ly.length;
   const sxx = x.reduce((s, v) => s + (v - mx) ** 2, 0);
-  const slope = sxx > 0 ? x.reduce((s, v, i) => s + (v - mx) * (y[i] - my), 0) / sxx : 0;
-  const trend = my > 0 ? (slope / my) * 100 : null; // % je Woche
+  const slope = sxx > 0 ? x.reduce((s, v, i) => s + (v - mx) * (ly[i] - my), 0) / sxx : 0; // ln-Einheiten je Woche
+  const trend = (Math.exp(slope) - 1) * 100; // % je Woche
 
-  // Rauschen = Streuung der Wochenschritte UM den Trend, nicht der Schritt
-  // selbst. Eine glatte +5 %-Reihe hat null Rauschen, obwohl sich jede Woche
-  // 5 % bewegt — die Bewegung IST der Trend. Der erste Entwurf dieses Moduls
-  // zählte die Trendschritte als Rauschen und stufte genau diese Reihe als
-  // "rauschen" ein; der Selbsttest unten hat das gefunden.
-  const stepTrend = trend != null ? trend / 100 : 0;
+  // Rauschen = mittlere absolute Abweichung des Log-Wochenschritts vom
+  // erwarteten Log-Trendschritt (slope × Tage/7), zurück in Prozent.
   const resid = [];
   for (let i = 1; i < pts.length; i++) {
     const d = days(pts[i - 1].date, pts[i].date);
     if (d < PAIR_MIN_DAYS || d > PAIR_MAX_DAYS) continue;
-    const relStep = pts[i].value / pts[i - 1].value - 1;
-    resid.push(Math.abs(relStep - stepTrend * (d / 7)));
+    const logStep = Math.log(pts[i].value / pts[i - 1].value);
+    resid.push(Math.abs(logStep - slope * (d / 7)));
   }
-  const noise = resid.length ? (resid.reduce((s, v) => s + v, 0) / resid.length) * 100 : null;
+  const noiseLog = resid.length ? resid.reduce((s, v) => s + v, 0) / resid.length : null;
+  const noise = noiseLog != null ? (Math.exp(noiseLog) - 1) * 100 : null; // UNGERUNDET für die Klassifikation
 
   // ratio: |Trend| gegen Rauschen. Null Rauschen bei vorhandenem Trend heißt:
-  // jede Bewegung ist Signal.
+  // jede Bewegung ist Signal. Gedeckelt, damit der Snapshot JSON-fähig bleibt
+  // (JSON.stringify(Infinity) wäre null).
   let ratio = null;
-  if (noise != null && trend != null) ratio = noise > 0 ? Math.abs(trend) / noise : (trend !== 0 ? Infinity : null);
+  if (noise != null) ratio = noise > 1e-9 ? Math.min(Math.abs(trend) / noise, 999) : (Math.abs(trend) > 1e-9 ? 999 : null);
   const enough = pts.length >= minWeeks && resid.length >= Math.max(3, minWeeks - 2);
   const verdict = !enough ? 'unbekannt' : ratio != null && ratio < 1 ? 'rauschen' : 'signal';
 
   return {
     weeks: pts.length,
     pairs: resid.length,
-    noise_pct: noise != null ? +noise.toFixed(1) : null,
+    noise_pct: noise != null ? +noise.toFixed(3) : null, // 3 Stellen: Klassifikation braucht den Wert, Anzeige rundet selbst
     trend_pct_per_week: trend != null ? +trend.toFixed(2) : null,
-    ratio: ratio == null ? null : ratio === Infinity ? Infinity : +ratio.toFixed(2),
+    ratio: ratio == null ? null : +ratio.toFixed(2),
     verdict,
     first: pts[0].date,
     last: pts[pts.length - 1].date,
@@ -111,7 +115,12 @@ function noiseModel(series, opts = {}) {
 /** Liegt eine relative Wochenbewegung innerhalb des Bandes? null = Modell fehlt. */
 function withinBand(relChange, model) {
   if (!model || model.noise_pct == null || model.verdict === 'unbekannt') return null;
-  return Math.abs(relChange) * 100 < model.noise_pct;
+  if (!Number.isFinite(relChange)) return null;
+  // Inklusiv, und eine Null-Bewegung ist immer "innerhalb" — sonst schreibt
+  // eine flache Reihe (Rauschen 0) "außerhalb der üblichen Schwankung ±0,0 %"
+  // an eine Bewegung von 0,0 % (Codex-Befund 07.09.2026).
+  if (relChange === 0) return true;
+  return Math.abs(relChange) * 100 <= model.noise_pct;
 }
 
 module.exports = { noiseModel, withinBand, MIN_WEEKS };
@@ -150,6 +159,12 @@ if (require.main === module && process.argv.includes('--selftest')) {
   assert.equal(withinBand(0.05, band), true);
   assert.equal(withinBand(-0.20, band), false);
   assert.equal(withinBand(0.05, { verdict: 'unbekannt' }), null);
+  assert.equal(withinBand(0, { noise_pct: 0, verdict: 'rauschen' }), true, 'Null-Bewegung bei Null-Rauschen ist innerhalb');
+  assert.equal(withinBand(Infinity, band), null, 'Infinity (Vorwoche 0) → kein Urteil');
 
-  console.log('weekly-noise selftest: 5/5 OK');
+  // 6) Linearer Trend (nicht exponentiell): +5 je Woche auf 100 → im Log-Raum fast gerade, Residuen klein → signal
+  m = noiseModel([...Array(12)].map((_, i) => ({ date: wk(i), value: 100 + 5 * i })));
+  assert.equal(m.verdict, 'signal', `linear: ${JSON.stringify(m)}`);
+
+  console.log('weekly-noise selftest: 6/6 OK');
 }
