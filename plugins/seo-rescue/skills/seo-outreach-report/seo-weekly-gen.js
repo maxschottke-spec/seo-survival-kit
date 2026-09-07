@@ -157,7 +157,7 @@ if (!observations) {
   if (S.vi_all_time_max && S.vi_current < S.vi_all_time_max.value * 0.9)
     observations.push(`Die Sichtbarkeit liegt ${de((1 - S.vi_current / S.vi_all_time_max.value) * 100)} % unter dem eigenen Höchststand vom ${deDate(S.vi_all_time_max.date)} – der Abstand ist aufholbar, schließt sich aber nicht von selbst.`);
   if (!observations.length)
-    observations.push(`Solide Woche ohne auffällige Befunde: ${de(S.d4s_kw_total)} Rankings in den Top-100, Sichtbarkeitstrend ${S.vi_trend_4w > 0 ? 'positiv' : 'seitwärts'} (${de(S.vi_trend_4w, 1)} % über 4 Wochen).`);
+    observations.push(`Solide Woche ohne auffällige Befunde: ${de(S.d4s_kw_total)} Rankings in den Top-100${S.vi_trend_4w != null && S.vi_trend_short_label ? `, Sichtbarkeitstrend ${S.vi_trend_4w > 0 ? 'positiv' : 'seitwärts'} (${de(S.vi_trend_4w, 1)} % über ${S.vi_trend_short_label})` : ''}.`);
 }
 
 const recommendations = W.recommendations || [];
@@ -223,7 +223,7 @@ ${intro ? `<p>${esc(intro)}</p>` : ''}
 <div class="kpis">
   <div class="kpi"><div class="v">${de(S.vi_current, 3)}</div><div class="l">Sichtbarkeit (Sistrix)</div>${delta(S.vi_current, PREV?.vi, 3)}</div>
   <div class="kpi"><div class="v">${de(S.d4s_kw_total)}</div><div class="l">Keywords Top-100</div>${delta(S.d4s_kw_total, PREV?.kw_total)}</div>
-  <div class="kpi"><div class="v">${S.vi_trend_4w > 0 ? '+' : ''}${de(S.vi_trend_4w, 1)}%</div><div class="l">Sichtbarkeit 4 Wochen</div></div>
+  ${S.vi_trend_4w != null && S.vi_trend_short_label ? `<div class="kpi"><div class="v">${S.vi_trend_4w > 0 ? '+' : ''}${de(S.vi_trend_4w, 1)}%</div><div class="l">Sichtbarkeit ${S.vi_trend_short_label}${S.vi_trend_as_of ? ` (Stand ${deDate(S.vi_trend_as_of)})` : ''}</div></div>` : ''}
   <div class="kpi"><div class="v">${de(S.backlinks?.referring_domains)}</div><div class="l">Verlinkende Domains</div>${delta(S.backlinks?.referring_domains, PREV?.ref_domains)}</div>
   <div class="kpi"><div class="v">${de(S.psi_mobile?.perf)}/100</div><div class="l">PageSpeed mobil</div>${delta(S.psi_mobile?.perf, PREV?.psi_mobile_perf)}</div>
   <div class="kpi"><div class="v">${de(S.psi_desktop?.perf)}/100</div><div class="l">PageSpeed Desktop</div>${delta(S.psi_desktop?.perf, PREV?.psi_desktop_perf)}</div>

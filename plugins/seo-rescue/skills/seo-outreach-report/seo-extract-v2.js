@@ -34,13 +34,55 @@ function summarize(t) {
   o.vi_weeks_tracked = ov?.sichtbarkeitsindex_overview?.[0]?.weeks || null;
 
   // Sistrix VI history series
+  //
+  // ACHTUNG Zeitraum: Die Reihe ist NICHT wöchentlich getaktet. Gemessen am
+  // 07.09.2026 an einer Kundendomain: 18 Punkte über 18 Monate, Abstände 28–36 Tage,
+  // also ein Punkt je MONAT. "5 Einträge zurück" sind damit rund vier Monate,
+  // nicht vier Wochen.
+  //
+  // Bis zum 07.09.2026 trugen die Kacheln trotzdem die festen Beschriftungen
+  // "Sichtbarkeit 4 Wochen" und "(12 Wo)". Der Bericht #9 zeigte dadurch
+  // "+9,3 % Sichtbarkeit 4 Wochen" (Wert vom 31.08. gegen den 27.04., also
+  // 126 Tage), während die echte Vierwochenveränderung −24,5 % betrug. Das
+  // Editorial-Gate hat den Versand gestoppt, aber als "verwirrend" beschrieben,
+  // nicht als falsch — ein Sprachmodell prüft Kohärenz, keine Zeiträume.
+  //
+  // Konsequenz: Der Wert bleibt, wie er ist (er ist richtig), aber die
+  // Beschriftung wird aus den tatsächlichen Datumsangaben ABGELEITET statt
+  // angenommen. Ändert Sistrix die Taktung, ändert sich das Label mit. Lässt
+  // sich kein Zeitraum bestimmen, bleibt das Label null und die aufrufende
+  // Stelle blendet die Kachel aus (fail-closed) — lieber keine Angabe als
+  // eine falsche.
   o.vi_series = raw.sistrix.vi_history || [];
   if (o.vi_series.length > 4) {
-    const last = o.vi_series[o.vi_series.length - 1].value;
-    const ago4 = o.vi_series[o.vi_series.length - 5]?.value;
-    const ago12 = o.vi_series[o.vi_series.length - 13]?.value;
+    const at = (n) => o.vi_series[o.vi_series.length - n];
+    const spanDays = (from, to) => {
+      if (!from?.date || !to?.date) return null;
+      const d = Math.round((new Date(to.date) - new Date(from.date)) / 86400000);
+      return Number.isFinite(d) && d > 0 ? d : null;
+    };
+    // Tage → Beschriftung. Die Grenzen sind grob und sollen nur verhindern,
+    // dass ein Zeitraum in der falschen Einheit benannt wird.
+    const spanLabel = (days) => {
+      if (days == null) return null;
+      if (days < 11) return `${days} Tage`;
+      if (days < 46) return `${Math.round(days / 7)} Wochen`;
+      return `${Math.round(days / 30.44)} Monate`;
+    };
+    const lastPt = at(1), ago4Pt = at(5), ago12Pt = at(13);
+    const last = lastPt.value;
+    const ago4 = ago4Pt?.value;
+    const ago12 = ago12Pt?.value;
     o.vi_trend_4w  = ago4  > 0 ? +(((last - ago4)  / ago4)  * 100).toFixed(1) : null;
     o.vi_trend_12w = ago12 > 0 ? +(((last - ago12) / ago12) * 100).toFixed(1) : null;
+    o.vi_trend_short_days  = spanDays(ago4Pt, lastPt);
+    o.vi_trend_long_days   = spanDays(ago12Pt, lastPt);
+    o.vi_trend_short_label = spanLabel(o.vi_trend_short_days);
+    o.vi_trend_long_label  = spanLabel(o.vi_trend_long_days);
+    // Der Endpunkt der Historie ist regelmäßig älter als die Live-Messung
+    // (31.08. gegen 07.09. im Fall oben). Wer die Kachel neben den
+    // Wochenvergleich stellt, muss das wissen.
+    o.vi_trend_as_of = lastPt.date || null;
   }
 
   // DataForSEO ranked
@@ -147,6 +189,13 @@ function summarize(t) {
       crux_inp: raw.psi[strat]?.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT_MS?.category,
       crux_cls: raw.psi[strat]?.loadingExperience?.metrics?.CUMULATIVE_LAYOUT_SHIFT_SCORE?.category,
       crux_overall: raw.psi[strat]?.loadingExperience?.overall_category,
+      // Woraus der Punktwert stammt (Median aus mehreren Läufen, s.
+      // psiMedian in seo-audit-fetch-v2.js). `spread` ist die Spanne der
+      // Einzelläufe: liegt sie hoch, sagt der Punktwert wenig über die Seite
+      // und viel über die Messung.
+      runs: raw.psi[strat]?._psi_runs ?? null,
+      scores: raw.psi[strat]?._psi_scores ?? null,
+      spread: raw.psi[strat]?._psi_spread ?? null,
     };
   }
 

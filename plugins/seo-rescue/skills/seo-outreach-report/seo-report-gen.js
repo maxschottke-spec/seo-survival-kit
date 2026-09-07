@@ -248,7 +248,7 @@ ${(narrative.diagnose || []).map(p => `<p>${esc(p)}</p>`).join('')}
   <div class="kpi ${summary.vi_current >= 0.2 ? 'green' : summary.vi_current >= 0.1 ? 'amber' : 'red'}">
     <div class="lbl">Sichtbarkeit Google</div>
     <div class="val">${formatVI(summary.vi_current)}</div>
-    <div class="sub">${summary.vi_trend_12w != null ? formatPct(summary.vi_trend_12w) + ' (12 Wo)' : ''}</div>
+    <div class="sub">${summary.vi_trend_12w != null && summary.vi_trend_long_label ? formatPct(summary.vi_trend_12w) + ` (${summary.vi_trend_long_label})` : ''}</div>
   </div>
   <div class="kpi ${summary.d4s_kw_total > 1000 ? 'green' : summary.d4s_kw_total > 200 ? 'amber' : 'red'}">
     <div class="lbl">Top-100-Keywords</div>
