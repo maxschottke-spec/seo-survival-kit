@@ -12,7 +12,7 @@
 < 1. Document the Core Update date — see https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history. Match Sistrix drop date exactly.
 < 2. Industry communities (e-commerce: camper forums, boating blogs; news: investigations, exclusive stories)
 < 2. Structural quality cleanup executed in parallel. If >40 % of pages are broken/thin/duplicate (see Structural Quality Baseline in RECOVERY_SYSTEM.md), fixing them removes a compounding penalty. The Core Update hit is authority × structural quality — improving either factor independently lifts the product.
-< 4. AI Citations as a possible early signal (hypothesis, N=1, currently unproven). Rising AI Overview/ChatGPT/Perplexity mentions while classical VI is still flat MAY indicate that authority work is being recognized. ⚠ This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see LESSONS.md, 2026-06-03 correction). Treat rising AI citations as worth logging, not as confirmation — do not change course or report recovery based on this signal alone.
+< 4. AI Citations as a possible early signal (hypothesis, N=1, currently unproven). Rising AI Overview/ChatGPT/Perplexity mentions while classical VI is still flat MAY indicate that authority work is being recognized. ⚠ This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise could not be separated from a pre-update plateau (the update hit first cited as having erased it was itself withdrawn after a full post-window re-measurement; the hypothesis stays unproven either way) (see LESSONS.md, 2026-06-03 correction). Treat rising AI citations as worth logging, not as confirmation — do not change course or report recovery based on this signal alone.
 < ## Related skills
 < - seo-outreach-report — when the owner needs a printable status report
 < ## Real data points (anonymized 2026 cases)
@@ -31,22 +31,21 @@
 > 1. Document the Core Update date — see `https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history`. Match Sistrix/GSC drop date exactly.
 > 2. Industry communities (e-commerce: forums; news: investigations, exclusive stories)
 > 2. Structural quality cleanup executed in parallel. If >40 % of pages are broken/thin/duplicate (see diagnostic step 7 above), fixing them removes a compounding penalty. The Core Update hit is authority × structural quality — improving either factor independently lifts the product.
-> 4. AI Citations as a possible early signal (hypothesis, N=1, currently unproven). Rising AI Overview/ChatGPT/Perplexity mentions while classical VI is still flat MAY indicate that authority work is being recognized. ⚠ This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see the canonical `LESSONS.md`, 2026-06-03 correction). Treat rising AI citations as worth logging, not as confirmation — do not change course or report recovery based on this signal alone.
+> 4. AI Citations as a possible early signal (hypothesis, N=1, currently unproven). Rising AI Overview/ChatGPT/Perplexity mentions while classical VI is still flat MAY indicate that authority work is being recognized. ⚠ This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise could not be separated from a pre-update plateau (the update hit first cited as having erased it was itself withdrawn after a full post-window re-measurement; the hypothesis stays unproven either way) (see the canonical `LESSONS.md`, 2026-06-03 correction). Treat rising AI citations as worth logging, not as confirmation — do not change course or report recovery based on this signal alone.
 > ## Real anchor data (anonymized 2026 cases)
 > - Recovery plan: 6–12 months, Authority-First. Tech (PSI/Schema) in parallel but not the primary lever
 > ---
 ## plugins/seo-rescue/skills/ai-search-rescue/SKILL.md <-> exports/skills/ai-search-rescue.md
-### only in canonical (48)
+### only in canonical (47)
 < # AI Search Rescue
 < A framework for recovering and growing visibility in AI search surfaces: Google AI Overviews, Google AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai search. The mechanics differ from classical SERP-ranking: instead of position 1-10 of a result list, you are competing to be the source the LLM cites in a generated answer.
 < Two operational findings drive this skill:
-< 1. AI citations may lead classical SERP recovery by several weeks. In one mid-sized e-commerce recovery (March 2026 Core Update), AI-Mode + AI-Overviews + ChatGPT citations started moving up roughly 2–6 weeks before the Sistrix VI did. The pattern is an observation from a single case plus published anecdata, not a measured statistical relationship. Treat it as an indicator worth watching, not a prediction. If you observe the same or opposite pattern in your own recoveries, please contribute the data point back to `LESSONS.md`.
 < - Pure SERP-position optimization (use `seo-outreach-report` + `competitor-deep-audit`)
 < Different surfaces, similar mechanics. The model receives a user query, retrieves candidate documents (via search index or RAG), and assembles a generated answer. Two questions determine if you make it in:
 < 1. Does the retriever surface your page? This is classical SEO — backlinks, relevance, freshness, indexability.
 < 2. Does the LLM find an extractable passage on your page that directly answers a sub-question? This is new — it depends on structure, clarity, and the presence of definitive, source-able statements.
 < ## Measurement: what to track and how
-< You cannot improve what you can't see. Three measurement layers:
+< You cannot improve what you can't see. Four measurement layers:
 < ### Layer 1 — Brand mention tracking (free, daily)
 < Manually query the key AI surfaces with brand-relevant prompts. Track whether your domain is cited.
 < - 10-15 more, covering category, problem-aware, and brand-aware queries
@@ -70,6 +69,7 @@
 < A growing convention: `llms.txt` at the site root provides a curated index of the site's most authoritative pages, in a format optimized for LLM consumption. Many AI surfaces don't yet consume it, but the cost is low (a single Markdown file) and Anthropic, Mintlify, and some other documentation platforms have started reading it.
 < For brands with notable claims (publications, awards, original research, multi-year operating history), having a Wikipedia article that mentions you is one of the strongest single signals for AI citation, because retrievers heavily weight Wikipedia. Wikipedia notability requirements are strict and you cannot create your own article — third parties must do it based on independent sources.
 < This is a long-horizon move. Don't pursue it for sites without genuine notability.
+< 0. Run the consistency-first sequence above; on a self-contradicting site the Week 1 numbers are a diagnostic snapshot, not the reference baseline
 < 2. Rewrite each with the Tactic 1 (extractable passage) and Tactic 2 (question headings) pattern
 < 3. Add Tactic 3 (source citations) and Tactic 4 (author byline + Person-Schema)
 < 1. Re-run the brand-mention prompt set weekly
@@ -80,24 +80,22 @@
 < | "AI Overviews will go away, this is a fad" | They're now in 80%+ of broad queries. The mechanics will evolve but the surface is here. Plan for it. |
 < | "Our content already ranks #1, we don't need to change it" | Ranking #1 organically and being cited in AI Overviews are two different things. Pages with the same content rank well organically while losing the citation. |
 < | "We need a dedicated AI-SEO team" | Most of this work overlaps with classical content quality + author authority. One person doing both is more efficient than a separate team. |
-< - Same shop: GPTBot crawl frequency on top 50 URLs went from 2x/week to 8x/week after llms.txt publication. ChatGPT citation count rose proportionally.
 < ## Related skills
 < - post-core-update-recovery — Phase A (author + EEAT) overlaps directly with Tactic 4; AI-citations as a possible early signal (N=1 hypothesis, see Overview finding 1) of Phase A success
 < - seo-outreach-report — for measuring classical SERP visibility in the same report
 < - competitor-deep-audit — to find which competitors are actually getting the AI citations you're not
-### only in export (44)
+### only in export (42)
 > # AI Search Rescue — Framework
 > > Source: `plugins/seo-rescue/skills/ai-search-rescue/SKILL.md` (canonical Claude Code version).
 > > Use case: Recover and grow visibility in AI search surfaces (Google AI Overviews/AI Mode, ChatGPT, Perplexity, Bing Copilot, Claude.ai). Not SERP ranking — citation in generated answers.
 > > Use this exported version when: you're running Cursor, an OpenAI Custom GPT, Gemini CLI, Aider, or any LLM tool that isn't Claude Code. The framework content is identical — only Claude-specific frontmatter has been stripped.
 > The mechanics of AI search differ from classical SERP ranking: instead of position 1-10 in a result list, you compete to be the source the LLM cites in a generated answer.
 > Two operational findings drive this framework:
-> 1. AI citations may lead classical SERP recovery by several weeks. In one mid-sized e-commerce recovery (March 2026 Core Update), AI-Mode + AI-Overviews + ChatGPT citations started moving up roughly 2–6 weeks before the Sistrix VI did. The pattern is an observation from a single case plus published anecdata, not a measured statistical relationship. Treat it as an indicator worth watching, not a prediction.
 > - Pure SERP-position optimization (different lever set)
 > The model receives a user query, retrieves candidate documents (via search index or RAG), and assembles a generated answer. Two questions determine if you make it in:
 > 1. Does the retriever surface your page? Classical SEO — backlinks, relevance, freshness, indexability.
 > 2. Does the LLM find an extractable passage on your page that directly answers a sub-question? New — depends on structure, clarity, and the presence of definitive, source-able statements.
-> ## Measurement: three layers
+> ## Measurement: four layers
 > ### Layer 1 — Brand mention tracking (free, manual or automated)
 > Query the key AI surfaces with brand-relevant prompts. Track whether your domain is cited.
 > - 10-15 more covering category, problem-aware, and brand-aware queries
@@ -128,7 +126,6 @@
 > | "AI Overviews will go away, this is a fad" | They're now in 80 %+ of broad queries. The mechanics will evolve but the surface is here. |
 > | "Our content already ranks #1, we don't need to change it" | Ranking #1 organically and being cited in AI Overviews are two different things. |
 > | "We need a dedicated AI-SEO team" | Most of this work overlaps with classical content quality + author authority. One person doing both is more efficient. |
-> - Same shop: GPTBot crawl frequency on top 50 URLs went from 2×/week to 8×/week after `llms.txt` publication. ChatGPT citation count rose proportionally.
 > ---
 ## plugins/seo-rescue/skills/rescue/SKILL.md <-> exports/skills/seo-rescue-overview.md
 ### only in canonical (103)

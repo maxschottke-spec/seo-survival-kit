@@ -28,7 +28,7 @@ This skill removes that friction: one config (service-account JSON or OAuth toke
 - An agency onboarding a client — first-call data gathering in <5 minutes
 
 **Don't use for:**
-- Real-time monitoring (GSC data lags ~2 days for fresh queries, ~7 days for impressions)
+- Real-time monitoring (GSC data lags 2-3 days and the most recent days keep filling up; exclude days younger than three days from window comparisons)
 - Competitor data (GSC only shows your own property)
 - Backlink analysis (GSC has a backlink view but [[seo-outreach-report]] / [[competitor-deep-audit]] pull DataForSEO's more complete dataset)
 
@@ -182,6 +182,18 @@ cat gsc-history/example-com-2026-05-22.json | \
   const items = (d.top_pages || []).filter(r => r.position > 10 && r.position < 21); \
   items.sort((a,b) => b.impressions - a.impressions).slice(0,15).forEach(r => console.log(r.page, '|', 'pos', r.position.toFixed(1), '|', r.impressions, 'imp'));"
 ```
+
+### Reading traps
+
+Observed in one case unless marked (experimental, N=1). Full entries in `references/RECOVERY_SYSTEM.md` Appendix A13 to A17.
+
+- **Know the aggregation mode.** By property, a query's position comes from the topmost own result per impression. With the page dimension in the request (as in `query_page_pairs`), each own URL has its own position; averaging those rows across URLs reports a loss the best page never had.
+- **Third-party rank trackers create deep-position impressions**, typically on brand queries on a fixed weekday. Read brand positions per day.
+- **An impression drop confined to positions 11+** with flat clicks is a counting change, not a ranking loss. Split impressions by position bucket (an unrelated property showed the same pattern).
+- **One spike day flips a week-over-week comparison.** Pull the daily curve first; show a same-weekday-median comparison next to the raw one.
+- **Rows came back click-descending whatever sort was requested.** Zero-click pages with many impressions drop out of limited pulls. Paginate within the API's row limits and report coverage; do not claim completeness.
+- **Query × page covers only part of total clicks** (under half in the observed case, because of anonymised queries). Report dimension coverage against the property total.
+- **Analytics-to-clicks ratio.** Know the normal ratio of analytics organic sessions to GSC clicks for the site. Compute it per month before any cross-month analytics comparison: when consent coverage drifts, analytics shows channel growth that did not happen.
 
 ## Quiet-Death Detection (experimental, N=1)
 

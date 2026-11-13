@@ -116,6 +116,28 @@ Weak (insufficient alone):
 
 A hypothesis verified by weak-tier sources only is at most `likely`, never `verified`. Multiple weak-tier sources do not aggregate into verified; only a strong-tier or strongest-tier source produces verified.
 
+## Negative findings
+
+"Nothing there" is a hypothesis like any other (experimental, N=1 — **Maturity:** `experimental_n1`), many incidents in one case).
+
+- A zero or empty result from a measuring tool counts as a finding only after the same tool has shown a non-zero result on a known-positive case of the same object type. Headless browsers, exports, OCR, list endpoints and change-history endpoints all have blind spots that look like "nothing there". Tool-specific blind spots are listed in `PROVIDER_CAPABILITIES.md`.
+- "No changes", "no items" and "no access" from an API need a second, different signal before they are reported.
+- A check that has never been seen to fail on real data is untested. A monitor that has only ever reported "all clear" is unproven. Before relying on a check, neutralise the thing it guards once and confirm it turns red.
+- Two totals that match are not a mechanism. Disaggregate (per day, per URL, per segment) before a hypothesis moves beyond `suspected`.
+- Two third-party estimators that agree do not confirm each other; they share inputs. First-party clicks decide.
+- For a suspected cause, check the prior state: if the same state was already live during a normal period, the hypothesis stays `suspected`.
+- A statement about live state (status, budget, price, open items, job health) is re-measured in the current session before it is reported or handed on. If it cannot be measured, it is labelled "per document, dated". Your own measurement from earlier the same day ages too.
+
+## Delegated checks and agent reports
+
+When checks are delegated to sub-agents or parallel sessions (experimental, N=1 — **Maturity:** `experimental_n1`)):
+
+- **A briefing is a transfer of facts.** Whatever stands in a sub-agent briefing ends up as fact in its output. Open the briefing with live state measured in this session, give every identifier with its source, copy rule lists verbatim from the rule file, and mark estimates as estimates. On acceptance, search the result for your own briefing sentences.
+- **Numbers in an agent report are hypotheses** until traced to their source. An agent without the data tools or turn budget for the task returns silence or an empty result that reads like "no issues". Confirm the agent type has the tools before delegating.
+- **A read-only instruction is not enforcement.** Back it with a technical write block, name one scratch directory with absolute paths, and check the working tree afterwards. The instruction does not bind the script the agent writes ad hoc.
+- **Parallel change streams collide.** Two sessions given overlapping work wrote the same objects on the same day, and one later re-introduced text the other had removed. Keep a history sweep that re-checks every text ever replaced, and reject catalogue entries whose target contains the source (not idempotent).
+- **A decision takes effect only in the copy that runs.** Where a scheduled job runs is read from its definition, not from a folder name. After a decision that changes a calculation or a rule, check the code state the automation actually executes, and check whether a scheduled sync will overwrite a manual correction.
+
 ## Required structure per hypothesis
 
 Every recovery diagnosis must produce a JSON structure conforming to `schemas/hypothesis-verification.schema.json`. Minimum required fields:

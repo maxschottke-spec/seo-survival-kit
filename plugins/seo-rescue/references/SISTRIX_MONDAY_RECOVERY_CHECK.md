@@ -156,7 +156,7 @@ Classify the recovery into one of six stages. Each stage represents a milestone 
 - Stage 4: money keywords move into Top 5 / Top 3
 - Stage 5: visibility index, GSC clicks, and revenue follow
 
-A possible early signal (hypothesis, N=1, currently unproven): rising AI Overview / ChatGPT / Perplexity mentions while classical SISTRIX VI is still flat MAY indicate that authority work is being recognized — but in the pilot case the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (2026-06-03 correction, see `post-core-update-recovery/LESSONS.md`). Log the signal, do not act on it alone. Independent of that hypothesis: Stage 4 commonly arrives before Stage 5, and the operator should not panic when Stage 5 lags.
+A possible early signal (hypothesis, N=1, currently unproven): rising AI Overview / ChatGPT / Perplexity mentions while classical SISTRIX VI is still flat MAY indicate that authority work is being recognized — but in the pilot case the AI-citation rise could not be separated from a pre-update plateau (the update hit first cited as having erased it was itself withdrawn after a full post-window re-measurement; the hypothesis stays unproven either way) (2026-06-03 correction, see `post-core-update-recovery/LESSONS.md`). Log the signal, do not act on it alone. Independent of that hypothesis: Stage 4 commonly arrives before Stage 5, and the operator should not panic when Stage 5 lags.
 
 #### Per-cluster stage classification (moved to Appendix B)
 

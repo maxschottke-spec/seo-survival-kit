@@ -91,7 +91,7 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 
 **Quelle:** Pilot-Domain Sistrix-Toolbox-UI 2026-05-22 (Screenshot, anonymisiert).
 
-**⚠ KORREKTUR 2026-06-03 zum 22.05.-Eintrag:** Der „+22 % UI-Trend"-Befund vom 22.05. war NICHT echte Recovery sondern Pre-Mai-Update-Plateau. Mai 2026 Core Update (21.05.-02.06.) hat die Pilot-Domain mit −47,7 % Klicks getroffen. Die „Recovery früher als Framework-Vorhersage"-Hypothese ist NICHT haltbar. AI-Citations-Hypothese bleibt offen. Siehe Eintrag 2026-06-03 unten für korrigierte Lese und Multi-Update-Sequenz-Befund.
+**⚠ KORREKTUR 2026-06-03 zum 22.05.-Eintrag:** Der „+22 % UI-Trend"-Befund vom 22.05. war NICHT echte Recovery sondern Pre-Mai-Update-Plateau. Mai 2026 Core Update (21.05.-02.06.) hat die Pilot-Domain mit −47,7 % Klicks getroffen. Die „Recovery früher als Framework-Vorhersage"-Hypothese ist NICHT haltbar. AI-Citations-Hypothese bleibt offen. Siehe Eintrag 2026-06-03 unten für korrigierte Lese und Multi-Update-Sequenz-Befund. **Nachtrag:** Die Zahl −47,7 % wurde später selbst widerrufen (Korrektur-Eintrag 2026-08/11); offen bleibt die AI-Citations-Hypothese, nicht belegt bleibt die frühe Recovery.
 
 ---
 
@@ -105,11 +105,11 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 |---|---:|---|
 | Juni 2025 Core Update | −1,1 % | neutral |
 | August 2025 Spam Update | −0,3 % Klicks, −18,8 % Impr. | Frühwarnung, ignoriert |
-| Dezember 2025 Core Update | **+20,6 %** | **major_gain** |
+| Dezember 2025 Core Update | **+20,6 %** | **major_gain** (Fenster-Eigenheit, siehe Korrektur-Eintrag 2026-08/11) |
 | Februar 2026 Discover Update | −21,8 % | moderate_hit (in Originaldiagnose übersehen) |
 | März 2026 Spam Update | −32,2 % | major_hit |
 | März 2026 Core Update | −36,3 % | major_hit |
-| Mai 2026 Core Update | −47,7 % | major_hit (frisch) |
+| Mai 2026 Core Update | −47,7 % | ~~major_hit (frisch)~~ **widerrufen**, siehe Korrektur-Eintrag 2026-08/11 |
 
 **Pre-Hit-Baseline-Korrektur:** Original-Diagnose nutzte „letztes stabiles Plateau vor März-Hit" als Baseline (~1.077 Klicks/Woche im Februar 2026). Tiefenscan zeigt: das Februar-Plateau war bereits eroded — echter Pre-Hit war Sommer/Herbst 2025 (1.150-1.300 Klicks/Woche). Recovery-Stand wurde dadurch zu optimistisch berichtet (~62 % vom Pre-Hit statt tatsächlich ~37-40 %).
 
@@ -121,7 +121,7 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 4. **Multi-Update-Sequence Stage Modeling:** Stage-Modell muss erlauben Stage 3 → Stage 1 (Re-Entry) bei neuem Hit. Aktuell linear modelliert. Plus: „Active update window" als Stage-Gate-Parameter („no progression during rollout").
 5. **Heterogene Page-Trajectory:** Site-Level −37-40 % verbirgt: einzelne Pages ranging von −90 % bis +621 %. Cluster-Analyse nötig (Format-Match-Slug Winner vs Broad-Adjective Loser).
 
-**Konsequenz für Pilot-Domain:**
+**Konsequenz für Pilot-Domain** (Punkte 1 bis 3 widerrufen, bei Punkt 4 die Begründung mit dem Dezember-Gain; siehe Korrektur-Eintrag 2026-08/11; hier als Protokoll belassen):
 - Stage zurück auf 1 (Acute Damage) vom frischen Mai-Update
 - Settlement-Phase mindestens 28 Tage (echte Post-Daten erst Ende Juni)
 - Recovery-Operations (Schema-Fix, Canonical-Fix) konnten Update-Wirkung NICHT abfedern — notwendig aber nicht hinreichend
@@ -158,6 +158,52 @@ Datierte Lern-Einträge aus realen Core-Update-Recoveries. Format: `## YYYY-MM-D
 - N=1 candidates → validated nach cross-case Bestätigung.
 
 **Quelle:** case-001 Recovery-Ops 2026-06-30/07-01 (case-internes Detail in `private/cases/case-001/patterns/`), anonymisiert.
+
+---
+
+## 2026-08/11 — Korrekturen früherer Einträge + Mess- und Betriebslehren (DE-Matratzen-Shop)
+
+**Kontext:** Fünf Monate Betrieb nach den Einträgen oben: mehrere Tiefenscans, ein Vollaudit, eine Umsatzdiagnose-Serie, ein Programm zur KI-Sichtbarkeit und ein Layoutumbau alter Seiten. Der größte Ertrag dieser Phase sind Widerrufe. Mehrere Befunde, auf denen Stage, Gates und Pläne standen, hielten der Nachmessung nicht stand. Alles N=1, sofern nicht anders vermerkt.
+
+### Korrekturen an Einträgen in dieser Datei
+
+1. **Mai-2026-Update war kein Treffer.** Die Zahl −47,7 % (Eintrag 2026-06-03) stammte aus einem Fenster mitten im Rollout, hochgerechnet auf 28 Tage. Der Eintrag nannte die Einschränkung selbst, die angekündigte Nachmessung fand aber nie statt. Erst knapp drei Monate später wurde mit einem vollen Nachfenster gemessen: Klickverlust im niedrigen einstelligen Prozentbereich bei deutlich gestiegenen Impressionen. Der strukturelle Bruch ist das März-Doppel (Spam- und Core-Update, Fenster überlappen, Anteile nicht trennbar). **Damit hinfällig:** „Stage zurück auf 1 vom frischen Mai-Update", die darauf gestützte Verlängerung der Settlement-Phase und der Satz, Recovery-Operations hätten die Update-Wirkung nicht abfedern können. **Lehre:** vorläufige Zahl als vorläufig kennzeichnen und die Nachmessung im selben Moment als datierte Aufgabe anlegen (`RECOVERY_SYSTEM.md` Appendix A18).
+2. **Dezember-2025-„Gain" ist eine Fenster-Eigenheit.** Die +20,6 % sind der 28-Tage-Vergleich um das Update-Fenster. Im Monat selbst lag eine mehrwöchige Delle, die sich erst gegen Monatsende erholte, und es liefen gleichzeitig Änderungen außerhalb von SEO. Die Folgerung „Authority wird belohnt" trägt diese Zahl nicht. Die Priorität für Editorial-Authority bleibt aus anderen Gründen bestehen (Autoritätsdecke im späteren Vollaudit), aber nicht wegen dieses Wertes.
+3. **AI-Citations als Frühindikator** (Eintrag 2026-05-22, bereits zurückgenommen): Die Rücknahme bleibt richtig, ihre damalige Begründung („nachfolgendes Update löschte das Plateau") fällt mit Punkt 1 weg. Dazu kommt: Der Sichtbarkeitsindex, gegen den verglichen wurde, war für diese Domain über Monate mit den Klicks unkorreliert.
+4. **„Tech ist nicht der Hebel"** bleibt im Kern richtig für Rankings. Ergänzung: Einige technische Schalter hatten Wirkung außerhalb des Rankings, vor allem strukturierte Daten, die bestellbare Ware als nicht lieferbar meldeten und damit Shopping-Anzeigen blockierten.
+
+### Widerrufe, die Entscheidungen fast oder tatsächlich fehlgesteuert haben
+
+- **„Neubewertung nach Massenänderungen"** als Ursache eines Einbruchs: Der Impressionsknick war ein Zähleffekt in tiefen Positionen (A13), die Stufen im Tagesindex hingen an einzelnen Kopf-Keywords (A16). Auf der Hypothese standen ein Änderungsstopp und Rollback-Überlegungen.
+- **„Brand-Positionsverlust":** Rank-Tracker-Artefakt plus Mittelwert über mehrere eigene URLs (A14). Der reale Klickverlust war ein Kanalwechsel zur eigenen Brand-Kampagne (A15).
+- **„Umsatzrückgang durch SEO-Maßnahmen":** gekürztes Werbebudget; organische Klicks stabil (`r-revenue-drop-check-paid-first`).
+- **„Kein Tracking-Bruch, zwei Quellen zeigen dasselbe":** beide Quellen hingen am selben Tagging (`r-orders-from-order-system`).
+- **„Kaufeinbruch":** angebrochener Tag gegen volle Tage, Käufe aus Analytics bei wandernder Erfassungsquote.
+- **Eine Seite fiel nach einem neuen Inhaltsblock:** Die Kontrollgruppe mit demselben Block war stabil; kein Rollback (`RECOVERY_SYSTEM.md` §9).
+- **„Wochenvergleich zeigt Erholung" und eine Woche später „Einbruch":** je ein Spitzentag (A17).
+
+### Neue Lessons (N=1, candidate-stage)
+
+1. **Erst messen, ob es SEO ist.** Vor jeder SEO-Diagnose: Klicks nach Quelle, Werbeausgaben, Rabattkalender und Bestellungen aus dem Shopsystem nebeneinander. → `references/FUNNEL_DIAGNOSIS.md` Step 0.
+2. **Erfassungsquote als Pflichtkennzahl** (in zwei Fällen auf verschiedenen Shopsystemen beobachtet): Analytics sieht unter Einwilligungspflicht nur einen Teil, und der Teil wandert. Jede Analytics-Zahl trägt ihre datierte Quote.
+3. **Null erst nach Positivkontrolle.** Messwerkzeuge haben Blindstellen, die wie „nichts da" aussehen. → `HYPOTHESIS_VERIFICATION_GATE.md`, Negative findings.
+4. **Abnahme an der ausgelieferten Seite.** Ohne Cache-Parameter, mit einer Kopie, die nach dem Write entstand, mit Negativkontrolle gegen den Vor-Crawl. → `docs/LIVE_CHANGE_QA.md`, Acceptance checks.
+5. **Aktivieren ist Veröffentlichen.** Eine reaktivierte Kategorie brachte alte Meta-Texte mit inzwischen entfernten Aussagen live. → `SAFE_LIVE_CHANGE_RULES.md` Regel 13.
+6. **Freeze-Prüfung in jede Freigabefrage.** Eine Bereinigung lief über mehrere hundert Objekte, während ein Änderungsstopp galt; Dry-Run, Canary und Review kennen keine Freezes. → Regel 0.
+7. **Der Rückweg ist Code.** Ein nie ausgeführter Rückweg schlug beim ersten Einsatz fehl. → Regel 9.
+8. **KI-Kanal auf Bestellebene messen.** Bestellungen über KI-Assistenten waren im Herkunftsfeld des Shops sichtbar, landeten auf Produktvarianten und blieben für eine Promptmessung mit Allgemeinfragen unsichtbar. → `ai-search-rescue`, Layer 4.
+9. **Erst Widerspruchsfreiheit, dann KI-Baseline.** Ein Shop, der sich bei Grundfakten selbst widerspricht, bekommt die Widersprüche als Sichtbarkeit gemessen. → `ai-search-rescue`, Vorstufe.
+10. **Fundstellen und Ursachen getrennt zählen.** Tausende Treffer gingen auf rund ein Dutzend Ursachen zurück, die meisten davon seitenweite Bausteine. → Regel 12.
+11. **Layoutumbau bei konstanter URL.** URL, Titel, Überschriften und Links bleiben; Vorlage ist die abgenommene Schwesterseite; Vorschau als versteckte noindex-Kopie; Vergleich vorher/nachher mit automatischem Rückbau. Erste Gruppe nach wenigen Tagen stabil bis besser. Messfenster zum Zeitpunkt dieses Eintrags noch offen, also kein Wirkungsnachweis. → Regel 14.
+12. **Feed-Titel verbinden organische und bezahlte Sichtbarkeit.** Verstümmelte Ersatztitel machten Produkte für genau die Suchen unsichtbar, für die die Kategorie ranken sollte; zuerst aber das Anlagedatum prüfen. → `DECISION_ENGINE.md` §8 P7.
+
+**Konsequenz für Framework:**
+- Die Batch-Regel (`r-batch-change-velocity-cap`) behält ihre Grenze, verliert aber einen Teil ihrer Begründung; Confidence gesenkt.
+- Die Schwellen in `FUNNEL_DIAGNOSIS.md` gelten nur bei stabiler Erfassungsquote.
+- Offene Uneinheitlichkeit, bewusst nicht in diesem Eintrag entschieden: Mindestwartezeit vor der zweiten Welle (7 Tage in den Operating Rules, 5 Tage als Minimum im Settlement Gate).
+- N=1 candidates → validated nach cross-case Bestätigung. Mehrfaches Wiederauftreten im selben Fall ist kein zweiter Fall.
+
+**Quelle:** case-internes Detail in `private/cases/case-001/patterns/`, anonymisiert.
 
 ---
 

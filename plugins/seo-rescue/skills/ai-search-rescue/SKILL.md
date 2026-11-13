@@ -19,7 +19,7 @@ A framework for recovering and growing visibility in AI search surfaces: Google 
 
 Two operational findings drive this skill:
 
-1. **AI citations may lead classical SERP recovery by several weeks.** In one mid-sized e-commerce recovery (March 2026 Core Update), AI-Mode + AI-Overviews + ChatGPT citations started moving up roughly 2–6 weeks before the Sistrix VI did. The pattern is an observation from a single case plus published anecdata, not a measured statistical relationship. Treat it as an indicator worth watching, not a prediction. If you observe the same or opposite pattern in your own recoveries, please contribute the data point back to `LESSONS.md`.
+1. **AI citations may lead classical SERP recovery by several weeks (unproven, observation rescinded).** In one mid-sized e-commerce recovery, AI-Mode + AI-Overviews + ChatGPT citations started moving up roughly 2–6 weeks before the Sistrix VI did. The observation was later rescinded: the rise could not be separated from a plateau that preceded further updates, and the visibility index it was compared with turned out to be a poor proxy for that site's clicks. Treat it as a hypothesis to test, not as an indicator. If you observe the same or opposite pattern in your own recoveries, please contribute the data point back to `LESSONS.md`.
 2. **The optimization isn't keyword targeting, it's passage targeting.** AI surfaces extract short passages (one sentence to one paragraph) that directly answer a sub-question of the user's prompt. If your page has no extractable passages, you don't get cited even when you rank #1 organically.
 
 ## When to use
@@ -68,9 +68,23 @@ digraph extractability {
 }
 ```
 
+## Before any optimization: consistency first, then measurement
+
+Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`).
+
+A shop that contradicts itself on basic product facts across template, content and structured-data layers gets those contradictions measured as its AI visibility. Sequence:
+
+1. **Fact base.** Collect product facts from evidenced values only. A value without evidence is null, not an estimate.
+2. **Consistency check.** Check every rendered page against the fact base, structured data included. Report occurrences and root causes separately; most hits trace back to a few sitewide strings.
+3. **Freeze the prompt benchmark** (fixed prompt set, checksummed). A time series without a frozen prompt set is not a benchmark. A snapshot taken now is a *diagnostic* before-state: keep it to judge the corrections, and label it as measured on a self-contradicting site.
+4. **Resolve the sitewide contradictions.**
+5. **Take the reference baseline** after the corrections are live and crawled. Later optimization is measured against this one, not against the diagnostic snapshot.
+
+The live crawl is authoritative for the current state. Index snippets and AI answers are a delayed observation layer; an external audit of AI answers can report as open what was fixed weeks ago.
+
 ## Measurement: what to track and how
 
-You cannot improve what you can't see. Three measurement layers:
+You cannot improve what you can't see. Four measurement layers:
 
 ### Layer 1 — Brand mention tracking (free, daily)
 Manually query the key AI surfaces with brand-relevant prompts. Track whether your domain is cited.
@@ -113,6 +127,16 @@ AI crawlers identify themselves in the User-Agent. Watch for traffic from:
 - `Applebot-Extended` (Apple Intelligence)
 
 Crawl frequency from these bots correlates with citation frequency. If `PerplexityBot` visits your top URLs daily, your odds of being cited rise. Block them in `robots.txt` and you opt out of AI surfaces entirely (a common mistake on sites that fear LLM training — those two concerns are now separable via the `Google-Extended` vs `Googlebot` distinction, but most sites haven't disambiguated).
+
+### Layer 4 — Orders from AI assistants (shop data, consent-independent)
+
+Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`).
+
+Layers 1 to 3 measure visibility. They do not measure whether anyone buys. In the originating case, orders attributed to AI assistants were readable from the shop's order-level source field, independent of cookie consent, and were large enough to matter commercially. Three things followed:
+
+- The assistant sent buyers to **specific product-variant URLs**, not to editorial pages. A prompt tracker built from general advice questions saw none of those product pages.
+- Build the purchase-path prompt set from the queries buyers actually use (size, firmness, a constraint) and run it through the consumer interface. Record product cards, the merchants shown on them and the cited sources separately. Marketplaces and comparison portals often hold those slots, and outdated product names or third-party offers can surface.
+- In analytics, AI referrals behave unlike other sources: very high add-to-cart rates with few purchases in the same session. Segment them, or their arrival and disappearance will look like a product-page defect (see `references/FUNNEL_DIAGNOSIS.md`).
 
 ## Optimization tactics
 
@@ -207,6 +231,7 @@ This is a long-horizon move. Don't pursue it for sites without genuine notabilit
 ## Recovery workflow (6-12 weeks)
 
 ### Week 1 — Baseline
+0. Run the consistency-first sequence above; on a self-contradicting site the Week 1 numbers are a diagnostic snapshot, not the reference baseline
 1. Set up Layer 1, 2, 3 measurement
 2. Run the brand-mention-prompt-set across all six AI surfaces
 3. Document current state: % of queries where you're cited, % where competitor is cited, who the dominant competitors are
@@ -247,8 +272,9 @@ If after 12 weeks of rewrites you still see no citation movement, the issue is r
 
 ## Real-world anchor data (anonymized 2026)
 
-- Mid-size DE shop, post-March-Core-Update: AI-Mode citations went from 12 to 153 over 8 weeks of Tactic 1+2 rewrites. Sistrix VI moved 2 weeks later.
-- Same shop: GPTBot crawl frequency on top 50 URLs went from 2x/week to 8x/week after llms.txt publication. ChatGPT citation count rose proportionally.
+- Mid-size DE shop, post-March-Core-Update: AI-Mode citations went from 12 to 153 over 8 weeks of Tactic 1+2 rewrites. The earlier addition "Sistrix VI moved 2 weeks later" is withdrawn: the lead-indicator reading was rescinded (see Overview, point 1).
+- Same shop: GPTBot crawl frequency on top 50 URLs rose after llms.txt publication. This is an anecdote from server logs that was not re-verified; no causal link to citation counts is claimed.
+- Same shop, later: orders from AI assistants became measurable at order level and landed on product-variant URLs (see Layer 4).
 - One Phase-A author-page-rewrite increased AI Overview citation share for a specific keyword cluster from 0/10 prompts to 6/10 prompts within 5 weeks.
 
 ## Related skills

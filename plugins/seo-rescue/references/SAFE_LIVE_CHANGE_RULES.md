@@ -12,6 +12,7 @@ A user response counts as **valid approval** only when it contains at least **th
 4. Concrete URLs or cluster names (e.g., "die Topper-Redirects", "die Lattenrost-Kategorien")
 5. Explicit reference to the shown Change Plan (e.g., "diesen Plan", "wie geplant")
 6. Explicit execution permission ("fuehre aus", "mach das", "execute")
+7. Explicit scope limit ("sonst nichts", "keine weiteren Aenderungen", "nur diesen Micro-Fix")
 
 ### Valid Informal German Examples
 
@@ -19,7 +20,7 @@ A user response counts as **valid approval** only when it contains at least **th
 - "Okay, fuehre diesen Change Plan mit 2 Anchor-Fixes aus." (plan reference + number + type + permission)
 - "Freigegeben: die 3 DreiscSeo-Ketten deaktivieren, keine weiteren Aenderungen." (number + type + cluster + permission + scope)
 - "Mach die eine Anchor-Aenderung, sonst nichts." (number + type + scope + permission)
-- "Ja, nur diesen Micro-Fix ausfuehren." (mode reference + scope + permission)
+- "Ja, nur diesen Micro-Fix ausfuehren." (reference to the shown plan/mode + scope + permission)
 - "Deaktiviere die 8 leeren Kategorien (0 Produkte), ich kenne die Folgen." (number + type + acknowledgment)
 
 ### Invalid Approvals (Hard Stop)
@@ -93,11 +94,22 @@ If approval is unclear (one or two elements only), Claude must stop and ask:
 
 > "Bitte bestaetige konkret: Anzahl Aenderungen, Aenderungstyp und ob genau dieser Plan freigegeben ist."
 
+### What an approval does not cover
+
+Derived from repeated incidents in one case in which a short answer was read as more than it said (experimental, N=1 — **Maturity:** `experimental_n1`):
+
+- **Open questions stay open.** If the approval request contained a question (which of two objects, which target value, duplicate or not) and the answer does not address it, the question is unanswered. Ask again; do not pick the convenient reading.
+- **A pasted command is not an execution order.** A write command that arrives as text in the conversation is material to review, not a go.
+- **The agent prepares, the human starts.** For bulk or irreversible writes the agent delivers script, dry run and expected output; the operator starts the live run. This keeps "who pressed the button" unambiguous.
+- **A bundled approval is valid only if the bundle is specific.** One go for a package is fine when the package names count, type and objects and the approval refers to it. It does not turn "go" into a valid approval for anything outside the package.
+- **State can change between dry run and write.** Immediately before writing, compare the targets' last-modified state with the dry run and stop on any difference. Another session, a scheduled sync or a colleague may have touched the same objects.
+
 ## Pre-Change Checklist
 
 Before every live write:
 
-1. **Change Plan** output with risk points (SEO_CHANGE_GOVERNOR.md format)
+0. **Open freezes and tests named in the approval request**: before asking for approval, check for any running freeze, settlement or measurement window, A/B or price test, promotion, or ad learning phase that touches the same objects, and write it into the request. Compliance and legal-text clean-ups count as changes too. Dry run, canary and review do not know about freezes; this check is separate.
+1. **Change Plan** output with risk points (SEO_CHANGE_GOVERNOR.md format). For every existing value the plan changes (end time, exclusion, limit, redirect), name the reason for the current value from the change history. A value that looks wrong may be deliberate.
 2. **Budget check**: total_risk_points <= budget_remaining
 3. **Pre-checks for each target URL**:
    - HTTP status (live, not just API state)
@@ -122,15 +134,26 @@ Before every live write:
    - Run all terms through DACH_MEDICAL_SEO_TERMS.md
    - Flag High/Medium risk in `compliance_review`
 8. **Valid approval** received
-9. **Rollback method** documented
+9. **Rollback method** documented, and for scripted or bulk changes **rollback readiness** (experimental, N=1 — **Maturity:** `experimental_n1`):
+   - The rollback has been run in validation mode *before* the forward change executes. A rollback that was never run is a hope.
+   - It carries the same guards as the forward path and restores only the fields this run changed, never from an older backup (an old backup re-publishes old text).
+   - It needs a different confirmation word than the forward run and is locked against concurrent runs.
+   - The success report names where the rollback lives; it does not print a ready-to-paste rollback command.
+   - A same-day rollback of a bulk change is a second bulk change, not a return to zero. Check a control group first (see `RECOVERY_SYSTEM.md` section 9).
 10. **Rendered-source verification** for meta/CMS edits (experimental, N=1 — **Maturity:** `experimental_n1`, derived from a single observed case, 2026-06/07 post-deploy lessons; NOT a validated rule, promotion after N=2): confirm what actually *renders* (live fetch / view-source), not just the stored field. Category/CMS meta fields (metaTitle, metaDescription, slot content) can be overridden per page by SEO plugins or theme templates — editing the stored field is then a no-op. Field-based inventories overcount ("Karteileichen"); verify the page renders the field before counting it as a target and before editing. Extends "live HTTP, not just API state" to meta/CMS fields.
-11. **Governing fact confirmed** before any factual or wording claim edit (experimental, N=1 — **Maturity:** `experimental_n1`, derived from a single observed case, 2026-06/07 post-deploy lessons; NOT a validated rule, promotion after N=2): the underlying fact (production location, own-vs-partner manufacturing, certification, timeline) must be owner-confirmed *before* editing the claim. Editing on an unconfirmed fact introduces a new error that must later be reverted. Sequence: confirm the fact, then edit.
+11. **Governing fact confirmed** before any factual or wording claim edit (experimental, N=1 — **Maturity:** `experimental_n1`, derived from a single observed case, 2026-06/07 post-deploy lessons; NOT a validated rule, promotion after N=2): the underlying fact (production location, own-vs-partner manufacturing, certification, timeline) must be owner-confirmed *before* editing the claim. Editing on an unconfirmed fact introduces a new error that must later be reverted. Sequence: confirm the fact, then edit. Re-observed several times in the same case since: text already live on the site is not a source ("it already says so in the shop" feels like evidence and is not). Check newly written text against a maintained list of superseded values and decisions, take product attributes only from product data (never from SKUs, URLs or names), and treat meta titles and descriptions as customer-facing claims with the same fact check.
+12. **Storage-layer inventory** before any bulk text correction (experimental, N=1 — **Maturity:** `experimental_n1`): derive the search scope from the rendered page, not from the first place the text was found. List every layer that can render on the page (layout slots, per-page overrides, product and category fields, tab fields, variant-level copies, translations, plugin settings, text snippets, product boxes that embed another product's description). Count occurrences of the old text across the whole crawl first; abort if the plan does not cover every hit. Report occurrences and root causes separately: thousands of hits usually collapse to a handful of sitewide template or plugin strings.
+13. **Activation is publication** (experimental, N=1 — **Maturity:** `experimental_n1`): setting an inactive category, product, landing page or widget to active publishes every text stored in it, including stale meta texts and claims that were removed elsewhere in the meantime. Before activation, scan all text fields of the object and its assigned layout against the current wording and fact rules. Any hit blocks the activation.
+14. **Preview first for visible changes** (experimental, N=1 — **Maturity:** `experimental_n1`): build any new customer-visible element inactive, hidden and noindex, or on a clone. Compare full-page screenshots, mobile and desktop, before and after, against the nearest already approved sibling page. Insert new blocks as their own section, not into an existing shared section. When cloning, copy only fields the template itself carries; inherited values written explicitly onto the clone stop inheriting. An approval to proceed does not replace looking at the rendered result.
+15. **Feed delta in the blast radius**: activating or creating products changes what flows into shopping campaigns and marketplaces. Name the feed delta in the plan.
 
 ## Post-Change Checklist
 
 After every live write:
 
 1. **Live HTTP test** of affected URL (not just API state)
+   - **Full-object re-read**: a success response is not evidence of state. Re-read the whole object through a separate read call and diff it against the pre-write snapshot. Allowed delta: the intended fields plus system-maintained effects you have listed beforehand (modification timestamps, version counters, documented derived fields). Anything else is a stop. Write endpoints have side effects (status flips, replaced sub-objects, recalculated totals). On first use of a write endpoint, also re-read one untouched neighbouring object.
+   - **Served-page acceptance**: accept on the plain public URL without a cache-busting parameter (a parameter creates its own cache key and shows database state, not delivered state). The cached copy must have been created after the write. Check that the old text is gone from every served page, on parsed visible text, not merely that the new text is present. Details and traps: `docs/LIVE_CHANGE_QA.md`, Acceptance checks.
 2. **Final status** check (follow redirects)
 3. **Canonical** of final target
 4. **Robots** of final target
@@ -138,6 +161,7 @@ After every live write:
 6. **CMS-Slot after-snapshot** written (if applicable)
 7. **Change-history.ndjson** entry appended with all required fields
 8. **Stop check**: any unexpected result triggers immediate stop
+9. **Customer-visible end measured**: a change is done when its effect is measured where the customer meets it (page served, offer buyable, order reaches fulfilment), not when the API, task or submission reports success. A status field announces a thing; it is not the thing.
 
 ## Batch Limits by Change Category
 
@@ -198,7 +222,7 @@ The "Reserve bleibt Reserve" rule from `SEO_SETTLEMENT_GATE.md` section 11 is ca
 
 ### Plugin-Install / Cache-Rebuild Pre-/Post-Crawl Rule
 
-Every plugin install, activation, deactivation, upgrade, or forced theme/cache rebuild on a live shop requires a paired crawl: one immediately before the action, one immediately after (allowing ≥ 60 seconds for cache propagation). Both crawls must capture at minimum:
+Every plugin install, activation, deactivation, upgrade, or forced theme/cache rebuild on a live shop requires a paired crawl: one immediately before the action, one after. Do not crawl in the first minutes after a full cache purge: listings can render incomplete while the cache refills, which produces false findings. Wait until repeated fetches of the same listing return the same product count. Schedule plugin state changes off-peak: a theme recompile can take the storefront down for longer than the change itself suggests. Both crawls must capture at minimum:
 
 - Canonical count per URL and canonical href values
 - Indexability status (`Indexierbar` / `Canonicalised` / `Noindex`)
@@ -206,6 +230,9 @@ Every plugin install, activation, deactivation, upgrade, or forced theme/cache r
 - Schema.org structured-data presence and validity
 - HTTP status and internal 4xx/5xx counts
 - Meta robots directives
+- Listing completeness: product count per category on repeated fetches (a plugin that floods the message queue makes listings drop products intermittently)
+- Sitemap: URL count and last-modified against the expected value; diff the sitemap after every plugin activation
+- Tracking: after any theme, tag-plugin or checkout change, one controlled order per major payment method, reconciled against the order system (purchase event present, value basis correct, exactly one primary conversion action receiving data, integrations that existed before are still installed)
 
 Diff the two crawls. Any new conflicts (new duplicate canonicals, new missing H1, new 4xx/5xx, flipped indexability, new redirect chains, broken structured data) is a stop-the-line event. No further changes until the conflict is understood. If the conflict cannot be reverted in ≤ 5 minutes, escalate to the operator before continuing.
 

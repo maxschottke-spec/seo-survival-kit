@@ -30,6 +30,18 @@
 8. **Change-history entry** appended to ndjson
 9. **Monitoring date** set for +7d / +14d check
 
+## Acceptance checks: what makes a "0 findings" result worth anything
+
+From repeated acceptance runs that reported "done" on pages that were not (experimental, N=1 — **Maturity:** `experimental_n1`):
+
+- **Negative control.** Run the same check against the pre-change crawl. If it does not report the known findings there, a zero after the change proves nothing.
+- **Plain URL, fresh copy.** No cache-busting parameter. Compare the response date minus its age with the write time; a copy older than the write invalidates the check. Do not fetch the target shortly before writing, or you seed the cache with the old version yourself.
+- **Search by topic, not by known phrasing.** A list of exact sentences misses the rephrased variant. Match on parsed visible text: markup splits sentences, non-breaking spaces sit between number and unit, dash variants and connectors break literals.
+- **Structured data: parse, do not grep.** Rendered JSON-LD escapes slashes, so a literal search for a schema URL returns zero. The main entity of a product page may be a product group with variants; count per offer. Define the pass condition independent of the target value ("no non-target value left") and keep one control page that must not change.
+- **Counting checks need an expected value.** Write down the expected count or a plausibility bound before running, and stop on deviation instead of interpreting it. Every "all", "none" or "only" states its coverage: total available versus actually read. List endpoints truncate silently; a count from a response header is not a count of rows read.
+- **Inherited fields: count three groups.** Target value, other value, null (inherited). The sum must equal the full scope. A filter on the explicit value undercounts; a dry run that selects "deviating values" drops the null group.
+- **Network errors are not 404s.** Separate timeouts and DNS failures from real status codes, and resolve relative links before counting link targets. When every monitor turns red at once, suspect the measuring machine first.
+
 ## Red Flags (immediate stop)
 
 - Live test returns 404 after change
@@ -41,6 +53,9 @@
 - seo-url state says redirect exists but live HTTP shows 404
 - DreiscSeo and seo-url produce contradictory redirects
 - More broken links after change than before
+- A field outside the allowed delta (intended fields plus listed system-maintained effects) differs in the post-write re-read
+- A command was rephrased or rerouted so that a guard does not trigger (guard evasion is a stop event, not a workaround)
+- The same objects were modified by someone else between dry run and write
 - Settlement Gate is active and the proposed change is not a Technical Emergency, Rollback/Stabilization, or Explicit Emergency Approval per `references/SEO_SETTLEMENT_GATE.md`
 
 ## Settlement Gate

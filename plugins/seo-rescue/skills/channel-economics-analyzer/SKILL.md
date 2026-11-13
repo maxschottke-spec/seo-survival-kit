@@ -45,6 +45,14 @@ A simple-but-rigorous channel-level P&L calculator for multi-channel e-commerce 
 | Returns processing cost | Internal time-cost estimate |
 | Order count | Order export |
 
+**Data hygiene before the formula** (experimental, N=1):
+
+- Use **order date**, not invoice date, for demand questions. Clearing a delivery backlog produces fake growth months on an invoice basis.
+- Read the status distribution first. Cancelled orders and drafts counted as revenue distort every ratio.
+- Keep gross and net strictly apart, and check per platform which one it reports. Marketplace fee percentages are usually quoted before VAT on the fee; whether that VAT is a cost depends on your input-tax position.
+- Remove your own test orders and duplicate payment attempts. They sit in analytics and ad platforms as conversions.
+- Never add attributed revenue across ad platforms; the same order is routinely claimed twice.
+
 ## The formula
 
 ```
@@ -282,7 +290,7 @@ Typical fee ranges as observed in public marketplace documentation and seller-co
 | Channel | Hidden cost |
 |---------|-------------|
 | Amazon FBA | Storage fees scale with low-velocity SKUs — old inventory eats margin. Aged-inventory-surcharge nach 6 Monaten verdoppelt sich |
-| Amazon advertising | "Sponsored Products" auto-bid burns budget on irrelevant terms — always negative-keyword. Plus: Brand-Cannibalization (du bewirbst dein eigenes Brand-Keyword teurer als ohne PPC) |
+| Amazon advertising | "Sponsored Products" auto-bid burns budget on irrelevant terms — always negative-keyword. Plus: Brand-Cannibalization (du bewirbst dein eigenes Brand-Keyword teurer als ohne PPC). After any price or offer change, re-check buy-box ownership: platform price checks can remove it without a competitor, and sponsored ads then stop serving although their status says live. When marketplace revenue falls year over year, compare the ad-spend history first — the volume may have been bought |
 | OTTO | Returns rate often 2-3× direct shop (sizing mismatches). Plus: "Strafgebühren" für SLA-Verletzungen (verspätete Verarbeitung) |
 | Kaufland.de | Schedule-Compliance strikt — verspätete Lieferung führt zu Account-Suspend |
 | eBay | Auction volatility skews per-order margin. Promoted-Listings sind quasi-erzwungen seit 2024 (ohne kein organischer Traffic) |
@@ -298,8 +306,8 @@ Typical fee ranges as observed in public marketplace documentation and seller-co
 | Alibaba B2B | Trade-Assurance-Pflicht für Bezahlung, sonst hohes Buyer-Default-Risiko |
 | Direct shop | Payment provider fees (Klarna, PayPal) often 2-3% — don't forget. Plus: Currency-Conversion-Fees bei Cross-Border |
 | Idealo Direktkauf | Preis-Race-to-Bottom — wenn du deine Marge senkst, ziehen alle nach |
-| Affiliate (Awin/TradeDoubler) | Last-Cookie-Wins-Attribution oft unfair zu organischem Traffic — über-credited Affiliate-Sales fressen Marge |
-| Google Shopping | CPC-Inflation in saturierten Kategorien (Matratzen, Möbel, Elektronik) — ROAS oft <1 |
+| Affiliate (Awin/TradeDoubler) | Last-Cookie-Wins-Attribution oft unfair zu organischem Traffic — über-credited Affiliate-Sales fressen Marge. The opposite failure also occurs: after a shop rebuild or theme change the affiliate tracking is not reinstalled, traffic continues and no sales are reported for months |
+| Google Shopping | CPC-Inflation in saturierten Kategorien (Matratzen, Möbel, Elektronik) — ROAS oft <1. Split brand from non-brand before judging; on brand terms check whether competitors bid before pausing |
 
 ## Recommended channel-portfolio templates
 

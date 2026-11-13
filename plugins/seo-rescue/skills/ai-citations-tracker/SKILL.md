@@ -19,7 +19,7 @@ Most "AI search visibility" advice is descriptive ("you should rank in AI Overvi
 
 This is the **possible-early-signal** companion to [[post-core-update-recovery]]:
 - Classical Sistrix VI / GSC clicks lag Google by 3-5 days
-- Hypothesis (N=1, currently unproven): AI citation counts MAY start moving **2-6 weeks before** classical SERP recovery shows up. In the pilot case this pattern suffered a setback — the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see `post-core-update-recovery/LESSONS.md`, 2026-06-03 correction). Log the signal; do not report recovery based on it alone.
+- Hypothesis (N=1, currently unproven): AI citation counts MAY start moving **2-6 weeks before** classical SERP recovery shows up. In the pilot case this pattern suffered a setback — the AI-citation rise could not be separated from a pre-update plateau (the update hit first cited as having erased it was itself withdrawn after a full post-window re-measurement; the hypothesis stays unproven either way) (see `post-core-update-recovery/LESSONS.md`, 2026-06-03 correction). Log the signal; do not report recovery based on it alone.
 - If your AI citations are climbing while VI is flat, that is worth logging — not confirmation that recovery is on track. If both are flat, the authority signals from [[ai-search-rescue]] Tactic 4 (Author + Person-Schema) need more time or aren't reaching the model retrieval layer.
 
 ## When to use
@@ -154,6 +154,12 @@ cat ai-citations-history/history.ndjson | \
 ```
 
 The numbers are most useful **week-over-week**, not absolute — citation models drift, so always compare relative trends.
+
+**What this tracker does not see** (experimental, N=1):
+
+- **The purchase path.** A prompt set of brand and general questions measures citations. In one case, AI-assistant orders landed on product-variant pages that such a prompt set never surfaced. Measure AI-driven orders from the shop's order-level source field, and keep a second, purchase-path prompt set (see `ai-search-rescue`, Layer 4).
+- **A frozen benchmark.** Changing the prompt set breaks the series. Freeze it and store a checksum over prompt IDs and texts.
+- **Full result sets from mention APIs.** An LLM-mentions endpoint can return a total count far above the rows delivered by default, and rows carry first-seen and last-seen timestamps. Counting delivered rows undercounts and mixes periods. Page through the full result and filter by response date.
 
 ## Security model
 

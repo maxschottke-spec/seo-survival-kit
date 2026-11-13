@@ -177,7 +177,9 @@ These rules are derived from real recovery operations and apply to all commands 
 ### Data Source Discipline
 
 - Every important claim needs a source and confidence level. See `references/PROVIDER_CAPABILITIES.md`.
-- DataForSEO, Sistrix, and Screaming Frog are strong sources but not ground truth. Live HTTP and GSC are ground truth.
+- DataForSEO, Sistrix, and Screaming Frog are strong sources but not ground truth. Live HTTP and GSC clicks are ground truth; GSC impressions and average positions need the reading checks in `references/PROVIDER_CAPABILITIES.md`.
+- Orders and revenue come from the order system, never from analytics or an ad platform. State the capture rate next to analytics numbers.
+- A zero from a measuring tool counts only after a positive control. Statements about live state are re-measured before they are reported.
 - When data is weak or contradictory: report `partial + low confidence` instead of false certainty.
 - Backlink data from a single provider may be incomplete. Cross-check when counts seem off.
 

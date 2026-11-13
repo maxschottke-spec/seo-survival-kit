@@ -183,7 +183,10 @@ if (!observations) {
     // 1,15 s Feld/FAST). Ab 15 s gilt der Lab-Wert als Simulationsartefakt und
     // wird als solches benannt statt als Nutzererlebnis.
     const lcpS = S.psi_mobile.lcp != null ? S.psi_mobile.lcp / 1000 : null;
-    const feld = { FAST: 'gut (grün)', AVERAGE: 'mittel', SLOW: 'langsam' }[S.psi_mobile.crux_lcp] || null;
+    const feldBasis = { FAST: 'gut (grün)', AVERAGE: 'mittel', SLOW: 'langsam' }[S.psi_mobile.crux_lcp] || null;
+    // Origin-Fallback: zu wenig Felddaten für die URL, der Wert beschreibt die
+    // ganze Domain. Das steht dann im Satz, statt als Seitenwert durchzugehen.
+    const feld = feldBasis && S.psi_mobile.crux_origin_fallback ? `${feldBasis}, gemessen für die gesamte Domain` : feldBasis;
     if (lcpS != null && lcpS >= 15) {
       observations.push(`Der mobile Labor-Score liegt bei ${S.psi_mobile.perf}/100, gedrückt von einem LCP-Laborwert von ${de(lcpS, 1)} s. Dieser Wert ist ein Ausreißer der Labor-Simulation, kein echtes Nutzererlebnis${feld ? ` – die echten Nutzerdaten stehen auf „${feld}"` : ''}. Für Priorisierungen stützen wir uns deshalb auf die Feld-Daten; der Laborwert bleibt unter Beobachtung.`);
     } else {

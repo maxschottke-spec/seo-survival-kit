@@ -201,7 +201,12 @@ function summarize(t) {
       cls: audits['cumulative-layout-shift']?.numericValue,
       ttfb: audits['server-response-time']?.numericValue,
       crux_lcp: raw.psi[strat]?.loadingExperience?.metrics?.LARGEST_CONTENTFUL_PAINT_MS?.category,
-      crux_inp: raw.psi[strat]?.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT_MS?.category,
+      // PSI-v5-Feldschlüssel für INP trägt kein _MS (anders als LCP); der alte
+      // Schlüssel traf nie, crux_inp war immer leer.
+      crux_inp: (raw.psi[strat]?.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT
+        ?? raw.psi[strat]?.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT_MS)?.category,
+      // true = zu wenig Felddaten für die URL, die Werte beschreiben die ganze Origin.
+      crux_origin_fallback: raw.psi[strat]?.loadingExperience?.origin_fallback === true,
       crux_cls: raw.psi[strat]?.loadingExperience?.metrics?.CUMULATIVE_LAYOUT_SHIFT_SCORE?.category,
       crux_overall: raw.psi[strat]?.loadingExperience?.overall_category,
       // Woraus der Punktwert stammt (Median aus mehreren Läufen, s.

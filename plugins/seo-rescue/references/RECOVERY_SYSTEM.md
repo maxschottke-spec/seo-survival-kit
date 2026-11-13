@@ -22,7 +22,7 @@ The operational methodology. Every recovery decision moves through these ten ste
 
 **Step 1. Detect signal.** Something in the data moved. A keyword returned, a position changed, a visibility-index point shifted, a GSC impression count rose. Note the signal. Do not yet act on it.
 
-**Step 2. Validate signal.** Check the signal against at least one other source. SISTRIX ranking change should be visible in GSC impressions. GSC click change should be visible in shop revenue if the keyword is transactional. A signal that appears in only one source at this stage is weak evidence (see [DECISION_ENGINE.md section 3](./DECISION_ENGINE.md#3-evidence-weighting)).
+**Step 2. Validate signal.** Check the signal against at least one other source. SISTRIX ranking change should be visible in GSC clicks and in the position of the best-ranking URL for the query (impressions alone are a weak cross-check, see Appendix A13 and A14). GSC click change should be visible in shop revenue if the keyword is transactional. A signal that appears in only one source at this stage is weak evidence (see [DECISION_ENGINE.md section 3](./DECISION_ENGINE.md#3-evidence-weighting)).
 
 **Step 3. Protect winners.** Identify URLs and money keywords that are recovering. Apply do-not-touch logic before any other action (see section 3). The default during recovery is leave the winning URLs alone, not strengthen them aggressively.
 
@@ -155,7 +155,7 @@ Recovery follows a sequence. Each stage represents a milestone in how recovery p
 - **Stage 4.** Money keywords move into Top 5 / Top 3. Revenue signals begin to follow.
 - **Stage 5.** Visibility index, GSC clicks, and revenue all move in alignment. Recovery is established.
 
-A possible early signal (hypothesis, N=1, currently unproven): rising AI Overview / ChatGPT / Perplexity mentions while classical SISTRIX VI is still flat MAY indicate that authority work is being recognized. This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see `post-core-update-recovery/LESSONS.md`, 2026-06-03 correction). Treat rising AI citations as worth logging via the `ai-citations-tracker` skill, not as confirmation — do not change course or report recovery based on this signal alone. Independent of that hypothesis: Stage 4 commonly arrives before Stage 5, and operators should not panic when Stage 5 lags.
+A possible early signal (hypothesis, N=1, currently unproven): rising AI Overview / ChatGPT / Perplexity mentions while classical SISTRIX VI is still flat MAY indicate that authority work is being recognized. This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise could not be separated from a pre-update plateau (the update hit first cited as having erased it was itself withdrawn after a full post-window re-measurement; the hypothesis stays unproven either way) (see `post-core-update-recovery/LESSONS.md`, 2026-06-03 correction). Treat rising AI citations as worth logging via the `ai-citations-tracker` skill, not as confirmation — do not change course or report recovery based on this signal alone. Independent of that hypothesis: Stage 4 commonly arrives before Stage 5, and operators should not panic when Stage 5 lags.
 
 Recovery does not always follow the sequence linearly. A site can be at Stage 4 on its highest-priority keyword cluster while Stage 1 on a secondary cluster. Stage classification is per-cluster as well as global.
 
@@ -227,7 +227,7 @@ Bei einer **Multi-Update-Sequenz** (mehrere Algorithmus-Updates über Monate) is
 
 > **Maturity:** `experimental_n1` — abgeleitet aus einem einzigen Fall (case-001, Lesson 4). KEINE validierte Methode. Promotion erst nach N=2.
 
-Die lineare Erholungssequenz — die Keyword-Meilensteine Stage 0–5 (§4) ebenso wie die diagnostische Stage R1→R5 (definiert in `commands/recovery-diagnose.md`, Schritt 10; siehe Vokabular-Tabelle oben) — ist der Happy-Path. Bei Multi-Update-Sequenzen ist sie unvollständig: Schaden kann wiederkehren, während der Operator schon Erholung misst. Case-001 wurde als „Stage 3 stabil" bewertet (Keyword-Meilenstein-Namespace, §4) — einen Tag später schloss ein neues Core Update seinen Rollout ab und warf die Site auf Stage 1 (§4).
+Die lineare Erholungssequenz — die Keyword-Meilensteine Stage 0–5 (§4) ebenso wie die diagnostische Stage R1→R5 (definiert in `commands/recovery-diagnose.md`, Schritt 10; siehe Vokabular-Tabelle oben) — ist der Happy-Path. Bei Multi-Update-Sequenzen ist sie unvollständig: Schaden kann wiederkehren, während der Operator schon Erholung misst. Case-001 wurde als „Stage 3 stabil" bewertet (Keyword-Meilenstein-Namespace, §4) — einen Tag später schloss ein neues Core Update seinen Rollout ab, und die Site wurde auf Stage 1 (§4) zurückgestuft. Diese Rückstufung beruhte auf einer vorläufigen Zahl aus dem Rollout-Fenster und wurde später widerrufen (Appendix A18). Die State-Machine bleibt als Vorsichtsregel bestehen: Sie verhindert Fortschrittsmeldungen während eines Rollouts. Als Beleg für einen Wiedereintritt taugt der Fall nicht mehr.
 
 `recovery-diagnose` (Schritt 10) überlagert die rohe Stage daher mit einer State-Machine und schreibt das Ergebnis nach `stage_status`:
 
@@ -321,6 +321,8 @@ Practical risk framework. Every proposed action during recovery gets scored on s
 During active recovery, limit URL changes to **3 per calendar day** — 4–5 only with an explicit batch plan naming the count and acknowledging the higher risk, more than 5 never (see the "Batch Limits by Change Category" table in `SAFE_LIVE_CHANGE_RULES.md`, which is the binding rule; "per calendar day" is counted across all sessions of that day via `change-history.ndjson`). CMS template switches (changing which layout a category uses) count as high-impact changes because Google sees a different rendered HTML structure on the same URL — even if the text content is unchanged.
 
 Observed pattern: switching 5 category pages to new dedicated CMS layouts in a single day during Stage 3-4 recovery caused a same-day live visibility drop of ~11 %. The weekly trend remained positive, and the drop corrected within days, but the intraday signal was measurable and avoidable.
+
+Evidence note: the observation above rests on a same-day reading of a daily visibility index. Later work in the same case showed that such an index can step on single head keywords entering or leaving the tool's daily keyword subset (Appendix A16), so the causal link between batch size and the drop is weaker than it looked. A later layout migration that held URL, title, headings and links constant ran in larger daily groups without visible damage in the first days; the full measurement window was still open when this note was written. The limit stays as a precaution, mainly because small batches keep cause and effect separable. It is not a measured threshold.
 
 If a batch of changes is necessary, spread them across 3–5 days with monitoring between each batch. Prepare a rollback script before starting. Monitor live visibility (if the SEO tool supports intraday checks) after each batch.
 
@@ -515,6 +517,10 @@ If the operator provided a list of URLs changed since the previous export, the f
 - Changes followed by losses (high-confidence negative learnings; recommend revert if possible)
 - Gains on unchanged URLs (recovery from external factors or earlier changes)
 - Losses on unchanged URLs (the most concerning pattern; investigate)
+
+**Control group before rollback** (experimental, N=1 — **Maturity:** `experimental_n1`): when one changed URL loses positions, look at every other URL that received the identical change, and at the last-crawl date of the losing URL. If the siblings are stable and the page has not been re-crawled since the change, the change is not the established cause. Hold, set a fixed re-measurement date, and do not stack another change or a rollback on top. A rollback is itself a change.
+
+**Does the finding pre-date the drop?** Orphaned URLs, duplication and architecture findings are often long-standing. Before naming one as the cause of a drop, check whether it already existed during the healthy period.
 
 ### Common URL-level recovery patterns
 
@@ -836,7 +842,7 @@ Catalog of misleading recovery signals. Each entry: what the signal looks like, 
 
 **Actually means.** Position likely moved into a higher impression-but-low-click range (page 1 lower half, position 7-10, or page 2 top). Impressions accrue without click conversion. The CTR is low because the snippet is weak, the SERP feature dominates, or the position is below the click threshold.
 
-**Validation rule.** Impressions rise + CTR fall = position moved into a lower-CTR slot. Not a click improvement. Check average position from GSC.
+**Validation rule.** Impressions rise + CTR fall = position moved into a lower-CTR slot. Not a click improvement. Check the position of the best-ranking URL for the query and name the aggregation mode; a figure averaged over per-URL rows also moves when additional own URLs appear (see A14).
 
 **Time-to-trust.** Immediate; the impressions-without-clicks pattern is detectable in the same snapshot.
 
@@ -889,6 +895,88 @@ Catalog of misleading recovery signals. Each entry: what the signal looks like, 
 **Validation rule.** Two URLs alternating positions for the same query over 4+ weeks is unresolved cannibalization, not recovery. Apply resolution patterns from section 7.
 
 **Time-to-trust.** 4-week observation period before classifying the resolution.
+
+### A13. Impression drop confined to deep positions
+
+**Looks like.** Search Console impressions fall by a double-digit percentage from one day to the next. The operator concludes a ranking loss or a penalty and considers rolling back recent changes.
+
+**Actually means.** Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`). The explanation below is the one that held there; it is a candidate, not a diagnosis. Rule out a real ranking or demand change with the validation steps before adopting it.
+
+If the loss sits almost entirely in positions 11 and deeper while clicks, top-3 impressions and the set of ranking queries are flat, the likelier explanation is a change in how deep-page impressions are recorded, not a ranking loss. An unrelated property showed the same pattern, which is what made a site-specific cause unlikely.
+
+**Validation rule.** Split impressions by position bucket. Check clicks and the number of distinct ranking queries. Check an unrelated property for the same pattern. Bucket thresholds are case-calibrated.
+
+**Time-to-trust.** Same day, once the bucket split is done. Do not use impressions as a ranking indicator across such a step.
+
+### A14. Average position collapse on a brand query
+
+**Looks like.** The brand query shows an average position far below 1 over a 28-day window. The operator diagnoses a brand loss.
+
+**Actually means.** Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`). The explanation below is the one that held there; it is a candidate, not a diagnosis. Rule out a real ranking or demand change with the validation steps before adopting it.
+
+Two artefacts can produce this without any loss. First, a figure built from per-URL rows (page dimension in the request) averages over all own URLs shown for the query; additional own pages further down make it worse. Second, a third-party rank tracker that pages deep into the brand result logs an impression for every deep result.
+
+**Validation rule.** Read brand positions per day and per query + page. Most days at position 1 with a few outlier days carrying the deep impressions (in the observed case on a fixed weekday) points to automated deep scans. Confirm against the live result page before reporting either way.
+
+**Time-to-trust.** Immediate after the per-day read.
+
+### A15. Organic brand clicks fall while the own brand campaign grows
+
+**Looks like.** Organic clicks on brand queries halve. The operator suspects lost rankings or an affiliate hijacking the brand.
+
+**Actually means.** Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`). The explanation below is the one that held there; it is a candidate, not a diagnosis. Rule out a real ranking or demand change with the validation steps before adopting it.
+
+The site's own brand search campaign may be taking a larger share of the same demand: total brand clicks stable, channel changed.
+
+**Validation rule.** Compare paid and organic brand clicks over the same windows before any organic diagnosis.
+
+**Time-to-trust.** Immediate.
+
+### A16. Visibility index steps on single head keywords
+
+**Looks like.** A daily visibility index drops in one or two clear steps. The operator ties the steps to the last batch of changes or to an update.
+
+**Actually means.** Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`). The explanation below is the one that held there; it is a candidate, not a diagnosis. Rule out a real ranking or demand change with the validation steps before adopting it.
+
+In the originating case, on a handful of URLs one head keyword each had left the tool's daily keyword subset while Search Console positions for those keywords were unchanged. Related trap: when a site's clicks come from a small-volume, high-CTR query population and its impressions from a high-volume, low-CTR one, a volume-weighted index follows the second and can be uncorrelated with clicks.
+
+**Validation rule.** Decompose the index step per URL (some API tiers return per-URL values for a given date). Measure the correlation between index and clicks over several months before using the index as the recovery KPI. Never compute a loss from a single-week peak; use a median or plateau.
+
+**Time-to-trust.** After the per-URL decomposition and the click cross-check.
+
+### A17. Week-over-week flip from one spike day
+
+**Looks like.** A strong double-digit gain week over week, or a collapse of similar size the week after.
+
+**Actually means.** Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`). The explanation below is the one that held there; it is a candidate, not a diagnosis. Rule out a real ranking or demand change with the validation steps before adopting it.
+
+One or two demand-spike days sit in one of the two windows and carry the whole difference. The most recent days were possibly still being back-filled when the comparison ran.
+
+**Validation rule.** Pull the daily curve first and keep the raw figures. Show a robust comparison next to them, not instead of them (outlier days replaced by the same-weekday median, days still filling up excluded, unequal window lengths normalised per day). The ratio of analytics organic sessions to Search Console clicks is a useful diagnostic: if it holds on the spike day, a scan artefact is less likely. It is not proof of human traffic.
+
+**Time-to-trust.** After the daily read. Never open or close a gate on a week-over-week figure alone.
+
+### A18. Damage figure from inside an update rollout
+
+**Looks like.** A click loss measured over the days of an ongoing rollout, extrapolated to a full window, shows a severe hit. Stage, gates and plan are set accordingly.
+
+**Actually means.** Provisional (N=1). In the originating case the full post-rollout window, measured months later, showed a loss an order of magnitude smaller, with impressions up. The provisional figure had steered stage classification and gates for the whole time in between, because the re-measurement was announced and never scheduled.
+
+**Validation rule.** Label in-rollout numbers as provisional in every document that carries them. Create the post-window re-measurement as a dated task at the moment the provisional number is written down. Stage and gate decisions that rest on a provisional figure are re-opened on that date.
+
+**Time-to-trust.** One full comparison window after rollout end.
+
+### A19. Break on the day of a tracking change
+
+**Looks like.** Paid click-through rate or conversions break on the day the tracking setup was changed. The tracking change is blamed.
+
+**Actually means.** Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`). The explanation below is the one that held there; it is a candidate, not a diagnosis. Rule out a real ranking or demand change with the validation steps before adopting it.
+
+Check the temporal order before anything else: in the originating case the break preceded the change by hours. Causes to test: brand demand moved, a discount window ended, the campaign mix shifted.
+
+**Validation rule.** Line up hourly timestamps first. Decompose into brand demand, mix and within-segment change. Build baselines only from days on which the segment existed.
+
+**Time-to-trust.** After the hourly alignment.
 
 ---
 
