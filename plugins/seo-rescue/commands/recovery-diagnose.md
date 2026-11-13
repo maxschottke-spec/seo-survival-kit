@@ -190,6 +190,14 @@ Rufe ueber DataForSEO MCP auf.
   - `intent`: falls vorhanden aus DataForSEO-Daten, sonst `"unknown"`
 - `top_losers` — falls DataForSEO historische Positions-Daten liefert: Keywords mit groesstem negativem Positions-Delta (position nach minus position vorher, aufsteigend sortiert = groesste Verluste zuerst), maximal 10 Eintraege. Falls keine historischen Daten: leeres Array.
 
+**Seitentyp-Abgleich der `quick_wins` (seit v0.5.5, ohne Schema-Aenderung):**
+
+Fuer jeden `quick_wins`-Eintrag die rankende URL (`ranked_serp_element.serp_item.url`) gegen redaktionelle Pfadmuster halten (`/blog/`, `/magazin/`, `/ratgeber/`, `/news/`, `/journal/`, `/wissen/`). Traegt ein Eintrag Kaufabsicht (`intent` in `transactional`/`commercial`) UND eine redaktionelle URL, ist das ein eigener Befund, kein Quick Win: **Die Domain rankt — aber mit der falschen Seite.** Der Suchende will kaufen, Google liefert einen Ratgeber; der verkauft nichts und drueckt die Klickrate. In einem Crawl-Report taucht das nie auf, weil technisch nichts kaputt ist.
+
+- Betroffene Eintraege im Freitext der Diagnose unter „Falscher Seitentyp" auflisten (Begriff, Volumen, Position, rankende URL).
+- Gemessene Groessenordnung an einer Domain: 11 von 50 Kaufbegriff-Clustern, 31 % des kommerziellen Werts (Volumen × CPC) — plausibelste Einzelursache fuer eine dauerhaft niedrige CTR bei stabilen Positionen.
+- Die vollstaendige Ableitung (Cluster, Saisonfenster, Wertanteil) liefert der Skill `target-keyword-set`; hier reicht der Abgleich der 15 Quick Wins. URL-Muster sind eine Heuristik (experimental_n1) — mit Crawl-Daten ueber `Product`/`CollectionPage` gegen `Article` klassifizieren.
+
 **Falls DataForSEO MCP nicht verfuegbar — CSV-Fallback:**
 
 Pruefe ob `~/.cache/seo-rescue/{slug}/imports/keywords.csv` existiert. Falls ja:

@@ -27,6 +27,7 @@ This is the entry point for the seo-rescue plugin. It routes to the specialized 
 | `/seo-rescue:rescue report <domain>` | Generate decision-maker PDF report (alias for `/seo-rescue:seo-outreach-report`) |
 | `/seo-rescue:rescue channels` | Per-channel P&L analysis (alias for `/seo-rescue:channel-economics-analyzer`) |
 | `/seo-rescue:rescue competitors <domain>` | DataForSEO competitor + keyword-gap audit (alias for `/seo-rescue:competitor-deep-audit`) |
+| `/seo-rescue:rescue targets <domain>` | Agreed target keyword set from existing rankings, grouped by kind of work (alias for `/seo-rescue:target-keyword-set`) |
 | `/seo-rescue:rescue psi-baseline` | Set up weekly PSI cron baseline (alias for `/seo-rescue:psi-weekly-cron-baseline`) |
 | `/seo-rescue:rescue ai-search <domain>` | AI search visibility recovery (alias for `/seo-rescue:ai-search-rescue`) |
 | `/seo-rescue:rescue ai-citations` | Track AI citations weekly (alias for `/seo-rescue:ai-citations-tracker`) |
@@ -104,6 +105,9 @@ Per-channel P&L for multi-marketplace e-commerce. ~30 channels supported across 
 
 ### `/seo-rescue:competitor-deep-audit [domain]`
 DataForSEO SERP-overlap competitor identification + keyword-gap analysis. Output: prioritized 30–50-item opportunity list per audit with opportunity scores. Cost: ~$0.10–$0.50 per audit.
+
+### `/seo-rescue:target-keyword-set <domain>`
+Derives 20–30 target terms from where the domain already ranks (positions 3–20, minimum volume, purchase intent or strong seasonality, no brand), clustered by core keyword and grouped by the kind of work each needs: hold / advance / wrong page type (an editorial page holds a buying query) / seasonal window (peak month + window width). Quantifies the share of commercial value sitting on editorial pages. Built for contract annexes and weekly reports that need positions instead of a noisy traffic delta. One DataForSEO Labs call (~$0.01–0.10); offline via `--fixture`.
 
 ### `/seo-rescue:psi-weekly-cron-baseline`
 Automated weekly PageSpeed Insights tracking with regression detection. launchd/systemd/GitHub-Actions compatible. NDJSON history. Free (uses PSI v5 25k-call daily quota).

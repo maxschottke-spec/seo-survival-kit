@@ -60,7 +60,15 @@
           "text": "WHY it matters and why it needs a professional — never step-by-step instructions."
         }
       ],
-      "mail_comment": "Recipient/sender/body live in your private runner copy (weekly-runner.example.sh), never in this repo."
+      "mail": {
+        "to": "owner@example.com",
+        "from": "you@example.com",
+        "body": "Hi,\n\nanbei der wöchentliche SEO-Status: die wichtigsten Zahlen, die Bewegungen zur Vorwoche und meine Einordnung.\n\nViele Grüße",
+        "smtp_host": "smtp.gmail.com",
+        "smtp_port": 465,
+        "keychain_service": "seo-weekly-smtp",
+        "_comment": "Real values live ONLY in your private audit-config.json. Password: env SMTP_PASSWORD or macOS keychain (security add-generic-password -a <from> -s <keychain_service> -w '<app-password>' -U). Never in a file, never in the repo."
+      }
     }
   }
 }

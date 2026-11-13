@@ -105,8 +105,15 @@ function extractMetrics(j) {
     ttfb: audits['server-response-time']?.numericValue,
     crux_lcp: j?.loadingExperience?.metrics?.LARGEST_CONTENTFUL_PAINT_MS?.category,
     crux_cls: j?.loadingExperience?.metrics?.CUMULATIVE_LAYOUT_SHIFT_SCORE?.category,
-    crux_inp: j?.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT_MS?.category,
+    // The PSI v5 field key for INP carries no _MS suffix (unlike LCP). The old
+    // key never matched, so crux_inp was always empty. Both are read so that a
+    // future rename does not silently blank the field again.
+    crux_inp: (j?.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT
+      ?? j?.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT_MS)?.category,
     crux_overall: j?.loadingExperience?.overall_category,
+    // true = the URL has too little field data and the values above describe
+    // the whole origin, not this page.
+    crux_origin_fallback: j?.loadingExperience?.origin_fallback === true,
   };
 }
 

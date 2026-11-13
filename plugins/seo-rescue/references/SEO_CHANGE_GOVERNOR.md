@@ -245,6 +245,18 @@ Claude must immediately stop when:
 7. What explicit approval would be needed to continue
 ```
 
+## Write-Script Requirements
+
+For changes executed by script rather than by hand (experimental, N=1 — **Maturity:** `experimental_n1`), each point from repeated incidents in one case):
+
+- **Fail closed.** At a write or rollback boundary there is no partial tolerance for damaged input: a complete parser or an abort with an instruction for the human. A guard blocks; it does not warn. A run that read or wrote less than everything must not exit successfully. Input a checker does not understand is reported, never passed.
+- **Deterministic targets.** Compute target values from stable keys, never from the current value or from a position in a filtered list. The run must be repeatable: after a canary, the full run reports the canary set as already correct or aborts before its first write.
+- **A dry run shows effect, not plan.** Counting matches proves nothing; inspect the resulting values. Anything that acts automatically (rules, promotions, feeds) launches in a restricted form first.
+- **Mutation probe.** Before release, remove or neutralise each load-bearing check once and confirm that a test or dry run turns red.
+- **Close the class, not the instance.** When a check is added or tightened in one script, list every sibling script and call site built from the same template and update them in the same change. Scripts derived by copy lose hardenings; diff a new script against the latest hardened sibling.
+- **Review loop.** Give every re-review the previous findings and ask explicitly which errors the fixes introduced. Review the write script and its verification tool separately. Reproduce each reviewer finding before fixing it. If rounds only produce findings about the checking tool, stop after a fixed number and narrow the tool's claim.
+- **Concurrent writers.** Compare the targets' last-modified timestamps with your own measurement immediately before the run.
+
 ## Change Plan Format
 
 ```json

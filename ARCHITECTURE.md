@@ -86,7 +86,7 @@ Skills do not implement the decision layer themselves. They feed it. The user in
 
 ### Active modules (v0.5.2)
 
-**seo-rescue.** The current installable plugin. Eighteen skills and commands (one routing orchestrator plus seventeen sub-skills and recovery commands). Stable. The wedge.
+**seo-rescue.** The current installable plugin. Nineteen skills and commands (one routing orchestrator plus eighteen sub-skills and recovery commands). Stable. The wedge.
 
 ### Planned modules (umbrella roadmap)
 
@@ -110,6 +110,7 @@ Skills that explicitly do not belong in this umbrella: content writing, brand vo
 | `seo-outreach-report` | stable | domain + API credentials (env) | 10-chapter A4 PDF ~1MB | Medium | Client-facing |
 | `channel-economics-analyzer` | stable | user CSV | Markdown scorecard | Medium | High (financial) |
 | `competitor-deep-audit` | stable | domain + DataForSEO creds | Markdown opportunity list | Medium | Public competitive |
+| `target-keyword-set` | beta | domain + DataForSEO creds | Markdown target set + JSON (groups, season calendar, editorial share) | Low | Public rankings |
 | `psi-weekly-cron-baseline` | stable | domain list + PSI key | NDJSON + summary | Low | Public performance |
 | `ai-search-rescue` | stable | domain + brand vars | Markdown framework | Low | None |
 | `ai-citations-tracker` | beta | brand vars + OpenAI key | NDJSON history | Low | Public mention |
@@ -380,7 +381,7 @@ seo-survival-kit/                  # Repository / marketplace name
 │       │   └── plugin.json        # Plugin manifest (path matters — v0.2.0/v0.2.1 yanked for wrong path)
 │       ├── lib/
 │       │   └── safe.js            # Shared safety primitives
-│       └── skills/                # 18 skills/commands (1 orchestrator + 17 sub-skills/commands)
+│       └── skills/                # 19 skills/commands (1 orchestrator + 18 sub-skills/commands)
 ├── exports/                       # Platform-agnostic Markdown for Cursor / Custom GPT / Gemini / Aider / Codex
 ├── examples/                      # Sample PDF + screenshots only (synthetic data)
 ├── ARCHITECTURE.md                # This document

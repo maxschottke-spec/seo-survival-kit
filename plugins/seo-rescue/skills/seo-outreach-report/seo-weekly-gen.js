@@ -29,6 +29,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { safeSlug, validateConfigTargets, safeReadFile, cachePath, getCacheDir, mkRunDir, writeFileExclusive } = require('../../lib/safe.js');
+const { noiseModel, withinBand } = require('./weekly-noise.js');
 
 const CONFIG_PATH = process.env.SEO_AUDIT_CONFIG || './audit-config.json';
 const CONFIG = JSON.parse(safeReadFile(CONFIG_PATH));
@@ -58,8 +59,26 @@ const snap = {
   vi: S.vi_current, kw_total: S.d4s_kw_total,
   backlinks: S.backlinks?.total, ref_domains: S.backlinks?.referring_domains,
   psi_mobile_perf: S.psi_mobile?.perf, psi_desktop_perf: S.psi_desktop?.perf,
+  psi_mobile_degraded: !!S.psi_mobile?.degraded, psi_desktop_degraded: !!S.psi_desktop?.degraded,
+  psi_mobile_spread: S.psi_mobile?.spread ?? null, psi_desktop_spread: S.psi_desktop?.spread ?? null,
   keywords: (S.d4s_top_keywords || []).map(k => ({ keyword: k.keyword, position: k.position, sv: k.sv })),
 };
+
+// ---- Rauschmodell der Sichtbarkeit (weekly-noise.js)
+// Aus allen bisherigen Wochen-Snapshots plus dieser Woche: Wie stark streuen
+// die Wochenschritte um den Trend? Unterhalb dieses Bandes ist eine
+// Wochenbewegung Zufall und wird im Bericht nicht als Entwicklung erzählt.
+// Ohne genug Wochen (< 8) bleibt das Urteil "unbekannt", und der Bericht
+// fällt auf die bisherige feste 5-%-Schwelle zurück.
+const viSeries = fs.readdirSync(SNAP_DIR)
+  .filter(f => /^snap-\d{4}-\d{2}-\d{2}\.json$/.test(f) && f !== `snap-${today}.json`)
+  .sort()
+  .map(f => { try { const d = JSON.parse(safeReadFile(path.join(SNAP_DIR, f))); return { date: f.slice(5, 15), value: d.vi }; } catch { return null; } })
+  .filter(Boolean)
+  .concat(S.vi_current != null ? [{ date: today, value: S.vi_current }] : []);
+const NOISE = noiseModel(viSeries);
+snap.noise = NOISE;
+
 const snapFile = path.join(SNAP_DIR, `snap-${today}.json`);
 fs.rmSync(snapFile, { force: true });
 writeFileExclusive(snapFile, JSON.stringify(snap, null, 2));
@@ -80,6 +99,16 @@ function delta(cur, prev, d = 0, invert = false) {
   if (Math.abs(diff) < Math.pow(10, -d) / 2) return '<span class="d n">±0</span>';
   const good = invert ? diff < 0 : diff > 0;
   return `<span class="d ${good ? 'up' : 'down'}">${diff > 0 ? '+' : '−'}${de(Math.abs(diff), d)}</span>`;
+}
+
+// PageSpeed-Kachel: nur, wenn die Messung trägt. "Degraded" heißt: weniger
+// als drei gültige Läufe oder Streuung ≥ 15 Punkte — dann sagt der Wert mehr
+// über die Messung als über die Seite und bleibt draußen (Codex-Befund
+// 07.09.2026: ein Bericht versendete "80/100" bei Einzelwerten 60/80/80).
+function psiTile(psi, prevPerf, label) {
+  if (!psi || psi.perf == null) return `<div class="kpi"><div class="v">–</div><div class="l">${label}</div><span class="d n">nicht gemessen</span></div>`;
+  if (psi.degraded) return `<div class="kpi"><div class="v">–</div><div class="l">${label}</div><span class="d n">Messung diese Woche nicht belastbar${psi.degraded_reason ? ` (${esc(psi.degraded_reason)})` : ''}</span></div>`;
+  return `<div class="kpi"><div class="v">${de(psi.perf)}/100</div><div class="l">${label}</div>${delta(psi.perf, prevPerf)}</div>`;
 }
 
 // ---- VI-Sparkline (inline SVG)
@@ -117,7 +146,26 @@ if (PREV && PREV.keywords) {
       ${gone.map(k => `<tr><td>${esc(k.keyword)}</td><td class="r">${de(k.sv)}</td><td class="r">–</td><td class="r"><span class="d down">aus Top-Erfassung gefallen</span></td></tr>`).join('')}
     </table>`;
   } else {
-    moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Keine nennenswerten Positionsveränderungen in den Top-Rankings – in einer ruhigen Woche ist das ein gutes Zeichen.</p>`;
+    // Der Fallback darf keine "ruhige Woche" behaupten, wenn der VI im selben
+    // Fenster deutlich sprang (Editorial-Gate-Befund 10.08.2026): Positionen
+    // stabil UND VI-Bewegung sind gleichzeitig möglich — beides benennen,
+    // keine Ursache behaupten.
+    const viPrev = PREV?.vi;
+    const viRel = viPrev ? (S.vi_current - viPrev) / viPrev : null;
+    // "Deutlich" heißt seit 07.09.2026: außerhalb des GEMESSENEN Bandes der
+    // Wochenschwankung (weekly-noise.js), nicht außerhalb einer gesetzten
+    // 5-%-Schwelle. Erst wenn das Modell noch keine acht Wochen hat, gilt die
+    // alte Schwelle als Rückfall.
+    const inBand = viRel != null ? withinBand(viRel, NOISE) : null;
+    const deutlich = viRel != null && (inBand == null ? Math.abs(viRel) >= 0.05 : inBand === false);
+    if (deutlich) {
+      moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Die Einzelpositionen der Top-Rankings blieben stabil (keine Veränderung oberhalb der Erfassungsschwelle). Die Sichtbarkeit insgesamt ${viRel > 0 ? 'stieg' : 'sank'} im selben Zeitraum um ${de(Math.abs(viRel) * 100, 1)} % (VI ${de(viPrev, 3)} → ${de(S.vi_current, 3)})${NOISE.noise_pct != null && NOISE.verdict !== 'unbekannt' ? ` – das liegt außerhalb der üblichen Wochenschwankung von ±${de(NOISE.noise_pct, 1)} %` : ''}.</p>`;
+    } else if (viRel != null && inBand === true && Math.abs(viRel) >= 0.02) {
+      // Bewegung sichtbar, aber innerhalb des Bandes: benennen, nicht deuten.
+      moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Keine nennenswerten Positionsveränderungen in den Top-Rankings. Die Sichtbarkeit bewegte sich um ${de(Math.abs(viRel) * 100, 1)} % (VI ${de(viPrev, 3)} → ${de(S.vi_current, 3)}) – das liegt innerhalb der üblichen Wochenschwankung von ±${de(NOISE.noise_pct, 1)} % und ist keine Entwicklung.</p>`;
+    } else {
+      moversHtml = `<h2>Bewegungen seit ${deDate(prevDate)}</h2><p class="muted">Keine nennenswerten Positionsveränderungen in den Top-Rankings – in einer ruhigen Woche ist das ein gutes Zeichen.</p>`;
+    }
   }
 }
 
@@ -129,14 +177,28 @@ const topKw = (S.d4s_top_keywords || []).slice().sort((a, b) => (b.sv || 0) - (a
 let observations = (W.observations_date === today && W.observations_current) || null;
 if (!observations) {
   observations = [];
-  if (S.psi_mobile?.perf != null && S.psi_mobile.perf < 60)
-    observations.push(`Die mobile Ladeleistung liegt im Labor-Test bei ${S.psi_mobile.perf}/100 (größtes Element nach ${de(S.psi_mobile.lcp / 1000, 1)} s sichtbar; Google-Richtwert: unter 2,5 s). Die echten Nutzerdaten sind aktuell noch im grünen Bereich – das Labor zeigt aber, wie wenig Puffer bleibt.`);
+  if (S.psi_mobile?.perf != null && !S.psi_mobile.degraded && S.psi_mobile.perf < 60) {
+    // Lab-LCP nie ungeprüft als Fakt zitieren (Editorial-Gate-Befund 10.08.2026):
+    // Lighthouse-Lantern kann Ausreißer simulieren (gemessen: 45,4 s Lab bei
+    // 1,15 s Feld/FAST). Ab 15 s gilt der Lab-Wert als Simulationsartefakt und
+    // wird als solches benannt statt als Nutzererlebnis.
+    const lcpS = S.psi_mobile.lcp != null ? S.psi_mobile.lcp / 1000 : null;
+    const feldBasis = { FAST: 'gut (grün)', AVERAGE: 'mittel', SLOW: 'langsam' }[S.psi_mobile.crux_lcp] || null;
+    // Origin-Fallback: zu wenig Felddaten für die URL, der Wert beschreibt die
+    // ganze Domain. Das steht dann im Satz, statt als Seitenwert durchzugehen.
+    const feld = feldBasis && S.psi_mobile.crux_origin_fallback ? `${feldBasis}, gemessen für die gesamte Domain` : feldBasis;
+    if (lcpS != null && lcpS >= 15) {
+      observations.push(`Der mobile Labor-Score liegt bei ${S.psi_mobile.perf}/100, gedrückt von einem LCP-Laborwert von ${de(lcpS, 1)} s. Dieser Wert ist ein Ausreißer der Labor-Simulation, kein echtes Nutzererlebnis${feld ? ` – die echten Nutzerdaten stehen auf „${feld}"` : ''}. Für Priorisierungen stützen wir uns deshalb auf die Feld-Daten; der Laborwert bleibt unter Beobachtung.`);
+    } else {
+      observations.push(`Die mobile Ladeleistung liegt im Labor-Test bei ${S.psi_mobile.perf}/100${lcpS != null ? ` (größtes Element nach ${de(lcpS, 1)} s sichtbar; Google-Richtwert: unter 2,5 s)` : ''}. Die echten Nutzerdaten sind aktuell${feld ? ` mit „${feld}"` : ''} noch im grünen Bereich – das Labor zeigt aber, wie wenig Puffer bleibt.`);
+    }
+  }
   if (ONP.schema_types && ONP.schema_types.length === 0)
     observations.push('Die Startseite liefert kein strukturiertes Markup aus. Rich-Results in der Google-Suche (Preise, Bewertungssterne, Produktdaten) bleiben damit ungenutzt – ein Feld, auf dem Wettbewerber sichtbar präsenter sind.');
   if (S.vi_all_time_max && S.vi_current < S.vi_all_time_max.value * 0.9)
     observations.push(`Die Sichtbarkeit liegt ${de((1 - S.vi_current / S.vi_all_time_max.value) * 100)} % unter dem eigenen Höchststand vom ${deDate(S.vi_all_time_max.date)} – der Abstand ist aufholbar, schließt sich aber nicht von selbst.`);
   if (!observations.length)
-    observations.push(`Solide Woche ohne auffällige Befunde: ${de(S.d4s_kw_total)} Rankings in den Top-100, Sichtbarkeitstrend ${S.vi_trend_4w > 0 ? 'positiv' : 'seitwärts'} (${de(S.vi_trend_4w, 1)} % über 4 Wochen).`);
+    observations.push(`Solide Woche ohne auffällige Befunde: ${de(S.d4s_kw_total)} Rankings in den Top-100${S.vi_trend_4w != null && S.vi_trend_short_label ? `, Sichtbarkeitstrend ${S.vi_trend_4w > 0 ? 'positiv' : 'seitwärts'} (${de(S.vi_trend_4w, 1)} % über ${S.vi_trend_short_label})` : ''}.`);
 }
 
 const recommendations = W.recommendations || [];
@@ -200,12 +262,22 @@ const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><style>
 ${intro ? `<p>${esc(intro)}</p>` : ''}
 
 <div class="kpis">
-  <div class="kpi"><div class="v">${de(S.vi_current, 3)}</div><div class="l">Sichtbarkeit (Sistrix)</div>${delta(S.vi_current, PREV?.vi, 3)}</div>
+  <div class="kpi"><div class="v">${de(S.vi_current, 3)}</div><div class="l">Sichtbarkeit (Sistrix)</div>${delta(S.vi_current, PREV?.vi, 3)}${(() => {
+    // Wochenschwankung ans Delta heften, sobald das Modell steht: Ein
+    // "−0,027" ohne Band liest sich wie ein Befund. Mit "übliche Schwankung
+    // ±7,6 %" liest es sich wie das, was es ist.
+    // PREV.vi > 0, nicht nur != null: bei 0 wäre die Division Infinity und die
+    // Kachel behauptete "außerhalb" (Codex-Befund 07.09.2026).
+    if (!PREV || !(PREV.vi > 0) || S.vi_current == null || NOISE.verdict === 'unbekannt') return '';
+    const rel = (S.vi_current - PREV.vi) / PREV.vi;
+    const inBand = withinBand(rel, NOISE);
+    return `<div class="l" style="margin-top:2px">${inBand ? 'innerhalb' : 'außerhalb'} der üblichen Schwankung (±${de(NOISE.noise_pct, 1)} %)</div>`;
+  })()}</div>
   <div class="kpi"><div class="v">${de(S.d4s_kw_total)}</div><div class="l">Keywords Top-100</div>${delta(S.d4s_kw_total, PREV?.kw_total)}</div>
-  <div class="kpi"><div class="v">${S.vi_trend_4w > 0 ? '+' : ''}${de(S.vi_trend_4w, 1)}%</div><div class="l">Sichtbarkeit 4 Wochen</div></div>
+  ${S.vi_trend_4w != null && S.vi_trend_short_label ? `<div class="kpi"><div class="v">${S.vi_trend_4w > 0 ? '+' : ''}${de(S.vi_trend_4w, 1)}%</div><div class="l">Sichtbarkeit ${S.vi_trend_short_label}${S.vi_trend_short_from && S.vi_trend_as_of ? ` (${deDate(S.vi_trend_short_from)} bis ${deDate(S.vi_trend_as_of)})` : S.vi_trend_as_of ? ` (Stand ${deDate(S.vi_trend_as_of)})` : ''}</div></div>` : ''}
   <div class="kpi"><div class="v">${de(S.backlinks?.referring_domains)}</div><div class="l">Verlinkende Domains</div>${delta(S.backlinks?.referring_domains, PREV?.ref_domains)}</div>
-  <div class="kpi"><div class="v">${de(S.psi_mobile?.perf)}/100</div><div class="l">PageSpeed mobil</div>${delta(S.psi_mobile?.perf, PREV?.psi_mobile_perf)}</div>
-  <div class="kpi"><div class="v">${de(S.psi_desktop?.perf)}/100</div><div class="l">PageSpeed Desktop</div>${delta(S.psi_desktop?.perf, PREV?.psi_desktop_perf)}</div>
+  ${psiTile(S.psi_mobile, PREV?.psi_mobile_perf, 'PageSpeed mobil')}
+  ${psiTile(S.psi_desktop, PREV?.psi_desktop_perf, 'PageSpeed Desktop')}
 </div>
 
 <h2>Sichtbarkeitsverlauf (18 Monate)</h2>

@@ -2,7 +2,7 @@
 
 > **Source:** `plugins/seo-rescue/skills/rescue/SKILL.md` (canonical Claude Code orchestrator). This export is a **platform-agnostic overview** for non-Claude-Code LLMs — the slash-command-based routing in the original (`/seo-rescue:rescue audit <domain>` etc.) does not apply outside Claude Code.
 
-This document describes the overall SEO-Rescue framework so any LLM (Cursor, OpenAI Custom GPT, Gemini, Aider) can route the user to the right sub-framework. Two of the sub-frameworks (`post-core-update-recovery`, `ai-search-rescue`) are also available as exported markdown in this directory. The remaining sub-frameworks (`seo-outreach-report`, `competitor-deep-audit`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`, `sistrix-monday-recovery-check`, `subscription-monetization-audit`, plus the six `recovery-*` workflow commands) remain Claude-Code-specific — see "Script-backed skills" below.
+This document describes the overall SEO-Rescue framework so any LLM (Cursor, OpenAI Custom GPT, Gemini, Aider) can route the user to the right sub-framework. Two of the sub-frameworks (`post-core-update-recovery`, `ai-search-rescue`) are also available as exported markdown in this directory. The remaining sub-frameworks (`seo-outreach-report`, `competitor-deep-audit`, `target-keyword-set`, `psi-weekly-cron-baseline`, `channel-economics-analyzer`, `ai-citations-tracker`, `gsc-deep-dive`, `seo-audit-free`, `sistrix-monday-recovery-check`, `subscription-monetization-audit`, plus the six `recovery-*` workflow commands) remain Claude-Code-specific — see "Script-backed skills" below.
 
 ## Routing — pick the right sub-framework by symptom
 
@@ -14,6 +14,7 @@ This document describes the overall SEO-Rescue framework so any LLM (Cursor, Ope
 | "Generate a decision-maker PDF for shop owner X.de" | seo-outreach-report (Claude Code only — Node-pipeline script) |
 | "Which sales channel actually makes money?" | channel-economics-analyzer (Claude Code only — Node-pipeline script) |
 | "Who outranks me, what keywords am I missing?" | competitor-deep-audit (Claude Code only — Node-pipeline script) |
+| "Which keywords should we commit to in the contract / measure weekly?" | target-keyword-set (Claude Code only — Node-pipeline script) |
 | "Set up weekly PSI tracking with regression alerts" | psi-weekly-cron-baseline (Claude Code only — Node-pipeline script) |
 | "Track ChatGPT / Perplexity brand-citation frequency weekly" | ai-citations-tracker (Claude Code only — Node-pipeline script) |
 | "Pull Google Search Console data in one call" | gsc-deep-dive (Claude Code only — Node-pipeline script) |
@@ -40,6 +41,8 @@ User reports a problem
   │
   ├── Wants competitor analysis?
   │     └── YES → competitor-deep-audit (Claude Code only)
+  ├── Needs an agreed target keyword set (contract annex, weekly positions)?
+  │     └── YES → target-keyword-set (Claude Code only)
   │
   ├── Wants ongoing performance monitoring?
   │     └── YES → psi-weekly-cron-baseline (Claude Code only)

@@ -110,7 +110,7 @@ This matters for funnel ratios: `eventCount(view_item) / sessions(from-event-row
 
 ## 7. Default lookback window for the API
 
-The Data API serves data with **~2 hours of latency** for the current day and ~48 hours for full daily-stable data. For reports that compare to GSC (which has ~48-72 hour latency), align by ending both windows at `today - 2 days`.
+The Data API serves data with **a few hours of latency** for the current day (observed: 3 to 4 hours, and one day still unprocessed the next morning) and ~48 hours for full daily-stable data. An unprocessed day is recognizable: sessions pile up under "Unassigned" and engagement is zero. Do not read such a day as a tracking break. For reports that compare to GSC (which has ~48-72 hour latency), align by ending both windows at `today - 2 days`.
 
 ## 8. Where to put credentials
 

@@ -2,7 +2,7 @@
 
 ## What this repository is
 
-seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **eighteen skills and commands (one orchestrator plus seventeen sub-skills and recovery commands)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit. Canonical skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
+seo-survival-kit is a Claude Code plugin (marketplace name `seo-survival-kit`, plugin name `seo-rescue`) that bundles **nineteen skills and commands (one orchestrator plus eighteen sub-skills and recovery commands)** built from real ecommerce/D2C recovery work after Google Core Updates. It is MIT-licensed, has zero npm runtime dependencies, and is published at https://github.com/maxschottke-spec/seo-survival-kit. Canonical skill registry: [ARCHITECTURE.md section 4](./ARCHITECTURE.md#4-modules-and-skill-registry).
 
 Positioning: **Recovery Operating System for Ecommerce/D2C**. Recovery-first, decision-first, profit-aware, risk-aware. The framework supports operators making recovery and growth decisions; execution belongs to the operator's team, agency, or contractors. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the canonical source of truth.
 
@@ -47,13 +47,14 @@ seo-survival-kit/
 │       │   ├── FALLBACKS.md
 │       │   └── TROUBLESHOOTING.md
 │       ├── test-fixtures/            # Minimal test data for offline testing
-│       └── skills/                   # 18 skills/commands (1 orchestrator + 17 sub-skills/commands)
+│       └── skills/                   # 19 skills/commands (1 orchestrator + 18 sub-skills/commands)
 │           ├── rescue/                       # Orchestrator + routing table
 │           ├── seo-audit-free/
 │           ├── post-core-update-recovery/
 │           ├── seo-outreach-report/          # SKILL.md + 4 Node.js scripts + .env.example
 │           ├── channel-economics-analyzer/
 │           ├── competitor-deep-audit/
+│           ├── target-keyword-set/           # v0.5.5: target set from existing rankings, grouped by kind of work
 │           ├── psi-weekly-cron-baseline/
 │           ├── ai-search-rescue/
 │           ├── ai-citations-tracker/         # v0.4 addition: weekly cron AI surface tracker
@@ -176,7 +177,9 @@ These rules are derived from real recovery operations and apply to all commands 
 ### Data Source Discipline
 
 - Every important claim needs a source and confidence level. See `references/PROVIDER_CAPABILITIES.md`.
-- DataForSEO, Sistrix, and Screaming Frog are strong sources but not ground truth. Live HTTP and GSC are ground truth.
+- DataForSEO, Sistrix, and Screaming Frog are strong sources but not ground truth. Live HTTP and GSC clicks are ground truth; GSC impressions and average positions need the reading checks in `references/PROVIDER_CAPABILITIES.md`.
+- Orders and revenue come from the order system, never from analytics or an ad platform. State the capture rate next to analytics numbers.
+- A zero from a measuring tool counts only after a positive control. Statements about live state are re-measured before they are reported.
 - When data is weak or contradictory: report `partial + low confidence` instead of false certainty.
 - Backlink data from a single provider may be incomplete. Cross-check when counts seem off.
 

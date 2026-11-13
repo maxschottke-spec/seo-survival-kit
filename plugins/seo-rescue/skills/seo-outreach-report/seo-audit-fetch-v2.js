@@ -55,6 +55,60 @@ async function psi(url, strategy) {
   return r.json().catch(() => ({}));
 }
 
+// PageSpeed ist eine EINZELMESSUNG auf geteilter Infrastruktur und streut
+// erheblich. Beleg (eine Kundendomain, 07.09.2026): 07:17 Uhr Desktop 80, 14:25 Uhr
+// Desktop 60 — dieselbe Seite, sieben Stunden Abstand, 20 Punkte Unterschied,
+// gegen eine Reihe, die vom 03.08. bis 24.08. zwischen 79 und 83 lag. Der
+// Wochenbericht hätte daraus "PageSpeed Desktop 60/100, −23" gemacht und dem
+// Kunden einen Einbruch gemeldet, den es nicht gab. Das Editorial-Gate hat den
+// Versand gestoppt; verlassen darf man sich darauf nicht, denn es prüft
+// Kohärenz, nicht Messgüte.
+//
+// Deshalb drei Läufe, und es gewinnt der MITTLERE nach Performance-Score.
+// Zurückgegeben wird der vollständige mittlere Lauf, nicht ein aus drei Läufen
+// zusammengerechneter Wert: sonst beschreibt der Bericht eine Messung, die so
+// nie stattgefunden hat (Score aus Lauf 2, LCP aus Lauf 1, TBT aus Lauf 3).
+// `_psi_spread` hält fest, wie weit die Läufe auseinanderlagen — ist die
+// Streuung selbst groß, ist sie das Thema und nicht der Punktwert.
+const PSI_SPREAD_MAX = 15; // Punkte zwischen bestem und schlechtestem Lauf, ab denen die Messung nicht trägt
+async function psiMedian(url, strategy, runs = 3) {
+  const results = [];
+  for (let i = 0; i < runs; i++) {
+    // Nicht im Sekundentakt gegen dieselbe URL feuern.
+    if (i > 0) await new Promise((r) => setTimeout(r, 2000));
+    try {
+      const r = await psi(url, strategy);
+      const score = r?.lighthouseResult?.categories?.performance?.score;
+      // Ein einzelner Fehllauf (Quota, Timeout, leere Antwort) kippt die
+      // Messung nicht — er zählt nur nicht mit.
+      if (typeof score === 'number') results.push({ score: Math.round(score * 100), raw: r });
+    } catch { /* siehe oben */ }
+  }
+  if (!results.length) return { error: `psi ${strategy}: kein Lauf lieferte einen Performance-Score` };
+  results.sort((a, b) => a.score - b.score);
+  const scores = results.map((r) => r.score);
+  const spread = scores[scores.length - 1] - scores[0];
+  // Weniger als `runs` gültige Läufe: Es gibt keinen Median. Bei zwei Läufen
+  // wählte Math.floor(2/2) bisher den HÖHEREN — ein Einbruch wurde damit
+  // optimistisch kaschiert (Codex-Befund 07.09.2026). Jetzt: bei unvollständiger
+  // Messung den NIEDRIGEREN nehmen (konservativ) und die Messung als
+  // "degraded" markieren; Generator und Gate blenden die Kachel dann aus.
+  // Dasselbe bei großer Streuung: ab PSI_SPREAD_MAX Punkten sagt der Median
+  // mehr über die Messung als über die Seite.
+  const complete = results.length >= runs;
+  const pick = complete ? results[Math.floor(results.length / 2)] : results[0];
+  const degraded = !complete || spread >= PSI_SPREAD_MAX;
+  return {
+    ...pick.raw,
+    _psi_runs: results.length,
+    _psi_runs_requested: runs,
+    _psi_scores: scores,
+    _psi_spread: spread,
+    _psi_degraded: degraded,
+    _psi_degraded_reason: !complete ? `nur ${results.length} von ${runs} Läufen gültig` : spread >= PSI_SPREAD_MAX ? `Streuung ${spread} Punkte` : null,
+  };
+}
+
 // Sistrix VI history: fetch one call per month for the last N months.
 // Abgeschlossene Monate sind unveränderlich → Cache im User-Cache-Dir, damit
 // wiederkehrende Läufe (Weekly-Reports, Crons) nicht 18 Credits pro Lauf verbrennen:
@@ -94,7 +148,7 @@ async function fetchOne(target) {
   console.error(`[${target.slug}] fetching...`);
   const out = { target, ts: new Date().toISOString() };
 
-  const [sxVi, sxViOverview, viHist, d4sRanked, d4sBacklinks, d4sDomainInfo, d4sCompetitors, d4sBacklinkDomains, psiMobile, psiDesktop] = await Promise.all([
+  const [sxVi, sxViOverview, viHist, d4sRanked, d4sBacklinks, d4sDomainInfo, d4sCompetitors, d4sBacklinkDomains] = await Promise.all([
     sistrix('domain.sichtbarkeitsindex', { domain: target.domain, country: 'de' }).catch(e => ({ error: String(e) })),
     sistrix('domain.sichtbarkeitsindex.overview', { domain: target.domain, country: 'de' }).catch(e => ({ error: String(e) })),
     sistrixViHistory(target.slug, target.domain).catch(e => []),
@@ -112,9 +166,14 @@ async function fetchOne(target) {
     d4sPost('/v3/dataforseo_labs/google/domain_rank_overview/live', { target: target.domain, language_code: 'de', location_code: 2276 }).catch(e => ({ error: String(e) })),
     d4sPost('/v3/dataforseo_labs/google/competitors_domain/live', { target: target.domain, language_code: 'de', location_code: 2276, limit: 15 }).catch(e => ({ error: String(e) })),
     d4sPost('/v3/backlinks/referring_domains/live', { target: target.domain, limit: 25, order_by: ['rank,desc'] }).catch(e => ({ error: String(e) })),
-    psi(target.host, 'mobile').catch(e => ({ error: String(e) })),
-    psi(target.host, 'desktop').catch(e => ({ error: String(e) })),
   ]);
+  // PSI NACH den übrigen Abfragen und mobil/desktop NACHEINANDER: parallel
+  // hießen 3+3 Läufe zwei Anfragen je zwei Sekunden gegen dieselbe URL —
+  // ein gemeinsames Ratenlimit dünnt dann beide Reihen aus, und der
+  // Ein-Lauf-Rückfall greift genau dann, wenn er nicht greifen soll
+  // (Codex-Befund 07.09.2026). Kostet rund eine Minute Laufzeit.
+  const psiMobile = await psiMedian(target.host, 'mobile').catch(e => ({ error: String(e) }));
+  const psiDesktop = await psiMedian(target.host, 'desktop').catch(e => ({ error: String(e) }));
 
   out.sistrix = { vi: sxVi, vi_overview: sxViOverview, vi_history: viHist };
   out.dataforseo = { ranked: d4sRanked, backlinks: d4sBacklinks, domain_info: d4sDomainInfo, competitors: d4sCompetitors, ref_domains: d4sBacklinkDomains };

@@ -1,0 +1,496 @@
+{
+ "tasks": [
+  {
+   "status_code": 20000,
+   "result": [
+    {
+     "target": "example-bedding.de",
+     "total_count": 13,
+     "items": [
+      {
+       "keyword_data": {
+        "keyword": "bettdeckenbezug",
+        "keyword_info": {
+         "search_volume": 880,
+         "cpc": 1.65,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 880,
+          "2025-10": 880,
+          "2025-11": 880,
+          "2025-12": 880,
+          "2026-01": 880,
+          "2026-02": 880,
+          "2026-03": 880,
+          "2026-04": 880,
+          "2026-05": 880,
+          "2026-06": 880,
+          "2026-07": 880,
+          "2026-08": 880
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "bettdeckenbezug"
+        },
+        "search_intent_info": {
+         "main_intent": "transactional"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 3,
+         "url": "https://www.example-bedding.de/schlafen/bettdeckenbezuege/",
+         "relative_url": "/schlafen/bettdeckenbezuege/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "hotelbettwäsche",
+        "keyword_info": {
+         "search_volume": 2900,
+         "cpc": 2.92,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 4400,
+          "2025-10": 2900,
+          "2025-11": 2900,
+          "2025-12": 2900,
+          "2026-01": 2900,
+          "2026-02": 2900,
+          "2026-03": 2900,
+          "2026-04": 2900,
+          "2026-05": 2900,
+          "2026-06": 2900,
+          "2026-07": 2900,
+          "2026-08": 2900
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "hotelbettwäsche"
+        },
+        "search_intent_info": {
+         "main_intent": "transactional"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 10,
+         "url": "https://www.example-bedding.de/schlafen/hotelbettwaesche/",
+         "relative_url": "/schlafen/hotelbettwaesche/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "bettwäsche hotel",
+        "keyword_info": {
+         "search_volume": 2900,
+         "cpc": 2.92,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 2900,
+          "2025-10": 2900,
+          "2025-11": 2900,
+          "2025-12": 2900,
+          "2026-01": 2900,
+          "2026-02": 2900,
+          "2026-03": 2900,
+          "2026-04": 2900,
+          "2026-05": 2900,
+          "2026-06": 2900,
+          "2026-07": 2900,
+          "2026-08": 2900
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "hotelbettwäsche"
+        },
+        "search_intent_info": {
+         "main_intent": "navigational"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 9,
+         "url": "https://www.example-bedding.de/schlafen/hotelbettwaesche/",
+         "relative_url": "/schlafen/hotelbettwaesche/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "bettwäsche für hotel",
+        "keyword_info": {
+         "search_volume": 2900,
+         "cpc": 3.07,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 2900,
+          "2025-10": 2900,
+          "2025-11": 2900,
+          "2025-12": 2900,
+          "2026-01": 2900,
+          "2026-02": 2900,
+          "2026-03": 2900,
+          "2026-04": 2900,
+          "2026-05": 2900,
+          "2026-06": 2900,
+          "2026-07": 2900,
+          "2026-08": 2900
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "bettwäsche für hotel"
+        },
+        "search_intent_info": {
+         "main_intent": "commercial"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 14,
+         "url": "https://www.example-bedding.de/schlafen/hotelbettwaesche/",
+         "relative_url": "/schlafen/hotelbettwaesche/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "luxus handtücher",
+        "keyword_info": {
+         "search_volume": 480,
+         "cpc": 1.62,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 480,
+          "2025-10": 480,
+          "2025-11": 480,
+          "2025-12": 480,
+          "2026-01": 480,
+          "2026-02": 480,
+          "2026-03": 480,
+          "2026-04": 480,
+          "2026-05": 480,
+          "2026-06": 480,
+          "2026-07": 480,
+          "2026-08": 480
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "luxus handtücher"
+        },
+        "search_intent_info": {
+         "main_intent": "transactional"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 11,
+         "url": "https://www.example-bedding.de/luxus-handtuecher-sand-bb10053",
+         "relative_url": "/luxus-handtuecher-sand-bb10053"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "bettwäsche für allergiker",
+        "keyword_info": {
+         "search_volume": 5400,
+         "cpc": 2.09,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 5400,
+          "2025-10": 5400,
+          "2025-11": 5400,
+          "2025-12": 5400,
+          "2026-01": 5400,
+          "2026-02": 5400,
+          "2026-03": 5400,
+          "2026-04": 5400,
+          "2026-05": 5400,
+          "2026-06": 5400,
+          "2026-07": 5400,
+          "2026-08": 5400
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "bettwäsche für allergiker"
+        },
+        "search_intent_info": {
+         "main_intent": "transactional"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 13,
+         "url": "https://www.example-bedding.de/blog/hochwertige-bettwaesche/allergiker/",
+         "relative_url": "/blog/hochwertige-bettwaesche/allergiker/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "beste daunendecke",
+        "keyword_info": {
+         "search_volume": 260,
+         "cpc": 2.4,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 260,
+          "2025-10": 260,
+          "2025-11": 260,
+          "2025-12": 260,
+          "2026-01": 260,
+          "2026-02": 260,
+          "2026-03": 260,
+          "2026-04": 260,
+          "2026-05": 260,
+          "2026-06": 260,
+          "2026-07": 260,
+          "2026-08": 260
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "beste daunendecke"
+        },
+        "search_intent_info": {
+         "main_intent": "transactional"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 12,
+         "url": "https://www.example-bedding.de/blog/saison/daunendecke-winter/",
+         "relative_url": "/blog/saison/daunendecke-winter/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "herbstbettwäsche",
+        "keyword_info": {
+         "search_volume": 1000,
+         "cpc": 0.34,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 6600,
+          "2025-10": 1900,
+          "2025-11": 60,
+          "2025-12": 60,
+          "2026-01": 60,
+          "2026-02": 60,
+          "2026-03": 60,
+          "2026-04": 60,
+          "2026-05": 60,
+          "2026-06": 60,
+          "2026-07": 480,
+          "2026-08": 2900
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "herbstbettwäsche"
+        },
+        "search_intent_info": {
+         "main_intent": "informational"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 5,
+         "url": "https://www.example-bedding.de/blog/saison/herbst-bettwaesche/",
+         "relative_url": "/blog/saison/herbst-bettwaesche/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "welche bettwäsche im winter",
+        "keyword_info": {
+         "search_volume": 590,
+         "cpc": 1.23,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 90,
+          "2025-10": 1600,
+          "2025-11": 1900,
+          "2025-12": 880,
+          "2026-01": 90,
+          "2026-02": 90,
+          "2026-03": 90,
+          "2026-04": 90,
+          "2026-05": 90,
+          "2026-06": 90,
+          "2026-07": 90,
+          "2026-08": 90
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "welche bettwäsche im winter"
+        },
+        "search_intent_info": {
+         "main_intent": "informational"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 15,
+         "url": "https://www.example-bedding.de/blog/saison/winter/",
+         "relative_url": "/blog/saison/winter/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "example bedding",
+        "keyword_info": {
+         "search_volume": 720,
+         "cpc": 0.1,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 720,
+          "2025-10": 720,
+          "2025-11": 720,
+          "2025-12": 720,
+          "2026-01": 720,
+          "2026-02": 720,
+          "2026-03": 720,
+          "2026-04": 720,
+          "2026-05": 720,
+          "2026-06": 720,
+          "2026-07": 720,
+          "2026-08": 720
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "example bedding"
+        },
+        "search_intent_info": {
+         "main_intent": "navigational"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 1,
+         "url": "https://www.example-bedding.de/",
+         "relative_url": "/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "bettwäsche waschen",
+        "keyword_info": {
+         "search_volume": 1600,
+         "cpc": 0.33,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 1600,
+          "2025-10": 1600,
+          "2025-11": 1600,
+          "2025-12": 1600,
+          "2026-01": 1600,
+          "2026-02": 1600,
+          "2026-03": 1600,
+          "2026-04": 1600,
+          "2026-05": 1600,
+          "2026-06": 1600,
+          "2026-07": 1600,
+          "2026-08": 1600
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "bettwäsche waschen"
+        },
+        "search_intent_info": {
+         "main_intent": "informational"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 8,
+         "url": "https://www.example-bedding.de/blog/pflege/waschen/",
+         "relative_url": "/blog/pflege/waschen/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "bettwäsche",
+        "keyword_info": {
+         "search_volume": 110000,
+         "cpc": 0.9,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 110000,
+          "2025-10": 110000,
+          "2025-11": 110000,
+          "2025-12": 110000,
+          "2026-01": 110000,
+          "2026-02": 110000,
+          "2026-03": 110000,
+          "2026-04": 110000,
+          "2026-05": 110000,
+          "2026-06": 110000,
+          "2026-07": 110000,
+          "2026-08": 110000
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "bettwäsche"
+        },
+        "search_intent_info": {
+         "main_intent": "transactional"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 35,
+         "url": "https://www.example-bedding.de/schlafen/",
+         "relative_url": "/schlafen/"
+        }
+       }
+      },
+      {
+       "keyword_data": {
+        "keyword": "kissenbezug 80x80 weiß",
+        "keyword_info": {
+         "search_volume": 90,
+         "cpc": 0.8,
+         "competition_level": "MEDIUM",
+         "monthly_searches": {
+          "2025-09": 90,
+          "2025-10": 90,
+          "2025-11": 90,
+          "2025-12": 90,
+          "2026-01": 90,
+          "2026-02": 90,
+          "2026-03": 90,
+          "2026-04": 90,
+          "2026-05": 90,
+          "2026-06": 90,
+          "2026-07": 90,
+          "2026-08": 90
+         }
+        },
+        "keyword_properties": {
+         "core_keyword": "kissenbezug 80x80 weiß"
+        },
+        "search_intent_info": {
+         "main_intent": "transactional"
+        }
+       },
+       "ranked_serp_element": {
+        "serp_item": {
+         "rank_group": 7,
+         "url": "https://www.example-bedding.de/kissenbezug-weiss",
+         "relative_url": "/kissenbezug-weiss"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

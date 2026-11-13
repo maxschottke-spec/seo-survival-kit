@@ -85,7 +85,9 @@ Setting `active: false` on a category returns 404 for its URL. Shopware also set
 
 ### Reactivation as Fallback
 
-When a redirect attempt fails (API 500, wrong slug, channel conflict), reactivating the category with `active: true` is the safest fallback. URL returns 200 immediately. Preferred over leaving broken 404 during active recovery.
+When a redirect attempt fails (API 500, wrong slug, channel conflict), reactivating the category with `active: true` is the fastest fallback. URL returns 200 immediately. Preferred over leaving broken 404 during active recovery.
+
+**Precondition**: activation publishes every text stored in the category and its layout, including stale meta texts and claims that were removed elsewhere since. Scan them first (`SAFE_LIVE_CHANGE_RULES.md` rule 13). A reactivated category may also need its deleted seo-url entry restored.
 
 ## Blog URL Patterns
 
@@ -95,7 +97,9 @@ Shopware serves blog content at both case variants. Both return HTTP 200 with id
 
 **Trap**: DreiscSeo or seo-url redirect from `/blog/` to `/Blog/` creates infinite loop (DreiscSeo matches case-insensitively).
 
-**Proper fix**: Nginx-level redirect:
+**Check first whether a fix is needed at all.** In the originating case the search engine consolidated the case variants on its own choice regardless of the declared canonical, and the duplicates carried a negligible share of clicks. The remaining defect was a shared footer link block in many layouts pointing at the non-canonical casing. Repairing internal links in controlled batches removed the cause without putting a redirect in front of the strongest pages.
+
+**If a redirect is still wanted**, do it at server level:
 
 ```nginx
 location ~ ^/blog/ { rewrite ^/blog/(.*)$ /Blog/$1 permanent; }
@@ -136,10 +140,63 @@ Shopware does NOT reliably return `updatedAt` in CMS-Slot PATCH API responses. T
 
 **Mandatory workflow**: Every CMS-Slot PATCH must write before/after snapshots to `~/.cache/seo-rescue/{slug}/snapshots/cms-slots/`. See `references/SEO_CHANGE_HISTORY.md`.
 
+## Rendering and Storage Patterns
+
+Observed in one case (experimental, N=1 — **Maturity:** `experimental_n1`). Platform behaviour may differ by version and plugin set; verify on your instance.
+
+### Override beats base slot
+
+A per-category slot override wins over the layout slot. A verified write to the base slot then changes nothing on the page. Overrides bound to slot IDs of a previous layout stay stored and are never rendered; they inflate field inventories and are lost when a layout is cloned (a cloned landing layout can come up empty). An override PATCH replaces the override object; it does not merge. Resolve the rendering object before every content write.
+
+### Inherited null fields on variants
+
+Variant fields inherit from the parent and are stored as null. Consequences: a filter on an explicit value (for example active = true) undercounts live variants; a parent-only write has no effect where children carry own values; a variant without an own meta title renders the parent's; a product stream that filters on parent IDs can empty a listing. For every bulk field write count three groups (target value, other value, null) and require the sum to equal the scope.
+
+### The same text lives in several carriers
+
+Product text can sit in the description and in a tab field. Product boxes embed the parent description on other pages. FAQ or custom fields may exist as copies on every variant. Properties hang on variants, not on the parent. "Suitable alternatives" blocks show another product's text. Many supposed theme strings are plugin settings, property descriptions, system configuration or text snippets and can be changed without a theme recompile.
+
+### Page cache and acceptance
+
+API writes to CMS slots, overrides and product texts do not necessarily invalidate the page cache. Accept a change only on the plain URL and only on a copy created after the write. A query parameter creates its own cache key. Do not assume a cache lifetime; measure it. After a full purge, listings can render incomplete for minutes.
+
+### Structured data sources
+
+Inventory every schema source: hand-written blocks on legacy landing pages, SEO-plugin settings, product fields. Patterns seen:
+
+- **Availability derived from stock level.** Wherever products are orderable at zero stock (backorder, drop-ship, production on demand), markup that derives availability from the stock figure reports OutOfStock on buyable products. That contradicts the visible page and the merchant feed and can cost shopping eligibility. A passing rich-results test does not catch it. One global plugin setting can drive all sales channels; check the scope before changing it, and check which availability values the plugin offers at all.
+- `priceValidUntil` set to the current date.
+- Hand-written product markup with ratings and prices that no longer match anything on the page.
+- A sitewide business rating emitted on every page from one plugin switch.
+- A review count equal to the "maximum reviews shown" setting instead of the total.
+- Dimensions in mixed units.
+- A breadcrumb derived from the product's main category; a main category set to the root produces a wrong path. Fixing the main category creates no new URLs.
+
+### Variants, canonicals, sitemap
+
+- A parent product URL can canonicalise to its first variant. Without an explicitly set main variant the canonical may flip between crawls.
+- Variant pages reachable only through a script-driven configurator are internally unlinked. Check whether that pre-dates the drop before treating it as its cause.
+- The scheduled sitemap job can skip runs while its next-run time keeps advancing. Monitor sitemap last-modified and URL count against an expected value.
+- Two categories with the same name: on re-indexing the single SEO URL can move to the twin, and the other is served under its internal route with a self-canonical. A case-insensitive path lookup can return the twin, so a rebuild lands on an object that is not live on that URL. Confirm that the object found is the one whose canonical and H1 are live.
+- Categories without an SEO URL are served under the internal route.
+- After moving categories, the products' category tree updates only with an index run.
+
+### Markup and snippets
+
+- A block element nested inside the H1 makes the parser close the heading early: the H1 is empty, the text sits next to it, and crawlers report "H1 missing". Inspect the rendered DOM; repair the structure with the text held invariant.
+- A missing text snippet can be rendered as its key inside a link target, creating thousands of internal links to 404 URLs. When internal 404s cluster on one odd path, look for an unresolved snippet key. Several snippet sets can share one locale; a write to the wrong set succeeds without effect. Resolve the active set through the storefront domain.
+- A hidden landing page may only be settable to noindex through a category-level field, not through the landing-page entity.
+
+### Operations
+
+- One upload in an image format the server cannot process can stall thumbnail generation for all later uploads. There is no retroactive generation, and the page cache hides the repair.
+- A null restock field can remove the delivery-time line on orderable products.
+- Plugins that copy product data into their own public endpoints can publish more fields than intended, internal ones included. Inspect what a plugin exposes through the public store API, and re-check after saving its configuration.
+
 ## Plugin Config Patterns
 
 See `references/plugins/` for plugin-specific patterns:
-- `plugins/DREISCSEO.md` — DreiscSeo Pro redirect layer
+- `plugins/DREISCSEO.md` — DreiscSeo Pro redirect layer. Note: SEO plugins of this kind typically also control structured-data availability, price validity, business markup, review counts, robots per category and breadcrumbs. Treat the plugin as a schema source, not only as a redirect layer
 - `plugins/CRAYSSN_RICH_SNIPPETS.md` — Review widget plugin
 - `plugins/SHOPWARE_SEO_URL.md` — Core seo-url constraints
 
@@ -155,7 +212,7 @@ For every Shopware SEO change:
 6. ✅ Robots is index,follow (unless intentionally not)
 7. ✅ No 301 -> 404 chain created
 8. ✅ Correct Sales Channel
-9. ✅ Cache cleared after change
+9. ✅ Cache cleared after change, and acceptance on a copy created after the write (plain URL, no parameter)
 10. ✅ Snapshot after CMS-Slot PATCH
 
 ## See Also

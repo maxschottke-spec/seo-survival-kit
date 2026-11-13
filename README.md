@@ -106,6 +106,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 | `/seo-rescue:seo-audit-free <domain>` | Free-tier health check (GSC + PSI + Lighthouse + curl) | free |
 | `/seo-rescue:gsc-deep-dive <domain> [days?]` | One-call Google Search Console snapshot | free |
 | `/seo-rescue:competitor-deep-audit <domain>` | DataForSEO SERP-overlap + keyword-gap analysis | ~$0.10–$0.50 |
+| `/seo-rescue:target-keyword-set <domain>` | Target keyword set from existing rankings, grouped by kind of work; editorial-share + season calendar | ~$0.01–$0.10 |
 | `/seo-rescue:psi-weekly-cron-baseline` | Automated weekly PSI tracking with regression alerts | free |
 
 **Reporting and economics**

@@ -104,7 +104,7 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 
 - **Condition.** Recovery work is multi-week into Phase R1 or R2; AI citation counts rising while classical SISTRIX VI flat.
 - **Sequences.** Continue Authority-First recovery on its own merits and log the AI-citation signal. Do not abandon strategy because VI is flat — but also do not report recovery or change course based on rising AI citations alone.
-- **Reason.** Hypothesis (N=1, currently unproven): AI citation growth MAY be an early signal of Authority-First recovery being recognized, with classical VI following on a 2-6 week lag. The pilot-case observation behind this rule was rescinded on 2026-06-03 — the AI-citation rise coincided with a pre-update plateau that a subsequent Core Update erased (see `post-core-update-recovery/LESSONS.md`).
+- **Reason.** Hypothesis (N=1, currently unproven): AI citation growth MAY be an early signal of Authority-First recovery being recognized, with classical VI following on a 2-6 week lag. The pilot-case observation behind this rule was rescinded on 2026-06-03 because the AI-citation rise could not be separated from a pre-update plateau. The reasoning given at the time (a subsequent Core Update erased the plateau) was itself corrected later: the damage figure came from a window inside the rollout and did not hold in the full post-window (see `post-core-update-recovery/LESSONS.md`, correction entry, and `RECOVERY_SYSTEM.md` Appendix A18). The rule stays unproven either way.
 - **Confidence.** Low (single rescinded case observation; direction consistent with EEAT-weighted signals informing AI surfaces, but unvalidated).
 
 ### r-csv-first-no-api-claim
@@ -136,7 +136,7 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 - **Blocks.** Executing all changes on the same day.
 - **Sequences.** Spread changes across 3–5 days. CMS template switches count as high-impact changes. Monitor live visibility between batches.
 - **Reason.** Observed pattern: 13 URL changes + 5 CMS template switches in a single day during Stage 3-4 recovery caused an 11 % same-day live visibility drop. The weekly trend remained positive and the drop corrected within days, but the intraday signal was measurable and avoidable. Each CMS template switch changes the rendered HTML structure on the same URL — Google treats this as a page-level change even when text content is identical.
-- **Confidence.** Medium (one confirmed case; consistent with known Google behavior during re-evaluation periods).
+- **Confidence.** Low-Medium. The same-day signal came from a daily visibility index that can step on single head keywords (see `RECOVERY_SYSTEM.md` Appendix A16), so the causal link is weaker than first recorded. The rule is kept because small batches keep cause and effect separable.
 
 ### r-shared-cms-layout-content-block
 
@@ -149,7 +149,7 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 ### r-blog-authority-carries-recovery
 
 - **Condition.** During recovery, blog/editorial pages deliver 5x+ more clicks per URL than category/product pages.
-- **Sequences.** Protect blog pages with Do-Not-Touch. Use blog authority to bridge trust to category pages via internal links (blog → category). Do not restructure, move, or merge blog content during recovery.
+- **Sequences.** Protect blog pages with Do-Not-Touch. Use blog authority to bridge trust to category pages via internal links (blog → category). Do not restructure, move, or merge blog content during recovery. If such a page carries factual errors, correct sentence by sentence and keep title, headings and structure; a title change ships as its own, individually measured change. In the originating case the strongest editorial page was also the page AI assistants cited most, which raises the cost of a structural mistake.
 - **Reason.** Observed pattern: 24 blog URLs delivered 6.5 clicks/URL average while 335 category/product URLs delivered 0.8 clicks/URL. Blog pages retained authority through the Core Update while category pages lost it. The blog serves as the trust anchor for recovery — internal links from blog to category transfer this trust signal.
 - **Confidence.** Medium-High (one confirmed case; consistent with Core Update authority-preservation pattern where editorially strong content survives while thin commercial content drops).
 
@@ -159,6 +159,30 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 - **Sequences.** Investigate before optimizing. Check: (a) is the meta title/description compelling? (b) is the ranking URL the correct intent-match for the query? (c) is a SERP feature (AI Overview, Shopping carousel) compressing organic CTR? Only after diagnosis: optimize meta description for CTR, or add content depth to push from page 2 to page 1.
 - **Reason.** High impressions with near-zero CTR on page 2 is a recovery-phase signal: Google is testing the page for relevance but users aren't clicking. The page needs either a position improvement (to reach above-fold visibility) or a snippet improvement (to compete for clicks at current position). Premature content changes can disrupt the testing phase.
 - **Confidence.** Medium (one confirmed case with 2,000+ impressions at 0.2 % CTR on a page-2 position).
+
+### r-revenue-drop-check-paid-first
+
+- **Condition.** Revenue or orders dropped and the working assumption is "SEO problem" or "the last SEO change did it".
+- **Blocks.** New SEO countermeasures, rollbacks motivated by the revenue drop alone, and any causal statement, until the split is done. Not blocked: stabilizing an independently verified technical defect (broken redirect, accidental deactivation, noindex on a key page) under the emergency provisions of `SEO_SETTLEMENT_GATE.md`.
+- **Sequences.** Split lost clicks by source (Search Console, paid search, paid social), lay the ad-spend timeline and the promotion calendar next to orders from the order system. Then decide which layer the work belongs to.
+- **Reason.** If organic clicks are flat, a decline in paid clicks accounts for most of the lost volume, and orders per click are stable, then reduced paid traffic is the best-supported hypothesis. Other sources (referral, direct, email) are checked the same way before it is adopted. This is a correlation read, not a causal test; the output says so. Full method in [FUNNEL_DIAGNOSIS.md](./FUNNEL_DIAGNOSIS.md) Step 0.
+- **Confidence.** Low (experimental; one case).
+
+### r-orders-from-order-system
+
+- **Condition.** A decision (budget, pause, deactivation, "tracking is broken", "sales collapsed") rests on purchase counts.
+- **Blocks.** Using analytics or ad-platform purchase counts as the count of sales. Using agreement between analytics and the ad platform as confirmation.
+- **Sequences.** Take orders and revenue from the order system (order date, net, status-filtered, test orders removed). Compute the dated capture rate. Only then read analytics and platform numbers, each with its rate.
+- **Reason.** Analytics and ad platforms usually share one on-site tagging; they fail together. Under consent gating the capture rate is partial and moves. Engagement-specific bands and thresholds are private calibration.
+- **Confidence.** Low (experimental; observed in two cases on different shop systems, below the three-case threshold for regular rules).
+
+### r-brand-split-before-channel-verdict
+
+- **Condition.** A paid channel or campaign is judged profitable or unprofitable on blended numbers.
+- **Blocks.** Scaling or cutting on the blended figure.
+- **Sequences.** Split brand from non-brand first, inside automated campaign types too. Before a brand holdout, check the auction: if competitors bid on the brand, a pause may hand them the top slot.
+- **Reason.** A brand campaign can harvest clicks the organic first position would also have received, which flatters the blended return while non-brand sits below break-even. How incremental brand spend is on a given site is an empirical question (auction data, holdout where safe). Full trade-off analysis belongs in engagement-specific playbooks.
+- **Confidence.** Low (experimental, one case).
 
 ### Adding rules
 
@@ -230,7 +254,7 @@ Is the data fresh enough that conclusions reflect current reality? Examples: GSC
 
 ### Accuracy
 
-Is the data correct? Examples: GSC data with consent-mode gaps = accuracy reduced. Shop data with manual fixes applied = accuracy depends on fix quality. Channel economics with attributed (vs first-touch) revenue = accuracy depends on attribution model. AI citations with false positives from short brand tokens = accuracy reduced.
+Is the data correct? Examples: analytics data with consent gaps = accuracy reduced (Search Console data does not depend on consent and stays usable as the denominator). Shop data with manual fixes applied = accuracy depends on fix quality. Channel economics with attributed (vs first-touch) revenue = accuracy depends on attribution model. AI citations with false positives from short brand tokens = accuracy reduced.
 
 The hardest dimension to evaluate from the data alone. The engine relies on user-declared accuracy notes + pattern-based heuristics.
 
@@ -375,11 +399,17 @@ The engine's bias: economics when available, quality when economics missing, vol
 
 **P2: business recovery exceeding visibility recovery.** SEO VI flat. Money keywords returning to Top 10 and Top 3. AI citations growing. GSC impressions and clicks rising. Revenue recovering. Conclusion: business recovery stronger than VI suggests. Switch to Protect mode. Do not panic-edit.
 
-**P3: paid scaling blocked by tracking confidence.** Paid healthy ROAS. Tracking confidence low (consent-mode active, server-side incomplete, cross-device attribution unclear). Conclusion: do not scale paid. Tracking work first.
+**P3: paid scaling blocked by tracking confidence.** Paid healthy ROAS. Tracking confidence low (capture rate unknown or unstable, server-side incomplete, a tag or banner change inside the window). Conclusion: do not scale paid. Tracking work first. Active consent gating alone is not "low confidence": in consent-gated markets the gap is permanent. A low but stable capture rate is workable; an unknown, unstable or unrepresentative one is not. Confidence is restored by a measured, stable capture rate plus a reconciliation of platform conversions against shop orders carrying the platform's source code.
 
 **P4: SEO recovery first when SEO is primary.** Site primary acquisition is SEO. SEO recovery in Phase R2. Paid channel small but profitable. Temptation: scale paid. Conclusion: do not divert attention. Protect and progress SEO. Paid scaling waits until SEO in Phase R3+.
 
 **P5: weak landing page blocks paid scaling.** Paid acquires traffic cheaply. Landing-page conversion rate significantly below benchmark. Ad CTR acceptable. Conclusion: CRO first. Scaling spend on weak landing page wastes budget.
+
+**P6: brand split before any paid verdict (experimental, N=1).** Blended paid return looks healthy. Brand campaign carries almost all of it; non-brand search and automated shopping sit below break-even. Conclusion: judge non-brand on its own numbers, and check the auction before testing a brand pause. See rule `r-brand-split-before-channel-verdict`.
+
+**P7: product feed connects organic and paid visibility (experimental, N=1).** Paid shopping shows no impressions on product groups with real search demand. Conclusion: read the titles and availability the platform actually received before touching bids or content. A garbled or attribute-free feed title can keep the product from serving on exactly the queries the category page is trying to rank for (observed in one case; confirm with product-level serving data). Check the item's creation date first.
+
+**P8: catalog expansion dilutes a budget-capped campaign (hypothesis, N=1, causal link unproven).** Many new products go live and flow through the feed into a campaign with a fixed daily budget. Clicks stay level, conversions fall. Conclusion: include the feed delta in the blast radius of any product launch; consider separating new items from items with sales history.
 
 ### Conflict resolution rules of preference
 
@@ -392,6 +422,8 @@ The engine's bias: economics when available, quality when economics missing, vol
 ### Cross-channel attribution
 
 The engine does not attempt multi-touch attribution. Real attribution requires server-side tracking, consent-aware modeling, and assumptions the framework cannot validate. Instead the engine uses: channel-level economics from user-provided CSVs (user's own attribution model), last-click signals from GSC and paid platforms as channel-specific indicators, cross-channel comparison via MER when total revenue and total spend are both known.
+
+Three attribution traps the engine names whenever platform numbers enter a recommendation: (1) attributed revenue is never added across platforms, because the same order is routinely claimed twice; (2) platforms report on different bases, one net and another gross, so the basis is verified on a single known order; (3) an analytics capture rate is not transferred to an ad platform, which attributes across devices and click windows and can over-count.
 
 Attribution improvements are v0.8 docs / v0.9 read-only API beta — and even there the engine remains agnostic on attribution model. It surfaces the assumption rather than picking one.
 
@@ -478,7 +510,7 @@ These patterns were codified from real Shopware ecommerce recovery operations. T
 | Source is 404, target is 200 + self-canonical + index,follow + thematically exact | **Set 301** | high |
 | Source is 404, 0 products, 0 inlinks, 0 backlinks, no rankings | **Leave as 404** | high |
 | Source is 404, has external backlinks, no clean redirect target available | **Dev ticket** (manual redirect needed) | high |
-| Redirect attempt fails (API 500, wrong slug) and source was previously live | **Reactivate** source as fallback | high |
+| Redirect attempt fails (API 500, wrong slug) and source was previously live | **Reactivate** source as fallback, after scanning its stored texts (activation publishes everything stored in the object, see `SAFE_LIVE_CHANGE_RULES.md` rule 13) | high |
 | Redirect target is 301 itself (chain) | **Do not redirect** — find the final 200 target | high |
 | Redirect target is thematically wrong (e.g., Product A -> Category B (different vertical/intent)) | **Accept temporarily** if source has <5 inlinks and 0 backlinks. Otherwise: dev ticket | medium |
 | DreiscSeo redirect and seo-url redirect conflict | **DreiscSeo wins** at runtime. Deactivate DreiscSeo entry if it causes 301->404 | high |
@@ -505,6 +537,9 @@ These patterns were codified from real Shopware ecommerce recovery operations. T
 | External backlinks | Must be 0 |
 | DreiscSeo redirects pointing TO this URL | Must be deactivated first |
 | 404 vs 301 decision | Document whether clean 404 or 301 to parent/sibling |
+| Live status of the URL | Verify live that a "consolidated" URL really redirects before deactivating it; a spelling twin that returns 200 becomes a 404 |
+| Sitemap after consolidation | A category consolidated by redirect but left active stays in the sitemap as canonical while the URL redirects. Deactivate the source and check the sitemap for non-200 URLs |
+| Demand on already inactive URLs | Rank deactivated URLs by impressions before deciding what to reactivate. An inactive parent or a "hidden in navigation" flag does not take a child URL offline |
 
 ### Backlink Verification
 
