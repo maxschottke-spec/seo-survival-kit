@@ -6,6 +6,7 @@ const { parseArgs } = require('node:util');
 const {
   normalizeDomain,
   ensureDomainDir,
+  resolveDomainDir,
   acquireLock,
   releaseLock,
   appendNDJSON,
@@ -27,10 +28,25 @@ function parseCLI() {
     options: {
       domain: { type: 'string' },
       'cache-dir': { type: 'string' },
+      'dry-run': { type: 'boolean' },
+      vi: { type: 'string' },
+      'keywords-t10': { type: 'string' },
+      help: { type: 'boolean', short: 'h' },
     },
     strict: false,
   });
   return values;
+}
+
+// Parses an optional non-negative number from a CLI string. Returns null when
+// the option was not given; throws on anything that is not a finite number >= 0.
+function parseNumberOption(name, raw, { integer = false } = {}) {
+  if (raw == null) return null;
+  const n = Number(raw);
+  if (typeof raw !== 'string' || raw.trim() === '' || !Number.isFinite(n) || n < 0 || (integer && !Number.isInteger(n))) {
+    throw new Error(`Invalid value for --${name}: ${JSON.stringify(raw)}`);
+  }
+  return n;
 }
 
 function computeRecoveryScore(current, baseline, lastEntry) {
@@ -145,10 +161,18 @@ function determinePhase(score, baseline) {
   return 'R5';
 }
 
+// options.cacheDir — explicit cache root (the --cache-dir option). Goes through
+//   ensureDomainDir()/getCacheDir() in lib/safe.js: created 0700, symlink refused.
+//   Without it: SEO_CACHE_DIR or ~/.cache/seo-rescue/.
+// options.manualInput — values were typed in by hand (direct CLI call);
+//   data_quality is capped at 'partial', confidence at 'medium'.
+// options.dryRun — compute the entry against whatever is already in the cache,
+//   but create no directory, take no lock and append nothing.
 function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings, errors, options = {}) {
-  const dir = ensureDomainDir(slug);
+  const dryRun = options.dryRun === true;
+  const dir = dryRun ? resolveDomainDir(slug, options.cacheDir) : ensureDomainDir(slug, options.cacheDir);
   const historyPath = path.join(dir, 'history.ndjson');
-  const lock = acquireLock(dir, 'recovery-monitor');
+  const lock = dryRun ? null : acquireLock(dir, 'recovery-monitor');
   try {
     const lastEntry = getLastEntry(historyPath);
     const baseline = getBaseline(dir);
@@ -167,7 +191,10 @@ function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings,
     // 'failed' is reserved for no-write aborts (lock timeout, symlink — exit codes 2/3).
     // Any entry that gets written is 'complete' or 'partial'.
     const status = (errors.length > 0 || warnings.length > 0) ? 'partial' : 'complete';
-    const dataQuality = (vi != null && keywordsT10 != null) ? 'good' : (vi != null || keywordsT10 != null) ? 'partial' : 'poor';
+    let dataQuality = (vi != null && keywordsT10 != null) ? 'good' : (vi != null || keywordsT10 != null) ? 'partial' : 'poor';
+    // Hand-entered values are not a live provider reading: never rate them 'good'
+    // (and therefore never 'high' confidence).
+    if (options.manualInput === true && dataQuality === 'good') dataQuality = 'partial';
 
     const entry = {
       schema_version: '1.0.0',
@@ -186,11 +213,11 @@ function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings,
       missing_capabilities: options.missingCapabilities || [],
       source_notes: options.sourceNotes || [],
       vi,
-      vi_delta_pct: lastEntry && lastEntry.vi ? Math.round(((vi - lastEntry.vi) / lastEntry.vi) * 1000) / 10 : null,
+      vi_delta_pct: vi != null && lastEntry && lastEntry.vi ? Math.round(((vi - lastEntry.vi) / lastEntry.vi) * 1000) / 10 : null,
       score,
       phase,
       keywords_t10: keywordsT10,
-      keywords_t10_delta: lastEntry && lastEntry.keywords_t10 != null ? keywordsT10 - lastEntry.keywords_t10 : null,
+      keywords_t10_delta: keywordsT10 != null && lastEntry && lastEntry.keywords_t10 != null ? keywordsT10 - lastEntry.keywords_t10 : null,
       keywords_total: options.keywordsTotal != null ? options.keywordsTotal : null,
       top_losers_recovered: null,
       issues_open: issuesData ? issuesData.open : null,
@@ -202,8 +229,8 @@ function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings,
       component_scores: components,
     };
 
-    appendNDJSON(historyPath, entry);
-    return { entry, lastEntry };
+    if (!dryRun) appendNDJSON(historyPath, entry);
+    return { entry, lastEntry, historyPath, written: !dryRun };
   } finally {
     releaseLock(lock);
   }
@@ -232,20 +259,61 @@ function formatDeltaReport(entry, lastEntry) {
   return lines.join('\n');
 }
 
+const USAGE = `Usage: node recovery-monitor.js --domain <domain> [--vi <number>] [--keywords-t10 <integer>]
+                                [--cache-dir <path>] [--dry-run]
+
+  --domain        Domain to track (required).
+  --vi            Current visibility index, entered by hand (e.g. from a Sistrix export).
+  --keywords-t10  Current number of keywords in the top 10, entered by hand.
+  --cache-dir     Cache root to use instead of SEO_CACHE_DIR / ~/.cache/seo-rescue.
+  --dry-run       Print the entry that would be appended. Creates and writes nothing.
+
+Without --vi and --keywords-t10 the script has no data: it prints the current
+state and appends nothing. Safe first run:
+  node recovery-monitor.js --domain example.com --vi 0.42 --keywords-t10 12 --dry-run`;
+
 if (require.main === module) {
   const args = parseCLI();
-  if (!args.domain) {
-    console.error('Usage: node recovery-monitor.js --domain <domain> [--cache-dir <path>]');
+  if (args.help) {
+    console.log(USAGE);
+    process.exit(0);
+  }
+  if (!args.domain || typeof args.domain !== 'string') {
+    console.error(USAGE);
     process.exit(2);
   }
   try {
     const { domain, slug, input_domain } = normalizeDomain(args.domain);
-    const result = writeMonitorEntry(input_domain, domain, slug, null, null, ['CLI mode: no live data fetched'], []);
+    const cacheDir = typeof args['cache-dir'] === 'string' ? args['cache-dir'] : undefined;
+    const vi = parseNumberOption('vi', args.vi);
+    const keywordsT10 = parseNumberOption('keywords-t10', args['keywords-t10'], { integer: true });
+    const hasData = vi != null || keywordsT10 != null;
+    // No data: never append. A history line with nothing but nulls adds no
+    // information and skews "delta vs. last entry" on the next real run.
+    const dryRun = args['dry-run'] === true || !hasData;
+    const warnings = [];
+    if (vi == null) warnings.push('CLI mode: no VI given (--vi)');
+    if (keywordsT10 == null) warnings.push('CLI mode: no top-10 keyword count given (--keywords-t10)');
+    const result = writeMonitorEntry(input_domain, domain, slug, vi, keywordsT10, warnings, [], {
+      cacheDir,
+      dryRun,
+      manualInput: true,
+      providersUsed: hasData ? ['manual_cli'] : [],
+      sourceNotes: hasData ? ['Values entered by hand on the command line'] : [],
+    });
     console.log(formatDeltaReport(result.entry, result.lastEntry));
-    process.exit(result.entry.status === 'failed' ? 1 : 0);
+    if (!hasData) {
+      console.log(`No data given (--vi / --keywords-t10): nothing written. History file would be: ${result.historyPath}`);
+    } else if (!result.written) {
+      console.log(`Dry run: nothing written. Entry that would be appended to ${result.historyPath}:`);
+      console.log(JSON.stringify(result.entry));
+    } else {
+      console.log(`Appended to ${result.historyPath}`);
+    }
+    process.exit(0);
   } catch (e) {
     console.error(e.message);
-    process.exit(e.message.includes('Lock') ? 3 : 1);
+    process.exit(/symlink|Unsafe/i.test(e.message) ? 2 : e.message.includes('Lock') ? 3 : 1);
   }
 }
 
@@ -259,4 +327,5 @@ module.exports = {
   formatDeltaReport,
   SCORE_WEIGHTS,
   parseCLI,
+  parseNumberOption,
 };

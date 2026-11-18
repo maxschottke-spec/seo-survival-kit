@@ -4,7 +4,7 @@
 
 - Claude Code installiert
 - seo-rescue Plugin installiert (`/plugin marketplace add maxschottke-spec/seo-survival-kit`)
-- Node.js 18+ (fuer Scripts)
+- Node.js 20.6+ (fuer Scripts; `node --env-file` gibt es erst ab 20.6, die CI laeuft mit Node 20)
 
 ## Plugin-Pfad
 

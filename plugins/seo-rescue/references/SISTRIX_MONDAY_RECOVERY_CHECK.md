@@ -271,11 +271,11 @@ The recommended action would be `Protect`. The Recovery Signal Score would be in
 
 ### 15. Synthetic example
 
-A synthetic example folder ships at `examples/synthetic-sistrix-monday-check/`. The example uses:
+A synthetic example ships inside the plugin at `skills/sistrix-monday-recovery-check/examples/` and, with a README, in the repository at `examples/synthetic-sistrix-monday-check/`. The example uses:
 
 - Domain: `example-furniture-shop.test`
 - Important keyword: `office chair ergonomic 27 inch`
-- Scenario: current position 2, previous position 18, 200+ keywords returned, visibility index flat, some head terms lost, GSC impressions rising, clicks not yet fully recovered
+- Scenario: current position 2, previous position 18; 20 of the 25 shared keywords improved, 4 guide head terms declined, 3 keywords left the export; visibility index flat; no GSC and no conversion data supplied
 
 All data is synthetic. No real company names, no real exports, no real revenue numbers. The README in that folder shows the input CSV shape and the expected output Markdown.
 

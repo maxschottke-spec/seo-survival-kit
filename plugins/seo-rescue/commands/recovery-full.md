@@ -205,7 +205,7 @@ ARTIFACTS:
 GESAMMELTE WARNUNGEN (3):
   - "Sistrix-Backlink-Endpoint lieferte leere Daten"
   - "Crawl-Timeout nach 8 Minuten — 312 von 500 URLs gecrawlt"
-  - "CORE_UPDATES.md aelter als 90 Tage — Korrelation max. 'low'"
+  - "CORE_UPDATES.md zuletzt geprueft vor mehr als 90 Tagen — Korrelation max. 'low'"
 
 PROVIDERS VERWENDET:
   sistrix, dataforseo, screaming_frog_mcp

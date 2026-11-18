@@ -7,13 +7,17 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 
 ## Zweck
 
-Woechentliches Recovery-Tracking. Holt aktuelle VI + Keyword-Daten, berechnet Recovery-Score, appendet an die History-Datei. Laeuft auch bei fehlenden Datenquellen durch und schreibt einen Partial-Eintrag — der Zeitstempel allein ist wertvoll fuer die Zeitreihe.
+Woechentliches Recovery-Tracking. Holt aktuelle VI + Keyword-Daten, berechnet Recovery-Score, appendet an die History-Datei. Laeuft auch bei fehlenden Datenquellen durch und schreibt einen Partial-Eintrag — der Zeitstempel allein ist wertvoll fuer die Zeitreihe. Das gilt fuer den von Claude gefuehrten Ablauf, in dem der Ausfall einer Quelle als Warnung im Eintrag steht. Der direkte Skript-Aufruf ohne jede Datenangabe schreibt dagegen nichts (siehe Script CLI Contract).
 
 ## Change Governance
 
 Mode: `read_only`. Change Budget: 0. Keine Live-Shop-Writes. Schreibt nur History-Artefakte (`history.ndjson`, append-only, via `lib/safe.js`).
 
 Wenn `change-history.ndjson` existiert, wird sie fuer die Change-History-Integration gelesen und im Eintrag referenziert (siehe `## Change History Integration`). Jede Score-Bewegung traegt Quelle und Confidence.
+
+## Pfade
+
+Alle Pfade in diesem Command, die mit `${CLAUDE_PLUGIN_ROOT}` beginnen, liegen im Installationsverzeichnis des Plugins (dort, wo `commands/`, `lib/`, `references/`, `schemas/` und `scripts/` liegen). Claude Code setzt die Variable beim Laden des Commands ein. Kurzformen wie `lib/safe.js`, `references/…`, `schemas/…` oder `scripts/…` im Fliesstext meinen dasselbe Verzeichnis. Steht die Variable nach dem Laden noch woertlich im Text (z. B. weil die Datei per Read geoeffnet wurde), nimm das Verzeichnis, aus dem diese Datei gelesen wurde, eine Ebene hoeher; im geklonten Repository ist das `plugins/seo-rescue`.
 
 ## Settlement Gate Awareness
 
@@ -51,14 +55,28 @@ Dieses Command ist read-only gegenueber dem Live-Shop (`audit_only`, Change Budg
 ## Script CLI Contract
 
 ```bash
-node scripts/recovery-monitor.js --domain <domain> --cache-dir <path>
+node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js" --domain <domain> [--vi <zahl>] [--keywords-t10 <ganzzahl>] [--cache-dir <path>] [--dry-run]
+```
+
+| Option | Bedeutung |
+|--------|-----------|
+| `--vi`, `--keywords-t10` | Von Hand eingegebene Werte (z. B. aus einem Sistrix-Export). Der direkte Aufruf ruft selbst keine API ab. Der Eintrag traegt `providers_used: ["manual_cli"]`, `data_quality` hoechstens `partial`, `confidence` hoechstens `medium`. |
+| `--cache-dir <path>` | Cache-Wurzel fuer diesen Aufruf (sonst `SEO_CACHE_DIR`, sonst `~/.cache/seo-rescue`). Durchlaeuft dieselben Pruefungen aus `lib/safe.js` (Modus 0700, Abbruch bei Symlink). |
+| `--dry-run` | Berechnet den Eintrag gegen den vorhandenen Cache und gibt ihn aus. Legt kein Verzeichnis an, nimmt keinen Lock, haengt nichts an. |
+
+Ohne `--vi` und `--keywords-t10` hat der direkte Aufruf keine Daten: Er gibt den Stand aus und haengt **nichts** an `history.ndjson` an (bis v0.5.5 entstand dabei ein Leereintrag mit lauter `null`, und `--cache-dir` wurde ignoriert).
+
+Gefahrloser Probelauf (schreibt nichts, auch nicht nach `~/.cache/seo-rescue`):
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js" --domain example.com --vi 0.42 --keywords-t10 12 --cache-dir /tmp/seo-rescue-probe --dry-run
 ```
 
 | Exit Code | Bedeutung |
 |-----------|-----------|
-| `0` | Monitor-Eintrag geschrieben (complete oder partial) |
-| `1` | Monitor fehlgeschlagen (kein Eintrag geschrieben) |
-| `2` | Security-Abbruch (Symlink, Path-Traversal) |
+| `0` | Monitor-Eintrag geschrieben (complete oder partial), oder bewusst nichts geschrieben (`--dry-run`, direkter Aufruf ohne Daten) |
+| `1` | Monitor fehlgeschlagen (kein Eintrag geschrieben), z. B. ungueltiger Wert fuer `--vi` |
+| `2` | Security-Abbruch (Symlink im Cache-Pfad) oder fehlendes `--domain` |
 | `3` | Lock-Timeout (anderer Command laeuft) |
 
 ## Ablauf
@@ -120,7 +138,7 @@ Rufe das Helper-Script auf. Die reale Signatur ist `writeMonitorEntry(inputDomai
 
 ```bash
 node -e "
-const { writeMonitorEntry, formatDeltaReport } = require('./plugins/seo-rescue/scripts/recovery-monitor.js');
+const { writeMonitorEntry, formatDeltaReport } = require('${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js');
 const { entry, lastEntry } = writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings, errors, {
   runId,
   keywordsTotal,
@@ -143,6 +161,8 @@ Unterstuetzte `options`-Keys (alle optional, null-Defaults; nur diese werden vom
 | Key | Default | Bedeutung |
 |-----|---------|-----------|
 | `runId` | neu generiert | Run-ID aus Schritt 3 |
+| `cacheDir` | `SEO_CACHE_DIR` bzw. `~/.cache/seo-rescue` | Cache-Wurzel fuer diesen Aufruf (entspricht `--cache-dir`) |
+| `dryRun` | `false` | `true`: berechnet den Eintrag, haengt aber nichts an und legt kein Verzeichnis an |
 | `keywordsTotal` | `null` | Gesamtzahl rankender Keywords (Schritt 5) → `keywords_total` |
 | `issueDataFresh` | `false` | Ergebnis aus Schritt 6; nur bei `true` fliesst `issue_reduction` in den Score |
 | `viTrend4wPct` | `null` | 4-Wochen-VI-Trend in Prozent (Sistrix); Primaer-Input fuer die `vi_trend`-Komponente |

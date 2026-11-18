@@ -111,13 +111,29 @@ function mkRunDir(prefix = 'seo-rescue-') {
 // ACLs manually on $env:LOCALAPPDATA\seo-rescue\cache to your user only — see
 // ONBOARDING.md "Cross-platform env vars for the pipeline scripts" for the
 // PowerShell snippet that does this for .env files (same pattern applies here).
-function getCacheDir() {
-  const dir = process.env.SEO_CACHE_DIR || path.join(os.homedir(), '.cache', 'seo-rescue');
+//
+// `overrideDir` (optional) is an explicit cache root, e.g. from a script's
+// --cache-dir option. It takes precedence over SEO_CACHE_DIR and gets exactly
+// the same treatment: resolved to an absolute path, created 0700, refused if
+// it is a symlink. Passing nothing keeps the previous behaviour.
+function getCacheDir(overrideDir) {
+  if (overrideDir != null && (typeof overrideDir !== 'string' || overrideDir.trim() === '' || overrideDir.includes('\0'))) {
+    throw new Error(`Unsafe cache dir rejected: ${JSON.stringify(overrideDir)}`);
+  }
+  const dir = overrideDir != null
+    ? path.resolve(overrideDir)
+    : (process.env.SEO_CACHE_DIR || path.join(os.homedir(), '.cache', 'seo-rescue'));
+  // Check before mkdir as well: mkdirSync({recursive}) on an existing symlink
+  // succeeds silently, and chmodSync would then follow it.
+  const pre = safeLstat(dir);
+  if (pre && pre.isSymbolicLink()) {
+    throw new Error(`Cache dir must not be a symlink: ${dir}`);
+  }
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   try { fs.chmodSync(dir, 0o700); } catch {}
   const st = fs.lstatSync(dir);
   if (st.isSymbolicLink()) {
-    throw new Error(`SEO_CACHE_DIR must not be a symlink: ${dir}`);
+    throw new Error(`Cache dir must not be a symlink: ${dir}`);
   }
   return dir;
 }
@@ -172,14 +188,38 @@ function normalizeDomain(input) {
   };
 }
 
-function ensureDomainDir(slug) {
+// `cacheDir` (optional) is an explicit cache root (see getCacheDir). Without it
+// the root is SEO_CACHE_DIR or ~/.cache/seo-rescue/.
+function ensureDomainDir(slug, cacheDir) {
   safeSlug(slug);
-  const dir = path.join(getCacheDir(), slug);
+  const dir = path.join(getCacheDir(cacheDir), slug);
+  const pre = safeLstat(dir);
+  if (pre && pre.isSymbolicLink()) {
+    throw new Error(`Domain cache dir must not be a symlink: ${dir}`);
+  }
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   try { fs.chmodSync(dir, 0o700); } catch {}
   const st = fs.lstatSync(dir);
   if (st.isSymbolicLink()) {
     throw new Error(`Domain cache dir must not be a symlink: ${dir}`);
+  }
+  return dir;
+}
+
+// Read-only counterpart of ensureDomainDir for dry runs: returns the path the
+// domain dir WOULD have, creates nothing, and still refuses symlinks.
+function resolveDomainDir(slug, cacheDir) {
+  safeSlug(slug);
+  if (cacheDir != null && (typeof cacheDir !== 'string' || cacheDir.trim() === '' || cacheDir.includes('\0'))) {
+    throw new Error(`Unsafe cache dir rejected: ${JSON.stringify(cacheDir)}`);
+  }
+  const root = cacheDir != null
+    ? path.resolve(cacheDir)
+    : (process.env.SEO_CACHE_DIR || path.join(os.homedir(), '.cache', 'seo-rescue'));
+  const dir = path.join(root, slug);
+  for (const p of [root, dir]) {
+    const st = safeLstat(p);
+    if (st && st.isSymbolicLink()) throw new Error(`Cache dir must not be a symlink: ${p}`);
   }
   return dir;
 }
@@ -677,6 +717,7 @@ module.exports = {
   cachePath,
   normalizeDomain,
   ensureDomainDir,
+  resolveDomainDir,
   ensureSafeDomainDir,
   acquireLock,
   releaseLock,

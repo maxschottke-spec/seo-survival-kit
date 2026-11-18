@@ -9,6 +9,10 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 
 Screaming Frog MCP Crawl durchfuehren und die Ergebnisse in eine strukturierte, priorisierte Issues-Liste transformieren. Identifiziert technische SEO-Probleme die Recovery blockieren. Falls Screaming Frog MCP nicht verfuegbar ist, Fallback auf CSV-Import; ohne CSV-Import bricht das Command mit Status `failed` ab.
 
+## Pfade
+
+Alle Pfade in diesem Command, die mit `${CLAUDE_PLUGIN_ROOT}` beginnen, liegen im Installationsverzeichnis des Plugins (dort, wo `commands/`, `lib/`, `references/`, `schemas/` und `scripts/` liegen). Claude Code setzt die Variable beim Laden des Commands ein. Kurzformen wie `lib/safe.js`, `references/…`, `schemas/…` oder `scripts/…` im Fliesstext meinen dasselbe Verzeichnis. Steht die Variable nach dem Laden noch woertlich im Text (z. B. weil die Datei per Read geoeffnet wurde), nimm das Verzeichnis, aus dem diese Datei gelesen wurde, eine Ebene hoeher; im geklonten Repository ist das `plugins/seo-rescue`.
+
 ## Trigger
 
 `/seo-rescue:recovery-crawl <domain>`
@@ -57,7 +61,15 @@ CSV-Importe werden unter `~/.cache/seo-rescue/{slug}/imports/` erwartet.
 ## Script CLI Contract
 
 ```bash
-node scripts/recovery-crawl.js --domain <domain> --cache-dir <path>
+node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-crawl.js" --domain <domain> [--cache-dir <path>] [--dry-run]
+```
+
+Der direkte Aufruf ist kein Crawler: Er legt nur das Cache-Verzeichnis der Domain an und gibt dessen Pfad aus. `--cache-dir <path>` setzt die Cache-Wurzel fuer diesen Aufruf (sonst `SEO_CACHE_DIR`, sonst `~/.cache/seo-rescue`); das Verzeichnis durchlaeuft dieselben Pruefungen aus `lib/safe.js` (Modus 0700, Abbruch bei Symlink). `--dry-run` gibt nur aus, welches Verzeichnis verwendet wuerde, und legt nichts an.
+
+Gefahrloser Probelauf:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-crawl.js" --domain example.com --cache-dir /tmp/seo-rescue-probe --dry-run
 ```
 
 | Exit Code | Bedeutung |
@@ -84,7 +96,7 @@ Normalisiere den Input gemaess dem gemeinsamen Input-Kontrakt:
 Fuehre aus:
 
 ```bash
-node -e "const { normalizeDomain } = require('./plugins/seo-rescue/lib/safe.js'); console.log(JSON.stringify(normalizeDomain('{domain}')))"
+node -e "const { normalizeDomain } = require('${CLAUDE_PLUGIN_ROOT}/lib/safe.js'); console.log(JSON.stringify(normalizeDomain('{domain}')))"
 ```
 
 Ersetze `{domain}` durch den tatsaechlichen User-Input. Falls `normalizeDomain()` einen Fehler wirft (z.B. leerer Input, ungueltiger Slug), Abbruch mit Status `failed`.
@@ -94,7 +106,7 @@ Ersetze `{domain}` durch den tatsaechlichen User-Input. Falls `normalizeDomain()
 Erstelle das domainspezifische Cache-Verzeichnis unter `~/.cache/seo-rescue/{slug}/`:
 
 ```bash
-node -e "const { ensureDomainDir } = require('./plugins/seo-rescue/lib/safe.js'); console.log(ensureDomainDir('{slug}'))"
+node -e "const { ensureDomainDir } = require('${CLAUDE_PLUGIN_ROOT}/lib/safe.js'); console.log(ensureDomainDir('{slug}'))"
 ```
 
 Ersetze `{slug}` durch den in Schritt 1 ermittelten Slug. Das Verzeichnis wird mit Modus 0700 angelegt (nur der aktuelle User hat Zugriff). Falls das Verzeichnis ein Symlink ist, Abbruch mit Status `failed`.
@@ -192,7 +204,7 @@ Rufe dann den Helper-Script auf um Issues zu klassifizieren und die `issues.json
 
 ```bash
 node -e "
-const { writeIssuesJSON } = require('./plugins/seo-rescue/scripts/recovery-crawl.js');
+const { writeIssuesJSON } = require('${CLAUDE_PLUGIN_ROOT}/scripts/recovery-crawl.js');
 const result = writeIssuesJSON(domain, slug, inputDomain, crawledInternalHtmlUrls, rawIssues, warnings, errors, {
   runId,
   crawlLimit,
@@ -218,6 +230,8 @@ Unterstuetzte `options`-Keys (alle optional; nur diese werden vom Script gelesen
 | `exportedRowsTotal` | `crawledUrls` | Summe exportierter Zeilen ueber alle Bulk-Exports |
 | `rawExportsUsed` | `[]` | Liste der verwendeten Export-Filter-Namen |
 | `crawlerProvider` | `null` + Warnung | Immer explizit setzen (`screaming_frog_mcp` oder `csv_import`). Fehlt der Wert, schreibt das Script eine Warnung und `data_quality` bleibt konservativ auf `partial` gedeckelt |
+| `cacheDir` | `SEO_CACHE_DIR` bzw. `~/.cache/seo-rescue` | Cache-Wurzel fuer diesen Aufruf (entspricht `--cache-dir`) |
+| `dryRun` | `false` | `true`: klassifiziert und gibt das Ergebnis zurueck, schreibt aber keine `issues.json` und legt kein Verzeichnis an |
 | `localCrawlerUsed` | `false` | Immer `false` (Legacy-Feld, siehe Validierungsregeln) |
 | `providersUsed` | `[]` | Provider-Liste fuer das Output-Schema |
 | `missingCapabilities` | `[]` | Fehlende Capabilities fuer das Output-Schema |

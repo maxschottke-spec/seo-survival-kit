@@ -5,6 +5,7 @@ const { parseArgs } = require('node:util');
 const {
   normalizeDomain,
   ensureDomainDir,
+  resolveDomainDir,
   acquireLock,
   releaseLock,
   atomicWriteJSON,
@@ -30,6 +31,8 @@ function parseCLI() {
     options: {
       domain: { type: 'string' },
       'cache-dir': { type: 'string' },
+      'dry-run': { type: 'boolean' },
+      help: { type: 'boolean', short: 'h' },
     },
     strict: false,
   });
@@ -63,9 +66,15 @@ function buildSummary(issues) {
   return summary;
 }
 
+// options.cacheDir — explicit cache root (the --cache-dir option). Goes through
+//   ensureDomainDir()/getCacheDir() in lib/safe.js: created 0700, symlink refused.
+//   Without it: SEO_CACHE_DIR or ~/.cache/seo-rescue/.
+// options.dryRun — classify and return the result, but create no directory,
+//   take no lock and write no issues.json.
 function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warnings, errors, options = {}) {
-  const dir = ensureDomainDir(slug);
-  const lock = acquireLock(dir, 'recovery-crawl');
+  const dryRun = options.dryRun === true;
+  const dir = dryRun ? resolveDomainDir(slug, options.cacheDir) : ensureDomainDir(slug, options.cacheDir);
+  const lock = dryRun ? null : acquireLock(dir, 'recovery-crawl');
   try {
     const issues = classifyIssues(rawIssues);
     const summary = buildSummary(issues);
@@ -101,29 +110,50 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
       issues,
       summary,
     };
-    atomicWriteJSON(path.join(dir, 'issues.json'), output);
+    if (!dryRun) atomicWriteJSON(path.join(dir, 'issues.json'), output);
     return output;
   } finally {
     releaseLock(lock);
   }
 }
 
+const USAGE = `Usage: node recovery-crawl.js --domain <domain> [--cache-dir <path>] [--dry-run]
+
+  --domain     Domain whose cache directory is prepared (required).
+  --cache-dir  Cache root to use instead of SEO_CACHE_DIR / ~/.cache/seo-rescue.
+  --dry-run    Print the directory that would be used. Creates nothing.
+
+This entry point is not a crawler. It only resolves (and, without --dry-run,
+creates) the per-domain cache directory. Classification and the issues.json
+write happen through writeIssuesJSON(), see commands/recovery-crawl.md.`;
+
 if (require.main === module) {
   const args = parseCLI();
-  if (!args.domain) {
-    console.error('Usage: node recovery-crawl.js --domain <domain> [--cache-dir <path>]');
+  if (args.help) {
+    console.log(USAGE);
+    process.exit(0);
+  }
+  if (!args.domain || typeof args.domain !== 'string') {
+    console.error(USAGE);
     process.exit(2);
   }
   try {
     const { domain, slug } = normalizeDomain(args.domain);
-    // Read raw exports from cache dir
-    const cacheDir = args['cache-dir'] || ensureDomainDir(slug);
+    const cacheRoot = typeof args['cache-dir'] === 'string' ? args['cache-dir'] : undefined;
+    const dryRun = args['dry-run'] === true;
     // This CLI entry point expects raw data to already be in crawl/raw/ or imports/crawl/
-    console.log(JSON.stringify({ domain, slug, cacheDir, message: 'Ready for crawl data processing' }));
+    const cacheDir = dryRun ? resolveDomainDir(slug, cacheRoot) : ensureDomainDir(slug, cacheRoot);
+    console.log(JSON.stringify({
+      domain,
+      slug,
+      cacheDir,
+      dry_run: dryRun,
+      message: dryRun ? 'Dry run: nothing created' : 'Ready for crawl data processing',
+    }));
     process.exit(0);
   } catch (e) {
     console.error(e.message);
-    process.exit(e.message.includes('Lock') ? 3 : 1);
+    process.exit(/symlink|Unsafe/i.test(e.message) ? 2 : e.message.includes('Lock') ? 3 : 1);
   }
 }
 
