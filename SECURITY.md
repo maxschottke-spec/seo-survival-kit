@@ -38,6 +38,10 @@ Inter-script state lives under `~/.cache/seo-rescue/` (created mode `0700`, refu
 
 You can override the cache directory with `SEO_CACHE_DIR=/some/private/path`. The script will refuse to use the path if it is a symlink.
 
+The two recovery scripts (`recovery-monitor.js`, `recovery-crawl.js`) also take `--cache-dir <path>`. Because that path is free-form, it is checked more strictly: no component of it may be a symlink, parent directories included (on macOS write `/private/tmp/…`, not `/tmp/…`). For every cache directory, the directory must be owned by the current user; group and other permission bits are removed, stricter existing permissions are left as they are, and a failing `chmod` aborts the run. `history.ndjson` is opened with `O_NOFOLLOW` and appended to only if the opened file is a regular file of the current user with exactly one hard link; an existing `issues.json` is replaced only if it is a regular file of the current user. Arguments are parsed strictly: an unknown option, a value on a switch (`--dry-run=true`) or an option without its value ends the run with exit code 2 before any file is touched.
+
+**Known limit.** These checks and the write that follows are separate system calls; Node.js offers no `openat`, so the gap between them cannot be closed completely. The checks protect against accidental and pre-planted symlinks and hard links, not against an attacker who, running as the same user, swaps directories while a script is running.
+
 Intermediate HTML for the PDF render lives in a per-run directory created via `fs.mkdtempSync(os.tmpdir() + '/seo-rescue-render-XXXXXX')` and is removed when the run completes. Set `SEO_KEEP_RUN_DIR=1` if you want to inspect the HTML between runs.
 
 Final PDFs are written to `$SEO_PDF_OUTPUT_DIR` (default `~/Downloads/`).

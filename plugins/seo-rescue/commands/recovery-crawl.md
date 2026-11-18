@@ -69,14 +69,29 @@ Der direkte Aufruf ist kein Crawler: Er legt nur das Cache-Verzeichnis der Domai
 Gefahrloser Probelauf:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-crawl.js" --domain example.com --cache-dir /tmp/seo-rescue-probe --dry-run
+node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-crawl.js" --domain example.com --cache-dir "$HOME/seo-rescue-probe" --dry-run
 ```
+
+**Strenge Argumentpruefung (vor jedem Dateizugriff).** Alles, was nicht eindeutig ist, beendet den Lauf mit Exit Code `2` und der Zeile `Nothing was written.`, statt still einen Standard zu nehmen:
+
+| Eingabe | Ergebnis |
+|---------|----------|
+| `--dry-run=true`, `--dry-run=false`, `--dry-run=1` | abgelehnt. `--dry-run` ist ein Schalter ohne Wert. |
+| `--dryrun`, `--dry_run`, jede unbekannte Option, ein loses Wort | abgelehnt. Ein Tippfehler darf nicht zu einem echten Schreiblauf fuehren. |
+| `--cache-dir` ohne Wert, `--cache-dir --dry-run`, `--cache-dir=` | abgelehnt. Eine angegebene, aber leere Option gilt nie als „nicht angegeben“; es gibt keinen stillen Rueckfall auf `~/.cache/seo-rescue`. |
+| dieselbe Option zweimal | abgelehnt. |
+
+**Regeln fuer `--cache-dir`.** Kein Bestandteil des Pfads darf ein Symlink sein, auch kein Elternverzeichnis; die Fehlermeldung nennt den aufgeloesten Pfad, der stattdessen anzugeben ist. Auf macOS sind `/tmp` und `/var` selbst Symlinks: dort `/private/tmp/…` schreiben oder ein Verzeichnis unter dem eigenen Home nehmen. Das Verzeichnis muss dem aktuellen Benutzer gehoeren. Rechte fuer Gruppe und andere werden entfernt, strengere bestehende Rechte (z. B. `0500`) bleiben unveraendert. Dieselben Eigentums- und Rechtepruefungen gelten fuer `SEO_CACHE_DIR` und den Standardpfad.
+
+**Grenze.** Pruefung und Zugriff sind getrennte Systemaufrufe. Das schuetzt vor versehentlichen und vorbereiteten Symlinks, nicht vor einem Prozess desselben Benutzers, der waehrend des Laufs Verzeichnisse austauscht (siehe SECURITY.md im Repository).
+
+**Dateien.** Eine bestehende `issues.json` wird nur ersetzt, wenn sie eine regulaere Datei des aktuellen Benutzers ist; ein Symlink an dieser Stelle fuehrt zum Abbruch.
 
 | Exit Code | Bedeutung |
 |-----------|-----------|
 | `0` | Crawl abgeschlossen (complete oder partial) |
 | `1` | Crawl fehlgeschlagen (kein Provider, kein CSV) |
-| `2` | Security-Abbruch (Symlink, Path-Traversal) |
+| `2` | Nichts geschrieben: ungueltige Argumente (unbekannte Option, Schalter mit Wert, Option ohne Wert, fehlendes oder ungueltiges `--domain`) oder Security-Abbruch (Symlink im Pfad, fremdes Verzeichnis) |
 | `3` | Lock-Timeout (anderer Command laeuft) |
 
 ## Ablauf
@@ -231,7 +246,7 @@ Unterstuetzte `options`-Keys (alle optional; nur diese werden vom Script gelesen
 | `rawExportsUsed` | `[]` | Liste der verwendeten Export-Filter-Namen |
 | `crawlerProvider` | `null` + Warnung | Immer explizit setzen (`screaming_frog_mcp` oder `csv_import`). Fehlt der Wert, schreibt das Script eine Warnung und `data_quality` bleibt konservativ auf `partial` gedeckelt |
 | `cacheDir` | `SEO_CACHE_DIR` bzw. `~/.cache/seo-rescue` | Cache-Wurzel fuer diesen Aufruf (entspricht `--cache-dir`) |
-| `dryRun` | `false` | `true`: klassifiziert und gibt das Ergebnis zurueck, schreibt aber keine `issues.json` und legt kein Verzeichnis an |
+| `dryRun` | `false` | `true`: klassifiziert und gibt das Ergebnis zurueck, schreibt aber keine `issues.json` und legt kein Verzeichnis an. Nur die Wahrheitswerte `true`/`false`; `"true"` als Zeichenkette wird abgelehnt |
 | `localCrawlerUsed` | `false` | Immer `false` (Legacy-Feld, siehe Validierungsregeln) |
 | `providersUsed` | `[]` | Provider-Liste fuer das Output-Schema |
 | `missingCapabilities` | `[]` | Fehlende Capabilities fuer das Output-Schema |

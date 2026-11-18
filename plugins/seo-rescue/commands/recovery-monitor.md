@@ -69,14 +69,31 @@ Ohne `--vi` und `--keywords-t10` hat der direkte Aufruf keine Daten: Er gibt den
 Gefahrloser Probelauf (schreibt nichts, auch nicht nach `~/.cache/seo-rescue`):
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js" --domain example.com --vi 0.42 --keywords-t10 12 --cache-dir /tmp/seo-rescue-probe --dry-run
+node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js" --domain example.com --vi 0.42 --keywords-t10 12 --cache-dir "$HOME/seo-rescue-probe" --dry-run
 ```
+
+**Strenge Argumentpruefung (vor jedem Dateizugriff).** Alles, was nicht eindeutig ist, beendet den Lauf mit Exit Code `2` und der Zeile `Nothing was written.`, statt still einen Standard zu nehmen:
+
+| Eingabe | Ergebnis |
+|---------|----------|
+| `--dry-run=true`, `--dry-run=false`, `--dry-run=1` | abgelehnt. `--dry-run` ist ein Schalter ohne Wert. |
+| `--dryrun`, `--dry_run`, jede unbekannte Option, ein loses Wort | abgelehnt. Ein Tippfehler darf nicht zu einem echten Schreiblauf fuehren. |
+| `--cache-dir` ohne Wert, `--cache-dir --dry-run`, `--cache-dir=` | abgelehnt. Eine angegebene, aber leere Option gilt nie als „nicht angegeben“; es gibt keinen stillen Rueckfall auf `~/.cache/seo-rescue`. |
+| dieselbe Option zweimal | abgelehnt. |
+
+**Regeln fuer `--cache-dir`.** Kein Bestandteil des Pfads darf ein Symlink sein, auch kein Elternverzeichnis; die Fehlermeldung nennt den aufgeloesten Pfad, der stattdessen anzugeben ist. Auf macOS sind `/tmp` und `/var` selbst Symlinks: dort `/private/tmp/…` schreiben oder ein Verzeichnis unter dem eigenen Home nehmen. Das Verzeichnis muss dem aktuellen Benutzer gehoeren. Rechte fuer Gruppe und andere werden entfernt, strengere bestehende Rechte (z. B. `0500`) bleiben unveraendert. Dieselben Eigentums- und Rechtepruefungen gelten fuer `SEO_CACHE_DIR` und den Standardpfad.
+
+**Grenze.** Pruefung und Zugriff sind getrennte Systemaufrufe. Das schuetzt vor versehentlichen und vorbereiteten Symlinks, nicht vor einem Prozess desselben Benutzers, der waehrend des Laufs Verzeichnisse austauscht (siehe SECURITY.md im Repository).
+
+**Zahlen.** `--vi`: einfache Dezimalzahl von 0 bis 1000000 (`0.42`; kein Exponent, kein Vorzeichen). `--keywords-t10`: ganze Zahl von 0 bis 1000000000. Die Obergrenzen sind Plausibilitaetsgrenzen weit ueber realen Werten und weit unter dem Bereich, in dem JavaScript-Zahlen ungenau werden. `writeMonitorEntry()` prueft dieselben Bereiche selbst (auch `keywordsTotal`, `viTrend4wPct` von -100 bis 1000000, `backlinkSpamScore` von 0 bis 100) und wirft vor dem ersten Dateizugriff, wenn ein Wert keine endliche Zahl im Bereich ist. Laesst sich ein Delta nicht berechnen (Vorwert praktisch null oder keine Zahl), steht es als `null` im Eintrag, im ersten Fall mit einer Warnung.
+
+**Dateien.** `history.ndjson` wird nur angehaengt, wenn es eine regulaere Datei des aktuellen Benutzers mit genau einem Hardlink ist; ein Symlink oder eine hartverlinkte Datei beendet den Lauf mit Exit Code `2`, ohne dass etwas geschrieben wurde.
 
 | Exit Code | Bedeutung |
 |-----------|-----------|
 | `0` | Monitor-Eintrag geschrieben (complete oder partial), oder bewusst nichts geschrieben (`--dry-run`, direkter Aufruf ohne Daten) |
-| `1` | Monitor fehlgeschlagen (kein Eintrag geschrieben), z. B. ungueltiger Wert fuer `--vi` |
-| `2` | Security-Abbruch (Symlink im Cache-Pfad) oder fehlendes `--domain` |
+| `1` | Monitor fehlgeschlagen (kein Eintrag geschrieben), z. B. fehlende Schreibrechte |
+| `2` | Nichts geschrieben: ungueltige Argumente (unbekannte Option, Schalter mit Wert, Option ohne Wert, Zahl ausserhalb des Bereichs, fehlendes oder ungueltiges `--domain`) oder Security-Abbruch (Symlink im Pfad, fremdes Verzeichnis, hartverlinkte oder fremde Datei) |
 | `3` | Lock-Timeout (anderer Command laeuft) |
 
 ## Ablauf
@@ -162,7 +179,7 @@ Unterstuetzte `options`-Keys (alle optional, null-Defaults; nur diese werden vom
 |-----|---------|-----------|
 | `runId` | neu generiert | Run-ID aus Schritt 3 |
 | `cacheDir` | `SEO_CACHE_DIR` bzw. `~/.cache/seo-rescue` | Cache-Wurzel fuer diesen Aufruf (entspricht `--cache-dir`) |
-| `dryRun` | `false` | `true`: berechnet den Eintrag, haengt aber nichts an und legt kein Verzeichnis an |
+| `dryRun` | `false` | `true`: berechnet den Eintrag, haengt aber nichts an und legt kein Verzeichnis an. Nur die Wahrheitswerte `true`/`false`; `"true"` als Zeichenkette wird abgelehnt |
 | `keywordsTotal` | `null` | Gesamtzahl rankender Keywords (Schritt 5) → `keywords_total` |
 | `issueDataFresh` | `false` | Ergebnis aus Schritt 6; nur bei `true` fliesst `issue_reduction` in den Score |
 | `viTrend4wPct` | `null` | 4-Wochen-VI-Trend in Prozent (Sistrix); Primaer-Input fuer die `vi_trend`-Komponente |

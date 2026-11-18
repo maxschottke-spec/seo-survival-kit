@@ -12,6 +12,7 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { parseArgs } = require('node:util');
 
 const SLUG_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
 const HOSTNAME_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
@@ -113,16 +114,70 @@ function mkRunDir(prefix = 'seo-rescue-') {
 // PowerShell snippet that does this for .env files (same pattern applies here).
 //
 // `overrideDir` (optional) is an explicit cache root, e.g. from a script's
-// --cache-dir option. It takes precedence over SEO_CACHE_DIR and gets exactly
-// the same treatment: resolved to an absolute path, created 0700, refused if
-// it is a symlink. Passing nothing keeps the previous behaviour.
-function getCacheDir(overrideDir) {
-  if (overrideDir != null && (typeof overrideDir !== 'string' || overrideDir.trim() === '' || overrideDir.includes('\0'))) {
+// --cache-dir option. It takes precedence over SEO_CACHE_DIR. Because the
+// caller can point it anywhere, it is checked more strictly than the default:
+// no component of the path may be a symlink (see assertNoSymlinkInPath).
+//
+// For every cache dir (default, SEO_CACHE_DIR, explicit): the final component
+// must be a real directory owned by the current user; group/other permission
+// bits are removed; existing stricter permissions (e.g. 0500) are left alone;
+// a failing chmod aborts instead of being swallowed.
+//
+// KNOWN LIMIT: check and use are separate system calls (Node has no openat).
+// This stops accidental and pre-planted symlinks. It does not stop a process
+// running as the same user that swaps directories while a script runs.
+function validateExplicitCacheDir(overrideDir) {
+  if (typeof overrideDir !== 'string' || overrideDir.trim() === '' || overrideDir.includes('\0')) {
     throw new Error(`Unsafe cache dir rejected: ${JSON.stringify(overrideDir)}`);
   }
-  const dir = overrideDir != null
-    ? path.resolve(overrideDir)
-    : (process.env.SEO_CACHE_DIR || path.join(os.homedir(), '.cache', 'seo-rescue'));
+  return path.resolve(overrideDir);
+}
+
+// Rejects `dir` if any component of it is a symlink. Works for paths that do
+// not exist yet: the deepest existing ancestor is resolved with realpath and
+// must be identical to itself. `dir` must be absolute and normalized.
+function assertNoSymlinkInPath(dir) {
+  let existing = dir;
+  while (!safeLstat(existing)) {
+    const parent = path.dirname(existing);
+    if (parent === existing) break;
+    existing = parent;
+  }
+  const real = fs.realpathSync(existing);
+  if (real !== existing) {
+    const hint = path.join(real, path.relative(existing, dir));
+    throw new Error(`Unsafe cache dir rejected: a symlink is part of the path ${dir} (${existing} resolves to ${real}). Pass the resolved path instead: ${hint}`);
+  }
+}
+
+// Final-component checks shared by the cache root and the per-domain dir.
+function hardenOwnDir(dir, label) {
+  const st = fs.lstatSync(dir);
+  if (st.isSymbolicLink()) {
+    throw new Error(`${label} must not be a symlink: ${dir}`);
+  }
+  if (!st.isDirectory()) {
+    throw new Error(`${label} is not a directory: ${dir}`);
+  }
+  if (process.platform === 'win32') return; // no POSIX owner/mode on NTFS (see note above)
+  if (typeof process.getuid === 'function' && st.uid !== process.getuid()) {
+    throw new Error(`${label} is not owned by the current user: ${dir}`);
+  }
+  const mode = st.mode & 0o777;
+  if ((mode & 0o077) !== 0) {
+    // Only ever remove bits. A directory the owner made stricter stays as it is.
+    fs.chmodSync(dir, mode & 0o700);
+  }
+}
+
+function getCacheDir(overrideDir) {
+  let dir;
+  if (overrideDir != null) {
+    dir = validateExplicitCacheDir(overrideDir);
+    assertNoSymlinkInPath(dir);
+  } else {
+    dir = process.env.SEO_CACHE_DIR || path.join(os.homedir(), '.cache', 'seo-rescue');
+  }
   // Check before mkdir as well: mkdirSync({recursive}) on an existing symlink
   // succeeds silently, and chmodSync would then follow it.
   const pre = safeLstat(dir);
@@ -130,11 +185,8 @@ function getCacheDir(overrideDir) {
     throw new Error(`Cache dir must not be a symlink: ${dir}`);
   }
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-  try { fs.chmodSync(dir, 0o700); } catch {}
-  const st = fs.lstatSync(dir);
-  if (st.isSymbolicLink()) {
-    throw new Error(`Cache dir must not be a symlink: ${dir}`);
-  }
+  hardenOwnDir(dir, 'Cache dir');
+  if (overrideDir != null) assertNoSymlinkInPath(dir);
   return dir;
 }
 
@@ -198,28 +250,27 @@ function ensureDomainDir(slug, cacheDir) {
     throw new Error(`Domain cache dir must not be a symlink: ${dir}`);
   }
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-  try { fs.chmodSync(dir, 0o700); } catch {}
-  const st = fs.lstatSync(dir);
-  if (st.isSymbolicLink()) {
-    throw new Error(`Domain cache dir must not be a symlink: ${dir}`);
-  }
+  hardenOwnDir(dir, 'Domain cache dir');
   return dir;
 }
 
 // Read-only counterpart of ensureDomainDir for dry runs: returns the path the
-// domain dir WOULD have, creates nothing, and still refuses symlinks.
+// domain dir WOULD have, creates and changes nothing, and applies the same
+// symlink refusals (for an explicit cache dir: anywhere in the path).
 function resolveDomainDir(slug, cacheDir) {
   safeSlug(slug);
-  if (cacheDir != null && (typeof cacheDir !== 'string' || cacheDir.trim() === '' || cacheDir.includes('\0'))) {
-    throw new Error(`Unsafe cache dir rejected: ${JSON.stringify(cacheDir)}`);
+  let root;
+  if (cacheDir != null) {
+    root = validateExplicitCacheDir(cacheDir);
+    assertNoSymlinkInPath(root);
+  } else {
+    root = process.env.SEO_CACHE_DIR || path.join(os.homedir(), '.cache', 'seo-rescue');
   }
-  const root = cacheDir != null
-    ? path.resolve(cacheDir)
-    : (process.env.SEO_CACHE_DIR || path.join(os.homedir(), '.cache', 'seo-rescue'));
   const dir = path.join(root, slug);
   for (const p of [root, dir]) {
     const st = safeLstat(p);
     if (st && st.isSymbolicLink()) throw new Error(`Cache dir must not be a symlink: ${p}`);
+    if (st && !st.isDirectory()) throw new Error(`Cache dir is not a directory: ${p}`);
   }
   return dir;
 }
@@ -277,11 +328,27 @@ function releaseLock(lock) {
   }
 }
 
+// A file this library is about to replace or append to must be a regular file,
+// owned by the current user. `requireSingleLink` additionally refuses a file
+// with more than one hard link (writing through it would change a file that
+// also lives under another name).
+function assertOwnRegularFile(st, filePath, fn, requireSingleLink) {
+  if (st.isSymbolicLink()) throw new Error(`${fn}: target is a symlink: ${filePath}`);
+  if (!st.isFile()) throw new Error(`${fn}: target is not a regular file: ${filePath}`);
+  if (process.platform === 'win32') return;
+  if (typeof process.getuid === 'function' && st.uid !== process.getuid()) {
+    throw new Error(`${fn}: target is not owned by the current user: ${filePath}`);
+  }
+  if (requireSingleLink && st.nlink !== 1) {
+    throw new Error(`${fn}: target has ${st.nlink} hard links, refusing to write through it: ${filePath}`);
+  }
+}
+
 function atomicWriteJSON(filePath, data) {
   const st = safeLstat(filePath);
-  if (st && st.isSymbolicLink()) {
-    throw new Error(`atomicWriteJSON: target is a symlink: ${filePath}`);
-  }
+  // An existing target is replaced by rename, not written through, so a second
+  // hard link is harmless here. A symlink, a non-file or a foreign file is not.
+  if (st) assertOwnRegularFile(st, filePath, 'atomicWriteJSON', false);
   const tmpPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
   const json = JSON.stringify(data, null, 2) + '\n';
   // Write the temp file with O_EXCL so a pre-existing symlink at tmpPath aborts
@@ -296,8 +363,66 @@ function appendNDJSON(filePath, entry) {
     throw new Error(`appendNDJSON: target is a symlink: ${filePath}`);
   }
   const line = JSON.stringify(entry) + '\n';
-  const fd = fs.openSync(filePath, fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_WRONLY, 0o600);
-  try { fs.writeFileSync(fd, line); } finally { fs.closeSync(fd); }
+  // O_NOFOLLOW: if the path became a symlink after the lstat above, open fails
+  // (ELOOP) instead of following it. Not available on Windows (constant undefined).
+  const flags = fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_WRONLY | (fs.constants.O_NOFOLLOW || 0);
+  let fd;
+  try {
+    fd = fs.openSync(filePath, flags, 0o600);
+  } catch (e) {
+    if (e.code === 'ELOOP') throw new Error(`appendNDJSON: target is a symlink: ${filePath}`);
+    throw e;
+  }
+  try {
+    // Check the file that was actually opened, not the name: regular file,
+    // ours, exactly one link. Nothing has been written at this point.
+    assertOwnRegularFile(fs.fstatSync(fd), filePath, 'appendNDJSON', true);
+    fs.writeFileSync(fd, line);
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+// Strict command-line parsing for scripts that write files. Anything that is
+// not unambiguous is an error, never a silent default — a mistyped or malformed
+// safety switch must not turn into a real write:
+//   --dryrun                 unknown option            -> error
+//   --dry-run=true / =false  value on a switch          -> error
+//   --cache-dir              option without its value   -> error
+//   --cache-dir --dry-run    value looks like an option -> error
+//   --cache-dir=             empty value                -> error
+//   --vi 1 --vi 2            option given twice         -> error
+//   stray positional argument                           -> error
+// `spec` maps option name -> 'string' | 'boolean'. Returns { name: value } with
+// only the options that were given. Errors carry code 'USAGE'; callers print
+// the message and exit 2 before touching the file system.
+function parseStrictCli(spec, argv = process.argv.slice(2)) {
+  const options = {};
+  for (const [name, type] of Object.entries(spec)) {
+    if (type !== 'string' && type !== 'boolean') throw new Error(`parseStrictCli: bad type for --${name}`);
+    options[name] = { type, multiple: true };
+  }
+  let values;
+  try {
+    ({ values } = parseArgs({ args: argv, options, strict: true, allowPositionals: false }));
+  } catch (e) {
+    const err = new Error(`Invalid arguments: ${e.message}`);
+    err.code = 'USAGE';
+    throw err;
+  }
+  const usage = (msg) => { const err = new Error(`Invalid arguments: ${msg}`); err.code = 'USAGE'; return err; };
+  const out = {};
+  for (const [name, list] of Object.entries(values)) {
+    if (!Object.prototype.hasOwnProperty.call(spec, name)) continue;
+    if (list.length > 1) throw usage(`--${name} was given ${list.length} times`);
+    const v = list[0];
+    if (spec[name] === 'string' && (typeof v !== 'string' || v.trim() === '')) {
+      throw usage(`--${name} needs a non-empty value`);
+    }
+    if (spec[name] === 'boolean' && v !== true) throw usage(`--${name} takes no value`);
+    out[name] = v;
+  }
+  return out;
 }
 
 function generateRunId() {
@@ -723,6 +848,7 @@ module.exports = {
   releaseLock,
   atomicWriteJSON,
   appendNDJSON,
+  parseStrictCli,
   generateRunId,
   safeReadJSON,
   safeReadLatestImport,

@@ -30,6 +30,18 @@ Found by walking through the repository as a first-time user: installing v0.5.5,
 - Plugin docs: `docs/ONBOARDING.md` and `recovery-diagnose` named different places for the Search Console import; both now name `imports/gsc-performance.csv` (click series) and `imports/gsc/` (queries, pages, links). The command table lacked `recovery-audit`. `docs/SETUP.md` said Node.js 18+; `node --env-file` needs 20.6.
 - Stale version remarks removed (`README.md`, `sistrix-monday-recovery-check/SKILL.md`, the example README).
 
+### Fixed after review
+
+Found by an independent review of the fix itself, before release. The first version of the `--cache-dir` / `--dry-run` change above had these holes:
+
+- **`--dry-run=true` wrote.** The argument parser returned the string `"true"`, the code compared with `=== true`. `recovery-monitor.js` appended, `recovery-crawl.js` created directories. A mistyped `--dryrun` was ignored and led to a real write as well. Both scripts now parse strictly (`parseStrictCli()` in `lib/safe.js`): an unknown option, a value on a switch, a stray word or a repeated option ends the run with exit code 2 before any file access.
+- **A `--cache-dir` without a value fell back to the real cache.** `--vi 1 --cache-dir` wrote to `~/.cache/seo-rescue`; `--cache-dir --dry-run` created a directory named `--dry-run`. An option that is given but empty or unusable is now an error, never "not given". The same holds for `options.cacheDir` and `options.dryRun` when the functions are called directly.
+- **Numbers.** `--keywords-t10 9007199254740993` was stored as `…992`; a previous VI near zero produced an infinite delta that JSON stored silently as `null`. Values must now be finite and inside stated ranges (`--vi` 0 to 1,000,000; keyword counts whole numbers 0 to 1,000,000,000), on the command line and inside `writeMonitorEntry()`; a delta that cannot be computed is `null` with a warning; values read back from `history.ndjson` are used only if they are finite numbers.
+- **File system.** A symlink in the parent path of `--cache-dir` was followed; `history.ndjson` was appended to even when it was a hard link to another file; `chmod 0700` loosened a directory that was stricter (0500) and its errors were swallowed. Now: no symlink anywhere in an explicit cache path; cache directories must belong to the current user; permissions are only ever reduced; `history.ndjson` is opened with `O_NOFOLLOW` and checked after opening (regular file, own, one link); an existing `issues.json` must be a regular file of the current user.
+- Exit code 2 now consistently means "nothing was written" (invalid arguments or security abort); an invalid `--vi` used to exit 1.
+- Not closed, and stated in SECURITY.md: check and write are separate system calls. The checks stop accidental and pre-planted links, not a same-user process that swaps directories during a run.
+- `recovery-scripts-cache-dir.test.js` grew from 23 to 101 checks; every one of them also asserts that the stand-in for the user's real cache and the working directory stayed empty.
+
 ### Added
 
 - `--dry-run` for `recovery-monitor.js` and `recovery-crawl.js` (and `options.dryRun` for their functions): prints what would be written, creates no directory, takes no lock, writes nothing. `--help` for both.
@@ -41,7 +53,7 @@ Found by walking through the repository as a first-time user: installing v0.5.5,
 - The synthetic Monday-check CSVs and expected output now ship inside the plugin (`skills/sistrix-monday-recovery-check/examples/`), so the example works from an install; the skill states the column-name, separator and encoding rules.
 - `seo-audit-free`: an English note at the top, bilingual headings in the report template.
 - `channel-economics.example.js` and `csv-import.example.js` say where to run them from; the first one explains a missing `channels.json` instead of throwing.
-- Tests: `recovery-scripts-cache-dir.test.js` (23 checks), `core-updates-laufend.test.js` with a fixture for a running rollout, `monday-example.test.js`.
+- Tests: `recovery-scripts-cache-dir.test.js` (101 checks, see "Fixed after review"), `core-updates-laufend.test.js` with a fixture for a running rollout, `monday-example.test.js`.
 - CI: all seven test files and both self-tests run on every push and pull request; new checks for clone-only paths in command and skill files and for test files that are not wired in.
 
 ### Not changed, and still open
