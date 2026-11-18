@@ -50,7 +50,7 @@ Statt eines normalen Action-Plans erzeugt `recovery-full` bei aktivem Gate ein P
   "prepared_now": [
     "schema_drafts",
     "title_drafts",
-    "rico_briefings",
+    "dev_briefings",
     "rollback_plans"
   ],
   "deferred_until_unlock": [
