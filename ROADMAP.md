@@ -6,7 +6,7 @@ All versions before v1.0 are public beta. Breaking changes are possible between 
 
 ## v0.4.1 (shipped)
 
-Ten skills (one orchestrator plus nine sub-skills). Cross-platform exports for Cursor, Custom GPT, Gemini CLI, Aider, Codex. Two external security audit rounds closed. Anthropic plugin marketplace submission pending review.
+Ten skills (one orchestrator plus nine sub-skills). Cross-platform exports for Cursor, Custom GPT, Gemini CLI, Aider, Codex. One external security review plus one maintainer-driven re-audit closed. Anthropic plugin marketplace submission pending review.
 
 See [CHANGELOG.md](./CHANGELOG.md) for the per-release history.
 

@@ -4,12 +4,12 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 
 ## Where this plugin is today
 
-**Version 0.5.0** (shipped) — sixth release in the May 2026 launch + hardening cycle. Architecture consolidation: doc structure reached canonical-source-of-truth state in [ARCHITECTURE.md](./ARCHITECTURE.md). No new runtime skills and no change to runtime behavior relative to v0.4.1. **v0.5.2 shipped:** SEO Change Governor + Settlement Gate, the recovery-workflow commands, and the runnable SISTRIX Monday Recovery Check and subscription-monetization-audit skills.
+**Version 0.5.5** (November 2026). Nineteen skills and commands: one orchestrator, the six-command recovery workflow with Settlement Gate and Change Governor, and twelve further skills. See [CHANGELOG.md](./CHANGELOG.md) for what each release changed, including the findings that were withdrawn in 0.5.5.
 
 **Positioning.** Recovery Operating System for Ecommerce/D2C. Recovery-first, decision-first, profit-aware, risk-aware. Complements technical-audit suites like `claude-seo`; does not replace them. The framework supports decisions; execution belongs to the operator's team, agency, or contractors.
 
 - ✅ Tested against 4 real domains (mixed e-commerce + news, results anonymized in published LESSONS.md)
-- ✅ Real Core-Update-Recovery pilot case validates the framework — see usage section below
+- ✅ Built from one real Core-Update recovery case (N=1). The case did not end in a documented recovery, and several early findings were later withdrawn, see CHANGELOG
 - ✅ Pipeline scripts run end-to-end in <5 min per domain
 - ✅ MIT license, clean structure
 - ✅ Sample PDF + screenshots in `examples/` (synthetic data, real layout)
@@ -17,21 +17,21 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 - ✅ agentskills.io compliant — SKILL.md format works in Claude Code / Cursor / Codex / Gemini CLI (cross-agent portability — though only tested in Claude Code so far)
 - ✅ Cross-platform docs (macOS / Linux / Windows env-var reference in ONBOARDING.md)
 - ✅ Security hardening v0.3 — `lib/safe.js` (safeSlug + safeHostname + safeUrl + safeLabel + validateConfigTargets + writeFileExclusive + getCacheDir + cachePath), strict CSP on PDF HTML, `spawnSync` with `shell: false` + array argv, sanitize() against indirect prompt-injection, `allowed-tools` declared per skill, CODEOWNERS + Dependabot + branch protection
-- ✅ Two independent security review rounds completed 2026-05-22 (see [SECURITY.md → External security reviews](./SECURITY.md#external-security-reviews)):
+- ✅ Two security review rounds completed 2026-05-22, one external and one maintainer-driven (see [SECURITY.md → External security reviews](./SECURITY.md#external-security-reviews)):
   - Round 1 (external reviewer): 1 CRITICAL chain + 4 HIGH + 6 MEDIUM — all closed in the v0.3.x security sprint
   - Round 2 (maintainer-driven senior-engineering + marketplace-reviewer audit): gitleaks + trufflehog + semgrep clean; 2 P1 marketplace items flagged + closed; verdict **SAFE TO PUBLISH**
 - ⚠️ One external collaborator (security reviewer); no external feature-PRs yet
-- ⚠️ No automated tests (skills tested via subagent pressure scenarios manually, plus SAST tools in CI)
-- ⚠️ German-language documentation in some places (Lessons + parts of SKILL.md) — English README and a fully translated SKILL.md planned for 0.4
+- ⚠️ Thin automated testing: four fixture test files and two script self-tests exist but are not yet wired into CI. CI runs structure, syntax and consistency checks, no SAST
+- ⚠️ German-language documentation in some places (Lessons + parts of SKILL.md and commands)
 - ⚠️ Hardcoded for German/`location_code: 2276` DataForSEO Labs queries — international expansion planned
 
-## Already in production use
+## Where it has been used
 
-This is a working tool driving real Core-Update recovery decisions on a live e-commerce domain (the pilot domain, anonymized in published LESSONS.md). It is not a research prototype:
+This tool drove real Core-Update recovery decisions on one live e-commerce domain. It is not a research prototype, and it is not a proven method either:
 
-- **Active recovery case** — driving recovery decisions on a mid-sized DE e-commerce shop hit by the March 2026 Google Core Update. Pipeline outputs (Sistrix VI traces, GSC click diffs, AI-citation counts) inform weekly recovery prioritization. Multiple dated lesson entries in `post-core-update-recovery/LESSONS.md` and `seo-outreach-report/LESSONS.md` document what worked and what didn't.
+- **Pilot case** — used from March to November 2026 to drive recovery decisions on one mid-sized DE e-commerce shop hit by the March 2026 Google Core Update. Pipeline outputs (Sistrix VI traces, GSC click diffs, AI-citation counts) informed weekly prioritization. Dated entries in `post-core-update-recovery/LESSONS.md` and `seo-outreach-report/LESSONS.md` document what worked, what did not, and which early readings were withdrawn after re-measurement.
 - **Cold-outreach use** — the decision-maker PDF format from `seo-outreach-report` has been generated for real prospects, not just synthetic examples. The 10-chapter layout, the language register, and the action-plan template all reflect feedback from actual non-technical recipients.
-- **Operating since** — the pipeline scripts (then under different filenames) have been in regular use since March 2026 on the maintainer's daily SEO workflow. The plugin packaging just made them shareable.
+- **Operating period** — the pipeline scripts (then under different filenames) were in regular use from March 2026 in the maintainer's SEO workflow. The plugin packaging made them shareable.
 - **Self-improving via LESSONS.md** — each new pattern observed in real use gets a dated entry. After three confirmations, it moves into the main SKILL.md. This is the mechanism that took the framework from "ad-hoc memos" to "documented playbook".
 
 What this is **not** yet: production-grade in the sense of having external users, an SLA, or a support contract. The plugin is in **public beta** (single-maintainer, best-effort response, see the Status section of [README.md](./README.md)).
@@ -40,20 +40,18 @@ What this is **not** yet: production-grade in the sense of having external users
 
 ## How this compares to alternatives
 
-| Plugin / Skill Pack | Stars | Mature? | Covers what we cover? | Recommendation |
+| Plugin / Skill Pack | Stars (May 2026) | Mature? | Covers what we cover? | Recommendation |
 |---------------------|-------|---------|------------------------|----------------|
 | [AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo) | 6.9k | **Very mature** (v1.9.9, 30+ commits, active maintenance) | Comprehensive audit, schema, content, GEO, e-commerce, international, PDF reports | **Use for technical audits.** This is the reference. |
 | [aaron-he-zhu/seo-geo-claude-skills](https://github.com/aaron-he-zhu/seo-geo-claude-skills) | 1.7k | Mature | 20 skills around keyword research + content writing + technical audits + rank tracking | **Use for ongoing content/keyword work.** |
 | [zubair-trabzada/dataforseo-claude](https://github.com/zubair-trabzada/dataforseo-claude) | 79 | Newer | DataForSEO-focused with 13 skills + 5 subagents | Good if DataForSEO is your main data source. |
 | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | 12.9k | Very mature | Marketing stack (CRO, copy, paid ads, SEO) — broader scope | Use for marketing breadth, not deep SEO. |
 | [SwayyEm 21-Skills Pack](https://www.swayyem.com/guides/21-seo-skills-built-for-claude) | n/a (lead magnet) | Newer | 21 pure-prompt skills across keywords, content, technical, off-page, AI-search. Distributed as commercial lead magnet for editorial-PR services with email gate on full content. | Use for prompt-engineering patterns and breadth ideas. Lacks live API integrations, drift detection, recovery-window discipline, identity-leak sanitization, and pattern maturity stages. |
-| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.5.2 shipped, hardened** | Recovery Operating System for ecommerce/D2C: Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking, GSC deep dive, AI citation tracking, decision/sequencing layer (v0.5 docs) | **Use when** the situation is recovery / cold-outreach / AI-search visibility / cross-channel decision support for ecommerce. Complements technical-audit plugins. |
+| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.5.5, public beta** | Recovery Operating System for ecommerce/D2C: Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking, GSC deep dive, AI citation tracking, decision/sequencing layer (v0.5 docs) | **Use when** the situation is recovery / cold-outreach / AI-search visibility / cross-channel decision support for ecommerce. Complements technical-audit plugins. |
 
 ### Comparison detail
 
 **Against `claude-seo` (6.9k stars, very mature):** complementary, not competing. claude-seo is the broad technical-audit reference suite. This kit focuses on the narrower recovery-window decision-discipline: post-Core-Update sequencing, defensive change governance, stop-regel mechanics, and AI-citation drift detection. Recommended posture: claude-seo for broad audits, this kit for recovery windows.
-
-**Against SwayyEm 21-Skills Pack:** functional overlap exists in 5-7 skill areas (canonical conflict detection, content cluster building, backlink quality scoring with AI-citation-weight dimension, anchor text balancing, topical authority mapping, schema markup validation). The SwayyEm pack is pure-prompt without live validation backend, halluciniert in AI-engine-citation simulation (no API anchoring), and lacks recovery-window concepts (settlement gates, drift baselines, identity-leak sanitization). The SwayyEm pack is distributed as an email-gated lead magnet for editorial-PR services; this kit is MIT-licensed without gate. Cross-adaptation of useful prompt patterns is possible with sanitization and live-validation backend wrapping.
 
 ## What's actually unique here
 

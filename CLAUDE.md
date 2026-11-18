@@ -51,7 +51,7 @@ seo-survival-kit/
 │           ├── rescue/                       # Orchestrator + routing table
 │           ├── seo-audit-free/
 │           ├── post-core-update-recovery/
-│           ├── seo-outreach-report/          # SKILL.md + 4 Node.js scripts + .env.example
+│           ├── seo-outreach-report/          # SKILL.md + pipeline scripts + .env.example
 │           ├── channel-economics-analyzer/
 │           ├── competitor-deep-audit/
 │           ├── target-keyword-set/           # v0.5.5: target set from existing rankings, grouped by kind of work
@@ -193,7 +193,7 @@ These rules are derived from real recovery operations and apply to all commands 
 
 - Repository: https://github.com/maxschottke-spec/seo-survival-kit
 - Anthropic community marketplace: pending review at claude-plugins-community
-- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.4`
+- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.5`
 - Pilot-domain recovery case (anonymized): see `post-core-update-recovery/LESSONS.md` for the dated lesson entries that source the framework
 
 ## Canonical doc map

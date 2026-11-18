@@ -104,9 +104,9 @@ For the `post-core-update-recovery` skill's credibility — public examples of e
 
 | Year | Domain / Industry | Drop | Reference |
 |------|-------------------|------|-----------|
-| 2023–2024 | Glenn Gabe's commercial-site case (multiple updates Jul–Oct 2023) | −41 % over 4 updates | [Search Engine Journal coverage](https://searchengineland.com/case-study-august-2024-google-core-update-recovery-plan-447142) |
+| 2023–2024 | Glenn Gabe's commercial-site case (multiple updates Jul–Oct 2023) | −41 % over 4 updates | [Search Engine Land coverage](https://searchengineland.com/case-study-august-2024-google-core-update-recovery-plan-447142) |
 | Aug 2024 | Technical product site (Promodo case) | Notable decline, conversions stable | [Promodo blog](https://www.promodo.com/blog/google-updates) |
-| Dec 2025 | Mid-sized online retailer | −40 % traffic overnight, key products fell from pos 3-5 to 15-20 | [ALM Corp analysis](https://almcorp.com/blog/google-december-2025-core-update-complete-analysis-recovery-guide/) |
+| Dec 2025 | Mid-sized online retailer | −40 % traffic overnight, key products fell from pos 3-5 to 15-20 | ALM Corp analysis (source page no longer online) |
 | 2024 | HouseFresh (HVAC reviews) | Made famous by Forbes coverage — independent review sites flattened in favor of major publishers | Public reporting widely covered |
 | 2024 | Retro Dodo (gaming retro reviews) | Documented by DigiDay — small-publisher-crash narrative | Public reporting |
 

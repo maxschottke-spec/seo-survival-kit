@@ -2,7 +2,7 @@
 
 Logic that turns diagnostic evidence into prioritized, sequenced, confidence-rated recommendations. Sits above individual skills; new skills feed the engine, the engine produces decisions.
 
-Companion docs: [ARCHITECTURE.md](./ARCHITECTURE.md) for system shape, [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) for the recovery-specific layer that the engine consumes, [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) for the weekly workflow that exercises the engine.
+Companion docs: [ARCHITECTURE.md](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/ARCHITECTURE.md) for system shape, [RECOVERY_SYSTEM.md](./RECOVERY_SYSTEM.md) for the recovery-specific layer that the engine consumes, [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) for the weekly workflow that exercises the engine.
 
 ---
 
@@ -186,7 +186,7 @@ Each rule is a short, named, source-cited entry that applies in specific conditi
 
 ### Adding rules
 
-New rules land per the lifecycle in [ARCHITECTURE.md governance](./ARCHITECTURE.md#release-gating): observe across 3+ confirmed cases, document with all required fields, tie to source(s), add to relevant skill's `LESSONS.md`, reference in skill output when fired. Rules added without 3+ confirmations are labeled "experimental" and apply at low confidence only.
+New rules land per the lifecycle in [ARCHITECTURE.md governance](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/ARCHITECTURE.md#release-gating): observe across 3+ confirmed cases, document with all required fields, tie to source(s), add to relevant skill's `LESSONS.md`, reference in skill output when fired. Rules added without 3+ confirmations are labeled "experimental" and apply at low confidence only.
 
 ### Removing rules
 
@@ -467,7 +467,7 @@ It does not integrate with CRM, marketing automation, or dashboard platforms.
 
 ## 11. Planned output contract (v0.6+)
 
-**Planned for v0.6+.** The current skills (18 in `plugins/seo-rescue/skills/`) do not currently emit a structured decision-layer wrapper. This section specifies the output contract that the planned Decision Engine integration will produce when skills are revised to feed the engine in v0.6+. Treat the list below as the target shape, not as a description of current skill outputs.
+**Planned for v0.6+.** The current skills (19 in `plugins/seo-rescue/skills/`) do not currently emit a structured decision-layer wrapper. This section specifies the output contract that the planned Decision Engine integration will produce when skills are revised to feed the engine in v0.6+. Treat the list below as the target shape, not as a description of current skill outputs.
 
 The planned skill output will include the engine's decision-layer wrapper:
 

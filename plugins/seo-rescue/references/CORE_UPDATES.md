@@ -4,6 +4,10 @@ Reference data for Core Update correlation checks in `recovery-diagnose`.
 
 | Update | Type | Rollout-Start | Rollout-Ende | Verified |
 |--------|------|--------------|-------------|----------|
+| November 2026 Core Update | core | 2026-11-10 | laufend | yes (2026-11-18, rollout not finished) |
+| September 2026 Spam Update | spam | 2026-09-24 | 2026-10-08 | yes (2026-11-18) |
+| August 2026 Spam Update | spam | 2026-08-18 | 2026-08-21 | yes (2026-11-18) |
+| June 2026 Spam Update | spam | 2026-06-24 | 2026-06-26 | yes (2026-11-18) |
 | May 2026 Core Update | core | 2026-05-21 | 2026-06-02 | yes (2026-06-03) |
 | March 2026 Core Update | core | 2026-03-27 | 2026-04-08 | yes (2026-06-03) |
 | March 2026 Spam Update | spam | 2026-03-24 | 2026-03-25 | yes (2026-06-03, 20h rollout) |

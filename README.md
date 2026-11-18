@@ -1,12 +1,12 @@
 # SEO Survival Kit for Claude Code
 
-> Recovery-first decision support for ecommerce/D2C SEO. Claude Code skills for Core Update recovery diagnosis, prioritized action plans, weekly monitoring, and a Change Governor / Settlement Gate that prevents over-optimizing during recovery windows. Built and validated during real ecommerce Core-Update recovery in spring 2026. Open-source, MIT, zero runtime dependencies.
+> Recovery-first decision support for ecommerce/D2C SEO. Claude Code skills for Core Update recovery diagnosis, prioritized action plans, weekly monitoring, and a Change Governor / Settlement Gate that prevents over-optimizing during recovery windows. Built during a real ecommerce Core-Update recovery case in 2026 and corrected against five months of re-measurement. Most rules are single-case observations (N=1), labelled as such. Open-source, MIT, zero runtime dependencies.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://code.claude.com/)
 [![Status: Public Beta](https://img.shields.io/badge/Status-Public%20Beta-orange.svg)](./CHANGELOG.md)
 
-**v0.5.4 shipped.** Public beta. Breaking changes possible before v1.0. Pin to a tag for reproducible installs. See [CHANGELOG.md](./CHANGELOG.md).
+**v0.5.5 shipped.** Public beta. Breaking changes possible before v1.0. Pin to a tag for reproducible installs. See [CHANGELOG.md](./CHANGELOG.md).
 
 ## Start here
 
@@ -142,7 +142,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 Pinned to a tag (reproducible, survives upstream changes):
 
 ```shell
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.4
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.5
 /plugin install seo-rescue@seo-survival-kit
 /reload-plugins
 ```
@@ -178,7 +178,7 @@ Same layout you get for a real domain — 10 chapters, ~1 MB PDF, plain language
 
 ![Sample SEO Report — Cover & Executive Summary](./examples/screenshots/01-cover-executive-summary.png)
 
-Full sample: [examples/sample-audit.pdf](./examples/sample-audit.pdf). The use-case pattern (sharp −60% drop in 2-3 weeks after a published Core Update) is documented in [examples/screenshots/02-core-update-crash-case.png](./examples/screenshots/02-core-update-crash-case.png) and [ROADMAP-2026.md](./ROADMAP-2026.md).
+Full sample: [examples/sample-audit.pdf](./examples/sample-audit.pdf). The use-case pattern (a sharp drop within 2-3 weeks after a published Core Update) is illustrated with synthetic data in [examples/screenshots/02-core-update-crash-case.png](./examples/screenshots/02-core-update-crash-case.png) and [ROADMAP-2026.md](./ROADMAP-2026.md).
 
 ## When to use
 
@@ -218,7 +218,7 @@ For Your-Money-Your-Life sites (medical, legal, financial, regulated), have a do
 
 ## Real-world basis
 
-Skills were built from one extended Core-Update recovery case (mid-size DE ecommerce shop, March/April 2026 update window) and validated against four additional real-world domain audits in May 2026. Patterns in skill `LESSONS.md` files are observations from this case base, not population statistics — treat as starting hypotheses to test in your own context.
+Skills were built from one extended Core-Update recovery case (mid-size DE ecommerce shop, March/April 2026 update window) and applied to four additional real-world domain audits in May 2026. The case did not end in a documented recovery, and several early findings were later withdrawn (see [CHANGELOG.md](./CHANGELOG.md), 0.5.5 → Corrected). Patterns in skill `LESSONS.md` files are observations from this case base, not population statistics — treat as starting hypotheses to test in your own context.
 
 The open repo is a first-pass methodology and decision-support layer. It helps identify recovery signals, risky changes, protected URLs, winner/loser patterns, missing data, and validation steps. It is not the same as a calibrated recovery engagement that brings private business context into the decision. Deeper recovery work needs data the open repo does not see: GSC/SISTRIX history, shop revenue, margin, returns, inventory, paid-media context, implementation history, competitive context, and operator review to weigh conflicting signals.
 
@@ -232,7 +232,7 @@ The plugin is MIT and self-serve. If you'd rather have someone with operational 
 | **Recovery Retainer (ongoing advisory)** | Monthly reviews, plan adjustments, prioritization help | 3-6 months, weekly to bi-weekly cadence |
 | **Outreach pipeline setup** | Configured pipeline + first 5 PDFs + handoff | One-time, for agencies that want decision-maker deliverables |
 
-Contact: open a [Discussion](https://github.com/maxschottke-spec/seo-survival-kit/discussions) or reach the maintainer via the email on the [GitHub profile](https://github.com/maxschottke-spec). The framework comes from a specific recovery case still in active recovery; engaging means getting context on which patterns apply to your situation and which do not.
+Contact: open a [Discussion](https://github.com/maxschottke-spec/seo-survival-kit/discussions).
 
 ## Contributors
 
@@ -241,7 +241,7 @@ Contact: open a [Discussion](https://github.com/maxschottke-spec/seo-survival-ki
 
 ## Status
 
-Single-maintainer open-source project. No SLA, no commercial support. Issue response best-effort within a few days. For production-critical workflows, pin to a specific tag and review releases before upgrading. The currently shipping version is visible in the badge near the top of this README and in [CHANGELOG.md](./CHANGELOG.md).
+Single-maintainer open-source project. No SLA, no commercial support. Issue response best-effort within a few days. For production-critical workflows, pin to a specific tag and review releases before upgrading. The currently shipping version is stated at the top of this README and in [CHANGELOG.md](./CHANGELOG.md).
 
 ## License, security, contributing
 
