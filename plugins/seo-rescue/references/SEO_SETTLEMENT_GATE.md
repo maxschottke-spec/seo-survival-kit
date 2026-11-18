@@ -93,7 +93,7 @@ All read-only, planning, and rollback-preparation work continues:
 - Backlink audits and delta analyses
 - Live HTTP status checks (curl, no follow)
 - Schema validation drafts (output to local cache, not pushed live)
-- Rico / developer briefing documents
+- Developer briefing documents
 - Monitoring dashboards and re-renders
 - QA reports against existing live state
 - Rollback plan drafts (executed only under emergency_rollback)

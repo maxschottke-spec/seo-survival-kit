@@ -3,21 +3,25 @@ name: seo-audit-free
 description: 'Use when the user wants a basic SEO health check on a domain WITHOUT paying for any SEO tools — e.g. "kostenloser SEO-Check", "SEO ohne Sistrix", "ich habe nur Google Search Console und nichts anderes", "Anfänger-Audit", "wo fange ich beim SEO an", "billiges SEO" oder als Vorstufe vor dem entscheidet ob die kostenpflichtigen Tools (Sistrix, DataForSEO) sinnvoll sind. Anti-Use: NICHT für tiefere Wettbewerbsanalyse, Sichtbarkeitsverlauf, oder professionelle Outreach-Reports — dafür existiert `seo-outreach-report` mit den paid APIs.'
 user-invocable: true
 argument-hint: '[domain]'
-allowed-tools: [Read, Bash(curl:*), Bash(node:*), Bash(npx lighthouse:*)]
+allowed-tools: [Read, Bash(curl:*), Bash(node:*), Bash(npx lighthouse:*), Bash(grep:*), Bash(head:*), Bash(sort:*), Bash(echo:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.5'
+  version: '0.5.6'
   category: marketing
 ---
 
 # Beginner SEO Audit — nur kostenlose Tools
 
+> **Language note (English readers):** This skill text and its report template are written in German. The workflow itself is language-independent: eight steps (index check, robots.txt and sitemap, HTTP headers, on-page signals, PageSpeed Insights, Lighthouse, schema validator, Search Console). Ask Claude to "answer in English" and it will run the same steps and write the report in English; the template headings below carry both languages.
+>
+> **Hinweis:** Skilltext und Berichtsvorlage sind deutsch. Auf Wunsch antwortet Claude englisch.
+
 ## Overview
 
 Ein gewollt minimaler SEO-Check, der **ohne kostenpflichtige APIs** (Sistrix, DataForSEO, Ahrefs, SEMrush) auskommt. Nutzt nur:
 - Google Search Console (eigene Property)
-- Google PageSpeed Insights v5 (öffentlich, 25k Calls/Tag frei)
+- Google PageSpeed Insights v5 (öffentlich, 25k Calls/Tag frei mit kostenlosem API-Key; ohne Key oft HTTP 429, siehe Schritt 5)
 - Lighthouse CLI (lokal, Open Source)
 - Schema.org Validator (Web-Tool, kostenfrei)
 - Curl + manuelle Inspektion von robots.txt / sitemap.xml / headers
@@ -53,9 +57,16 @@ Im Google-Sucheingabe-Feld. Liefert eine grobe Indexgröße. Wenn 0 Treffer → 
 ### Schritt 2 — robots.txt + sitemap.xml manuell prüfen
 
 ```bash
+# Erst den Statuscode: Bei 404 liefern viele Server eine HTML-Fehlerseite,
+# die mit "| head" wie Inhalt aussieht, aber keine robots.txt ist.
+curl -s -o /dev/null -w 'robots.txt:  HTTP %{http_code} (%{content_type})\n' https://example.com/robots.txt
+curl -s -o /dev/null -w 'sitemap.xml: HTTP %{http_code} (%{content_type})\n' https://example.com/sitemap.xml
+# Inhalt nur auswerten, wenn oben HTTP 200 steht:
 curl -s https://example.com/robots.txt | head -100
 curl -s https://example.com/sitemap.xml | head -50
 ```
+
+Steht dort kein `HTTP 200`, gibt es die Datei nicht (oder sie wird umgeleitet: bei 301/302 dieselben Befehle mit `-L` wiederholen). Eine fehlende robots.txt ist kein Fehler, eine fehlende Sitemap ein Befund. Die Sitemap muss nicht unter `/sitemap.xml` liegen: Massgeblich ist die `Sitemap:`-Zeile in der robots.txt.
 
 Pflicht-Checks:
 - Wird der Hauptbereich nicht blockiert (`Disallow: /`)?
@@ -88,7 +99,7 @@ echo "=== JSON-LD ===" && grep -c 'application/ld+json' /tmp/home.html
 echo "=== Schema @types ===" && grep -oE '"@type"\s*:\s*"[^"]+"' /tmp/home.html | sort -u
 echo "=== Canonical ===" && grep -ioE '<link[^>]+rel=["'"'"']canonical["'"'"'][^>]+href=["'"'"'][^"'"'"']+' /tmp/home.html | head -1
 echo "=== Robots Meta ===" && grep -ioE '<meta[^>]+name=["'"'"']robots["'"'"'][^>]+content=["'"'"'][^"'"'"']+' /tmp/home.html
-echo "=== Lang ===" && grep -oE 'lang=["'"'"'][^"'"'"']+' /tmp/home.html | head -1
+echo "=== Lang ===" && grep -ioE '<html[^>]*[[:space:]]lang=["'"'"']?[a-zA-Z-]+' /tmp/home.html | head -1
 ```
 
 Bewertung pro Punkt:
@@ -104,7 +115,7 @@ Bewertung pro Punkt:
 | Robots-Meta = noindex | KRITISCH (außer absichtlich) |
 | lang fehlt | Niedrig |
 
-### Schritt 5 — Google PageSpeed Insights (kostenfreier API-Key)
+### Schritt 5 — Google PageSpeed Insights (kostenfreier API-Key empfohlen)
 
 ```bash
 # Mit API-Key (empfohlen, 25k/Tag Quota)
@@ -113,25 +124,39 @@ curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https%3A
 curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https%3A%2F%2Fexample.com%2F&strategy=desktop&category=performance&category=seo&category=accessibility&category=best-practices&key=YOUR_KEY" > /tmp/psi-desktop.json
 ```
 
-Wichtige Felder extrahieren:
-```bash
-node -e "
-const j = JSON.parse(require('fs').readFileSync('/tmp/psi-mobile.json'));
-const r = j.lighthouseResult;
-console.log('Performance:', Math.round(r.categories.performance.score*100));
-console.log('SEO:', Math.round(r.categories.seo.score*100));
-console.log('LCP:', r.audits['largest-contentful-paint'].displayValue);
-console.log('CLS:', r.audits['cumulative-layout-shift'].displayValue);
-console.log('TBT:', r.audits['total-blocking-time'].displayValue);
-console.log('CrUX:', j.loadingExperience?.overall_category || 'no field data');
-"
-```
-
 API-Key holen: [console.cloud.google.com](https://console.cloud.google.com) → "PageSpeed Insights API" enablen → API key erstellen. **Kostenlos**.
 
-Alternativ ohne Key (Public-Quota 25 Calls/Tag/IP):
+Ohne Key (derselbe Aufruf ohne `&key=…`, gleiche Kategorien, gleiche Ausgabedatei):
 ```bash
-curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https%3A%2F%2Fexample.com%2F&strategy=mobile"
+curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https%3A%2F%2Fexample.com%2F&strategy=mobile&category=performance&category=seo&category=accessibility&category=best-practices" > /tmp/psi-mobile.json
+```
+
+**Ehrlicher Hinweis:** Ohne Key läuft der Aufruf über ein Kontingent, das sich alle schlüssellosen Aufrufer teilen. Er antwortet deshalb oft mit HTTP 429 („Quota exceeded“), auch beim allerersten Versuch. Dann nicht wiederholen, sondern entweder den kostenlosen Key anlegen (2 Minuten) oder direkt Schritt 6 nehmen: Lighthouse lokal liefert dieselben Labor-Werte ohne Kontingent, nur ohne die CrUX-Felddaten.
+
+Wichtige Felder extrahieren (bricht bei einer Fehlerantwort mit klarer Meldung ab, statt abzustürzen):
+```bash
+node -e "
+const fs = require('fs');
+const file = process.argv[1] || '/tmp/psi-mobile.json';
+let j;
+try { j = JSON.parse(fs.readFileSync(file, 'utf8')); }
+catch (e) { console.error('PSI: ' + file + ' ist kein lesbares JSON (' + e.message + ')'); process.exit(1); }
+if (j.error) {
+  console.error('PSI-Fehler ' + (j.error.code || '?') + ': ' + (j.error.message || 'ohne Meldung'));
+  if (j.error.code === 429) console.error('Kontingent erschoepft: kostenlosen API-Key anlegen oder Schritt 6 (Lighthouse lokal) nehmen.');
+  process.exit(1);
+}
+const r = j.lighthouseResult;
+if (!r || !r.categories) { console.error('PSI: Antwort ohne lighthouseResult'); process.exit(1); }
+const score = (k) => (r.categories[k] && r.categories[k].score != null) ? Math.round(r.categories[k].score * 100) : 'n/a';
+const audit = (k) => (r.audits && r.audits[k] && r.audits[k].displayValue) || 'n/a';
+console.log('Performance:', score('performance'));
+console.log('SEO:', score('seo'));
+console.log('LCP:', audit('largest-contentful-paint'));
+console.log('CLS:', audit('cumulative-layout-shift'));
+console.log('TBT:', audit('total-blocking-time'));
+console.log('CrUX:', (j.loadingExperience && j.loadingExperience.overall_category) || 'no field data');
+" /tmp/psi-mobile.json
 ```
 
 ### Schritt 6 — Lighthouse CLI lokal
@@ -141,7 +166,7 @@ Falls Node.js installiert:
 npx lighthouse https://example.com/ --output=json --output-path=/tmp/lh.json --quiet --chrome-flags="--headless"
 ```
 
-Gibt dieselben Metriken wie PSI v5, aber lokal — kein Quota-Limit. Funktioniert auch für interne/staging Sites.
+Gibt dieselben Labor-Metriken wie PSI v5, aber lokal — kein Quota-Limit, dafür keine CrUX-Felddaten. Braucht eine lokale Chrome- oder Chromium-Installation. Funktioniert auch für interne/staging Sites.
 
 ### Schritt 7 — Schema.org Validator (web)
 
@@ -161,31 +186,31 @@ Wenn der User Zugriff auf die GSC der Domain hat:
 
 Ohne GSC: bitten dass User Zugriff einrichtet. Setup ist kostenlos und dauert 5 Minuten ([Anleitung](https://support.google.com/webmasters/answer/9008080)).
 
-## Output-Format (für Einsteiger)
+## Output-Format (für Einsteiger) / Report template
 
-Kurzbericht in 1 Seite Markdown:
+Kurzbericht in 1 Seite Markdown. Die Überschriften stehen zweisprachig da; im Bericht nur die Sprache verwenden, in der der Nutzer schreibt.
 
 ```markdown
-# SEO-Check: example.com (Stand: TT.MM.JJJJ)
+# SEO-Check: example.com (Stand / as of: TT.MM.JJJJ)
 
-## 🟢 Was läuft gut
+## 🟢 Was läuft gut / What works
 - ...
 
-## 🟡 Was verbesserbar ist
+## 🟡 Was verbesserbar ist / What can be improved
 - ...
 
-## 🔴 Was kritisch ist
+## 🔴 Was kritisch ist / What is critical
 - ...
 
-## Drei konkrete Sofort-Maßnahmen
-1. ... (Aufwand: X Std., Effekt: Y)
+## Drei konkrete Sofort-Maßnahmen / Three immediate actions
+1. ... (Aufwand / effort: X Std., Effekt / effect: Y)
 2. ...
 3. ...
 
-## Wann sich ein größeres Audit lohnt
+## Wann sich ein größeres Audit lohnt / When a larger audit pays off
 Wenn 2+ rote Punkte vorhanden und/oder Sichtbarkeit fällt: Erweiterung auf
 das `seo-outreach-report`-Skill (Sistrix-VI-Trend + DataForSEO-Rankings + Wettbewerb)
-sinnvoll. Kosten: ca. €0,05–0,50 pro Domain für die paid APIs.
+sinnvoll. Kosten: ca. 0,15–0,75 pro Domain für die paid APIs (Sistrix-Credits plus DataForSEO, siehe COSTS.md im Repository).
 ```
 
 ## Verwandte Skills

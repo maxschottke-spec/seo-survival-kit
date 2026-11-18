@@ -7,7 +7,7 @@ allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.5'
+  version: '0.5.6'
   category: marketing
 ---
 
@@ -198,9 +198,19 @@ The script:
 3. Writes a `subscription-summary-<date>.json` to `~/.cache/seo-rescue/`
 4. The skill reads that summary and constructs the lever-rechnung against actual data
 
-Run as: `node csv-import.example.js path-to-export.csv`
+Run it by its full path (the script can be started from any directory; do not copy it out of the plugin on its own, it needs the plugin's `lib/safe.js`):
 
-A worked example CSV with synthetic data is at `csv-import.example.csv`.
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/subscription-monetization-audit/csv-import.example.js" path-to-export.csv
+```
+
+A worked example CSV with synthetic data ships next to the script. To try it:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/subscription-monetization-audit/csv-import.example.js" "${CLAUDE_PLUGIN_ROOT}/skills/subscription-monetization-audit/csv-import.example.csv"
+```
+
+In a clone of the repository replace `${CLAUDE_PLUGIN_ROOT}` with `plugins/seo-rescue`.
 
 ## Common rationalization traps
 

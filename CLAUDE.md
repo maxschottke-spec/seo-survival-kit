@@ -14,7 +14,7 @@ seo-survival-kit/
 │   └── marketplace.json              # Marketplace catalog
 ├── .github/
 │   └── workflows/
-│       └── validate.yml              # claude plugin validate on every push/PR
+│       └── validate.yml              # structure, version and path checks plus the test files on every push/PR
 ├── plugins/
 │   └── seo-rescue/
 │       ├── .claude-plugin/
@@ -46,7 +46,7 @@ seo-survival-kit/
 │       │   ├── TOOL_PROVIDERS.md
 │       │   ├── FALLBACKS.md
 │       │   └── TROUBLESHOOTING.md
-│       ├── test-fixtures/            # Minimal test data for offline testing
+│       ├── test-fixtures/            # Test data + *.test.js (run in CI; commands in README "Verify your install")
 │       └── skills/                   # 19 skills/commands (1 orchestrator + 18 sub-skills/commands)
 │           ├── rescue/                       # Orchestrator + routing table
 │           ├── seo-audit-free/
@@ -59,7 +59,7 @@ seo-survival-kit/
 │           ├── ai-search-rescue/
 │           ├── ai-citations-tracker/         # v0.4 addition: weekly cron AI surface tracker
 │           ├── gsc-deep-dive/                # v0.4 addition: one-call GSC API snapshot
-│           ├── sistrix-monday-recovery-check/  # v0.5.2: CSV-first weekly recovery review
+│           ├── sistrix-monday-recovery-check/  # v0.5.2: CSV-first weekly recovery review (+ examples/ with synthetic CSVs)
 │           ├── subscription-monetization-audit/ # v0.5.2: recurring-revenue lever audit
 │           └── recovery-{diagnose,crawl,audit,plan,monitor,full}/  # v0.5.2: thin wrappers for the recovery-workflow commands
 ├── exports/                          # Platform-agnostic Markdown copies (Cursor / Custom GPT / Gemini / Aider / Continue.dev / Codex)
@@ -112,7 +112,9 @@ claude plugin validate plugins/seo-rescue   # plugin
 claude plugin validate .                     # marketplace
 ```
 
-Both must show `✔ Validation passed`. Tags pushed without validation cost a release cycle (see CHANGELOG.md for v0.2.0 and v0.2.1, both un-installable due to missing manifest-path and YAML-frontmatter checks). The GitHub Actions workflow at `.github/workflows/validate.yml` runs the same checks on every push and PR, but local validation before `git tag` is the canonical gate.
+Also run the test files listed in README "Verify your install" (with `SEO_CACHE_DIR` pointed at a throwaway directory), `node scripts/check-export-sync.js` and `node scripts/check-no-private-names.js`.
+
+Both validations must show `✔ Validation passed`. Tags pushed without validation cost a release cycle (see CHANGELOG.md for v0.2.0 and v0.2.1, both un-installable due to missing manifest-path and YAML-frontmatter checks). The GitHub Actions workflow at `.github/workflows/validate.yml` runs the same checks on every push and PR, but local validation before `git tag` is the canonical gate.
 
 After validation passes:
 
@@ -139,7 +141,7 @@ When adding a new skill:
 
 1. Create `plugins/seo-rescue/skills/<name>/SKILL.md` with frontmatter containing `name`, `description`, `user-invocable: true`, `argument-hint`, `license: MIT`, `metadata: { author, version, category }`.
 2. Wrap any `description:` containing double-quotes in single quotes (`description: '...'`) — YAML 1.2 strict parsers reject unquoted scalars with internal double-quotes.
-3. If the skill has a script, place it in the skill folder (not at plugin root). Read shared safety primitives from `../../lib/safe.js`.
+3. If the skill has a script, place it in the skill folder (not at plugin root). Read shared safety primitives from `../../lib/safe.js`. In SKILL.md and command files, reference plugin files as `${CLAUDE_PLUGIN_ROOT}/…`, never as `./plugins/seo-rescue/…` or `../../…` (CI rejects both: they only resolve in a clone).
 4. Add a row to the `rescue` skill's Quick Reference table.
 5. Update README Quick Reference table and CHANGELOG.md.
 6. Run `claude plugin validate plugins/seo-rescue` and `claude plugin validate .` before commit.
@@ -193,7 +195,7 @@ These rules are derived from real recovery operations and apply to all commands 
 
 - Repository: https://github.com/maxschottke-spec/seo-survival-kit
 - Anthropic community marketplace: pending review at claude-plugins-community
-- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.5`
+- Install: `/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.6`
 - Pilot-domain recovery case (anonymized): see `post-core-update-recovery/LESSONS.md` for the dated lesson entries that source the framework
 
 ## Canonical doc map

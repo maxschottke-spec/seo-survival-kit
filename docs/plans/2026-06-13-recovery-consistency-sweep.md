@@ -30,7 +30,7 @@ Ersetze den exakten Block (aktuell Z.44–60):
   "next_allowed_review_date": "2026-06-06",
   "allowed_now": [
     "act-001 (audit)",
-    "act-002 (rico-briefing)"
+    "act-002 (dev-briefing)"
   ],
   "blocked_now": [
     "act-003 (title-rewrite — blocked_until_re_eval)",
@@ -53,7 +53,7 @@ durch:
   "live_changes_allowed": false,
   "allowed_now": [
     "act-001 (audit)",
-    "act-002 (rico-briefing)"
+    "act-002 (dev-briefing)"
   ],
   "blocked_now": [
     "act-003 (title-rewrite — blocked_until_re_eval)",

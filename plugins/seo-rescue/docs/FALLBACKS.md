@@ -18,6 +18,13 @@ Lege die Dateien ab unter:
 ~/.cache/seo-rescue/{domain-slug}/imports/gsc/
 ```
 
+Zusaetzlich fuer den Klickverlauf (Leistungsbericht, Tab „Daten“, Spalten `date,clicks`):
+```
+~/.cache/seo-rescue/{domain-slug}/imports/gsc-performance.csv
+```
+
+`recovery-diagnose` liest `imports/gsc-performance.csv` als Ersatz fuer den Sichtbarkeitsverlauf (Schritt 4 und 9) und die Dateien unter `imports/gsc/` fuer Suchanfragen und Seiten (Schritt 11).
+
 ### Manuelle Keyword-CSV
 
 Erstelle `keywords.csv` mit mindestens den Spalten `keyword` und `position`:

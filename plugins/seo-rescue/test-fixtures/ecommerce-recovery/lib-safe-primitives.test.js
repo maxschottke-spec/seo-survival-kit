@@ -10,12 +10,20 @@
 //   0 = all tests passed
 //   1 = at least one test failed
 //
-// No external dependencies. No live writes (uses ephemeral tmp dirs).
+// No external dependencies. No live writes: the cache root is redirected to an
+// ephemeral mkdtemp directory via SEO_CACHE_DIR, so the test never touches
+// ~/.cache/seo-rescue (up to v0.5.5 it wrote a test slug into the real cache
+// and failed whenever SEO_CACHE_DIR was set).
 
 const assert = require('node:assert');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+
+// Redirect the cache root before anything can write. Deliberately overrides an
+// inherited SEO_CACHE_DIR: a test must not write into a cache someone uses.
+const TEST_CACHE_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), 'seo-rescue-lib-safe-test-'));
+process.env.SEO_CACHE_DIR = TEST_CACHE_ROOT;
 
 const safe = require('../../lib/safe.js');
 
@@ -210,16 +218,12 @@ test('throws on empty urlSlug', () => {
 // ---------------------------------------------------------------------------
 section('writeSnapshot / appendChangeHistory / readChangeHistory');
 
-// Use an isolated test slug — uses real cache dir but a sandboxed slug name
+// Isolated test slug inside the ephemeral cache root (see top of file)
 const TEST_SLUG = 'test-fixture-lib-safe-' + process.pid + '-' + Date.now();
 
 function cleanupTestSlug() {
   try {
-    const home = os.homedir();
-    const dir = path.join(home, '.cache', 'seo-rescue', TEST_SLUG);
-    if (fs.existsSync(dir)) {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
+    fs.rmSync(TEST_CACHE_ROOT, { recursive: true, force: true });
   } catch { /* best effort */ }
 }
 
@@ -252,8 +256,8 @@ test('writeSnapshot sanitizes path traversal in kind/entityId', () => {
   // After sanitization "../etc" becomes "etc" which is a safe identifier.
   // Verify the resulting path is contained within the slug directory.
   const p = safe.writeSnapshot(TEST_SLUG, '../etc', 'safe-id', { test: 'sanitization' }, 'before');
-  const home = os.homedir();
-  const slugDir = path.join(home, '.cache', 'seo-rescue', TEST_SLUG);
+  const slugDir = path.join(safe.getCacheDir(), TEST_SLUG);
+  assert.strictEqual(safe.getCacheDir(), TEST_CACHE_ROOT, 'cache root is not the ephemeral test dir');
   assert.ok(p.startsWith(slugDir), `path escaped slug dir: ${p}`);
   // The "../" portion of kind must be stripped
   assert.ok(!p.includes('..'), `path contains "..": ${p}`);

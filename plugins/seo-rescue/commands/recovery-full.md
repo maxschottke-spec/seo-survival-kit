@@ -26,7 +26,7 @@ Wenn `~/.cache/seo-rescue/{slug}/recovery-gate.json` mit `settlement_gate_active
   - Audit (read-only)
   - Monitoring-Render (read-only)
   - Re-Evaluation-Report
-  - Ticketliste fuer Rico / Entwicklung
+  - Ticketliste fuer die Entwicklung
   - **Plan-After-Gate-Dokument** anstelle eines normalen Action-Plans
 
 ### Wenn der User trotzdem Live-Aenderungen fordert
@@ -50,7 +50,7 @@ Statt eines normalen Action-Plans erzeugt `recovery-full` bei aktivem Gate ein P
   "prepared_now": [
     "schema_drafts",
     "title_drafts",
-    "rico_briefings",
+    "dev_briefings",
     "rollback_plans"
   ],
   "deferred_until_unlock": [
@@ -205,7 +205,7 @@ ARTIFACTS:
 GESAMMELTE WARNUNGEN (3):
   - "Sistrix-Backlink-Endpoint lieferte leere Daten"
   - "Crawl-Timeout nach 8 Minuten — 312 von 500 URLs gecrawlt"
-  - "CORE_UPDATES.md aelter als 90 Tage — Korrelation max. 'low'"
+  - "CORE_UPDATES.md zuletzt geprueft vor mehr als 90 Tagen — Korrelation max. 'low'"
 
 PROVIDERS VERWENDET:
   sistrix, dataforseo, screaming_frog_mcp

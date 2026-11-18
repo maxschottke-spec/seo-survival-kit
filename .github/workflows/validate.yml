@@ -191,6 +191,62 @@ jobs:
           fi
           echo "✔ No path escapes above the plugin root in skills"
 
+      # Plugin-root paths: commands/*.md are read from the installed plugin, where
+      # neither the repository layout (./plugins/seo-rescue/...) nor a path
+      # relative to some other file (../../references/...) resolves. v0.5.5
+      # shipped both; a first-time user got "Cannot find module" on step 1.
+      # Allowed forms: \${CLAUDE_PLUGIN_ROOT}/... or a plain plugin-root-relative
+      # mention such as `references/X.md`. Skills get the same require() check.
+      - name: Check plugin-root paths in commands and skills
+        run: |
+          fail=0
+          if grep -rnE "require\(['\"]\./plugins/" plugins/*/commands plugins/*/skills --include='*.md'; then
+            echo "::error::require('./plugins/...') only works in a clone of the repository. Use '\${CLAUDE_PLUGIN_ROOT}/...' (see lines above)"
+            fail=1
+          fi
+          if grep -rnE '\.\./\.\./(references|schemas|lib|scripts|commands|docs)/' plugins/*/commands; then
+            echo "::error::../../<dir>/ in a command file points outside the plugin. Use \${CLAUDE_PLUGIN_ROOT}/<dir>/ (see lines above)"
+            fail=1
+          fi
+          if grep -rnE '^node (scripts|lib)/' plugins/*/commands; then
+            echo "::error::bare 'node scripts/...' in a command file depends on the current directory. Use node \"\${CLAUDE_PLUGIN_ROOT}/scripts/...\" (see lines above)"
+            fail=1
+          fi
+          [ "$fail" -eq 0 ] || exit 1
+          echo "✔ Command and skill files use plugin-root paths"
+
+      # Tests. Zero dependencies, no network, no API keys. SEO_CACHE_DIR points
+      # at a throwaway directory so nothing is written to a real cache. The same
+      # commands are documented in README.md, "Verify your install" — keep the
+      # two lists identical (the step below checks that every *.test.js on disk
+      # is run here and named in the README).
+      - name: Run tests (fixtures, scripts, self-tests)
+        run: |
+          set -e
+          export SEO_CACHE_DIR="$(mktemp -d)"
+          T=plugins/seo-rescue/test-fixtures/ecommerce-recovery
+          node $T/lib-safe-primitives.test.js
+          node $T/recovery-scripts-cache-dir.test.js
+          node $T/pre-hit-baseline.test.js
+          node $T/stage-status.test.js
+          node $T/core-updates-laufend.test.js
+          node $T/quiet-death-detect.test.js
+          node $T/monday-example.test.js
+          node plugins/seo-rescue/skills/seo-outreach-report/weekly-noise.js --selftest
+          node plugins/seo-rescue/skills/target-keyword-set/target-keyword-set.js --selftest
+          echo "✔ All tests passed"
+
+      - name: Check every test file is wired into CI and named in the README
+        run: |
+          fail=0
+          while IFS= read -r -d '' f; do
+            b="$(basename "$f")"
+            grep -qF "$b" .github/workflows/validate.yml || { echo "::error::$f is not run by validate.yml"; fail=1; }
+            grep -qF "$b" README.md || { echo "::error::$f is not listed in README.md (Verify your install)"; fail=1; }
+          done < <(find plugins -name '*.test.js' -print0)
+          [ "$fail" -eq 0 ] || exit 1
+          echo "✔ Every *.test.js is run in CI and listed in the README"
+
       # Export sync: normalized diff between exports/skills/*.md and their
       # canonical SKILL.md counterparts, compared against the accepted
       # baseline. New drift (canonical edited without syncing the export, or

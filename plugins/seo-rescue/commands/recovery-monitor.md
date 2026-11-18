@@ -7,13 +7,17 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 
 ## Zweck
 
-Woechentliches Recovery-Tracking. Holt aktuelle VI + Keyword-Daten, berechnet Recovery-Score, appendet an die History-Datei. Laeuft auch bei fehlenden Datenquellen durch und schreibt einen Partial-Eintrag — der Zeitstempel allein ist wertvoll fuer die Zeitreihe.
+Woechentliches Recovery-Tracking. Holt aktuelle VI + Keyword-Daten, berechnet Recovery-Score, appendet an die History-Datei. Faellt eine Datenquelle aus, laeuft das Command weiter und schreibt einen Partial-Eintrag mit dem, was da ist. Liegt gar kein Messwert vor, wird nichts angehaengt (siehe Schritt 7).
 
 ## Change Governance
 
 Mode: `read_only`. Change Budget: 0. Keine Live-Shop-Writes. Schreibt nur History-Artefakte (`history.ndjson`, append-only, via `lib/safe.js`).
 
 Wenn `change-history.ndjson` existiert, wird sie fuer die Change-History-Integration gelesen und im Eintrag referenziert (siehe `## Change History Integration`). Jede Score-Bewegung traegt Quelle und Confidence.
+
+## Pfade
+
+Alle Pfade in diesem Command, die mit `${CLAUDE_PLUGIN_ROOT}` beginnen, liegen im Installationsverzeichnis des Plugins (dort, wo `commands/`, `lib/`, `references/`, `schemas/` und `scripts/` liegen). Claude Code setzt die Variable beim Laden des Commands ein. Kurzformen wie `lib/safe.js`, `references/…`, `schemas/…` oder `scripts/…` im Fliesstext meinen dasselbe Verzeichnis. Steht die Variable nach dem Laden noch woertlich im Text (z. B. weil die Datei per Read geoeffnet wurde), nimm das Verzeichnis, aus dem diese Datei gelesen wurde, eine Ebene hoeher; im geklonten Repository ist das `plugins/seo-rescue`.
 
 ## Settlement Gate Awareness
 
@@ -51,14 +55,47 @@ Dieses Command ist read-only gegenueber dem Live-Shop (`audit_only`, Change Budg
 ## Script CLI Contract
 
 ```bash
-node scripts/recovery-monitor.js --domain <domain> --cache-dir <path>
+node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js" --domain <domain> [--vi <zahl>] [--keywords-t10 <ganzzahl>] [--cache-dir <path>] [--dry-run]
 ```
+
+| Option | Bedeutung |
+|--------|-----------|
+| `--vi`, `--keywords-t10` | Von Hand eingegebene Werte (z. B. aus einem Sistrix-Export). Der direkte Aufruf ruft selbst keine API ab. Der Eintrag traegt `providers_used: ["manual_cli"]`, `data_quality` hoechstens `partial`, `confidence` hoechstens `medium`. |
+| `--cache-dir <path>` | Cache-Wurzel fuer diesen Aufruf (sonst `SEO_CACHE_DIR`, sonst `~/.cache/seo-rescue`). Durchlaeuft dieselben Pruefungen aus `lib/safe.js` (Modus 0700, Abbruch bei Symlink). |
+| `--dry-run` | Berechnet den Eintrag gegen den vorhandenen Cache und gibt ihn aus. Legt kein Verzeichnis an, nimmt keinen Lock, haengt nichts an. |
+
+Ohne `--vi` und `--keywords-t10` hat der direkte Aufruf keine Daten: Er gibt den Stand aus und haengt **nichts** an `history.ndjson` an (bis v0.5.5 entstand dabei ein Leereintrag mit lauter `null`, und `--cache-dir` wurde ignoriert).
+
+Gefahrloser Probelauf (schreibt nichts, auch nicht nach `~/.cache/seo-rescue`):
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js" --domain example.com --vi 0.42 --keywords-t10 12 --cache-dir "$HOME/seo-rescue-probe" --dry-run
+```
+
+**Strenge Argumentpruefung (vor jedem Dateizugriff).** Alles, was nicht eindeutig ist, beendet den Lauf mit Exit Code `2` und der Zeile `Nothing was written.`, statt still einen Standard zu nehmen:
+
+| Eingabe | Ergebnis |
+|---------|----------|
+| `--dry-run=true`, `--dry-run=false`, `--dry-run=1` | abgelehnt. `--dry-run` ist ein Schalter ohne Wert. |
+| `--dryrun`, `--dry_run`, jede unbekannte Option, ein loses Wort | abgelehnt. Ein Tippfehler darf nicht zu einem echten Schreiblauf fuehren. |
+| `--cache-dir` ohne Wert, `--cache-dir --dry-run`, `--cache-dir=` | abgelehnt. Eine angegebene, aber leere Option gilt nie als „nicht angegeben“; es gibt keinen stillen Rueckfall auf `~/.cache/seo-rescue`. |
+| dieselbe Option zweimal | abgelehnt. |
+
+**Regeln fuer `--cache-dir`.** Kein Bestandteil des Pfads darf ein Symlink sein, auch kein Elternverzeichnis; die Fehlermeldung nennt den aufgeloesten Pfad, der stattdessen anzugeben ist. Auf macOS sind `/tmp` und `/var` selbst Symlinks: dort `/private/tmp/…` schreiben oder ein Verzeichnis unter dem eigenen Home nehmen. Auch `"$HOME/…"` scheitert, wenn das Home-Verzeichnis selbst ueber einen Symlink erreicht wird; dann den aufgeloesten Pfad nehmen, den die Meldung nennt. Werte, die mit `-` beginnen (`--cache-dir=--dry-run`), werden als vertippte Option abgelehnt.
+
+**Nimm ein eigenes, neues Verzeichnis.** Ein mit `--cache-dir` genanntes Verzeichnis, das schon existiert und fuer Gruppe oder andere zugaenglich ist (z. B. `.` oder `$HOME` mit `0755`), wird abgelehnt und nicht veraendert; die Meldung nennt `chmod 700 <dir>` fuer den Fall, dass es wirklich der Cache sein soll. Neu angelegte Verzeichnisse entstehen mit `0700`. Nur beim Standardpfad und bei `SEO_CACHE_DIR` werden Gruppen- und Fremdrechte eines bestehenden Verzeichnisses entfernt. Strengere bestehende Rechte (z. B. `0500`) bleiben immer unveraendert. Jedes Cache-Verzeichnis muss dem aktuellen Benutzer gehoeren; ein fremdes (Docker-Volume, frueherer `sudo`-Lauf) fuehrt zum Abbruch, Abhilfe `chown`. Ist im Pfad etwas kein Verzeichnis (eine Datei, eine FIFO), endet der Lauf mit Exit Code `2`, mit und ohne `--dry-run` gleich.
+
+**Grenze.** Pruefung und Zugriff sind getrennte Systemaufrufe. Das schuetzt vor versehentlichen und vorbereiteten Symlinks, nicht vor einem Prozess desselben Benutzers, der waehrend des Laufs Verzeichnisse austauscht (siehe SECURITY.md im Repository).
+
+**Zahlen.** `--vi`: einfache Dezimalzahl von 0 bis 1000000 (`0.42`; kein Exponent, kein Vorzeichen). `--keywords-t10`: ganze Zahl von 0 bis 1000000000. Die Obergrenzen sind Plausibilitaetsgrenzen weit ueber realen Werten und weit unter dem Bereich, in dem JavaScript-Zahlen ungenau werden. `writeMonitorEntry()` prueft dieselben Bereiche selbst (auch `keywordsTotal`, `viTrend4wPct` von -100 bis 1000000, `backlinkSpamScore` von 0 bis 100) und wirft vor dem ersten Dateizugriff, wenn ein Wert keine endliche Zahl im Bereich ist. Laesst sich ein Delta nicht berechnen (Vorwert praktisch null oder keine Zahl), steht es als `null` im Eintrag, im ersten Fall mit einer Warnung.
+
+**Dateien.** `history.ndjson` wird nur angehaengt, wenn es eine regulaere Datei des aktuellen Benutzers mit genau einem Hardlink ist; ein Symlink oder eine hartverlinkte Datei beendet den Lauf mit Exit Code `2`, ohne dass etwas geschrieben wurde.
 
 | Exit Code | Bedeutung |
 |-----------|-----------|
-| `0` | Monitor-Eintrag geschrieben (complete oder partial) |
-| `1` | Monitor fehlgeschlagen (kein Eintrag geschrieben) |
-| `2` | Security-Abbruch (Symlink, Path-Traversal) |
+| `0` | Monitor-Eintrag geschrieben (complete oder partial), oder bewusst nichts geschrieben (`--dry-run`, direkter Aufruf ohne Daten) |
+| `1` | Monitor fehlgeschlagen (kein Eintrag geschrieben), z. B. fehlende Schreibrechte |
+| `2` | Nichts geschrieben: ungueltige Argumente (unbekannte Option, Schalter mit Wert, Option ohne Wert, Zahl ausserhalb des Bereichs, fehlendes oder ungueltiges `--domain`) oder Security-Abbruch (Symlink im Pfad, fremdes Verzeichnis, hartverlinkte oder fremde Datei) |
 | `3` | Lock-Timeout (anderer Command laeuft) |
 
 ## Ablauf
@@ -120,7 +157,7 @@ Rufe das Helper-Script auf. Die reale Signatur ist `writeMonitorEntry(inputDomai
 
 ```bash
 node -e "
-const { writeMonitorEntry, formatDeltaReport } = require('./plugins/seo-rescue/scripts/recovery-monitor.js');
+const { writeMonitorEntry, formatDeltaReport } = require('${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js');
 const { entry, lastEntry } = writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings, errors, {
   runId,
   keywordsTotal,
@@ -143,6 +180,8 @@ Unterstuetzte `options`-Keys (alle optional, null-Defaults; nur diese werden vom
 | Key | Default | Bedeutung |
 |-----|---------|-----------|
 | `runId` | neu generiert | Run-ID aus Schritt 3 |
+| `cacheDir` | `SEO_CACHE_DIR` bzw. `~/.cache/seo-rescue` | Cache-Wurzel fuer diesen Aufruf (entspricht `--cache-dir`) |
+| `dryRun` | `false` | `true`: berechnet den Eintrag, haengt aber nichts an und legt kein Verzeichnis an. Nur die Wahrheitswerte `true`/`false`; `"true"` als Zeichenkette wird abgelehnt |
 | `keywordsTotal` | `null` | Gesamtzahl rankender Keywords (Schritt 5) → `keywords_total` |
 | `issueDataFresh` | `false` | Ergebnis aus Schritt 6; nur bei `true` fliesst `issue_reduction` in den Score |
 | `viTrend4wPct` | `null` | 4-Wochen-VI-Trend in Prozent (Sistrix); Primaer-Input fuer die `vi_trend`-Komponente |
@@ -154,10 +193,14 @@ Unterstuetzte `options`-Keys (alle optional, null-Defaults; nur diese werden vom
 | `providersUsed` | `[]` | Provider-Liste fuer das Output-Schema |
 | `missingCapabilities` | `[]` | Fehlende Capabilities fuer das Output-Schema |
 
-Falls keine aktuellen Daten vorhanden (weder VI noch Keywords):
-- Schreibe trotzdem einen Eintrag mit `status: "partial"`, `data_quality: "poor"`
+Falls keine aktuellen Daten vorhanden (weder VI noch Keywords noch ein anderer Messwert):
+- Es wird **kein** Eintrag angehaengt. `writeMonitorEntry()` gibt dann `written: false` und `skippedReason: "no_measurement"` zurueck und legt nichts an.
+- Grund: Ein Eintrag aus lauter `null` traegt keine Information, und als „letzter Eintrag“ loescht er beim naechsten Lauf das Delta gegen den letzten echten Messwert.
+- Sage dem User ausdruecklich, dass keine Quelle erreichbar war und deshalb nichts in die Zeitreihe geschrieben wurde, und welche Quelle woran gescheitert ist.
+
+Falls nur ein Teil der Daten vorhanden ist (mindestens ein Messwert):
+- Eintrag mit `status: "partial"` schreiben
 - Score-Berechnung mit verfuegbaren Komponenten; bei weniger als 2 Komponenten: `score: null`
-- Der Zeitstempel allein hat Wert fuer die Zeitreihe
 
 ## Recovery-Score-Formel (deterministisch)
 
@@ -258,14 +301,14 @@ Nach erfolgreichem Append des History-Eintrags, gib folgende Informationen aus:
 | Sistrix nicht erreichbar | Warnung, `vi = null`, Score ohne VI-Komponente | `partial` |
 | DataForSEO nicht verfuegbar (MCP), kein CSV-Import | Warnung, Keyword-Komponenten = `null` | `partial` |
 | DataForSEO nicht verfuegbar (MCP), CSV vorhanden | CSV-Fallback, `source_notes` eintragen | `partial` |
-| Beide Datenquellen nicht verfuegbar | Eintrag mit `score: null`, `status: "partial"`, `data_quality: "poor"` | `partial` |
+| Beide Datenquellen nicht verfuegbar, kein Messwert | Kein Eintrag (`written: false`, `skippedReason: "no_measurement"`); dem User melden | — |
 | `history.ndjson` corrupt | Warnung, kein Delta-Report, aktueller Eintrag wird geschrieben | `partial` |
 | `befund.json` fehlt | Warnung, kein Baseline fuer Keyword-Stabilitaet | `partial` |
 | Lock-Timeout 30s | Fehler eintragen (Exit Code 3), Abbruch | `failed` |
-| Symlink im Cache-Pfad | Fehler eintragen (Exit Code 2), Abbruch | `failed` |
-| Weniger als 2 Score-Komponenten verfuegbar | `score: null`; Eintrag trotzdem schreiben | `partial` |
+| Symlink im Cache-Pfad; `history.ndjson` oder `.lock` ist keine regulaere eigene Datei (Symlink, FIFO, Verzeichnis, Hardlink) | Abbruch sofort (Exit Code 2), nichts geschrieben, kein Lock bleibt zurueck | `failed` |
+| Weniger als 2 Score-Komponenten verfuegbar, aber mindestens ein Messwert | `score: null`; Eintrag schreiben | `partial` |
 
-Wichtig: Falls keine aktuellen Daten vorhanden sind (alle Quellen nicht erreichbar), wird trotzdem ein Eintrag mit `status: "partial"` und `data_quality: "poor"` geschrieben. Der Zeitstempel allein sichert die Zeitreihe.
+Wichtig: Falls keine aktuellen Daten vorhanden sind (alle Quellen nicht erreichbar), wird nichts angehaengt, weder im von Claude gefuehrten Ablauf noch beim direkten Skript-Aufruf. Eine Zeitreihe aus Leereintraegen sichert nichts; sie verdeckt den letzten echten Messwert.
 
 ## Validierungsregeln
 

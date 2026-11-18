@@ -15,9 +15,13 @@ Mode: `audit_only`. Change Budget: 0. Keine Live-Shop-Writes. Nur Cache-Report-A
 
 Wenn `change-history.ndjson` existiert, wird sie am Anfang gelesen und im Befund referenziert. Jede Aussage muss Quelle und Confidence tragen.
 
+## Pfade
+
+Alle Pfade in diesem Command, die mit `${CLAUDE_PLUGIN_ROOT}` beginnen, liegen im Installationsverzeichnis des Plugins (dort, wo `commands/`, `lib/`, `references/`, `schemas/` und `scripts/` liegen). Claude Code setzt die Variable beim Laden des Commands ein. Kurzformen wie `lib/safe.js`, `references/…`, `schemas/…` oder `scripts/…` im Fliesstext meinen dasselbe Verzeichnis. Steht die Variable nach dem Laden noch woertlich im Text (z. B. weil die Datei per Read geoeffnet wurde), nimm das Verzeichnis, aus dem diese Datei gelesen wurde, eine Ebene hoeher; im geklonten Repository ist das `plugins/seo-rescue`.
+
 ## Settlement Gate Awareness
 
-Dieses Command ist read-only (`audit_only`, Change Budget 0) — ein aktiver Settlement Gate (`../../references/SEO_SETTLEMENT_GATE.md`) blockiert es NIE. Es muss den Gate-State aber kennen und ausweisen:
+Dieses Command ist read-only (`audit_only`, Change Budget 0) — ein aktiver Settlement Gate (`${CLAUDE_PLUGIN_ROOT}/references/SEO_SETTLEMENT_GATE.md`) blockiert es NIE. Es muss den Gate-State aber kennen und ausweisen:
 
 1. Lies `~/.cache/seo-rescue/{slug}/recovery-gate.json`, falls vorhanden. **Writer dieser Datei ist `recovery-audit`** (siehe `commands/recovery-audit.md`, Schritt 7: Settlement-Gate-Detection) — recovery-diagnose liest sie nur. Fehlt die Datei, gilt der Gate als `never_triggered`: keine Warnung, normaler Ablauf.
 2. Falls `settlement_gate_active = true`:
@@ -65,9 +69,9 @@ Normalisierung gemaess Schritt 1 des Ablaufs. `www.` wird NICHT entfernt.
 - **visibility_history**: Sistrix MCP (`SISTRIX_API_KEY`)
 - **keyword_rankings**: DataForSEO MCP
 - **backlink_summary**: DataForSEO MCP (`backlinks/summary/live`)
-- **core_update_dates**: `../../references/CORE_UPDATES.md`
+- **core_update_dates**: `${CLAUDE_PLUGIN_ROOT}/references/CORE_UPDATES.md`
 - **serp_snapshot**: DataForSEO MCP (`serp/google/organic/live`)
-- **gsc_search_analytics**: GSC MCP/API (Query-Page-Paare mit Impressionen/CTR/Position); Free-Fallback: GSC-Performance-CSV unter `~/.cache/seo-rescue/{slug}/imports/`
+- **gsc_search_analytics**: GSC MCP/API (Query-Page-Paare mit Impressionen/CTR/Position); Free-Fallback: GSC-Exporte `queries.csv` und `pages.csv` unter `~/.cache/seo-rescue/{slug}/imports/gsc/` (der Klickverlauf fuer Schritt 4 und 9 liegt getrennt davon in `imports/gsc-performance.csv`)
 
 ## Fallback-Provider
 
@@ -86,7 +90,7 @@ Normalisierung gemaess Schritt 1 des Ablaufs. `www.` wird NICHT entfernt.
 | `visibility_history` | GSC CSV-Export (Performance-Report, 16 Monate) |
 | `keyword_rankings` | Manuelle Keyword-CSV aus GSC oder eigener Tabelle |
 | `backlink_summary` | Manuelle Backlink-CSV aus Google Search Console (Links-Report) |
-| `core_update_dates` | `../../references/CORE_UPDATES.md` (kein Netzwerk noetig) |
+| `core_update_dates` | `${CLAUDE_PLUGIN_ROOT}/references/CORE_UPDATES.md` (kein Netzwerk noetig) |
 
 CSV-Importe werden unter `~/.cache/seo-rescue/{slug}/imports/` erwartet.
 
@@ -107,7 +111,7 @@ Normalisiere den Input gemaess dem gemeinsamen Input-Kontrakt:
 Fuehre aus:
 
 ```bash
-node -e "const { normalizeDomain } = require('./plugins/seo-rescue/lib/safe.js'); console.log(JSON.stringify(normalizeDomain('{domain}')))"
+node -e "const { normalizeDomain } = require('${CLAUDE_PLUGIN_ROOT}/lib/safe.js'); console.log(JSON.stringify(normalizeDomain('{domain}')))"
 ```
 
 Ersetze `{domain}` durch den tatsaechlichen User-Input. Falls `normalizeDomain()` einen Fehler wirft (z.B. leerer Input, ungueltiger Slug), Abbruch mit Status `failed`.
@@ -117,7 +121,7 @@ Ersetze `{domain}` durch den tatsaechlichen User-Input. Falls `normalizeDomain()
 Erstelle das domainspezifische Cache-Verzeichnis unter `~/.cache/seo-rescue/{slug}/`:
 
 ```bash
-node -e "const { ensureDomainDir } = require('./plugins/seo-rescue/lib/safe.js'); console.log(ensureDomainDir('{slug}'))"
+node -e "const { ensureDomainDir } = require('${CLAUDE_PLUGIN_ROOT}/lib/safe.js'); console.log(ensureDomainDir('{slug}'))"
 ```
 
 Ersetze `{slug}` durch den in Schritt 1 ermittelten Slug. Das Verzeichnis wird mit Modus 0700 angelegt (nur der aktuelle User hat Zugriff). Falls das Verzeichnis ein Symlink ist, Abbruch mit Status `failed`.
@@ -265,28 +269,39 @@ Extrahiere `domain_rank` (falls vorhanden) und ergaenze damit die `backlink_prof
 
 ### Schritt 8: Core-Update-Korrelation
 
-Lies `../../references/CORE_UPDATES.md` fuer die Datumsliste bekannter Google Core Updates.
+Lies `${CLAUDE_PLUGIN_ROOT}/references/CORE_UPDATES.md` fuer die Datumsliste bekannter Google Core Updates.
 
 **Aktualitaetspruefung:**
 
-Pruefe das Datei-Aenderungsdatum von `CORE_UPDATES.md`. Falls aelter als 90 Tage:
-- Eintragen in `warnings`: `"CORE_UPDATES.md ist aelter als 90 Tage — Core-Update-Korrelation maximal 'low' oder 'unknown'"`
+Massgeblich ist die Zeile `Last verified: JJJJ-MM-TT` in `CORE_UPDATES.md`, NICHT das Aenderungsdatum der Datei: Eine Installation oder ein `git clone` setzt das Datei-Datum auf den Installationstag, die Liste wirkt dann frisch, obwohl sie es nicht ist. Liegt `Last verified` mehr als 90 Tage vor heute, oder fehlt die Zeile:
+- Eintragen in `warnings`: `"CORE_UPDATES.md zuletzt geprueft am {Last verified} (aelter als 90 Tage) — Core-Update-Korrelation maximal 'low' oder 'unknown'"`
 - Setze `core_update_correlation` auf maximal `"low"` (kein `"medium"` oder `"high"` bei veraltetem Referenz-File)
+- Hinweis an den User: Seit `Last verified` kann es Updates geben, die in der Liste fehlen. Aktuellen Stand im Google Search Status Dashboard pruefen (Adresse steht in `CORE_UPDATES.md`, Abschnitt Maintenance).
+
+**Was "korreliert" hier heisst:** ausschliesslich zeitliche Naehe zwischen dem Datum des groessten VI-Drops und dem `Rollout-Start` eines Updates. Das ist ein Indiz, kein Nachweis einer Ursache: Relaunch, Migration, Saison oder ein technischer Fehler im selben Zeitraum erzeugen dasselbe Bild und muessen separat ausgeschlossen werden.
 
 **Korrelations-Logik (nur wenn CORE_UPDATES.md aktuell):**
 
-Bestimme den Zeitpunkt des groessten VI-Drops (falls VI-Daten vorhanden). Pruefe fuer jedes bekannte Core Update:
+Bestimme den Zeitpunkt des groessten VI-Drops (falls VI-Daten vorhanden). Korreliere **nur gegen Eintraege mit Type `core`**. Pruefe fuer jeden dieser Eintraege:
 
 - Drop-Datum liegt <= 4 Wochen nach `Rollout-Start` → `correlation = "high"`, `core_update_name` = Name des Updates
 - Drop-Datum liegt 4–8 Wochen nach `Rollout-Start` → `correlation = "medium"`, `core_update_name` = Name des Updates
 - Drop-Datum liegt > 8 Wochen nach oder VOR `Rollout-Start` → `correlation = "low"`
 - Kein zeitlicher Zusammenhang mit keinem bekannten Update → `correlation = "none"`
 
+Ein Eintrag mit Rollout-Ende `laufend` wird wie jeder andere ueber seinen `Rollout-Start` korreliert; das fehlende Enddatum aendert an den Fenstern nichts.
+
+**Verified-Deckel:** `"high"` ist nur gegen Eintraege mit `Verified: yes` erlaubt. Trifft das 4-Wochen-Fenster auf einen Eintrag mit `Verified: no`, setze `correlation = "medium"` und trage in `warnings` ein: `"Core-Update-Eintrag '{Name}' ist nicht verifiziert — Korrelation auf 'medium' gedeckelt"`.
+
+**Eintraege mit Type `spam` oder `discover`:** nie als `core_update_name` setzen und nie fuer `"high"`/`"medium"` heranziehen. Liegt das Drop-Datum im Fenster [`Rollout-Start`, `Rollout-Ende` + 14 Tage] eines solchen Eintrags (bei `laufend`: ab `Rollout-Start` bis heute):
+- Eintragen in `warnings`: `"Drop faellt in das Fenster von '{Name}' (Type {type}) — kein Core-Update-Schaden belegt, andere Diagnose noetig (spam: Link-Profil; discover: GSC-Discover-Bericht)"`
+- Deckle `core_update_correlation` auf hoechstens `"low"`, auch wenn zusaetzlich ein `core`-Eintrag zeitlich passt (ueberlappende Rollouts lassen sich ueber die Zeit allein nicht trennen). In diesem Fall `core_update_name` = Name des `core`-Eintrags beibehalten und die Ueberlappung in `source_notes` nennen.
+
 **Falls keine VI-Daten verfuegbar (Sistrix fehlt):**
 
 Setze `core_update_correlation = "unknown"` und `core_update_name = null`. Warnung eintragen.
 
-**Nimm das am staerksten korrelierende Update** (hoechste Korrelation, bei Gleichstand das juengste). Setze `core_update_name` entsprechend.
+**Nimm das am staerksten korrelierende `core`-Update** (hoechste Korrelation nach Anwendung der Deckel, bei Gleichstand das juengste). Setze `core_update_name` entsprechend. Pruefe trotzdem alle Updates im Rueckblick-Fenster, nicht nur das naechstliegende (siehe `CORE_UPDATES.md`, Multi-Update-Sequenzen).
 
 ### Schritt 9: Pre-Hit-Baseline-Selektion (experimental, N=1)
 
@@ -298,7 +313,7 @@ Bestimmt die Recovery-Baseline als **historisches Peak-Plateau** statt als letzt
    - sonst keine Reihe → `pre_hit_baseline: { "value": null, "unit": "clicks_per_week", "method": "unavailable", "source": "none", "maturity": "experimental_n1", "window_weeks": null, "window_limited": false, "erosion_vs_last_plateau_pct": null, "multi_update_erosion_detected": false, "recovery_vs_baseline_pct": null }`. Warnung eintragen. Weiter mit Schritt 10.
 2. **Mindestlänge:** Hat die Reihe < 8 Perioden, ist keine belastbare Plateau-Erkennung möglich → wie der „keine Reihe"-Fall behandeln (`method: "unavailable"`).
 3. **Peak-Plateau bestimmen:** Bilde den rollierenden 4-Perioden-Mittelwert über die Reihe. `value` = Maximum dieses Mittelwerts (höchstes *gehaltenes* Niveau, kein Einzel-Spike). `method: "historical_peak"`.
-4. **Letztes stabiles Plateau vor jüngstem Hit:** Identifiziere den letzten signifikanten Drop (Periode-über-Periode-Rückgang > 15 % ODER ein in `../../references/CORE_UPDATES.md` dokumentiertes Update-Fenster). `last_stable_plateau` = Mittelwert der ~4 Perioden direkt davor.
+4. **Letztes stabiles Plateau vor jüngstem Hit:** Identifiziere den letzten signifikanten Drop (Periode-über-Periode-Rückgang > 15 % ODER ein in `${CLAUDE_PLUGIN_ROOT}/references/CORE_UPDATES.md` dokumentiertes Update-Fenster). `last_stable_plateau` = Mittelwert der ~4 Perioden direkt davor.
 5. **Erosion berechnen:** `erosion_vs_last_plateau_pct = round((last_stable_plateau - value) / value * 100)`. Ist der Wert `< -15`: `multi_update_erosion_detected: true`, Warnung `"pre_hit_baseline: stabile Phase vor Hit ist selbst >15% unter historischem Peak — Multi-Update-Erosion"` eintragen, und einen Satz dazu in `summary_de` aufnehmen. Sonst `false`.
 6. **Fortschritt melden:** `recovery_vs_baseline_pct = round((current - value) / value * 100)`, wobei `current` der jüngste Reihen-Wert ist (jüngster Klick-Wochenwert bzw. `vi_current`). Reines Reporting.
 7. **Fenster-Ehrlichkeit:** `window_weeks` = Anzahl Perioden der genutzten Reihe. `window_limited: true`, falls `window_weeks < 52` (z.B. Sistrix-6-Monats-Fenster) — signalisiert, dass ein früherer Peak abgeschnitten sein könnte.
@@ -332,7 +347,7 @@ Erste zutreffende Zeile gewinnt (Tabellen werden von oben nach unten gelesen, sp
 
 **Recovery-Stage-Schaetzung (`recovery_stage_estimate`):**
 
-Die diagnostische Stage (R1–R5) ist HIER definiert — die folgende Tabelle ist die Definition. `../../references/RECOVERY_SYSTEM.md` enthaelt die Vokabular-Uebersicht der drei Namespaces (Stage 0–5, diagnostic stage R1–R5, work phase R1–R5) und verweist fuer die diagnostische Stage hierher.
+Die diagnostische Stage (R1–R5) ist HIER definiert — die folgende Tabelle ist die Definition. `${CLAUDE_PLUGIN_ROOT}/references/RECOVERY_SYSTEM.md` enthaelt die Vokabular-Uebersicht der drei Namespaces (Stage 0–5, diagnostic stage R1–R5, work phase R1–R5) und verweist fuer die diagnostische Stage hierher.
 
 | Stage | Bedingung (Default-Baender) |
 |-------|-----------|
@@ -347,13 +362,13 @@ Pruefreihenfolge: zuerst `R5` (der `vi_current`-Check hat Vorrang vor den Trend-
 
 **Stage-State-Machine (`stage_status`, experimental, N=1):**
 
-Überlagert die rohe `recovery_stage_estimate` mit Freeze-/Re-Entry-Regeln (Lesson 4a). Markiert `maturity: "experimental_n1"`. Liest die Rollout-Fenster (Start/Ende) aus `../../references/CORE_UPDATES.md` — dieselbe Datei wie Schritt 8.
+Überlagert die rohe `recovery_stage_estimate` mit Freeze-/Re-Entry-Regeln (Lesson 4a). Markiert `maturity: "experimental_n1"`. Liest die Rollout-Fenster (Start/Ende) aus `${CLAUDE_PLUGIN_ROOT}/references/CORE_UPDATES.md` — dieselbe Datei wie Schritt 8.
 
-1. **Kein/veraltetes CORE_UPDATES.md** (Datei fehlt oder > 90 Tage alt): keine Freezes — `stage = recovery_stage_estimate`, `raw_stage = recovery_stage_estimate`, `progression_allowed: true`, `frozen_reason: null`, `re_entry_detected: false`, `re_entry_from: null`, `active_update: null`, `days_since_rollout_end: null`, `maturity: "experimental_n1"`. Fertig.
-2. **active_update_window:** Liegt das heutige Datum innerhalb [Rollout-Start, Rollout-Ende] eines Eintrags, oder steht bei einem Eintrag mit Rollout-Start ≤ heute als Rollout-Ende `laufend` (Rollout noch nicht abgeschlossen) → `frozen_reason: "active_update_window"`, `progression_allowed: false`, `active_update` = Update-Name.
-3. **post_update_settlement:** sonst, liegt heute in (Rollout-Ende, Rollout-Ende + 28 Tage] des jüngsten Eintrags → `frozen_reason: "post_update_settlement"`, `progression_allowed: false`, `days_since_rollout_end` = Tage seit Rollout-Ende. Sonst `frozen_reason: null`, `progression_allowed: true`.
-4. **Re-Entry:** endete das jüngste Update ≤ 28 Tage vor heute UND `vi_trend_4w_pct < -10` → `re_entry_detected: true`, `re_entry_from` = `recovery_stage_estimate`, effektive `stage = "R1"`. Sonst `re_entry_detected: false`, `re_entry_from: null`, `stage = recovery_stage_estimate`.
-   (Re-Entry und Freeze können gleichzeitig gelten: `stage = "R1"`, `progression_allowed` bleibt `false`.)
+1. **Kein/veraltetes CORE_UPDATES.md** (Datei fehlt, Zeile `Last verified` fehlt oder liegt > 90 Tage zurueck — siehe Aktualitaetspruefung in Schritt 8): keine Freezes — `stage = recovery_stage_estimate`, `raw_stage = recovery_stage_estimate`, `progression_allowed: true`, `frozen_reason: null`, `re_entry_detected: false`, `re_entry_from: null`, `active_update: null`, `days_since_rollout_end: null`, `maturity: "experimental_n1"`. Fertig.
+2. **active_update_window:** Liegt das heutige Datum innerhalb [Rollout-Start, Rollout-Ende] eines Eintrags, oder steht bei einem Eintrag mit Rollout-Start ≤ heute als Rollout-Ende `laufend` (Rollout noch nicht abgeschlossen) → `frozen_reason: "active_update_window"`, `progression_allowed: false`, `active_update` = Update-Name, `days_since_rollout_end: null` (es gibt noch kein Ende; bei `laufend` NIE eine Tageszahl berechnen).
+3. **post_update_settlement:** sonst, liegt heute in (Rollout-Ende, Rollout-Ende + 28 Tage] des jüngsten Eintrags → `frozen_reason: "post_update_settlement"`, `progression_allowed: false`, `active_update: null`, `days_since_rollout_end` = Tage seit Rollout-Ende. Sonst `frozen_reason: null`, `progression_allowed: true`, `active_update: null`, `days_since_rollout_end: null`.
+4. **Re-Entry:** Das Re-Entry-Fenster eines Updates reicht von seinem Rollout-Start bis 28 Tage nach seinem Rollout-Ende. Steht als Rollout-Ende `laufend`, ist das Fenster ab Rollout-Start offen, bis ein Enddatum eingetragen wird — ein laufender Rollout zählt also als „noch nicht beendet“ und damit als innerhalb des Fensters. Liegt heute im Re-Entry-Fenster des jüngsten Updates UND `vi_trend_4w_pct < -10` → `re_entry_detected: true`, `re_entry_from` = `recovery_stage_estimate`, effektive `stage = "R1"`. Sonst `re_entry_detected: false`, `re_entry_from: null`, `stage = recovery_stage_estimate`.
+   (Re-Entry und Freeze können gleichzeitig gelten: `stage = "R1"`, `progression_allowed` bleibt `false`. Während eines laufenden Rollouts ist ein Re-Entry vorläufig: Zahlen aus dem Rollout-Fenster schwanken, nach Rollout-Ende neu bewerten.)
 5. `raw_stage` ist immer = `recovery_stage_estimate`.
 
 Dies ist NICHT der Settlement Gate (§12a / `SEO_SETTLEMENT_GATE.md`) — jener ist operator-batch-getriggert und blockt Live-Writes; `stage_status` friert nur die Stage-Bewertung ein.
@@ -370,7 +385,7 @@ Schreibe 2–4 Saetze auf Deutsch, die die wichtigsten Befund-Punkte zusammenfas
 
 > **Maturity:** `experimental_n1` — abgeleitet aus einem einzigen Fall (post-deploy Lessons 2026-06/07, knocking-at-the-door cohort). KEINE validierte Methode. Promotion erst nach N=2.
 
-Falls GSC verfuegbar (`gsc_search_analytics`-Capability: GSC MCP/API oder GSC-Performance-CSV mit Query-Page-Paaren): die Seiten-Kohorte surfacen, die knapp unter Top-10 "an der Tuer klopft" — **hohe Impressionen x niedrige CTR x Position ~8-15 x fehlende H1/FAQ-Struktur**. Das sind die besten On-Page-Hardening-Ziele: die Substanz rankt bereits, konvertiert aber nicht.
+Falls GSC verfuegbar (`gsc_search_analytics`-Capability: GSC MCP/API mit Query-Page-Paaren, oder die GSC-Exporte `queries.csv` und `pages.csv` unter `imports/gsc/`; die Exporte der GSC-Oberflaeche liefern Suchanfragen und Seiten getrennt, die Kohorte wird dann auf Seitenebene gebildet): die Seiten-Kohorte surfacen, die knapp unter Top-10 "an der Tuer klopft" — **hohe Impressionen x niedrige CTR x Position ~8-15 x fehlende H1/FAQ-Struktur**. Das sind die besten On-Page-Hardening-Ziele: die Substanz rankt bereits, konvertiert aber nicht.
 
 Filter (Richtwerte, anpassbar): `position` 8-15, `impressions >= P75` der Domain, `ctr <= 0.5x` des Positions-Erwartungswerts (Expected-CTR-Kurve unten). Pro Kandidat **gerendert** pruefen (siehe Rendered-Source-Verification in `SAFE_LIVE_CHANGE_RULES.md`): H1 vorhanden? FAQPage-Schema? PAA-Fragen als H2 abgedeckt?
 
@@ -387,13 +402,13 @@ Filter (Richtwerte, anpassbar): `position` 8-15, `impressions >= P75` der Domain
 
 Diese Tabelle ist die EINE kanonische Stelle fuer die Position-CTR-Kurve der Recovery-Commands; `RECOVERY_SYSTEM.md` §8 (Winner/Loser Neutralization, "position-CTR curve") referenziert hierher.
 
-Massnahme je Kandidat (nach Change-Governor + Settlement-Gate + Approval, kein Auto-Write): fehlende **H1** setzen; **PAA-Fragen als H2** mit Direktantwort; **FAQPage-Schema**; **CTR-Title/Meta**. Erwartete Wirkung: CTR-Rewrites 1-3 Wochen, Ranking-Effekt ueber Wochen. Ausgabe als `hardening_candidates`-Array im Befund (Schema-Feld in `../../schemas/befund.schema.json`, max 10 Eintraege, sortiert nach Impressionen absteigend). Pro Eintrag: `query`, `url`, `position`, `impressions`, `ctr`, `expected_ctr`, optional `has_h1`, `has_faq_schema`, `paa_covered` (Booleans oder `null`, aus dem gerenderten Check). Read-only Diagnose; Umsetzung folgt der Live-Change-Discipline.
+Massnahme je Kandidat (nach Change-Governor + Settlement-Gate + Approval, kein Auto-Write): fehlende **H1** setzen; **PAA-Fragen als H2** mit Direktantwort; **FAQPage-Schema**; **CTR-Title/Meta**. Erwartete Wirkung: CTR-Rewrites 1-3 Wochen, Ranking-Effekt ueber Wochen. Ausgabe als `hardening_candidates`-Array im Befund (Schema-Feld in `${CLAUDE_PLUGIN_ROOT}/schemas/befund.schema.json`, max 10 Eintraege, sortiert nach Impressionen absteigend). Pro Eintrag: `query`, `url`, `position`, `impressions`, `ctr`, `expected_ctr`, optional `has_h1`, `has_faq_schema`, `paa_covered` (Booleans oder `null`, aus dem gerenderten Check). Read-only Diagnose; Umsetzung folgt der Live-Change-Discipline.
 
 **Graceful Degradation:** Kein GSC-Zugriff (weder MCP/API noch CSV-Import) → Schritt ueberspringen, `hardening_candidates: null`, Warnung `"GSC nicht verfuegbar — hardening_candidates uebersprungen"` eintragen. Weiter mit Schritt 12.
 
 ### Schritt 12: Befund schreiben
 
-Assembliere alle Daten in ein JSON-Objekt gemaess `../../schemas/befund.schema.json`.
+Assembliere alle Daten in ein JSON-Objekt gemaess `${CLAUDE_PLUGIN_ROOT}/schemas/befund.schema.json`.
 
 **Pflichtfelder:**
 
@@ -508,7 +523,7 @@ Hinweis: DataForSEO MCP nicht verfuegbar fuehrt zu `"partial"` (nicht `"failed"`
 
 ```bash
 node -e "
-const { ensureDomainDir, acquireLock, releaseLock, atomicWriteJSON } = require('./plugins/seo-rescue/lib/safe.js');
+const { ensureDomainDir, acquireLock, releaseLock, atomicWriteJSON } = require('${CLAUDE_PLUGIN_ROOT}/lib/safe.js');
 const path = require('path');
 const dir = ensureDomainDir('{slug}');
 const lock = acquireLock(dir);
@@ -605,7 +620,8 @@ Nach erfolgreichem Schreiben des Befunds, gib folgende Informationen aus:
 | `safeSlug()` schlaegt fehl (ungueltige Zeichen) | Fehler eintragen, Abbruch. Hinweis an User: Domain-Format ueberpruefen. | `failed` |
 | Lock nicht erwerbbar (Timeout 30s) | Fehler eintragen, Abbruch. Hinweis: anderer Command laeuft moeglicherweise fuer diese Domain. | `failed` |
 | Befund-Datei existiert bereits | Ueberschreiben via `atomicWriteJSON` ist immer erlaubt (idempotent). | — |
-| CORE_UPDATES.md aelter als 90 Tage | Warnung, core_update_correlation maximal "low". | `partial` |
+| CORE_UPDATES.md: `Last verified` aelter als 90 Tage oder fehlt | Warnung, core_update_correlation maximal "low". | `partial` |
+| Drop im Fenster eines `spam`-/`discover`-Eintrags | Warnung, core_update_correlation maximal "low". | `partial` |
 
 ## Validierungsregeln
 
@@ -645,8 +661,8 @@ Bei einem Validierungsfehler: Warnung eintragen und Wert auf den naechsten guelt
 | Alle Capabilities fehlen | `status = "failed"`, `data_quality = "poor"`, `confidence = "none"` |
 | Nur GSC-CSV als Quelle | `data_quality = "poor"`, `confidence = "low"` |
 | Keine verwertbare Zeitreihe / CSV ohne `date`-Spalte / Reihe < 8 Perioden | `pre_hit_baseline.method = "unavailable"`, `.value = null`, Warnung; Diagnose laeuft normal weiter |
-| CORE_UPDATES.md fehlt oder > 90 Tage alt | `stage_status` ohne Freezes: `progression_allowed = true`, `frozen_reason = null`, `re_entry_detected = false`, `stage = recovery_stage_estimate` |
-| CORE_UPDATES.md veraltet (> 90 Tage) | `core_update_correlation` max `"low"` oder `"unknown"` |
+| CORE_UPDATES.md fehlt oder `Last verified` > 90 Tage alt | `stage_status` ohne Freezes: `progression_allowed = true`, `frozen_reason = null`, `re_entry_detected = false`, `stage = recovery_stage_estimate` |
+| CORE_UPDATES.md veraltet (`Last verified` > 90 Tage) | `core_update_correlation` max `"low"` oder `"unknown"` |
 | VI fehlt (kein `recovery_stage_estimate`) | `stage_status.stage = null`, `raw_stage = null`; kein Abbruch |
 | Kein GSC-Zugriff (weder MCP/API noch CSV-Import) | Schritt 11 ueberspringen; `hardening_candidates = null`, Warnung |
 
@@ -660,9 +676,9 @@ Bei `data_quality = "poor"`: Keine aggressiven Empfehlungen. Jede Handlungsempfe
 
 ## Referenzen
 
-- `../../references/CORE_UPDATES.md` — Datumsliste bekannter Google Core Updates
-- `../../references/RECOVERY_SYSTEM.md` — Schwellwerte, Recovery-Stage-Definitionen (R1–R5)
-- `../../references/SEO_SETTLEMENT_GATE.md` — Settlement-Gate-Definition, Exceptions, Unlock-Kriterien
-- `../../schemas/befund.schema.json` — vollstaendiges JSON-Schema des Output-Objekts
-- `../../schemas/recovery-gate.schema.json` — Gate-State-Schema (`recovery-gate.json`)
-- `../../lib/safe.js` — `normalizeDomain()`, `safeSlug()`, `ensureDomainDir()`, `acquireLock()`, `releaseLock()`, `atomicWriteJSON()`
+- `${CLAUDE_PLUGIN_ROOT}/references/CORE_UPDATES.md` — Datumsliste bekannter Google Core Updates
+- `${CLAUDE_PLUGIN_ROOT}/references/RECOVERY_SYSTEM.md` — Schwellwerte, Recovery-Stage-Definitionen (R1–R5)
+- `${CLAUDE_PLUGIN_ROOT}/references/SEO_SETTLEMENT_GATE.md` — Settlement-Gate-Definition, Exceptions, Unlock-Kriterien
+- `${CLAUDE_PLUGIN_ROOT}/schemas/befund.schema.json` — vollstaendiges JSON-Schema des Output-Objekts
+- `${CLAUDE_PLUGIN_ROOT}/schemas/recovery-gate.schema.json` — Gate-State-Schema (`recovery-gate.json`)
+- `${CLAUDE_PLUGIN_ROOT}/lib/safe.js` — `normalizeDomain()`, `safeSlug()`, `ensureDomainDir()`, `acquireLock()`, `releaseLock()`, `atomicWriteJSON()`

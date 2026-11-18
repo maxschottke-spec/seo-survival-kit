@@ -10,15 +10,18 @@ Das seo-rescue Plugin fuer Claude Code automatisiert SEO-Recovery-Workflows nach
 |---------|----------|
 | `/seo-rescue:recovery-diagnose <domain>` | Automatische Diagnose (VI, Keywords, Backlinks, Core-Update-Korrelation) |
 | `/seo-rescue:recovery-crawl <domain>` | Technischer Crawl + Issue-Klassifikation |
+| `/seo-rescue:recovery-audit <domain>` | Read-only Change-Audit, Settlement-Gate-Status |
 | `/seo-rescue:recovery-plan <domain>` | Priorisierter 30/60/90-Tage Action-Plan |
 | `/seo-rescue:recovery-monitor <domain>` | Woechentliches Recovery-Tracking mit Score |
-| `/seo-rescue:recovery-full <domain>` | Alle vier Schritte in einem Durchlauf |
+| `/seo-rescue:recovery-full <domain>` | Alle fuenf Schritte in einem Durchlauf (diagnose → crawl → audit → plan → monitor) |
 
 ## Schnellstart
 
 ### Minimaler Start (ohne kostenpflichtige Tools)
 
-1. Google Search Console CSV-Exporte in `~/.cache/seo-rescue/{domain-slug}/imports/gsc/` ablegen
+1. Google Search Console CSV-Exporte ablegen (Verzeichnisse vorher anlegen, `{domain-slug}` = Domain mit Bindestrichen statt Punkten, z. B. `example-com`):
+   - Leistungsbericht, Tab „Daten“ (Spalten `date,clicks`) als `~/.cache/seo-rescue/{domain-slug}/imports/gsc-performance.csv`. Diese Datei liest `recovery-diagnose` fuer den Klickverlauf.
+   - Suchanfragen, Seiten und Links als `queries.csv`, `pages.csv`, `links.csv` nach `~/.cache/seo-rescue/{domain-slug}/imports/gsc/`
 2. `/seo-rescue:recovery-full example.com` ausfuehren
 3. Outputs pruefen (befund.json, issues.json, action-plan.json)
 4. Action-Plan manuell freigeben

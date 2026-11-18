@@ -14,7 +14,14 @@
 //   last_login_date, trial_end_date, payment_provider, country, coupon_code,
 //   cancellation_reason
 //
-// Run: node csv-import.example.js <path-to-export.csv>
+// Run: node "<plugin dir>/skills/subscription-monetization-audit/csv-import.example.js" <path-to-export.csv>
+//
+// The CSV path is taken as given (relative paths resolve against the current
+// directory), so the script can be started from anywhere. Call it by its full
+// path and do not copy it out of the plugin on its own — it needs
+// ../../lib/safe.js next to it. <plugin dir> is plugins/seo-rescue in a clone of
+// the repository, or ~/.claude/plugins/cache/seo-survival-kit/seo-rescue/<version>
+// after an install. Synthetic sample to try it: csv-import.example.csv in this folder.
 //
 // Output: ~/.cache/seo-rescue/subscription-summary-<YYYY-MM-DD>.json
 

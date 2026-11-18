@@ -90,7 +90,7 @@ During those 5-14 days, **low click counts do not mean the changes failed**. The
 - Read-only crawls, GSC/Sistrix/DataForSEO pulls
 - Live HTTP / canonical / robots checks
 - Schema validation drafts (local, not pushed)
-- Rico / developer briefings
+- Developer briefings
 - Monitoring dashboards
 - QA reports
 - Rollback plan drafts

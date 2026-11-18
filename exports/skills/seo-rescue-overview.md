@@ -56,7 +56,7 @@ User reports a problem
 
 These are pure-Markdown decision frameworks. They work on any LLM that reads the file. Drop them into Cursor `.cursor/rules/`, OpenAI Custom GPT Instructions, Gemini `GEMINI.md`, Aider `CONVENTIONS.md`, or paste into any chat context.
 
-- **[post-core-update-recovery.md](./post-core-update-recovery.md)** — Diagnose + 4-phase recovery plan for sites hit by a Google Core Update. Authority-first, 6–12 month timeline.
+- **[post-core-update-recovery.md](./post-core-update-recovery.md)** — Diagnose + 4-phase recovery plan for sites hit by a Google Core Update. Authority-first; first movement after 3–4 months, full recovery usually 9–18 months.
 - **[ai-search-rescue.md](./ai-search-rescue.md)** — Recover visibility in Google AI Overviews / AI Mode / ChatGPT / Perplexity / Bing Copilot / Claude.ai search. Seven optimization tactics plus a three-layer measurement setup.
 
 ## Script-backed skills (Claude Code only)
@@ -79,7 +79,7 @@ If you want native skill-like behavior on Cursor / Custom GPT / Gemini / Aider, 
 - **License:** MIT
 - **Dependencies:** zero npm runtime deps (everything that talks to a network is via `fetch`; PDF rendering uses Chrome-headless via `spawnSync` with `shell: false`)
 - **Security:** one external security review plus one maintainer-driven re-audit, see [SECURITY.md](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/SECURITY.md#external-security-reviews)
-- **Status:** Public Beta (v0.5.5 — 19 skills/commands: 1 orchestrator + 18 sub-skills and recovery commands)
+- **Status:** Public Beta (v0.5.6 — 19 skills/commands: 1 orchestrator + 18 sub-skills and recovery commands)
 
 ---
 

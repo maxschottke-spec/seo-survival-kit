@@ -1,11 +1,30 @@
 'use strict';
 // Channel Economics Analyzer — generic starter script.
 // Reads ./channels.json + ./data/<name>-period.csv, prints per-channel P&L.
+//
+// WHERE TO RUN IT FROM
+//   Data is read from the CURRENT directory, the helper library from the
+//   PLUGIN directory. So: cd into the folder that holds your channels.json and
+//   data/, and call the script by its full path. Do not copy this file out of
+//   the plugin on its own — it needs ../../lib/safe.js next to it.
+//
+//     cd ~/my-channel-data
+//     node "<plugin dir>/skills/channel-economics-analyzer/channel-economics.example.js"
+//
+//   <plugin dir> is plugins/seo-rescue in a clone of the repository, or
+//   ~/.claude/plugins/cache/seo-survival-kit/seo-rescue/<version> after an
+//   install. Template for the config: channels.example.json in this folder.
 
 const fs = require('node:fs');
 const path = require('node:path');
 const { safeSlug, safeReadFile } = require('../../lib/safe.js');
 
+if (!fs.existsSync('./channels.json')) {
+  console.error(`channels.json not found in the current directory (${process.cwd()}).`);
+  console.error('Run this script from the folder that holds channels.json and data/<name>-period.csv.');
+  console.error(`Template: ${path.join(__dirname, 'channels.example.json')}`);
+  process.exit(1);
+}
 const CFG = JSON.parse(safeReadFile('./channels.json'));
 const DAYS = CFG.period_days || 90;
 

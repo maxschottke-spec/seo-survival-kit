@@ -38,6 +38,16 @@ Inter-script state lives under `~/.cache/seo-rescue/` (created mode `0700`, refu
 
 You can override the cache directory with `SEO_CACHE_DIR=/some/private/path`. The script will refuse to use the path if it is a symlink.
 
+The two recovery scripts (`recovery-monitor.js`, `recovery-crawl.js`) also take `--cache-dir <path>`. Because that path is free-form, it is checked more strictly: no component of it may be a symlink, parent directories included (on macOS write `/private/tmp/…`, not `/tmp/…`). Use a new directory of its own: an existing directory named with `--cache-dir` that group or others can access (for example `.` or `$HOME` at mode 0755) is refused and left unchanged, never re-permissioned. For every cache directory, the directory must be owned by the current user and a failing `chmod` aborts the run; group and other permission bits are removed only on the default path, on `SEO_CACHE_DIR` and on directories the script has just created, and stricter existing permissions are left as they are. `history.ndjson` is checked before it is opened (an existing target must be a regular file of the current user with exactly one hard link, so a FIFO placed there is refused instead of blocking the run with the lock held), opened with `O_NOFOLLOW` and `O_NONBLOCK`, and checked again on the open descriptor; an existing `issues.json` is replaced only if it is a regular file of the current user. Arguments are parsed strictly: an unknown option, a value on a switch (`--dry-run=true`) or an option without its value ends the run with exit code 2 before any file is touched.
+
+**Known limit.** These checks and the write that follows are separate system calls; Node.js offers no `openat`, so the gap between them cannot be closed completely. The checks protect against accidental and pre-planted symlinks and hard links, not against an attacker who, running as the same user, swaps directories while a script is running.
+
+Further limits of these checks:
+
+- **Windows.** The owner check, the permission check and the no-follow open are skipped on Windows, because the platform has no equivalent in Node.js. There the cache directory inherits the ACL of its parent.
+- **Parent chain only for explicit paths.** Symlinks in parent directories are refused only for `--cache-dir` (and `options.cacheDir`). `SEO_CACHE_DIR` and the default path are checked at the cache directory itself, not along the whole chain, because temporary directories on macOS sit behind a system symlink.
+- **Slug collisions.** `a-b.com` and `a.b.com` map to the same cache folder name. If you track two domains that collide, give each its own cache root.
+
 Intermediate HTML for the PDF render lives in a per-run directory created via `fs.mkdtempSync(os.tmpdir() + '/seo-rescue-render-XXXXXX')` and is removed when the run completes. Set `SEO_KEEP_RUN_DIR=1` if you want to inspect the HTML between runs.
 
 Final PDFs are written to `$SEO_PDF_OUTPUT_DIR` (default `~/Downloads/`).
@@ -127,7 +137,7 @@ This applies to all plugins, not just this one. Anthropic's docs are explicit ab
 
 **Pinned install** (reproducible, recommended for production use):
 ```
-/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.5
+/plugin marketplace add maxschottke-spec/seo-survival-kit#v0.5.6
 ```
 or
 ```

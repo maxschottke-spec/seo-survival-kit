@@ -36,7 +36,7 @@ Verworfen: (B) alles unter `settlement_gate_status` nesten (invasiver, `active` 
       "unlock_status": "blocked"
     },
     "live_changes_allowed": false,
-    "allowed_now": ["act-001 (audit)", "act-002 (rico-briefing)"],
+    "allowed_now": ["act-001 (audit)", "act-002 (dev-briefing)"],
     "blocked_now": ["act-003 (title-rewrite — blocked_until_re_eval)"],
     "emergency_exceptions": [],
     "reason": "major_batch_settlement_window"

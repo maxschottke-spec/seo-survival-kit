@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "seo-rescue",
-  "version": "0.5.5",
-  "description": "SEO recovery skills + orchestrator. Type /seo-rescue:rescue for the routing table. NEW in v0.5.5: corrections from five months of operations (withdrawn figures, measurement basics, operating rules), target-keyword-set skill, weekly mode for the outreach report, INP fix. Recovery workflow: /seo-rescue:recovery-full (diagnose → crawl → audit → plan → monitor) plus recovery-diagnose, recovery-crawl, recovery-audit, recovery-plan, recovery-monitor. Plus: seo-audit-free, post-core-update-recovery, seo-outreach-report, channel-economics-analyzer, competitor-deep-audit, psi-weekly-cron-baseline, ai-search-rescue, ai-citations-tracker, gsc-deep-dive, sistrix-monday-recovery-check, target-keyword-set, subscription-monetization-audit.",
+  "version": "0.5.6",
+  "description": "SEO recovery skills + orchestrator. Type /seo-rescue:rescue for the routing table. NEW in v0.5.6: first-time-user fixes (scripts honour --cache-dir and have --dry-run, plugin-root paths in the recovery commands, core-update correlation rules, free path without paid tools, synthetic Monday-check example inside the plugin, tests in CI). Recovery workflow: /seo-rescue:recovery-full (diagnose → crawl → audit → plan → monitor) plus recovery-diagnose, recovery-crawl, recovery-audit, recovery-plan, recovery-monitor. Plus: seo-audit-free, post-core-update-recovery, seo-outreach-report, channel-economics-analyzer, competitor-deep-audit, psi-weekly-cron-baseline, ai-search-rescue, ai-citations-tracker, gsc-deep-dive, sistrix-monday-recovery-check, target-keyword-set, subscription-monetization-audit.",
   "author": {
     "name": "Max Schottke",
     "url": "https://github.com/maxschottke-spec"

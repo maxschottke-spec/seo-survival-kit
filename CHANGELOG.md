@@ -7,6 +7,83 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+## [0.5.6] — 2026-11-18
+
+Found by walking through the repository as a first-time user: installing v0.5.5, following the README and ONBOARDING.md literally, and running every documented command. Most of what follows is not new capability. It is the difference between what the documentation promised and what happened.
+
+### Fixed after the final acceptance run
+
+- `CORE_UPDATES.md`: the end date of the February 2026 Discover Update was wrong (2026-02-19, now 2026-02-27 per the Google Search Status Dashboard).
+- `SECURITY.md` now names three further limits: Windows skips the owner, permission and no-follow checks; the parent-chain symlink check applies to explicit paths only; two domains can collide on one cache folder name.
+- README and ONBOARDING say where output is German: the outreach PDF and the six `recovery-*` commands.
+- The hard-link refusal now says how to fix it.
+- Developer first name and a home-directory path removed from documentation.
+
+### Fixed
+
+- **`recovery-monitor.js` and `recovery-crawl.js` ignored `--cache-dir`.** The option was parsed and documented, but both scripts always wrote to `SEO_CACHE_DIR` or `~/.cache/seo-rescue`. A run meant for a throwaway directory wrote into the real cache. The option is now passed through `ensureDomainDir()` / `getCacheDir()` in `lib/safe.js` (same 0700 and symlink checks); `writeMonitorEntry()` and `writeIssuesJSON()` accept `options.cacheDir`.
+- **`recovery-monitor.js` appended an all-null entry when called without data.** The direct call has no data source of its own; it wrote `"status":"partial"` with every value `null` to `history.ndjson`, which then served as "last entry" for the next real run. It now writes nothing in that case and says so. The same rule holds inside `writeMonitorEntry()` and in the command specification, which used to ask for an entry "for the timestamp alone": without at least one measurement nothing is appended (`written: false`, `skippedReason: "no_measurement"`). New options `--vi` and `--keywords-t10` let the direct call record hand-entered values. Such entries carry `providers_used: ["manual_cli"]` and are rated `partial` / `medium` at most. Deltas against a previous entry are `null` instead of a negative number when the current value is missing.
+- **Recovery commands pointed at paths that only exist in a clone.** `require('./plugins/seo-rescue/lib/safe.js')` (seven places in `recovery-diagnose`, `recovery-crawl`, `recovery-monitor`) and ten `../../references/…` links in `recovery-diagnose` (from `commands/` that is outside the plugin). All are `${CLAUDE_PLUGIN_ROOT}/…` now, as in the skill wrappers; each of the three commands explains the variable in a short "Pfade" section. CI rejects both patterns from now on.
+- **Core-update correlation in `recovery-diagnose` contradicted `CORE_UPDATES.md`.** Step 8 correlated against every table entry, including `spam` and `discover`; it now correlates only against `core`, and a drop inside a spam or discover window gives a warning and at most `low`. The `Verified: no` cap (`medium` at most) was in the reference file but not in the command. The freshness rule used the file's modification date, which an install or clone resets to today; it now uses a `Last verified: 2026-11-18` line in the file. The re-entry rule of the stage state machine was undefined for a rollout that is still running (`laufend`); it is now defined, and rule 2 names `days_since_rollout_end: null`.
+- `CORE_UPDATES.md` said all verified entries were checked on 2026-06-03; four carry 2026-11-18. The dashboard link in the file returned HTTP 404 and is replaced by the working one.
+- **PageSpeed call without a key in `seo-audit-free`.** The keyless example had no `category` parameters and no output file, so the evaluation snippet read a file that did not exist; on an error response the snippet crashed with a TypeError. The keyless call answered HTTP 429 when tested. The example now uses the same parameters and file, the snippet reports API errors in plain words, and the text says that the keyless call often fails and what to do then.
+- `seo-audit-free`: the robots.txt check printed an HTML error page as if it were a robots.txt (status code is printed first now); the language check missed `lang=en` without quotes; `allowed-tools` now covers the commands step 4 uses.
+- **`sistrix-monday-recovery-check`: the expected output did not match its input CSVs.** It said "21 of 25 improved" and "Top-3 +1 (from 4 to 5)"; the CSVs give 20 improved, 4 declined, 1 unchanged, Top 3 from 1 to 3, Top 10 from 6 to 9. All counts are recomputed and now checked by a test. With the corrected numbers the gains outweigh the losses, so the example reads the flat index as lagging with concentrated losses, not as full neutralization. The score factor table follows the thirteen factors of `RECOVERY_SYSTEM.md` §10; the score figure itself is marked illustrative, because the spec does not define how factors are normalized.
+- `sistrix-monday-recovery-check/SKILL.md`: two references to `RECOVERY_SYSTEM.md §5` for the winner/loser logic pointed at the wrong section (it is §8); the position-CTR table was called a "standard SISTRIX curve" (it is the rule-of-thumb table in `recovery-diagnose`).
+- **ONBOARDING.md was out of date.** "All eight skills" (nineteen); a plugin cache path that does not exist (the real one is `~/.claude/plugins/cache/seo-survival-kit/seo-rescue/<version>/`, same wrong path six times in `SHOP-SYSTEMS.md`); `export ENV_PATH=…`, which has no effect (the scripts need `node --env-file=…`); a `NARRATIVE` map in `seo-report-gen.js` that does not exist (the text lives in `audit-config.json` under `narrative`); `/skill post-core-update-recovery` instead of `/seo-rescue:post-core-update-recovery`; German leftovers.
+- `post-core-update-recovery`: "3 phases" above four phases; "6–12 months" next to "9–18 months"; "30 %+" next to "<20 % is noise" with nothing in between. Now: four phases (A–D); first movement after 3–4 months, full recovery usually 9–18 months; 20–30 % is named as a grey zone. Export copy and README follow.
+- COSTS.md: the per-audit total "$0.05–$0.50" was not the sum of the rows above it (€0.10–€0.50 plus $0.05–$0.25). It is about 0.15–0.75; README, the rescue table and the marketplace description follow.
+- `channel-economics-analyzer/SKILL.md` named a script `channel-economics.js` that does not exist (`channel-economics.example.js`).
+- `lib-safe-primitives.test.js` wrote a test slug into the real `~/.cache/seo-rescue` and failed whenever `SEO_CACHE_DIR` was set. It now runs in a temporary directory.
+- Plugin docs: `docs/ONBOARDING.md` and `recovery-diagnose` named different places for the Search Console import; both now name `imports/gsc-performance.csv` (click series) and `imports/gsc/` (queries, pages, links). The command table lacked `recovery-audit`. `docs/SETUP.md` said Node.js 18+; `node --env-file` needs 20.6.
+- Stale version remarks removed (`README.md`, `sistrix-monday-recovery-check/SKILL.md`, the example README).
+
+### Fixed after review
+
+Found by an independent review of the fix itself, before release. The first version of the `--cache-dir` / `--dry-run` change above had these holes:
+
+- **`--dry-run=true` wrote.** The argument parser returned the string `"true"`, the code compared with `=== true`. `recovery-monitor.js` appended, `recovery-crawl.js` created directories. A mistyped `--dryrun` was ignored and led to a real write as well. Both scripts now parse strictly (`parseStrictCli()` in `lib/safe.js`): an unknown option, a value on a switch, a stray word or a repeated option ends the run with exit code 2 before any file access.
+- **A `--cache-dir` without a value fell back to the real cache.** `--vi 1 --cache-dir` wrote to `~/.cache/seo-rescue`; `--cache-dir --dry-run` created a directory named `--dry-run`. An option that is given but empty or unusable is now an error, never "not given". The same holds for `options.cacheDir` and `options.dryRun` when the functions are called directly.
+- **Numbers.** `--keywords-t10 9007199254740993` was stored as `…992`; a previous VI near zero produced an infinite delta that JSON stored silently as `null`. Values must now be finite and inside stated ranges (`--vi` 0 to 1,000,000; keyword counts whole numbers 0 to 1,000,000,000), on the command line and inside `writeMonitorEntry()`; a delta that cannot be computed is `null` with a warning; values read back from `history.ndjson` are used only if they are finite numbers.
+- **File system.** A symlink in the parent path of `--cache-dir` was followed; `history.ndjson` was appended to even when it was a hard link to another file; `chmod 0700` loosened a directory that was stricter (0500) and its errors were swallowed. Now: no symlink anywhere in an explicit cache path; cache directories must belong to the current user; permissions are never widened and a failing `chmod` aborts; `history.ndjson` is checked before opening, opened with `O_NOFOLLOW` and `O_NONBLOCK`, and checked again after opening (regular file, own, one link); an existing `issues.json` must be a regular file of the current user.
+- Not closed, and stated in SECURITY.md: check and write are separate system calls. The checks stop accidental and pre-planted links, not a same-user process that swaps directories during a run.
+- **A second review round found what the first repair still missed:**
+  - A FIFO in place of `history.ndjson` made the script block forever in `open()`, with the domain lock held; the next run then waited 30 seconds for that lock. The target is now checked before it is opened, and a lock path that is not a regular file is refused at once.
+  - `--cache-dir` on a directory that already existed (`.`, `$HOME`) took away its group and other permissions, even when the run then ended with "Nothing was written". An existing directory that group or others can access is now refused and left unchanged when it is named with `--cache-dir`; only the default path, `SEO_CACHE_DIR` and directories the script has just created are tightened, and setgid/sticky bits are kept.
+  - `--cache-dir=--dry-run` (with `=`) still created a directory named `--dry-run`. Values that start with `-` are refused for every option.
+  - Dry run and real run disagreed for a path through a file (`<file>/sub`: exit 0 against exit 2; `<file>`: exit 2 against exit 1 with a raw `EEXIST`). Both now exit 2 with the same message.
+  - `writeIssuesJSON()` accepted `crawlLimit: Infinity`; `crawlLimit` and `exportedRowsTotal` must be whole numbers. An issue type named `constructor` crashed `classifyIssues()`.
+- `recovery-scripts-cache-dir.test.js` grew from 23 to 133 checks; every one of them also asserts that the stand-in for the user's real cache and the working directory stayed empty. Twelve deliberate removals of single checks (among them `O_NOFOLLOW`, the ownership checks, the aborting `chmod`, the dry-run symlink check) each turn at least one test red.
+
+### Changed
+
+- **A cache directory that belongs to another user now stops the run.** This affects every script that uses `getCacheDir()` (the recovery scripts, the `seo-outreach-report` pipeline, `target-keyword-set`, `csv-import.example.js`), not only `--cache-dir`. Typical causes are a Docker volume or an earlier run with `sudo`. Until v0.5.5 such a directory was used silently. Remedy: `sudo chown -R "$(id -un)" ~/.cache/seo-rescue`, or point `SEO_CACHE_DIR` at a directory of your own.
+- `--cache-dir` names the cache root; the domain folder is added below it. An existing directory is accepted only if it is private (no group or other access); take a new directory of its own.
+- Exit code 2 of the two recovery scripts means "nothing was written" (invalid arguments or security abort). `-h` is gone, use `--help`.
+
+### Added
+
+- `--dry-run` for `recovery-monitor.js` and `recovery-crawl.js` (and `options.dryRun` for their functions): prints what would be written, creates no directory, takes no lock, writes nothing. `--help` for both.
+- `resolveDomainDir()` in `lib/safe.js`: the read-only counterpart of `ensureDomainDir()`; `getCacheDir()` and `ensureDomainDir()` accept an explicit cache root.
+- `post-core-update-recovery`: a free path for the day-1 diagnosis with a Google Search Console export instead of Sistrix and DataForSEO, a pointer to the bundled `CORE_UPDATES.md`, and a definition of what "correlates" means.
+- ONBOARDING.md: a "What you need" table (Node.js 20.6+, Chrome for the PDF step, which steps need paid access) and a section "No keys? Start with one of the three free entry points". The title no longer promises a PDF in 15 minutes without saying that it needs paid accounts.
+- README: "Verify your install" with the nine test commands; a note that the free audit skill is written in German; a pointer to the synthetic Monday-check CSVs; two sentences on why six names exist both as command and as skill.
+- COSTS.md: one table for all 19 skills (keys read, cost per run as far as the repository states it, what works without the key). `.env.example` says per key what is missing without it and lists the variables other skills read (`OPENAI_API_KEY`, `PERPLEXITY_API_KEY`, `GSC_SERVICE_ACCOUNT_JSON`). One `.env` location in all docs: `~/.config/seo-rescue/.env`.
+- The synthetic Monday-check CSVs and expected output now ship inside the plugin (`skills/sistrix-monday-recovery-check/examples/`), so the example works from an install; the skill states the column-name, separator and encoding rules.
+- `seo-audit-free`: an English note at the top, bilingual headings in the report template.
+- `channel-economics.example.js` and `csv-import.example.js` say where to run them from; the first one explains a missing `channels.json` instead of throwing.
+- Tests: `recovery-scripts-cache-dir.test.js` (133 checks, see "Fixed after review"), `core-updates-laufend.test.js` with a fixture for a running rollout, `monday-example.test.js`.
+- CI: all seven test files and both self-tests run on every push and pull request; new checks for clone-only paths in command and skill files and for test files that are not wired in.
+
+### Not changed, and still open
+
+- `a-b.com` and `a.b.com` share one cache folder (`a-b-com`), because the folder name replaces dots by hyphens. Documented in `docs/SETUP.md` and in `lib/safe.js`; a different scheme would orphan existing caches.
+- History files written by v0.5.5 can end with an all-null entry; the next run then shows no delta against the last real reading. Such lines can be deleted by hand.
+- The six `recovery-*` names remain both command and skill, with different pre-approved tools. Only documented.
+- `befund.schema.json` does not list `"unknown"` for `core_update_correlation`, although `recovery-diagnose` sets it when no visibility data exists.
+- The Recovery Signal Score cannot be reproduced from the spec: `RECOVERY_SYSTEM.md` §10 gives factors and weights, not the normalization.
+- The README section on paid engagements still says "6-12 month plan".
+
 ## [0.5.5] — 2026-11-18
 
 ### Fixed (release preparation)

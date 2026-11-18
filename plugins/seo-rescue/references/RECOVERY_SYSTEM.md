@@ -231,9 +231,9 @@ Die lineare Erholungssequenz — die Keyword-Meilensteine Stage 0–5 (§4) eben
 
 `recovery-diagnose` (Schritt 10) überlagert die rohe Stage daher mit einer State-Machine und schreibt das Ergebnis nach `stage_status`:
 
-- **active_update_window** — läuft heute ein Rollout (heute ∈ [Start, Ende] eines `CORE_UPDATES.md`-Eintrags), wird die Progression eingefroren (`progression_allowed: false`).
+- **active_update_window** — läuft heute ein Rollout (heute ∈ [Start, Ende] eines `CORE_UPDATES.md`-Eintrags, oder Rollout-Ende `laufend` bei Start ≤ heute), wird die Progression eingefroren (`progression_allowed: false`).
 - **post_update_settlement** — bis 28 Tage nach Rollout-Ende des jüngsten Updates bleibt die Progression eingefroren; Google justiert nach, die Stage-Bewertung ist unzuverlässig.
-- **Stage-Re-Entry** — ein frischer Major-Hit (jüngstes Update endete ≤ 28 Tage, VI-4-Wochen-Trend < −10 %) setzt die effektive Stage hart auf R1 zurück (`re_entry_detected`), statt die Erholung weiter hochzuzählen.
+- **Stage-Re-Entry** — ein frischer Major-Hit (heute liegt zwischen Rollout-Start und 28 Tagen nach Rollout-Ende des jüngsten Updates, bei Rollout-Ende `laufend` ab Rollout-Start; VI-4-Wochen-Trend < −10 %) setzt die effektive Stage hart auf R1 zurück (`re_entry_detected`), statt die Erholung weiter hochzuzählen.
 
 `recovery_stage_estimate` bleibt der rohe VI-Trend-Wert (`stage_status.raw_stage`); `stage_status.stage` ist der effektive Wert nach den Regeln.
 

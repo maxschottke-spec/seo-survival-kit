@@ -1,14 +1,15 @@
 'use strict';
 const path = require('node:path');
-const { parseArgs } = require('node:util');
 
 const {
   normalizeDomain,
   ensureDomainDir,
+  resolveDomainDir,
   acquireLock,
   releaseLock,
   atomicWriteJSON,
   generateRunId,
+  parseStrictCli,
 } = require('../lib/safe.js');
 
 const SEVERITY_MAP = {
@@ -25,20 +26,25 @@ const SEVERITY_MAP = {
   duplicate_canonical_blog: { default: 'high', upgrade: (d) => (d && d.top10_ranking === true) ? 'critical' : null },
 };
 
-function parseCLI() {
-  const { values } = parseArgs({
-    options: {
-      domain: { type: 'string' },
-      'cache-dir': { type: 'string' },
-    },
-    strict: false,
-  });
-  return values;
+const CLI_SPEC = {
+  domain: 'string',
+  'cache-dir': 'string',
+  'dry-run': 'boolean',
+  help: 'boolean',
+};
+
+// Strict: unknown options, a value on a switch (--dry-run=true), an option
+// without its value, an empty value and a repeated option all throw (code
+// 'USAGE'). See parseStrictCli in lib/safe.js.
+function parseCLI(argv) {
+  return parseStrictCli(CLI_SPEC, argv);
 }
 
 function classifyIssues(rawIssues) {
   return rawIssues.map(issue => {
-    const mapping = SEVERITY_MAP[issue.type];
+    // Own keys only: a type named "constructor" or "toString" must not pick up
+    // a function from Object.prototype as its mapping.
+    const mapping = Object.prototype.hasOwnProperty.call(SEVERITY_MAP, issue.type) ? SEVERITY_MAP[issue.type] : null;
     if (!mapping) return { ...issue, severity: 'medium' };
     let severity = mapping.default;
     if (issue.details && issue.details.length > 0) {
@@ -63,9 +69,32 @@ function buildSummary(issues) {
   return summary;
 }
 
+// options.cacheDir — explicit cache root (the --cache-dir option). Goes through
+//   ensureDomainDir()/getCacheDir() in lib/safe.js: created 0700, symlink refused.
+//   Without it: SEO_CACHE_DIR or ~/.cache/seo-rescue/.
+// options.dryRun — classify and return the result, but create no directory,
+//   take no lock and write no issues.json.
 function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warnings, errors, options = {}) {
-  const dir = ensureDomainDir(slug);
-  const lock = acquireLock(dir, 'recovery-crawl');
+  if (options.dryRun != null && typeof options.dryRun !== 'boolean') {
+    throw new Error(`Invalid value for options.dryRun: ${JSON.stringify(options.dryRun)} (true or false expected)`);
+  }
+  if (!Number.isSafeInteger(crawledUrls) || crawledUrls < 0) {
+    throw new Error(`Invalid value for crawledUrls: ${typeof crawledUrls === 'number' ? String(crawledUrls) : JSON.stringify(crawledUrls)} (whole number >= 0 expected)`);
+  }
+  // Optional counts: absent, or a whole number >= 0 (crawlLimit: >= 1). Infinity
+  // and NaN would be stored as null by JSON.stringify without anyone noticing.
+  for (const [name, min] of [['crawlLimit', 1], ['exportedRowsTotal', 0]]) {
+    const v = options[name];
+    if (v != null && (!Number.isSafeInteger(v) || v < min)) {
+      throw new Error(`Invalid value for options.${name}: ${typeof v === 'number' ? String(v) : JSON.stringify(v)} (whole number >= ${min} expected)`);
+    }
+  }
+  if (!Array.isArray(rawIssues) || !Array.isArray(warnings) || !Array.isArray(errors)) {
+    throw new Error('rawIssues, warnings and errors must be arrays');
+  }
+  const dryRun = options.dryRun === true;
+  const dir = dryRun ? resolveDomainDir(slug, options.cacheDir) : ensureDomainDir(slug, options.cacheDir);
+  const lock = dryRun ? null : acquireLock(dir, 'recovery-crawl');
   try {
     const issues = classifyIssues(rawIssues);
     const summary = buildSummary(issues);
@@ -94,37 +123,82 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
       missing_capabilities: options.missingCapabilities || [],
       crawl_limit: options.crawlLimit || 500,
       crawled_internal_html_urls: crawledUrls,
-      exported_rows_total: options.exportedRowsTotal || crawledUrls,
+      exported_rows_total: options.exportedRowsTotal != null ? options.exportedRowsTotal : crawledUrls,
       raw_exports_used: options.rawExportsUsed || [],
       crawler_provider: crawlerProvider,
       local_crawler_used: options.localCrawlerUsed || false,
       issues,
       summary,
     };
-    atomicWriteJSON(path.join(dir, 'issues.json'), output);
+    if (!dryRun) atomicWriteJSON(path.join(dir, 'issues.json'), output);
     return output;
   } finally {
     releaseLock(lock);
   }
 }
 
+const USAGE = `Usage: node recovery-crawl.js --domain <domain> [--cache-dir <path>] [--dry-run]
+
+  --domain     Domain whose cache directory is prepared (required).
+  --cache-dir  Cache root to use instead of SEO_CACHE_DIR / ~/.cache/seo-rescue.
+               Use a new directory of its own. No part of the path may be a
+               symlink; an existing directory that group or others can access
+               is refused and left unchanged.
+  --dry-run    Print the directory that would be used. Creates nothing.
+               A switch: write it without a value.
+
+Arguments are checked strictly, before anything is read or written: an unknown
+option, --dry-run=true, an option without its value or a repeated option ends
+the run with exit code 2.
+
+This entry point is not a crawler. It only resolves (and, without --dry-run,
+creates) the per-domain cache directory. Classification and the issues.json
+write happen through writeIssuesJSON(), see commands/recovery-crawl.md.`;
+
+// Exit codes: 0 ok · 1 run failed · 2 usage error or security abort (nothing
+// was written) · 3 lock timeout.
+function exitCodeFor(e) {
+  if (e && e.code === 'USAGE') return 2;
+  const msg = String((e && e.message) || '');
+  if (/^normalizeDomain:/.test(msg)) return 2;
+  if (/symlink|Unsafe|not owned|hard links|not a regular file|not a directory/i.test(msg)) return 2;
+  if (msg.includes('Lock')) return 3;
+  return 1;
+}
+
 if (require.main === module) {
-  const args = parseCLI();
-  if (!args.domain) {
-    console.error('Usage: node recovery-crawl.js --domain <domain> [--cache-dir <path>]');
-    process.exit(2);
-  }
   try {
+    // Arguments first: nothing below runs on a malformed command line.
+    const args = parseCLI();
+    if (args.help) {
+      console.log(USAGE);
+      process.exit(0);
+    }
+    if (!args.domain) {
+      const err = new Error('Invalid arguments: --domain is required');
+      err.code = 'USAGE';
+      throw err;
+    }
     const { domain, slug } = normalizeDomain(args.domain);
-    // Read raw exports from cache dir
-    const cacheDir = args['cache-dir'] || ensureDomainDir(slug);
+    const cacheRoot = args['cache-dir'];
+    const dryRun = args['dry-run'] === true;
     // This CLI entry point expects raw data to already be in crawl/raw/ or imports/crawl/
-    console.log(JSON.stringify({ domain, slug, cacheDir, message: 'Ready for crawl data processing' }));
+    const cacheDir = dryRun ? resolveDomainDir(slug, cacheRoot) : ensureDomainDir(slug, cacheRoot);
+    console.log(JSON.stringify({
+      domain,
+      slug,
+      cacheDir,
+      dry_run: dryRun,
+      message: dryRun ? 'Dry run: nothing created' : 'Ready for crawl data processing',
+    }));
     process.exit(0);
   } catch (e) {
+    const code = exitCodeFor(e);
     console.error(e.message);
-    process.exit(e.message.includes('Lock') ? 3 : 1);
+    if (e && e.code === 'USAGE') console.error('\n' + USAGE);
+    if (code === 2) console.error('Nothing was written.');
+    process.exit(code);
   }
 }
 
-module.exports = { classifyIssues, buildSummary, writeIssuesJSON, SEVERITY_MAP, parseCLI };
+module.exports = { classifyIssues, buildSummary, writeIssuesJSON, SEVERITY_MAP, parseCLI, exitCodeFor };

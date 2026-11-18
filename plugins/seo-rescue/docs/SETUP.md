@@ -4,7 +4,7 @@
 
 - Claude Code installiert
 - seo-rescue Plugin installiert (`/plugin marketplace add maxschottke-spec/seo-survival-kit`)
-- Node.js 18+ (fuer Scripts)
+- Node.js 20.6+ (fuer Scripts; `node --env-file` gibt es erst ab 20.6, die CI laeuft mit Node 20)
 
 ## Plugin-Pfad
 
@@ -38,6 +38,8 @@ Standard: `~/.cache/seo-rescue/`
 
 - Modus: `0700` (nur Owner)
 - Symlinks werden verweigert
+- Das Verzeichnis muss dem aktuellen Benutzer gehoeren (sonst Abbruch; Abhilfe `chown`)
+- Der Ordnername je Domain ersetzt Punkte durch Bindestriche. `a-b.com` und `a.b.com` teilen sich deshalb einen Ordner (`a-b-com`); wer zwei solche Domains fuehrt, gibt jeder eine eigene Cache-Wurzel (`SEO_CACHE_DIR` oder `--cache-dir`)
 - Lock-Dateien verhindern parallele Writes
 - Atomic Writes verhindern korrupte Dateien
 

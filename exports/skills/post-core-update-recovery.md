@@ -1,12 +1,12 @@
 # Post-Core-Update Recovery — Framework
 
 > **Source:** `plugins/seo-rescue/skills/post-core-update-recovery/SKILL.md` (canonical Claude Code version).
-> **Use case:** Diagnose and recover from a Google Core Update visibility drop. Authority-first, 6–12 month timeline, not a quick technical fix.
+> **Use case:** Diagnose and recover from a Google Core Update visibility drop. Authority-first, first movement after 3–4 months, full recovery usually 9–18 months, not a quick technical fix.
 > **Use this exported version when:** you're running Cursor, an OpenAI Custom GPT, Gemini CLI, Aider, or any LLM tool that isn't Claude Code. The framework content is identical — only the Claude-specific frontmatter (`allowed-tools`, `user-invocable`, `argument-hint`) has been stripped.
 
 ## When this framework applies
 
-- VI / organic-traffic drop correlates timely with a published Google Core Update (Search Status Dashboard)
+- VI / organic-traffic drop correlates timely with a published Google Core Update (Search Status Dashboard; "correlates" is defined below)
 - Drop is **broad** (many keywords simultaneously, not pinpoint)
 - Pages keep indexing normally, no technical break
 - Google Search Console shows no manual action
@@ -16,6 +16,11 @@
 - Point keyword losses → usually on-page issue
 - Drop coincides with migration / theme change / robots change → that's technical, not core
 - Drop is < 20 % from peak → can be normal market noise
+- Drop is between 20 % and 30 % from peak → grey zone: apply this framework only if the rest of the signature fits (broad loss, brand keywords intact, timing as defined below)
+
+## What "correlates" means here
+
+The drop **starts within 4 weeks after the rollout start** of an update of type `core`. Between 4 and 8 weeks the link is weak; later than 8 weeks, or a drop that began before the rollout, is not a correlation. Updates of type `spam` or `discover` do not count: a drop in their window needs a different diagnosis (link profile, or the Discover report in GSC). Timing is an indication, not proof of cause: a relaunch, a migration or a seasonal dip in the same weeks produces the same picture, which is why the decision tree asks for them separately.
 
 ## Diagnosis decision tree
 
@@ -36,15 +41,19 @@ If brand keywords are intact and CWV is stable but generic keywords are broadly 
 
 ## Required diagnostic steps (day 1)
 
-1. Document the Core Update date — see `https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history`. Match Sistrix / GSC drop date exactly.
-2. Measure the Sistrix drop diff — monthly values 12 months before vs 1–3 months after the update.
-3. DataForSEO ranked-keywords diff — compare top positions pre vs post update. Specific URL clusters affected or distributed uniformly?
+1. Document the Core Update date — the repository ships a dated list in `plugins/seo-rescue/references/CORE_UPDATES.md` (type, rollout start, rollout end, and a `Last verified` date; if that date is older than 90 days, check the dashboard for newer updates). Source: `https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history`. Match the start of the drop against the rollout start.
+2. Measure the visibility drop — with Sistrix: monthly VI values 12 months before vs 1–3 months after the update. Without Sistrix: weekly GSC clicks and impressions (see the free path below).
+3. Ranked-keywords diff — compare top positions pre vs post update, with DataForSEO or with the GSC "Queries" export. Specific URL clusters affected or distributed uniformly?
 4. GSC click diff — which URLs lost most traffic? Pattern visible (all blog posts? all product pages? all YMYL topics?)
 5. EEAT audit of lost top URLs — author visible? Sources cited? Last-updated stamp? Trust layer (About, Imprint, Reviews)?
 6. Self-canonical audit — check whether competing pages all carry self-referencing canonical tags. CMS platforms with SEO plugins (Shopware/DreiscSeo, WordPress/Yoast, Magento) commonly set `isCanonical=true` on ALL pages by default. When keyword overlap exists between pages, self-canonicals cause invisible cannibalization: Google sees competing versions without a consolidation signal. Identify clusters with 2+ URLs targeting overlapping keywords, verify each page's `<link rel="canonical">`, and flag cases where ALL competing pages point to themselves.
 7. Structural quality baseline — crawl all indexable pages and classify as healthy/broken/thin/duplicate. If > 40 % of pages are broken (rendering failures, empty content divs, soft-404s, Lorem-ipsum), the drop is not pure authority — it is authority multiplied by structural decay. Fixing the structural baseline is then a recovery accelerator, not just hygiene.
 
-## Recovery plan (3 phases × 6–12 months)
+**No paid tools? Steps 1–4 work with Google Search Console alone.** In GSC open Performance → Search results, set the date range to 16 months, and use Export. The "Dates" sheet gives clicks and impressions per day: sum them per week and find the week the drop starts (replaces the Sistrix curve in step 2). Then use Compare (28 days before the rollout start vs 28 days after the rollout end) and export "Queries" and "Pages": the queries and URLs with the largest click loss replace the ranked-keywords diff in step 3. What you do not get from GSC is a visibility index that is comparable with other domains, and no data for competitors. Steps 5–7 need no paid tool; step 7 needs a crawler (Screaming Frog is free up to 500 URLs).
+
+## Recovery plan (4 phases, A–D)
+
+The phases describe the work, roughly the first 8 months (A to C one after the other, D alongside). The result takes longer than the work: first visible movement after 3–4 months, full recovery usually 9–18 months (see Realistic expectations).
 
 ### Phase A — Authority foundation (months 1–2)
 
@@ -140,7 +149,7 @@ When 3+ of these factors are present, recovery has been observed to proceed mate
 
 - March / April 2026 update: mid-size DE shop lost 50 % VI in 4 weeks
 - Diagnosis pattern confirmed: brand keywords stable, generic keywords broadly lost, CWV unchanged
-- Recovery plan: 6–12 months, Authority-First. Tech (PSI / Schema) in parallel but not the primary lever
+- Recovery plan: 6–12 months, Authority-First. Tech (PSI / Schema) in parallel but not the primary lever. (That was the plan as set at the time. This framework now states 9–18 months for full recovery.)
 - Lesson (Sistrix wording on March update): "Authority beats interchangeability"
 
 A second real case (DE news site) showed the same pattern in April / May 2026: −60 % VI in 6 weeks, brand stability intact — news / YMYL variant of the same algo recalibration.
