@@ -15,7 +15,7 @@ Last verified: 2026-11-18
 | May 2026 Core Update | core | 2026-05-21 | 2026-06-02 | yes (2026-06-03) |
 | March 2026 Core Update | core | 2026-03-27 | 2026-04-08 | yes (2026-06-03) |
 | March 2026 Spam Update | spam | 2026-03-24 | 2026-03-25 | yes (2026-06-03, 20h rollout) |
-| February 2026 Discover Update | discover | 2026-02-05 | 2026-02-19 | yes (2026-06-03) |
+| February 2026 Discover Update | discover | 2026-02-05 | 2026-02-27 | yes (2026-11-18; end date corrected from 2026-02-19) |
 | December 2025 Core Update | core | 2025-12-11 | 2025-12-29 | yes (2026-06-03) |
 | November 2025 Core Update | core | 2025-11-11 | 2025-11-28 | no (pre-v0.5.2 seed) |
 | August 2025 Spam Update | spam | 2025-08-26 | 2025-09-22 | yes (2026-06-03) |

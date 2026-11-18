@@ -405,7 +405,8 @@ function assertOwnRegularFile(st, filePath, fn, requireSingleLink) {
     throw new Error(`${fn}: target is not owned by the current user: ${filePath}`);
   }
   if (requireSingleLink && st.nlink !== 1) {
-    throw new Error(`${fn}: target has ${st.nlink} hard links, refusing to write through it: ${filePath}`);
+    throw new Error(`${fn}: target has ${st.nlink} hard links, refusing to write through it: ${filePath}. ` +
+      `Fix: remove the other link, or replace the file with a private copy (cp -p <file> <file>.tmp && mv <file>.tmp <file>).`);
   }
 }
 

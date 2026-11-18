@@ -42,6 +42,12 @@ The two recovery scripts (`recovery-monitor.js`, `recovery-crawl.js`) also take 
 
 **Known limit.** These checks and the write that follows are separate system calls; Node.js offers no `openat`, so the gap between them cannot be closed completely. The checks protect against accidental and pre-planted symlinks and hard links, not against an attacker who, running as the same user, swaps directories while a script is running.
 
+Further limits of these checks:
+
+- **Windows.** The owner check, the permission check and the no-follow open are skipped on Windows, because the platform has no equivalent in Node.js. There the cache directory inherits the ACL of its parent.
+- **Parent chain only for explicit paths.** Symlinks in parent directories are refused only for `--cache-dir` (and `options.cacheDir`). `SEO_CACHE_DIR` and the default path are checked at the cache directory itself, not along the whole chain, because temporary directories on macOS sit behind a system symlink.
+- **Slug collisions.** `a-b.com` and `a.b.com` map to the same cache folder name. If you track two domains that collide, give each its own cache root.
+
 Intermediate HTML for the PDF render lives in a per-run directory created via `fs.mkdtempSync(os.tmpdir() + '/seo-rescue-render-XXXXXX')` and is removed when the run completes. Set `SEO_KEEP_RUN_DIR=1` if you want to inspect the HTML between runs.
 
 Final PDFs are written to `$SEO_PDF_OUTPUT_DIR` (default `~/Downloads/`).

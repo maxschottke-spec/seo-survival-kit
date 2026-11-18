@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 Found by walking through the repository as a first-time user: installing v0.5.5, following the README and ONBOARDING.md literally, and running every documented command. Most of what follows is not new capability. It is the difference between what the documentation promised and what happened.
 
+### Fixed after the final acceptance run
+
+- `CORE_UPDATES.md`: the end date of the February 2026 Discover Update was wrong (2026-02-19, now 2026-02-27 per the Google Search Status Dashboard).
+- `SECURITY.md` now names three further limits: Windows skips the owner, permission and no-follow checks; the parent-chain symlink check applies to explicit paths only; two domains can collide on one cache folder name.
+- README and ONBOARDING say where output is German: the outreach PDF and the six `recovery-*` commands.
+- The hard-link refusal now says how to fix it.
+- Developer first name and a home-directory path removed from documentation.
+
 ### Fixed
 
 - **`recovery-monitor.js` and `recovery-crawl.js` ignored `--cache-dir`.** The option was parsed and documented, but both scripts always wrote to `SEO_CACHE_DIR` or `~/.cache/seo-rescue`. A run meant for a throwaway directory wrote into the real cache. The option is now passed through `ensureDomainDir()` / `getCacheDir()` in `lib/safe.js` (same 0700 and symlink checks); `writeMonitorEntry()` and `writeIssuesJSON()` accept `options.cacheDir`.

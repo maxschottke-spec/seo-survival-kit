@@ -16,7 +16,7 @@ No `npm install` anywhere: the kit has no dependencies.
 
 ## No keys? Start with one of the three free entry points
 
-Install the plugin (Step 1), then pick one. None of them needs an API key or a paid tool.
+Install the plugin (Step 1), then pick one. None of them needs an API key. Entry point 3 works on the bundled example files without any account; for your own data it needs a Sistrix export, which requires a Sistrix account.
 
 **1. Traffic dropped after a Google update**
 `/seo-rescue:post-core-update-recovery example.com`
@@ -55,7 +55,7 @@ Verify:
 ```
 /plugin
 ```
-You should see `seo-rescue` in the Installed tab with all 19 skills:
+You should see `seo-rescue` in the Installed tab with all 19 skills (the plugin list may show 25 entries, because the six `recovery-*` names appear both as skill and as command):
 - `rescue` (orchestrator — entry point, type `/seo-rescue:rescue` to see the routing table)
 - Free, no keys: `seo-audit-free`, `post-core-update-recovery`, `ai-search-rescue`, `sistrix-monday-recovery-check`, `channel-economics-analyzer`, `subscription-monetization-audit`
 - Free, with a free Google key or service account: `psi-weekly-cron-baseline`, `gsc-deep-dive`
@@ -185,7 +185,7 @@ export CHROME_PATH="/usr/bin/google-chrome"   # Linux
 
 **Cross-platform caveats (verified known limitations):**
 
-- `lib/safe.js` calls `fs.chmodSync(dir, 0o700)` on the cache dir. On Windows this is a no-op — the directory inherits its parent ACL. If you're on a shared Windows box, set ACLs manually on `$env:LOCALAPPDATA\seo-rescue` to your user only (same pattern as the `.env` example above).
+- `lib/safe.js` removes group and other permissions from a cache dir it manages (and refuses an existing open directory passed as `--cache-dir`). On Windows these permission steps are a no-op — the directory inherits its parent ACL. If you're on a shared Windows box, set ACLs manually on `$env:LOCALAPPDATA\seo-rescue` to your user only (same pattern as the `.env` example above).
 - The PDF output uses `path.join` so separator handling is correct on Windows. The PDF filename never contains backslashes.
 - `psi-weekly-cron-baseline` documents launchd (macOS) and crontab (Linux). On Windows use Task Scheduler — see Microsoft's `schtasks /create` docs.
 
@@ -207,6 +207,8 @@ If the skill doesn't trigger, you can manually invoke it:
 ```
 
 ## Step 6 — Generate your first outreach PDF (needs the paid keys from Step 3)
+
+> The PDF is German: the template, the chapter titles and the file name (`SEO-Auswertung-…pdf`) are fixed, and the keyword queries run with German language settings.
 
 Open an empty working directory. The pipeline reads `./audit-config.json` from the directory you start it in and writes the PDF to `~/Downloads/`:
 ```bash

@@ -99,6 +99,8 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 | `/seo-rescue:recovery-plan <domain>` | Prioritized 30/60/90-day plan with Do-Not-Touch + human approval gate | free |
 | `/seo-rescue:recovery-monitor <domain>` | Weekly tracking with deterministic 0-100 recovery score (`null` when data is insufficient) | free with hand-entered or CSV values; Sistrix / DataForSEO calls if configured |
 | `/seo-rescue:recovery-full <domain>` | Full sequence: diagnose → crawl → audit → plan → monitor | ~$0.05–$0.50 |
+
+The six `recovery-*` commands are written in German and produce German output (for example the field `summary_de`). Ask Claude to explain a step in English if you need it.
 | `/seo-rescue:sistrix-monday-recovery-check <current.csv> <previous.csv> [domain?]` | CSV-first weekly review, 17-section structured report | free |
 
 **Diagnostic and analysis**
@@ -115,7 +117,7 @@ The orchestrator (`/seo-rescue:rescue`) routes to the right skill or command; ea
 
 | Command | What it does | Cost |
 |---|---|---|
-| `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers | ~0.15–0.75 (Sistrix credits + DataForSEO, see [COSTS.md](./COSTS.md)) |
+| `/seo-rescue:seo-outreach-report <domain>` | 10-chapter A4 PDF for non-technical decision-makers. The PDF is German (fixed template and German search queries) | ~0.15–0.75 (Sistrix credits + DataForSEO, see [COSTS.md](./COSTS.md)) |
 | `/seo-rescue:channel-economics-analyzer` | Per-channel P&L from your marketplace CSVs (Amazon, OTTO, eBay, Zalando, …) | free (your CSVs) |
 | `/seo-rescue:subscription-monetization-audit [domain \| --csv]` | 5-lever recurring-revenue playbook; optional Stripe/Chargebee/Recurly CSV import for MRR / ARPU / churn / cohort analysis | free (your CSVs) |
 
@@ -194,7 +196,7 @@ node plugins/seo-rescue/skills/seo-outreach-report/weekly-noise.js --selftest
 node plugins/seo-rescue/skills/target-keyword-set/target-keyword-set.js --selftest
 ```
 
-The same nine commands run in CI on every push and pull request ([`.github/workflows/validate.yml`](./.github/workflows/validate.yml)). They test the scripts and the data contracts. They do not test the prose workflows that Claude executes, and there is no end-to-end run against live APIs, see [MATURITY.md](./MATURITY.md).
+The same nine commands run in CI on every push to `main` and on every pull request ([`.github/workflows/validate.yml`](./.github/workflows/validate.yml)). They test the scripts and the data contracts. They do not test the prose workflows that Claude executes, and there is no end-to-end run against live APIs, see [MATURITY.md](./MATURITY.md).
 
 A safe first run of a script that would normally write to your cache:
 
