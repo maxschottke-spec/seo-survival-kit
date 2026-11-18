@@ -51,7 +51,7 @@ Wenn `settlement_gate_active = true`:
   "live_changes_allowed": false,
   "allowed_now": [
     "act-001 (audit)",
-    "act-002 (rico-briefing)"
+    "act-002 (dev-briefing)"
   ],
   "blocked_now": [
     "act-003 (title-rewrite — blocked_until_re_eval)",
