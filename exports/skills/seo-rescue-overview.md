@@ -78,8 +78,8 @@ If you want native skill-like behavior on Cursor / Custom GPT / Gemini / Aider, 
 - **Repository:** [github.com/maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit)
 - **License:** MIT
 - **Dependencies:** zero npm runtime deps (everything that talks to a network is via `fetch`; PDF rendering uses Chrome-headless via `spawnSync` with `shell: false`)
-- **Security:** two independent review rounds, see [SECURITY.md](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/SECURITY.md#external-security-reviews)
-- **Status:** Public Beta (v0.5.2 — 18 skills/commands: 1 orchestrator + 17 sub-skills and recovery commands)
+- **Security:** one external security review plus one maintainer-driven re-audit, see [SECURITY.md](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/SECURITY.md#external-security-reviews)
+- **Status:** Public Beta (v0.5.5 — 19 skills/commands: 1 orchestrator + 18 sub-skills and recovery commands)
 
 ---
 

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+## [0.5.5] — 2026-11-18
+
+### Fixed (release preparation)
+
+- Skill count corrected to nineteen in the marketplace manifest and exports; `target-keyword-set` added to the command lists.
+- `CORE_UPDATES.md` extended by the June, August and September 2026 spam updates and the November 2026 core update (still rolling out); `recovery-diagnose` treats an open rollout end (`laufend`) as an active update window.
+- Eight dead links to `ARCHITECTURE.md` in the reference documents repaired.
+- README and MATURITY.md no longer call the framework "validated"; the pilot case is described as what it is (one case, no documented recovery, several findings withdrawn).
+- Example screenshot of the Core-Update drop replaced by a chart with synthetic data.
+- Remaining "leading recovery indicator" wording for AI citations aligned with the retraction below.
+
 ### Corrected
 
 Findings from five further months of recovery operations, folded back into the framework. The largest part is retractions: several figures that stage, gates and plans rested on did not survive re-measurement.

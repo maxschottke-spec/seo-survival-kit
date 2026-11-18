@@ -1,10 +1,10 @@
 # Recovery System
 
-Operational methodology for SEO recovery within the [Recovery Operating System](./ARCHITECTURE.md). This document defines what an operator does during SEO recovery: how decisions get made, what gets protected, what does not get touched, how risk is evaluated, and how time windows shape conclusions. The aim is operator-grade methodology, not a feature list.
+Operational methodology for SEO recovery within the [Recovery Operating System](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/ARCHITECTURE.md). This document defines what an operator does during SEO recovery: how decisions get made, what gets protected, what does not get touched, how risk is evaluated, and how time windows shape conclusions. The aim is operator-grade methodology, not a feature list.
 
-> **Status note (v0.5.2).** This document is methodology specification. Sections 5 (Recovery Risk Engine), 6 (Risk Matrix), 7 (Money Keyword Protection), 8 (Winner/Loser Neutralization), 9 (URL Recovery Analysis), 10 (Recovery Signal Score), and 12 (Time-based Recovery Logic) are exercised by the `sistrix-monday-recovery-check` skill (shipped in v0.5.2, CSV-first weekly workflow). The recovery workflow commands (`recovery-diagnose/crawl/audit/plan/monitor/full`, also v0.5.2) implement parts of the methodology in runtime form: Do-Not-Touch and batch limits in `recovery-plan`, stage estimation in `recovery-diagnose`, and an **automated 5-component Recovery Score in `recovery-monitor` that is a separate metric from the section-10 Recovery Signal Score** (see section 10 note). Sections without a runtime are applied manually by reading them; the skill registry is in [ARCHITECTURE.md §4](./ARCHITECTURE.md#4-modules-and-skill-registry).
+> **Status note (v0.5.2).** This document is methodology specification. Sections 5 (Recovery Risk Engine), 6 (Risk Matrix), 7 (Money Keyword Protection), 8 (Winner/Loser Neutralization), 9 (URL Recovery Analysis), 10 (Recovery Signal Score), and 12 (Time-based Recovery Logic) are exercised by the `sistrix-monday-recovery-check` skill (shipped in v0.5.2, CSV-first weekly workflow). The recovery workflow commands (`recovery-diagnose/crawl/audit/plan/monitor/full`, also v0.5.2) implement parts of the methodology in runtime form: Do-Not-Touch and batch limits in `recovery-plan`, stage estimation in `recovery-diagnose`, and an **automated 5-component Recovery Score in `recovery-monitor` that is a separate metric from the section-10 Recovery Signal Score** (see section 10 note). Sections without a runtime are applied manually by reading them; the skill registry is in [ARCHITECTURE.md §4](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/ARCHITECTURE.md#4-modules-and-skill-registry).
 
-Companion docs: [ARCHITECTURE.md](./ARCHITECTURE.md) for system shape, [DECISION_ENGINE.md](./DECISION_ENGINE.md) for the decision rules consumed here, [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) for the weekly workflow that exercises this methodology.
+Companion docs: [ARCHITECTURE.md](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/ARCHITECTURE.md) for system shape, [DECISION_ENGINE.md](./DECISION_ENGINE.md) for the decision rules consumed here, [SISTRIX_MONDAY_RECOVERY_CHECK.md](./SISTRIX_MONDAY_RECOVERY_CHECK.md) for the weekly workflow that exercises this methodology.
 
 ---
 
@@ -126,7 +126,7 @@ The default is "stay protected longer". Lifting protection prematurely is more c
 
 ### Override
 
-The operator can override Do-Not-Touch with context the framework does not have. When the override happens, the decision is logged (see [ARCHITECTURE.md section 5](./ARCHITECTURE.md#5-privacy-and-client-data) decision memory), the specific risk acknowledged, and the result watched closely at the next Monday cycle.
+The operator can override Do-Not-Touch with context the framework does not have. When the override happens, the decision is logged (see [ARCHITECTURE.md section 5](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/ARCHITECTURE.md#5-privacy-and-client-data) decision memory), the specific risk acknowledged, and the result watched closely at the next Monday cycle.
 
 ---
 
@@ -982,7 +982,7 @@ Check the temporal order before anything else: in the originating case the break
 
 ## Appendix B: Decision Log Format (operator-facing)
 
-The operator maintains a decision log to build judgment over time. Lightweight format, expected to live in the operator's local gitignored `private/decisions/` directory (see [ARCHITECTURE.md section 5](./ARCHITECTURE.md#5-privacy-and-client-data)).
+The operator maintains a decision log to build judgment over time. Lightweight format, expected to live in the operator's local gitignored `private/decisions/` directory (see [ARCHITECTURE.md section 5](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/ARCHITECTURE.md#5-privacy-and-client-data)).
 
 ```markdown
 # YYYY-MM-DD — Brief decision title
@@ -1015,4 +1015,4 @@ The operator maintains a decision log to build judgment over time. Lightweight f
 
 The decision log is the primary source of pattern maturity progression. Repeated correct decisions on the same pattern type promote the pattern toward higher confidence. Repeated wrong decisions identify gaps in the existing rule set and trigger candidate new decision rules.
 
-The log is local-only. Public artifacts (new decision rules, new patterns documented in this file) are produced via the redaction process in [ARCHITECTURE.md section 5](./ARCHITECTURE.md#5-privacy-and-client-data).
+The log is local-only. Public artifacts (new decision rules, new patterns documented in this file) are produced via the redaction process in [ARCHITECTURE.md section 5](https://github.com/maxschottke-spec/seo-survival-kit/blob/main/ARCHITECTURE.md#5-privacy-and-client-data).

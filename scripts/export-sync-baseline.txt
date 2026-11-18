@@ -187,7 +187,7 @@
 < - Plugin name: `seo-rescue`
 < - Marketplace: `seo-survival-kit`
 < - Repo: https://github.com/maxschottke-spec/seo-survival-kit
-< - Latest installable version: v0.5.4
+< - Latest installable version: v0.5.5
 < - Dependencies: zero npm packages
 < - Validation: `claude plugin validate plugins/seo-rescue` passes
 < ## Workflow patterns
@@ -267,6 +267,6 @@
 > - Canonical version: `seo-survival-kit` plugin for Claude Code
 > - Repository: github.com/maxschottke-spec/seo-survival-kit
 > - Dependencies: zero npm runtime deps (everything that talks to a network is via `fetch`; PDF rendering uses Chrome-headless via `spawnSync` with `shell: false`)
-> - Security: two independent review rounds, see SECURITY.md
-> - Status: Public Beta (v0.5.2 — 18 skills/commands: 1 orchestrator + 17 sub-skills and recovery commands)
+> - Security: one external security review plus one maintainer-driven re-audit, see SECURITY.md
+> - Status: Public Beta (v0.5.5 — 19 skills/commands: 1 orchestrator + 18 sub-skills and recovery commands)
 > ---

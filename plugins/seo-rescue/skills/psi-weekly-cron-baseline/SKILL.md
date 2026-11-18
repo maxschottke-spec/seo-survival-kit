@@ -7,7 +7,7 @@ allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*), Bash(launchctl:*), Bash
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.4'
+  version: '0.5.5'
   category: marketing
 ---
 

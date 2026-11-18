@@ -7,7 +7,7 @@ allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*), Bash(launchctl:*), Bash
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.4'
+  version: '0.5.5'
   category: marketing
 ---
 
@@ -24,7 +24,7 @@ This is the **possible-early-signal** companion to [[post-core-update-recovery]]
 
 ## When to use
 
-- A site running active Core-Update recovery — track AI citations as the leading recovery indicator
+- A site running active Core-Update recovery — log AI citations as a supporting signal (the lead-indicator reading was rescinded, see Overview)
 - A brand wanting to know whether ChatGPT / Perplexity / AI Overviews actually mention them (most brands don't measure this — they guess)
 - An agency reporting to clients on "AI search visibility" — needs hard numbers, not vibes
 - A YMYL / B2B vendor whose buyers research via ChatGPT before contact sales — citation frequency is a direct lead-gen signal

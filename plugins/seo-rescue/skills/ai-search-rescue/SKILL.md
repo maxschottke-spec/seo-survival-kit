@@ -7,7 +7,7 @@ allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.4'
+  version: '0.5.5'
   category: marketing
 ---
 
@@ -27,7 +27,7 @@ Two operational findings drive this skill:
 - A site that recovered organic rankings but is invisible in AI Overviews
 - Owner says "ChatGPT keeps recommending our competitor, never us"
 - Site has thin or unstructured content that AI surfaces can't extract from
-- Post-Core-Update recovery work — track AI citations as leading recovery indicator
+- Post-Core-Update recovery work — log AI citations as a supporting signal (the lead-indicator reading was rescinded, see Overview)
 - New domain/topic launch — set up for AI-citability from day one
 - B2B / YMYL site (medical, legal, financial) — AI surfaces over-index on authoritative sources here
 
