@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Removed
+
+- README: the section offering paid engagements. This repository is a self-serve open-source tool; questions go to Issues.
+
 ## [0.5.6] — 2026-11-18
 
 Found by walking through the repository as a first-time user: installing v0.5.5, following the README and ONBOARDING.md literally, and running every documented command. Most of what follows is not new capability. It is the difference between what the documentation promised and what happened.

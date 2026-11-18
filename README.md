@@ -254,18 +254,6 @@ Skills were built from one extended Core-Update recovery case (mid-size DE ecomm
 
 The open repo is a first-pass methodology and decision-support layer. It helps identify recovery signals, risky changes, protected URLs, winner/loser patterns, missing data, and validation steps. It is not the same as a calibrated recovery engagement that brings private business context into the decision. Deeper recovery work needs data the open repo does not see: GSC/SISTRIX history, shop revenue, margin, returns, inventory, paid-media context, implementation history, competitive context, and operator review to weigh conflicting signals.
 
-## Need help running this on your own site?
-
-The plugin is MIT and self-serve. If you'd rather have someone with operational experience walk you through it on your specific case, the maintainer offers paid engagements:
-
-| Engagement | What you get | Typical scope |
-|---|---|---|
-| **Recovery Audit (fixed)** | Full diagnose-PDF + 60-min strategy call + 4-phase 6-12 month plan | One domain, one Core-Update or AI-search problem |
-| **Recovery Retainer (ongoing advisory)** | Monthly reviews, plan adjustments, prioritization help | 3-6 months, weekly to bi-weekly cadence |
-| **Outreach pipeline setup** | Configured pipeline + first 5 PDFs + handoff | One-time, for agencies that want decision-maker deliverables |
-
-Contact: open a [Discussion](https://github.com/maxschottke-spec/seo-survival-kit/discussions).
-
 ## Contributors
 
 - [Max Schottke](https://github.com/maxschottke-spec) — maintainer, original skills, plugin packaging
