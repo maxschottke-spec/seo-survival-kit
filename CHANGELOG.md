@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+## [0.5.6] — 2026-11-18
+
+Found by walking through the repository as a first-time user: installing v0.5.5, following the README and ONBOARDING.md literally, and running every documented command. Most of what follows is not new capability. It is the difference between what the documentation promised and what happened.
+
+### Fixed
+
+- **`recovery-monitor.js` and `recovery-crawl.js` ignored `--cache-dir`.** The option was parsed and documented, but both scripts always wrote to `SEO_CACHE_DIR` or `~/.cache/seo-rescue`. A run meant for a throwaway directory wrote into the real cache. The option is now passed through `ensureDomainDir()` / `getCacheDir()` in `lib/safe.js` (same 0700 and symlink checks); `writeMonitorEntry()` and `writeIssuesJSON()` accept `options.cacheDir`.
+- **`recovery-monitor.js` appended an all-null entry when called without data.** The direct call has no data source of its own; it wrote `"status":"partial"` with every value `null` to `history.ndjson`, which then served as "last entry" for the next real run. It now writes nothing in that case and says so. New options `--vi` and `--keywords-t10` let the direct call record hand-entered values. Such entries carry `providers_used: ["manual_cli"]` and are rated `partial` / `medium` at most. Deltas against a previous entry are `null` instead of a negative number when the current value is missing.
+- **Recovery commands pointed at paths that only exist in a clone.** `require('./plugins/seo-rescue/lib/safe.js')` (seven places in `recovery-diagnose`, `recovery-crawl`, `recovery-monitor`) and ten `../../references/…` links in `recovery-diagnose` (from `commands/` that is outside the plugin). All are `${CLAUDE_PLUGIN_ROOT}/…` now, as in the skill wrappers; each of the three commands explains the variable in a short "Pfade" section. CI rejects both patterns from now on.
+- **Core-update correlation in `recovery-diagnose` contradicted `CORE_UPDATES.md`.** Step 8 correlated against every table entry, including `spam` and `discover`; it now correlates only against `core`, and a drop inside a spam or discover window gives a warning and at most `low`. The `Verified: no` cap (`medium` at most) was in the reference file but not in the command. The freshness rule used the file's modification date, which an install or clone resets to today; it now uses a `Last verified: 2026-11-18` line in the file. The re-entry rule of the stage state machine was undefined for a rollout that is still running (`laufend`); it is now defined, and rule 2 names `days_since_rollout_end: null`.
+- `CORE_UPDATES.md` said all verified entries were checked on 2026-06-03; four carry 2026-11-18. The dashboard link in the file returned HTTP 404 and is replaced by the working one.
+- **PageSpeed call without a key in `seo-audit-free`.** The keyless example had no `category` parameters and no output file, so the evaluation snippet read a file that did not exist; on an error response the snippet crashed with a TypeError. The keyless call answered HTTP 429 when tested. The example now uses the same parameters and file, the snippet reports API errors in plain words, and the text says that the keyless call often fails and what to do then.
+- `seo-audit-free`: the robots.txt check printed an HTML error page as if it were a robots.txt (status code is printed first now); the language check missed `lang=en` without quotes; `allowed-tools` now covers the commands step 4 uses.
+- **`sistrix-monday-recovery-check`: the expected output did not match its input CSVs.** It said "21 of 25 improved" and "Top-3 +1 (from 4 to 5)"; the CSVs give 20 improved, 4 declined, 1 unchanged, Top 3 from 1 to 3, Top 10 from 6 to 9. All counts are recomputed and now checked by a test. With the corrected numbers the gains outweigh the losses, so the example reads the flat index as lagging with concentrated losses, not as full neutralization. The score factor table follows the thirteen factors of `RECOVERY_SYSTEM.md` §10; the score figure itself is marked illustrative, because the spec does not define how factors are normalized.
+- `sistrix-monday-recovery-check/SKILL.md`: two references to `RECOVERY_SYSTEM.md §5` for the winner/loser logic pointed at the wrong section (it is §8); the position-CTR table was called a "standard SISTRIX curve" (it is the rule-of-thumb table in `recovery-diagnose`).
+- **ONBOARDING.md was out of date.** "All eight skills" (nineteen); a plugin cache path that does not exist (the real one is `~/.claude/plugins/cache/seo-survival-kit/seo-rescue/<version>/`, same wrong path six times in `SHOP-SYSTEMS.md`); `export ENV_PATH=…`, which has no effect (the scripts need `node --env-file=…`); a `NARRATIVE` map in `seo-report-gen.js` that does not exist (the text lives in `audit-config.json` under `narrative`); `/skill post-core-update-recovery` instead of `/seo-rescue:post-core-update-recovery`; German leftovers.
+- `post-core-update-recovery`: "3 phases" above four phases; "6–12 months" next to "9–18 months"; "30 %+" next to "<20 % is noise" with nothing in between. Now: four phases (A–D); first movement after 3–4 months, full recovery usually 9–18 months; 20–30 % is named as a grey zone. Export copy and README follow.
+- COSTS.md: the per-audit total "$0.05–$0.50" was not the sum of the rows above it (€0.10–€0.50 plus $0.05–$0.25). It is about 0.15–0.75; README, the rescue table and the marketplace description follow.
+- `channel-economics-analyzer/SKILL.md` named a script `channel-economics.js` that does not exist (`channel-economics.example.js`).
+- `lib-safe-primitives.test.js` wrote a test slug into the real `~/.cache/seo-rescue` and failed whenever `SEO_CACHE_DIR` was set. It now runs in a temporary directory.
+- Plugin docs: `docs/ONBOARDING.md` and `recovery-diagnose` named different places for the Search Console import; both now name `imports/gsc-performance.csv` (click series) and `imports/gsc/` (queries, pages, links). The command table lacked `recovery-audit`. `docs/SETUP.md` said Node.js 18+; `node --env-file` needs 20.6.
+- Stale version remarks removed (`README.md`, `sistrix-monday-recovery-check/SKILL.md`, the example README).
+
+### Added
+
+- `--dry-run` for `recovery-monitor.js` and `recovery-crawl.js` (and `options.dryRun` for their functions): prints what would be written, creates no directory, takes no lock, writes nothing. `--help` for both.
+- `resolveDomainDir()` in `lib/safe.js`: the read-only counterpart of `ensureDomainDir()`; `getCacheDir()` and `ensureDomainDir()` accept an explicit cache root.
+- `post-core-update-recovery`: a free path for the day-1 diagnosis with a Google Search Console export instead of Sistrix and DataForSEO, a pointer to the bundled `CORE_UPDATES.md`, and a definition of what "correlates" means.
+- ONBOARDING.md: a "What you need" table (Node.js 20.6+, Chrome for the PDF step, which steps need paid access) and a section "No keys? Start with one of the three free entry points". The title no longer promises a PDF in 15 minutes without saying that it needs paid accounts.
+- README: "Verify your install" with the nine test commands; a note that the free audit skill is written in German; a pointer to the synthetic Monday-check CSVs; two sentences on why six names exist both as command and as skill.
+- COSTS.md: one table for all 19 skills (keys read, cost per run as far as the repository states it, what works without the key). `.env.example` says per key what is missing without it and lists the variables other skills read (`OPENAI_API_KEY`, `PERPLEXITY_API_KEY`, `GSC_SERVICE_ACCOUNT_JSON`). One `.env` location in all docs: `~/.config/seo-rescue/.env`.
+- The synthetic Monday-check CSVs and expected output now ship inside the plugin (`skills/sistrix-monday-recovery-check/examples/`), so the example works from an install; the skill states the column-name, separator and encoding rules.
+- `seo-audit-free`: an English note at the top, bilingual headings in the report template.
+- `channel-economics.example.js` and `csv-import.example.js` say where to run them from; the first one explains a missing `channels.json` instead of throwing.
+- Tests: `recovery-scripts-cache-dir.test.js` (23 checks), `core-updates-laufend.test.js` with a fixture for a running rollout, `monday-example.test.js`.
+- CI: all seven test files and both self-tests run on every push and pull request; new checks for clone-only paths in command and skill files and for test files that are not wired in.
+
+### Not changed, and still open
+
+- The six `recovery-*` names remain both command and skill, with different pre-approved tools. Only documented.
+- `befund.schema.json` does not list `"unknown"` for `core_update_correlation`, although `recovery-diagnose` sets it when no visibility data exists.
+- The Recovery Signal Score cannot be reproduced from the spec: `RECOVERY_SYSTEM.md` §10 gives factors and weights, not the normalization.
+- The README section on paid engagements still says "6-12 month plan".
+
 ## [0.5.5] — 2026-11-18
 
 ### Fixed (release preparation)

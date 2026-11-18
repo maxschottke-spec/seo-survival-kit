@@ -7,7 +7,7 @@ allowed-tools: [Read, Write, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.5'
+  version: '0.5.6'
   category: marketing
 ---
 
@@ -41,6 +41,15 @@ The skill does not require a SISTRIX API key. It accepts CSV exports produced fr
 ### Expected CSV shape
 
 A SISTRIX keyword export usually carries at minimum: `Keyword`, `Position`, `URL`, `Search Volume`, `Competition`, `SERP Features`, and optionally `Previous Position`, `CPC`, and `Intent`. Column names vary by SISTRIX UI version and export type. The skill normalizes column names case-insensitively and accepts the German export form (`Keyword`, `Position`, `URL`, `Suchvolumen`, `Wettbewerb`, `SERP-Features`) as well.
+
+### Column names, separator, encoding
+
+- **Column names** are matched case-insensitively, and spaces, underscores and hyphens are treated as the same character: `Search Volume`, `search_volume`, `search-volume` and `SEARCH VOLUME` are one column. The same goes for `Previous Position` / `previous_position` and `SERP Features` / `SERP-Features` / `serp_features`.
+- **Accepted names per field:** keyword = `Keyword`; position = `Position`; url = `URL`; search volume = `Search Volume` or `Suchvolumen`; competition = `Competition` or `Wettbewerb`; plus the optional `Previous Position`, `CPC`, `Intent`, `SERP Features`. A column that matches none of these is ignored and named in the Data Limitations section.
+- **Separator:** comma or semicolon (German spreadsheet exports use the semicolon). Detect it from the header line. Fields that contain the separator must be quoted.
+- **Encoding:** UTF-8, with or without a byte-order mark. If umlauts arrive garbled (`GrÃ¶ÃŸe`), the file is in another encoding (typically Windows-1252 or UTF-16 from a spreadsheet): ask the operator to re-export or re-save as UTF-8 instead of guessing the keywords.
+- **Numbers:** positions are whole numbers. Search volume may carry thousands separators (`4.400`, `4,400`, `4 400`); strip them. A position cell that is empty or `-` means "not ranking" and is treated like a missing row.
+- **Required columns:** keyword, position, url. If one of them cannot be identified, stop and show the operator the header line you found, do not guess.
 
 If a CSV is missing one of the optional fields, the skill degrades gracefully: the section that needed that field is marked "(data not in export)" rather than producing a fabricated number.
 
@@ -89,7 +98,7 @@ Output as a single table with current-week, previous-week, delta, and delta-perc
 
 ### Step 4 — Winner/Loser neutralization
 
-Apply the detection logic from RECOVERY_SYSTEM.md §5. The pattern: many small gains being offset by a few large head-term losses. Output:
+Apply the detection logic from RECOVERY_SYSTEM.md §8 (Winner/Loser Neutralization). The pattern: many small gains being offset by a few large head-term losses. Output:
 
 - Top 10 winners by position gain
 - Top 10 winners by commercial value (`search_volume * intent_weight`)
@@ -98,7 +107,7 @@ Apply the detection logic from RECOVERY_SYSTEM.md §5. The pattern: many small g
 - Top 10 losers by visibility impact
 - A 1-2 sentence interpretation of why the index might be flat or moving counter to keyword direction
 
-The CTR curve uses the standard SISTRIX position-to-CTR curve as documented in RECOVERY_SYSTEM.md §5; if the operator provided GSC CTR data per query, prefer that.
+The CTR curve is the rule-of-thumb expected-CTR table that RECOVERY_SYSTEM.md §8 points to: `${CLAUDE_PLUGIN_ROOT}/commands/recovery-diagnose.md`, Schritt 11. It is not a measured curve and has no value below position 20 (count those as zero). If the operator provided GSC CTR data per query, prefer that.
 
 ### Step 5 — Money keyword protection
 
@@ -244,7 +253,7 @@ If the operator is running in a sensitive-client-data mode (see `ARCHITECTURE.md
 
 ## What this skill does not do
 
-- Does not call the SISTRIX API. CSV-first only (as of v0.5.3, still true). Optional API integration is planned for the v0.9 beta.
+- Does not call the SISTRIX API. CSV-first only. Optional API integration is planned for the v0.9 beta.
 - Does not predict rankings with certainty. The Recovery Signal Score is a calibrated heuristic; treat it as one input, not as a forecast.
 - Does not recommend rewriting winning content. The What-Not-To-Touch section is explicit about this.
 - Does not require API keys.
@@ -269,10 +278,17 @@ If the operator is running in a sensitive-client-data mode (see `ARCHITECTURE.md
 
 ## Synthetic example
 
-A worked example with synthetic data ships at `examples/synthetic-sistrix-monday-check/` in the repository (repo root, not shipped in the plugin package). The example uses:
+A worked example with synthetic data ships with the plugin, in this skill's folder:
+
+- `${CLAUDE_PLUGIN_ROOT}/skills/sistrix-monday-recovery-check/examples/input-current.example.csv` (25 keywords)
+- `${CLAUDE_PLUGIN_ROOT}/skills/sistrix-monday-recovery-check/examples/input-previous.example.csv` (28 keywords)
+- `${CLAUDE_PLUGIN_ROOT}/skills/sistrix-monday-recovery-check/examples/money-keywords.example.csv` (11 money keywords)
+- `${CLAUDE_PLUGIN_ROOT}/skills/sistrix-monday-recovery-check/examples/expected-output.example.md` (the 17-section report these inputs should produce)
+
+To try the skill without own data, pass the first three paths as arguments, the domain `example-furniture-shop.test`, and the index values 0.84 (current) and 0.85 (previous). The same files, with a README, are in the repository under `examples/synthetic-sistrix-monday-check/` (repo root, not shipped in the plugin package).
 
 - Domain: `example-furniture-shop.test`
 - Important keyword: `office chair ergonomic 27 inch`
-- Scenario: current position 2, previous position 18, 200+ keywords returned, visibility index flat, some head terms lost, GSC impressions rising, clicks not yet fully recovered
+- Scenario: current position 2, previous position 18; 20 of the 25 shared keywords improved, 4 guide head terms declined, 3 keywords left the export; visibility index flat (0.85 → 0.84); no GSC and no conversion data supplied
 
-All data is synthetic. No real company names, no real exports, no real revenue numbers. The README in that folder shows the input CSV shape and the expected output Markdown.
+All data is synthetic. No real company names, no real exports, no real revenue numbers. The counts in the expected output are exact for these inputs; the Recovery Signal Score figure in it is illustrative.

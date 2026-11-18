@@ -2,38 +2,38 @@
 ### only in canonical (17)
 < # Post-Core-Update Recovery
 < ## Overview
-< A specific recovery framework for domains that lost visibility after a Google Core Update. Core insight from real March/April 2026 recovery cases: *Authority items > technical hygiene*. Recovery 6–12 months, not 6–8 weeks.
+< A specific recovery framework for domains that lost visibility after a Google Core Update. Core insight from real March/April 2026 recovery cases: *Authority items > technical hygiene*. Recovery takes 9–18 months, not 6–8 weeks; first visible movement after 3–4 months.
 < ## When to use
-< - VI drop correlates timely with a published Core Update (see Google Search Status Dashboard)
+< - VI drop correlates timely with a published Core Update (see Google Search Status Dashboard; "correlates" is defined below)
 < - GSC shows no manual action
 < Don't use for:
 < - Point keyword losses → usually on-page issue, not core update
 < If brand keywords are intact and CWV is stable but generic keywords are broadly lost → this is the core signature of a Core Update hit.
-< 1. Document the Core Update date — see https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history. Match Sistrix drop date exactly.
+< 1. Document the Core Update date — the plugin ships a dated list in `${CLAUDE_PLUGIN_ROOT}/references/CORE_UPDATES.md` (type, rollout start, rollout end, and a `Last verified` date; if that date is older than 90 days, check the dashboard for newer updates). Source: https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history. Match the start of the drop against the rollout start.
 < 2. Industry communities (e-commerce: camper forums, boating blogs; news: investigations, exclusive stories)
 < 2. Structural quality cleanup executed in parallel. If >40 % of pages are broken/thin/duplicate (see Structural Quality Baseline in RECOVERY_SYSTEM.md), fixing them removes a compounding penalty. The Core Update hit is authority × structural quality — improving either factor independently lifts the product.
 < 4. AI Citations as a possible early signal (hypothesis, N=1, currently unproven). Rising AI Overview/ChatGPT/Perplexity mentions while classical VI is still flat MAY indicate that authority work is being recognized. ⚠ This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise could not be separated from a pre-update plateau (the update hit first cited as having erased it was itself withdrawn after a full post-window re-measurement; the hypothesis stays unproven either way) (see LESSONS.md, 2026-06-03 correction). Treat rising AI citations as worth logging, not as confirmation — do not change course or report recovery based on this signal alone.
 < ## Related skills
 < - seo-outreach-report — when the owner needs a printable status report
 < ## Real data points (anonymized 2026 cases)
-< - Recovery plan: 6–12 months, Authority-First. Tech (PSI/Schema) in parallel but not the primary lever.
+< - Recovery plan: 6–12 months, Authority-First. Tech (PSI/Schema) in parallel but not the primary lever. (That was the plan as set at the time. This skill now states 9–18 months for full recovery.)
 ### only in export (17)
 > # Post-Core-Update Recovery — Framework
 > > Source: `plugins/seo-rescue/skills/post-core-update-recovery/SKILL.md` (canonical Claude Code version).
-> > Use case: Diagnose and recover from a Google Core Update visibility drop. Authority-first, 6–12 month timeline, not a quick technical fix.
+> > Use case: Diagnose and recover from a Google Core Update visibility drop. Authority-first, first movement after 3–4 months, full recovery usually 9–18 months, not a quick technical fix.
 > > Use this exported version when: you're running Cursor, an OpenAI Custom GPT, Gemini CLI, Aider, or any LLM tool that isn't Claude Code. The framework content is identical — only the Claude-specific frontmatter (`allowed-tools`, `user-invocable`, `argument-hint`) has been stripped.
 > ## When this framework applies
-> - VI/organic-traffic drop correlates timely with a published Google Core Update (Search Status Dashboard)
+> - VI/organic-traffic drop correlates timely with a published Google Core Update (Search Status Dashboard; "correlates" is defined below)
 > - Google Search Console shows no manual action
 > Don't apply for:
 > - Point keyword losses → usually on-page issue
 > If brand keywords are intact and CWV is stable but generic keywords are broadly lost → core signature of a Core Update hit.
-> 1. Document the Core Update date — see `https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history`. Match Sistrix/GSC drop date exactly.
+> 1. Document the Core Update date — the repository ships a dated list in `plugins/seo-rescue/references/CORE_UPDATES.md` (type, rollout start, rollout end, and a `Last verified` date; if that date is older than 90 days, check the dashboard for newer updates). Source: `https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history`. Match the start of the drop against the rollout start.
 > 2. Industry communities (e-commerce: forums; news: investigations, exclusive stories)
 > 2. Structural quality cleanup executed in parallel. If >40 % of pages are broken/thin/duplicate (see diagnostic step 7 above), fixing them removes a compounding penalty. The Core Update hit is authority × structural quality — improving either factor independently lifts the product.
 > 4. AI Citations as a possible early signal (hypothesis, N=1, currently unproven). Rising AI Overview/ChatGPT/Perplexity mentions while classical VI is still flat MAY indicate that authority work is being recognized. ⚠ This hypothesis suffered a setback on 2026-06-03: in the pilot case, the AI-citation rise could not be separated from a pre-update plateau (the update hit first cited as having erased it was itself withdrawn after a full post-window re-measurement; the hypothesis stays unproven either way) (see the canonical `LESSONS.md`, 2026-06-03 correction). Treat rising AI citations as worth logging, not as confirmation — do not change course or report recovery based on this signal alone.
 > ## Real anchor data (anonymized 2026 cases)
-> - Recovery plan: 6–12 months, Authority-First. Tech (PSI/Schema) in parallel but not the primary lever
+> - Recovery plan: 6–12 months, Authority-First. Tech (PSI/Schema) in parallel but not the primary lever. (That was the plan as set at the time. This framework now states 9–18 months for full recovery.)
 > ---
 ## plugins/seo-rescue/skills/ai-search-rescue/SKILL.md <-> exports/skills/ai-search-rescue.md
 ### only in canonical (47)
@@ -163,7 +163,7 @@
 < ### `/seo-rescue:post-core-update-recovery [domain]`
 < Pure-Markdown framework skill. Diagnose decision tree for distinguishing Core Update damage from technical/CWV drops. 4-phase Authority-First recovery plan (Authority foundation → Topical hubs → Off-page authority → Tech hygiene) with realistic 6–12 month timelines. Works as standalone documentation even without other skills installed.
 < ### `/seo-rescue:seo-outreach-report [domain]`
-< End-to-end pipeline: Sistrix VI + DataForSEO Labs + Google PSI v5 → 10-chapter A4 PDF for non-technical decision-makers. Chrome-headless render without Puppeteer. ~$0.05 per domain in DataForSEO credits plus Sistrix subscription.
+< End-to-end pipeline: Sistrix VI + DataForSEO Labs + Google PSI v5 → 10-chapter A4 PDF for non-technical decision-makers. Chrome-headless render without Puppeteer. ~$0.05–$0.25 per domain in DataForSEO calls plus about 20 Sistrix credits from your plan (breakdown in COSTS.md in the repository).
 < ### `/seo-rescue:channel-economics-analyzer`
 < Per-channel P&L for multi-marketplace e-commerce. ~30 channels supported across DACH (Amazon, OTTO, Kaufland.de, eBay, Zalando, About You, Galeria, Avocadostore, manomano, Limango, Bonprix, MyToys), EU (Bol.com, CDiscount, Allegro, Mirakl, Spartoo), US (Amazon US, Walmart, Etsy, Wayfair, Target Plus), social commerce (TikTok Shop, Instagram, Pinterest, YouTube, Live-Commerce), B2B/Wholesale (Alibaba, Faire, Ankorstore), direct-shop PSPs, and affiliate channels. Output: Healthy/Risky/Loss-Making scorecard with action thresholds.
 < ### `/seo-rescue:competitor-deep-audit [domain]`
@@ -187,7 +187,7 @@
 < - Plugin name: `seo-rescue`
 < - Marketplace: `seo-survival-kit`
 < - Repo: https://github.com/maxschottke-spec/seo-survival-kit
-< - Latest installable version: v0.5.5
+< - Latest installable version: v0.5.6
 < - Dependencies: zero npm packages
 < - Validation: `claude plugin validate plugins/seo-rescue` passes
 < ## Workflow patterns
@@ -212,7 +212,7 @@
 < |---|---|---|
 < | `seo-audit-free` | $0 | 10–15 min |
 < | `post-core-update-recovery` | $0 | 5 min (framework only) |
-< | `seo-outreach-report` | ~$0.05–$0.50 | 5 min |
+< | `seo-outreach-report` | ~0.15–0.75 (Sistrix credits + DataForSEO) | 5 min |
 < | `channel-economics-analyzer` | $0 (you provide CSVs) | 10 min |
 < | `competitor-deep-audit` | ~$0.10–$0.50 | 5 min |
 < | `psi-weekly-cron-baseline` | $0 (PSI free quota) | 30 min setup |
@@ -254,7 +254,7 @@
 > ## When to use which framework
 > ## Framework-only skills (available cross-platform)
 > These are pure-Markdown decision frameworks. They work on any LLM that reads the file. Drop them into Cursor `.cursor/rules/`, OpenAI Custom GPT Instructions, Gemini `GEMINI.md`, Aider `CONVENTIONS.md`, or paste into any chat context.
-> - post-core-update-recovery.md — Diagnose + 4-phase recovery plan for sites hit by a Google Core Update. Authority-first, 6–12 month timeline.
+> - post-core-update-recovery.md — Diagnose + 4-phase recovery plan for sites hit by a Google Core Update. Authority-first; first movement after 3–4 months, full recovery usually 9–18 months.
 > - ai-search-rescue.md — Recover visibility in Google AI Overviews/AI Mode/ChatGPT/Perplexity/Bing Copilot/Claude.ai search. Seven optimization tactics plus a three-layer measurement setup.
 > ## Script-backed skills (Claude Code only)
 > These wrap Node.js pipelines (API calls to Sistrix/DataForSEO/Google PSI/GSC/OpenAI/Perplexity, plus Chrome-headless PDF rendering). The scripts themselves are platform-agnostic Node, but the invocation instructions in their SKILL.md files use Claude Code conventions (slash commands, `allowed-tools` frontmatter, etc.).
@@ -268,5 +268,5 @@
 > - Repository: github.com/maxschottke-spec/seo-survival-kit
 > - Dependencies: zero npm runtime deps (everything that talks to a network is via `fetch`; PDF rendering uses Chrome-headless via `spawnSync` with `shell: false`)
 > - Security: one external security review plus one maintainer-driven re-audit, see SECURITY.md
-> - Status: Public Beta (v0.5.5 — 19 skills/commands: 1 orchestrator + 18 sub-skills and recovery commands)
+> - Status: Public Beta (v0.5.6 — 19 skills/commands: 1 orchestrator + 18 sub-skills and recovery commands)
 > ---

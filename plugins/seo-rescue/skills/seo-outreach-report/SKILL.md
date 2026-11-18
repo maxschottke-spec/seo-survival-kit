@@ -7,7 +7,7 @@ allowed-tools: [Read, Write, Bash(node:*), Bash(curl:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.5'
+  version: '0.5.6'
   category: marketing
 ---
 
@@ -69,7 +69,7 @@ DATAFORSEO_PASSWORD=...
 GOOGLE_API_KEY=...        # https://console.cloud.google.com/ — enable PageSpeed Insights API
 ```
 
-Recommended path convention: `~/.config/seo-outreach-report/.env` or `./.env` in your working directory. See `.env.example` in this skill folder.
+Recommended path convention: `~/.config/seo-rescue/.env` (the path all docs in this repository use) or `./.env` in your working directory. `node --env-file` needs Node.js 20.6 or newer. See `.env.example` in this skill folder.
 
 ## Quick start (adding a new domain)
 
@@ -94,7 +94,7 @@ Recommended path convention: `~/.config/seo-outreach-report/.env` or `./.env` in
 
 3. Run the pipeline:
    ```bash
-   ENV_PATH=/path/to/your/.env  # or ~/.config/seo-outreach-report/.env
+   ENV_PATH=/path/to/your/.env  # or ~/.config/seo-rescue/.env
    node --env-file="$ENV_PATH" seo-audit-fetch-v2.js newslug
    node seo-extract-v2.js
    node seo-onpage.js

@@ -324,16 +324,20 @@ Diese Schritte funktionieren immer, unabhängig vom Shop-System:
 ```
 
 ### Schritt 2 — Credentials einrichten
+
+Nach der Installation liegt das Plugin unter `~/.claude/plugins/cache/seo-survival-kit/seo-rescue/<version>/`. `PLUGIN_DIR` zeigt auf die neueste installierte Version (im geklonten Repo stattdessen `PLUGIN_DIR=plugins/seo-rescue/`). Die Variable gilt nur in der aktuellen Shell: in einem neuen Terminal die erste Zeile wiederholen.
+
 ```bash
+PLUGIN_DIR=$(ls -d ~/.claude/plugins/cache/seo-survival-kit/seo-rescue/*/ | sort -V | tail -1)
 mkdir -p ~/.config/seo-rescue
-cp ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/.env.example ~/.config/seo-rescue/.env
+cp "${PLUGIN_DIR}skills/seo-outreach-report/.env.example" ~/.config/seo-rescue/.env
 chmod 600 ~/.config/seo-rescue/.env
 # .env editieren und API-Keys eintragen
 ```
 
 ### Schritt 3 — Audit-Config für deine Domains
 ```bash
-cp ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/audit-config.example.json ./audit-config.json
+cp "${PLUGIN_DIR}skills/seo-outreach-report/audit-config.example.json" ./audit-config.json
 # audit-config.json editieren — targets + narrative pro Slug
 ```
 
@@ -348,10 +352,10 @@ curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 ### Schritt 5 — Pipeline laufen lassen
 ```bash
 ENV_PATH=~/.config/seo-rescue/.env
-node --env-file="$ENV_PATH" ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/seo-audit-fetch-v2.js
-node ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/seo-extract-v2.js
-node ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/seo-onpage.js
-node ~/.claude/plugins/cache/maxschottke-spec-seo-survival-kit/plugins/seo-rescue/skills/seo-outreach-report/seo-report-gen.js
+node --env-file="$ENV_PATH" "${PLUGIN_DIR}skills/seo-outreach-report/seo-audit-fetch-v2.js"
+node "${PLUGIN_DIR}skills/seo-outreach-report/seo-extract-v2.js"
+node "${PLUGIN_DIR}skills/seo-outreach-report/seo-onpage.js"
+node "${PLUGIN_DIR}skills/seo-outreach-report/seo-report-gen.js"
 ```
 
 PDF landet in `~/Downloads/SEO-Auswertung-<domain>-<date>.pdf`.

@@ -7,7 +7,7 @@ allowed-tools: [Read, Grep, Glob]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.5'
+  version: '0.5.6'
   category: marketing
 ---
 
@@ -98,7 +98,7 @@ Beginner SEO health check using only free tools (Google Search Console, PageSpee
 Pure-Markdown framework skill. Diagnose decision tree for distinguishing Core Update damage from technical/CWV drops. 4-phase Authority-First recovery plan (Authority foundation → Topical hubs → Off-page authority → Tech hygiene) with realistic 6–12 month timelines. Works as standalone documentation even without other skills installed.
 
 ### `/seo-rescue:seo-outreach-report [domain]`
-End-to-end pipeline: Sistrix VI + DataForSEO Labs + Google PSI v5 → 10-chapter A4 PDF for non-technical decision-makers. Chrome-headless render without Puppeteer. ~$0.05 per domain in DataForSEO credits plus Sistrix subscription.
+End-to-end pipeline: Sistrix VI + DataForSEO Labs + Google PSI v5 → 10-chapter A4 PDF for non-technical decision-makers. Chrome-headless render without Puppeteer. ~$0.05–$0.25 per domain in DataForSEO calls plus about 20 Sistrix credits from your plan (breakdown in COSTS.md in the repository).
 
 ### `/seo-rescue:channel-economics-analyzer`
 Per-channel P&L for multi-marketplace e-commerce. ~30 channels supported across DACH (Amazon, OTTO, Kaufland.de, eBay, Zalando, About You, Galeria, Avocadostore, manomano, Limango, Bonprix, MyToys), EU (Bol.com, CDiscount, Allegro, Mirakl, Spartoo), US (Amazon US, Walmart, Etsy, Wayfair, Target Plus), social commerce (TikTok Shop, Instagram, Pinterest, YouTube, Live-Commerce), B2B/Wholesale (Alibaba, Faire, Ankorstore), direct-shop PSPs, and affiliate channels. Output: Healthy/Risky/Loss-Making scorecard with action thresholds.
@@ -135,7 +135,7 @@ Five-lever recurring-revenue playbook for subscription businesses (premium tier,
 - **Plugin name:** `seo-rescue`
 - **Marketplace:** `seo-survival-kit`
 - **Repo:** https://github.com/maxschottke-spec/seo-survival-kit
-- **Latest installable version:** v0.5.5
+- **Latest installable version:** v0.5.6
 - **License:** MIT
 - **Dependencies:** zero npm packages
 - **Validation:** `claude plugin validate plugins/seo-rescue` passes
@@ -167,7 +167,7 @@ Five-lever recurring-revenue playbook for subscription businesses (premium tier,
 |---|---|---|
 | `seo-audit-free` | $0 | 10–15 min |
 | `post-core-update-recovery` | $0 | 5 min (framework only) |
-| `seo-outreach-report` | ~$0.05–$0.50 | 5 min |
+| `seo-outreach-report` | ~0.15–0.75 (Sistrix credits + DataForSEO) | 5 min |
 | `channel-economics-analyzer` | $0 (you provide CSVs) | 10 min |
 | `competitor-deep-audit` | ~$0.10–$0.50 | 5 min |
 | `psi-weekly-cron-baseline` | $0 (PSI free quota) | 30 min setup |

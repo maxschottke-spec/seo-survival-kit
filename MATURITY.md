@@ -4,7 +4,7 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
 
 ## Where this plugin is today
 
-**Version 0.5.5** (November 2026). Nineteen skills and commands: one orchestrator, the six-command recovery workflow with Settlement Gate and Change Governor, and twelve further skills. See [CHANGELOG.md](./CHANGELOG.md) for what each release changed, including the findings that were withdrawn in 0.5.5.
+**Version 0.5.6** (November 2026). Nineteen skills and commands: one orchestrator, the six-command recovery workflow with Settlement Gate and Change Governor, and twelve further skills. See [CHANGELOG.md](./CHANGELOG.md) for what each release changed, including the findings that were withdrawn in 0.5.5.
 
 **Positioning.** Recovery Operating System for Ecommerce/D2C. Recovery-first, decision-first, profit-aware, risk-aware. Complements technical-audit suites like `claude-seo`; does not replace them. The framework supports decisions; execution belongs to the operator's team, agency, or contractors.
 
@@ -21,7 +21,7 @@ Honest assessment of where this plugin sits in the Claude Code SEO ecosystem.
   - Round 1 (external reviewer): 1 CRITICAL chain + 4 HIGH + 6 MEDIUM — all closed in the v0.3.x security sprint
   - Round 2 (maintainer-driven senior-engineering + marketplace-reviewer audit): gitleaks + trufflehog + semgrep clean; 2 P1 marketplace items flagged + closed; verdict **SAFE TO PUBLISH**
 - ⚠️ One external collaborator (security reviewer); no external feature-PRs yet
-- ⚠️ Thin automated testing: four fixture test files and two script self-tests exist but are not yet wired into CI. CI runs structure, syntax and consistency checks, no SAST
+- ⚠️ Thin automated testing: seven fixture test files and two script self-tests, run in CI on every push and pull request since v0.5.6 (commands in the README, section "Verify your install"). They cover the safety primitives, the two recovery scripts, three data contracts and the Monday-check example. They do not cover the prose workflows Claude executes, and there is no end-to-end run against live APIs. CI also runs structure, syntax and consistency checks, no SAST
 - ⚠️ German-language documentation in some places (Lessons + parts of SKILL.md and commands)
 - ⚠️ Hardcoded for German/`location_code: 2276` DataForSEO Labs queries — international expansion planned
 
@@ -47,7 +47,7 @@ What this is **not** yet: production-grade in the sense of having external users
 | [zubair-trabzada/dataforseo-claude](https://github.com/zubair-trabzada/dataforseo-claude) | 79 | Newer | DataForSEO-focused with 13 skills + 5 subagents | Good if DataForSEO is your main data source. |
 | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) | 12.9k | Very mature | Marketing stack (CRO, copy, paid ads, SEO) — broader scope | Use for marketing breadth, not deep SEO. |
 | [SwayyEm 21-Skills Pack](https://www.swayyem.com/guides/21-seo-skills-built-for-claude) | n/a (lead magnet) | Newer | 21 pure-prompt skills across keywords, content, technical, off-page, AI-search. Distributed as commercial lead magnet for editorial-PR services with email gate on full content. | Use for prompt-engineering patterns and breadth ideas. Lacks live API integrations, drift detection, recovery-window discipline, identity-leak sanitization, and pattern maturity stages. |
-| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.5.5, public beta** | Recovery Operating System for ecommerce/D2C: Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking, GSC deep dive, AI citation tracking, decision/sequencing layer (v0.5 docs) | **Use when** the situation is recovery / cold-outreach / AI-search visibility / cross-channel decision support for ecommerce. Complements technical-audit plugins. |
+| **[maxschottke-spec/seo-survival-kit](https://github.com/maxschottke-spec/seo-survival-kit) (this)** | early | **0.5.6, public beta** | Recovery Operating System for ecommerce/D2C: Core-Update + AI-search recovery framework, outreach-PDF pipeline, channel economics, competitor + PSI tracking, GSC deep dive, AI citation tracking, decision/sequencing layer (v0.5 docs) | **Use when** the situation is recovery / cold-outreach / AI-search visibility / cross-channel decision support for ecommerce. Complements technical-audit plugins. |
 
 ### Comparison detail
 

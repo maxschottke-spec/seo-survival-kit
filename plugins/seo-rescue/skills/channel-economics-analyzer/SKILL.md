@@ -7,7 +7,7 @@ allowed-tools: [Read, Write, Bash(node:*)]
 license: MIT
 metadata:
   author: Max Schottke
-  version: '0.5.5'
+  version: '0.5.6'
   category: marketing
 ---
 
@@ -133,9 +133,14 @@ Sources:
 
 ### Step 3 — Run the analyzer
 
+Run it from the folder that holds your `channels.json` and `data/`, and call the script by its full path (data is read from the current directory, the helper library from the plugin directory, so do not copy the script out of the plugin on its own):
+
 ```bash
-node channel-economics.js
+cd ~/my-channel-data          # the folder with channels.json and data/
+node "${CLAUDE_PLUGIN_ROOT}/skills/channel-economics-analyzer/channel-economics.example.js"
 ```
+
+In a clone of the repository the path is `plugins/seo-rescue/skills/channel-economics-analyzer/channel-economics.example.js`.
 
 Output (per channel):
 
@@ -352,7 +357,7 @@ Picking which channels to start with depends on your category. Patterns we've se
 
 ## Implementation
 
-A starter script is provided in this folder as `channel-economics.example.js`. It expects `channels.json` + per-channel CSVs in `./data/` and prints the report to stdout. Customize fee rates and the report template for your business.
+A starter script is provided in this folder as `channel-economics.example.js`, with `channels.example.json` as the config template. It expects `channels.json` + per-channel CSVs in `./data/` of the directory you start it from (see Step 3) and prints the report to stdout. Customize fee rates and the report template for your business.
 
 ## Related skills
 
