@@ -119,9 +119,16 @@ function mkRunDir(prefix = 'seo-rescue-') {
 // no component of the path may be a symlink (see assertNoSymlinkInPath).
 //
 // For every cache dir (default, SEO_CACHE_DIR, explicit): the final component
-// must be a real directory owned by the current user; group/other permission
-// bits are removed; existing stricter permissions (e.g. 0500) are left alone;
-// a failing chmod aborts instead of being swallowed.
+// must be a real directory owned by the current user, and a failing chmod
+// aborts instead of being swallowed. Existing stricter permissions (e.g. 0500)
+// are left alone. What happens to a directory that is open to group or others
+// depends on whose directory it is:
+//   - default path / SEO_CACHE_DIR, and directories this library just created:
+//     the group/other bits are removed (setuid/setgid/sticky bits are kept);
+//   - an EXISTING directory named by an explicit --cache-dir (or the domain
+//     dir inside it): refused, never changed. `--cache-dir .` or
+//     `--cache-dir "$HOME"` must not silently take away other users' access
+//     to a directory that was never meant to be a cache.
 //
 // KNOWN LIMIT: check and use are separate system calls (Node has no openat).
 // This stops accidental and pre-planted symlinks. It does not stop a process
@@ -133,16 +140,22 @@ function validateExplicitCacheDir(overrideDir) {
   return path.resolve(overrideDir);
 }
 
-// Rejects `dir` if any component of it is a symlink. Works for paths that do
-// not exist yet: the deepest existing ancestor is resolved with realpath and
-// must be identical to itself. `dir` must be absolute and normalized.
-function assertNoSymlinkInPath(dir) {
+// Deepest existing ancestor of `dir` (may be `dir` itself).
+function deepestExisting(dir) {
   let existing = dir;
   while (!safeLstat(existing)) {
     const parent = path.dirname(existing);
     if (parent === existing) break;
     existing = parent;
   }
+  return existing;
+}
+
+// Rejects `dir` if any component of it is a symlink. Works for paths that do
+// not exist yet: the deepest existing ancestor is resolved with realpath and
+// must be identical to itself. `dir` must be absolute and normalized.
+function assertNoSymlinkInPath(dir) {
+  const existing = deepestExisting(dir);
   const real = fs.realpathSync(existing);
   if (real !== existing) {
     const hint = path.join(real, path.relative(existing, dir));
@@ -150,8 +163,24 @@ function assertNoSymlinkInPath(dir) {
   }
 }
 
+// Rejects `dir` if it, or the deepest ancestor of it that exists, is something
+// other than a directory (a file, a FIFO, …). Without this, a dry run would
+// accept `<file>/sub` while the real run fails in mkdir with a raw ENOTDIR.
+function assertPathUsableAsDir(dir, label) {
+  const existing = deepestExisting(dir);
+  const st = fs.statSync(existing);
+  if (!st.isDirectory()) {
+    throw new Error(existing === dir
+      ? `Unsafe cache dir rejected: ${label} is not a directory: ${dir}`
+      : `Unsafe cache dir rejected: ${existing} is not a directory, so ${dir} cannot be created`);
+  }
+}
+
 // Final-component checks shared by the cache root and the per-domain dir.
-function hardenOwnDir(dir, label) {
+// `refuseIfOpen`: the directory existed before this call AND was named through
+// an explicit cache dir — then group/other access is a reason to refuse, not
+// something to change (see the comment block above).
+function hardenOwnDir(dir, label, refuseIfOpen = false) {
   const st = fs.lstatSync(dir);
   if (st.isSymbolicLink()) {
     throw new Error(`${label} must not be a symlink: ${dir}`);
@@ -163,16 +192,19 @@ function hardenOwnDir(dir, label) {
   if (typeof process.getuid === 'function' && st.uid !== process.getuid()) {
     throw new Error(`${label} is not owned by the current user: ${dir}`);
   }
-  const mode = st.mode & 0o777;
-  if ((mode & 0o077) !== 0) {
-    // Only ever remove bits. A directory the owner made stricter stays as it is.
-    fs.chmodSync(dir, mode & 0o700);
+  if ((st.mode & 0o077) === 0) return; // already private (possibly stricter than 0700): leave it
+  if (refuseIfOpen) {
+    throw new Error(`Unsafe cache dir rejected: ${dir} already exists and is accessible to group or others (mode ${(st.mode & 0o777).toString(8).padStart(3, '0')}). It was not changed. Use a new directory of its own for the cache, or, if this directory really is meant to be the cache, run: chmod 700 ${JSON.stringify(dir)}`);
   }
+  // Only ever remove bits: drop group/other access, keep the owner bits and
+  // any setuid/setgid/sticky bit as they are.
+  fs.chmodSync(dir, (st.mode & 0o7777) & ~0o077);
 }
 
 function getCacheDir(overrideDir) {
   let dir;
-  if (overrideDir != null) {
+  const explicit = overrideDir != null;
+  if (explicit) {
     dir = validateExplicitCacheDir(overrideDir);
     assertNoSymlinkInPath(dir);
   } else {
@@ -184,9 +216,10 @@ function getCacheDir(overrideDir) {
   if (pre && pre.isSymbolicLink()) {
     throw new Error(`Cache dir must not be a symlink: ${dir}`);
   }
+  assertPathUsableAsDir(path.resolve(dir), 'cache dir');
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-  hardenOwnDir(dir, 'Cache dir');
-  if (overrideDir != null) assertNoSymlinkInPath(dir);
+  hardenOwnDir(dir, 'Cache dir', explicit && !!pre);
+  if (explicit) assertNoSymlinkInPath(dir);
   return dir;
 }
 
@@ -211,6 +244,12 @@ function writeFileExclusive(p, data) {
 // with http/https, and paths/queries (stripped). www. is NOT stripped —
 // www.example.com and example.com are treated as distinct domains.
 // Returns { input_domain, domain, canonical_domain, slug }.
+//
+// KNOWN LIMIT: the slug replaces dots by hyphens, so two different hostnames
+// can share one slug and therefore one cache directory: `a-b.com` and `a.b.com`
+// both give `a-b-com`. Not changed on purpose — a different slug scheme would
+// orphan every existing cache. If you track two such domains, give each its
+// own cache root (SEO_CACHE_DIR or --cache-dir).
 function normalizeDomain(input) {
   if (typeof input !== 'string' || input.trim() === '') {
     throw new Error('normalizeDomain: input must be a non-empty string');
@@ -249,8 +288,11 @@ function ensureDomainDir(slug, cacheDir) {
   if (pre && pre.isSymbolicLink()) {
     throw new Error(`Domain cache dir must not be a symlink: ${dir}`);
   }
+  if (pre && !pre.isDirectory()) {
+    throw new Error(`Unsafe cache dir rejected: domain cache dir is not a directory: ${dir}`);
+  }
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-  hardenOwnDir(dir, 'Domain cache dir');
+  hardenOwnDir(dir, 'Domain cache dir', cacheDir != null && !!pre);
   return dir;
 }
 
@@ -270,7 +312,23 @@ function resolveDomainDir(slug, cacheDir) {
   for (const p of [root, dir]) {
     const st = safeLstat(p);
     if (st && st.isSymbolicLink()) throw new Error(`Cache dir must not be a symlink: ${p}`);
-    if (st && !st.isDirectory()) throw new Error(`Cache dir is not a directory: ${p}`);
+  }
+  // Same refusals as the real run, without creating or changing anything:
+  // nothing in the path may be a non-directory, and an existing directory named
+  // through an explicit cache dir must be the user's own and private.
+  assertPathUsableAsDir(path.resolve(root), 'cache dir');
+  assertPathUsableAsDir(path.resolve(dir), 'domain cache dir');
+  if (process.platform !== 'win32') {
+    for (const p of [root, dir]) {
+      const st = safeLstat(p);
+      if (!st) continue;
+      if (typeof process.getuid === 'function' && st.uid !== process.getuid()) {
+        throw new Error(`Cache dir is not owned by the current user: ${p}`);
+      }
+      if (cacheDir != null && (st.mode & 0o077) !== 0) {
+        throw new Error(`Unsafe cache dir rejected: ${p} already exists and is accessible to group or others (mode ${(st.mode & 0o777).toString(8).padStart(3, '0')}). It was not changed. Use a new directory of its own for the cache, or, if this directory really is meant to be the cache, run: chmod 700 ${JSON.stringify(p)}`);
+      }
+    }
   }
   return dir;
 }
@@ -294,6 +352,13 @@ function acquireLock(domainDir, command = 'unknown', timeoutMs = 30000) {
       return { path: lockPath, token };
     } catch (e) {
       if (e.code === 'EEXIST') {
+        // Something that is not a plain file sits where the lock belongs (FIFO,
+        // directory, symlink): it can never be released by a running command,
+        // so waiting 30 s for it helps nobody. Refuse at once, change nothing.
+        const lst = safeLstat(lockPath);
+        if (lst && !lst.isFile()) {
+          throw new Error(`acquireLock: lock path is not a regular file: ${lockPath}`);
+        }
         // Check for stale lock
         try {
           const st = fs.statSync(lockPath);
@@ -357,30 +422,39 @@ function atomicWriteJSON(filePath, data) {
   fs.renameSync(tmpPath, filePath);
 }
 
-function appendNDJSON(filePath, entry) {
+// Appends one line to a file this library owns. Order matters:
+//   1. lstat BEFORE opening: an existing target must be a regular file, ours,
+//      with one link. This is what keeps a FIFO from being opened at all —
+//      open(O_WRONLY) on a FIFO without a reader blocks forever, with the
+//      domain lock held.
+//   2. open with O_NOFOLLOW: if the path was swapped for a symlink after
+//      step 1, open fails (ELOOP) instead of following it. O_NONBLOCK: if it
+//      was swapped for a FIFO, open fails (ENXIO) instead of blocking.
+//   3. fstat the descriptor: the file actually opened must pass the same
+//      checks as in step 1. Nothing is written before that.
+function appendLineSafely(filePath, line, fn) {
   const st = safeLstat(filePath);
-  if (st && st.isSymbolicLink()) {
-    throw new Error(`appendNDJSON: target is a symlink: ${filePath}`);
-  }
-  const line = JSON.stringify(entry) + '\n';
-  // O_NOFOLLOW: if the path became a symlink after the lstat above, open fails
-  // (ELOOP) instead of following it. Not available on Windows (constant undefined).
-  const flags = fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_WRONLY | (fs.constants.O_NOFOLLOW || 0);
+  if (st) assertOwnRegularFile(st, filePath, fn, true);
+  const flags = fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_WRONLY
+    | (fs.constants.O_NOFOLLOW || 0) | (fs.constants.O_NONBLOCK || 0);
   let fd;
   try {
     fd = fs.openSync(filePath, flags, 0o600);
   } catch (e) {
-    if (e.code === 'ELOOP') throw new Error(`appendNDJSON: target is a symlink: ${filePath}`);
+    if (e.code === 'ELOOP') throw new Error(`${fn}: target is a symlink: ${filePath}`);
+    if (e.code === 'ENXIO') throw new Error(`${fn}: target is not a regular file: ${filePath}`);
     throw e;
   }
   try {
-    // Check the file that was actually opened, not the name: regular file,
-    // ours, exactly one link. Nothing has been written at this point.
-    assertOwnRegularFile(fs.fstatSync(fd), filePath, 'appendNDJSON', true);
+    assertOwnRegularFile(fs.fstatSync(fd), filePath, fn, true);
     fs.writeFileSync(fd, line);
   } finally {
     fs.closeSync(fd);
   }
+}
+
+function appendNDJSON(filePath, entry) {
+  appendLineSafely(filePath, JSON.stringify(entry) + '\n', 'appendNDJSON');
 }
 
 // Strict command-line parsing for scripts that write files. Anything that is
@@ -391,6 +465,7 @@ function appendNDJSON(filePath, entry) {
 //   --cache-dir              option without its value   -> error
 //   --cache-dir --dry-run    value looks like an option -> error
 //   --cache-dir=             empty value                -> error
+//   --cache-dir=--dry-run    value looks like an option -> error
 //   --vi 1 --vi 2            option given twice         -> error
 //   stray positional argument                           -> error
 // `spec` maps option name -> 'string' | 'boolean'. Returns { name: value } with
@@ -418,6 +493,13 @@ function parseStrictCli(spec, argv = process.argv.slice(2)) {
     const v = list[0];
     if (spec[name] === 'string' && (typeof v !== 'string' || v.trim() === '')) {
       throw usage(`--${name} needs a non-empty value`);
+    }
+    // `--cache-dir=--dry-run` is the same slip as `--cache-dir --dry-run`, just
+    // in a form the parser accepts. A value that looks like an option is
+    // refused for every option; a path that really starts with "-" can be
+    // written as "./-name".
+    if (spec[name] === 'string' && v.trim().startsWith('-')) {
+      throw usage(`--${name} got ${JSON.stringify(v)}, which looks like an option, not a value`);
     }
     if (spec[name] === 'boolean' && v !== true) throw usage(`--${name} takes no value`);
     out[name] = v;
@@ -483,10 +565,16 @@ function maskSecrets(value) {
 function safeLog(domainDir, runId, message) {
   const logPath = path.join(domainDir, 'run.log');
   const st = safeLstat(logPath);
-  if (st && st.isSymbolicLink()) return;
+  // Logging is best effort: a log path that is a symlink, a FIFO, a directory,
+  // hard-linked or foreign is skipped silently, never opened.
+  if (st && (st.isSymbolicLink() || !st.isFile())) return;
   const line = `[${new Date().toISOString()}] [${runId}] ${maskSecrets(message)}\n`;
-  const fd = fs.openSync(logPath, fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_WRONLY, 0o600);
-  try { fs.writeFileSync(fd, line); } finally { fs.closeSync(fd); }
+  try {
+    appendLineSafely(logPath, line, 'safeLog');
+  } catch (e) {
+    if (/safeLog:/.test(String(e && e.message))) return;
+    throw e;
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -42,7 +42,9 @@ function parseCLI(argv) {
 
 function classifyIssues(rawIssues) {
   return rawIssues.map(issue => {
-    const mapping = SEVERITY_MAP[issue.type];
+    // Own keys only: a type named "constructor" or "toString" must not pick up
+    // a function from Object.prototype as its mapping.
+    const mapping = Object.prototype.hasOwnProperty.call(SEVERITY_MAP, issue.type) ? SEVERITY_MAP[issue.type] : null;
     if (!mapping) return { ...issue, severity: 'medium' };
     let severity = mapping.default;
     if (issue.details && issue.details.length > 0) {
@@ -77,7 +79,15 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
     throw new Error(`Invalid value for options.dryRun: ${JSON.stringify(options.dryRun)} (true or false expected)`);
   }
   if (!Number.isSafeInteger(crawledUrls) || crawledUrls < 0) {
-    throw new Error(`Invalid value for crawledUrls: ${JSON.stringify(crawledUrls)} (whole number >= 0 expected)`);
+    throw new Error(`Invalid value for crawledUrls: ${typeof crawledUrls === 'number' ? String(crawledUrls) : JSON.stringify(crawledUrls)} (whole number >= 0 expected)`);
+  }
+  // Optional counts: absent, or a whole number >= 0 (crawlLimit: >= 1). Infinity
+  // and NaN would be stored as null by JSON.stringify without anyone noticing.
+  for (const [name, min] of [['crawlLimit', 1], ['exportedRowsTotal', 0]]) {
+    const v = options[name];
+    if (v != null && (!Number.isSafeInteger(v) || v < min)) {
+      throw new Error(`Invalid value for options.${name}: ${typeof v === 'number' ? String(v) : JSON.stringify(v)} (whole number >= ${min} expected)`);
+    }
   }
   if (!Array.isArray(rawIssues) || !Array.isArray(warnings) || !Array.isArray(errors)) {
     throw new Error('rawIssues, warnings and errors must be arrays');
@@ -113,7 +123,7 @@ function writeIssuesJSON(domain, slug, inputDomain, crawledUrls, rawIssues, warn
       missing_capabilities: options.missingCapabilities || [],
       crawl_limit: options.crawlLimit || 500,
       crawled_internal_html_urls: crawledUrls,
-      exported_rows_total: options.exportedRowsTotal || crawledUrls,
+      exported_rows_total: options.exportedRowsTotal != null ? options.exportedRowsTotal : crawledUrls,
       raw_exports_used: options.rawExportsUsed || [],
       crawler_provider: crawlerProvider,
       local_crawler_used: options.localCrawlerUsed || false,
@@ -131,7 +141,9 @@ const USAGE = `Usage: node recovery-crawl.js --domain <domain> [--cache-dir <pat
 
   --domain     Domain whose cache directory is prepared (required).
   --cache-dir  Cache root to use instead of SEO_CACHE_DIR / ~/.cache/seo-rescue.
-               No part of the path may be a symlink.
+               Use a new directory of its own. No part of the path may be a
+               symlink; an existing directory that group or others can access
+               is refused and left unchanged.
   --dry-run    Print the directory that would be used. Creates nothing.
                A switch: write it without a value.
 

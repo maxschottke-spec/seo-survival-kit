@@ -183,7 +183,7 @@ export SEO_CACHE_DIR="$(mktemp -d)"
 
 T=plugins/seo-rescue/test-fixtures/ecommerce-recovery
 node $T/lib-safe-primitives.test.js          # safety primitives in lib/safe.js (55 checks)
-node $T/recovery-scripts-cache-dir.test.js   # --cache-dir, --dry-run, strict arguments, symlink/hard-link refusals (101 checks)
+node $T/recovery-scripts-cache-dir.test.js   # --cache-dir, --dry-run, strict arguments, symlink/hard-link/FIFO refusals (133 checks)
 node $T/pre-hit-baseline.test.js             # befund field pre_hit_baseline
 node $T/stage-status.test.js                 # befund field stage_status
 node $T/core-updates-laufend.test.js         # CORE_UPDATES.md table, rollout still running

@@ -692,6 +692,8 @@ Manuelle Crawl-CSV, lokaler Minimal-Crawler
 
 ### Script CLI Contract
 
+> **Superseded (v0.5.6).** Historical design text. `--cache-dir` names the cache ROOT, the domain folder is added by the script; the call below would create `…/example-com/example-com`. Current contract: `plugins/seo-rescue/commands/recovery-crawl.md`, section "Script CLI Contract".
+
 ```bash
 node scripts/recovery-crawl.js --domain example.com --cache-dir ~/.cache/seo-rescue/example-com
 ```
@@ -991,6 +993,8 @@ Monitoring soll mit Vollsetup, Teilsetup oder minimalen lokalen Daten laufen koe
 - Zuletzt bekannter `history.ndjson`-Eintrag
 
 ### Script CLI Contract
+
+> **Superseded (v0.5.6).** Historical design text. `--cache-dir` names the cache ROOT, the domain folder is added by the script; the call below would create `…/example-com/example-com`. Current contract: `plugins/seo-rescue/commands/recovery-monitor.md`, section "Script CLI Contract".
 
 ```bash
 node scripts/recovery-monitor.js --domain example.com --cache-dir ~/.cache/seo-rescue/example-com

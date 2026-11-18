@@ -7,7 +7,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__*
 
 ## Zweck
 
-Woechentliches Recovery-Tracking. Holt aktuelle VI + Keyword-Daten, berechnet Recovery-Score, appendet an die History-Datei. Laeuft auch bei fehlenden Datenquellen durch und schreibt einen Partial-Eintrag — der Zeitstempel allein ist wertvoll fuer die Zeitreihe. Das gilt fuer den von Claude gefuehrten Ablauf, in dem der Ausfall einer Quelle als Warnung im Eintrag steht. Der direkte Skript-Aufruf ohne jede Datenangabe schreibt dagegen nichts (siehe Script CLI Contract).
+Woechentliches Recovery-Tracking. Holt aktuelle VI + Keyword-Daten, berechnet Recovery-Score, appendet an die History-Datei. Faellt eine Datenquelle aus, laeuft das Command weiter und schreibt einen Partial-Eintrag mit dem, was da ist. Liegt gar kein Messwert vor, wird nichts angehaengt (siehe Schritt 7).
 
 ## Change Governance
 
@@ -81,7 +81,9 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-monitor.js" --domain example.com --
 | `--cache-dir` ohne Wert, `--cache-dir --dry-run`, `--cache-dir=` | abgelehnt. Eine angegebene, aber leere Option gilt nie als „nicht angegeben“; es gibt keinen stillen Rueckfall auf `~/.cache/seo-rescue`. |
 | dieselbe Option zweimal | abgelehnt. |
 
-**Regeln fuer `--cache-dir`.** Kein Bestandteil des Pfads darf ein Symlink sein, auch kein Elternverzeichnis; die Fehlermeldung nennt den aufgeloesten Pfad, der stattdessen anzugeben ist. Auf macOS sind `/tmp` und `/var` selbst Symlinks: dort `/private/tmp/…` schreiben oder ein Verzeichnis unter dem eigenen Home nehmen. Das Verzeichnis muss dem aktuellen Benutzer gehoeren. Rechte fuer Gruppe und andere werden entfernt, strengere bestehende Rechte (z. B. `0500`) bleiben unveraendert. Dieselben Eigentums- und Rechtepruefungen gelten fuer `SEO_CACHE_DIR` und den Standardpfad.
+**Regeln fuer `--cache-dir`.** Kein Bestandteil des Pfads darf ein Symlink sein, auch kein Elternverzeichnis; die Fehlermeldung nennt den aufgeloesten Pfad, der stattdessen anzugeben ist. Auf macOS sind `/tmp` und `/var` selbst Symlinks: dort `/private/tmp/…` schreiben oder ein Verzeichnis unter dem eigenen Home nehmen. Auch `"$HOME/…"` scheitert, wenn das Home-Verzeichnis selbst ueber einen Symlink erreicht wird; dann den aufgeloesten Pfad nehmen, den die Meldung nennt. Werte, die mit `-` beginnen (`--cache-dir=--dry-run`), werden als vertippte Option abgelehnt.
+
+**Nimm ein eigenes, neues Verzeichnis.** Ein mit `--cache-dir` genanntes Verzeichnis, das schon existiert und fuer Gruppe oder andere zugaenglich ist (z. B. `.` oder `$HOME` mit `0755`), wird abgelehnt und nicht veraendert; die Meldung nennt `chmod 700 <dir>` fuer den Fall, dass es wirklich der Cache sein soll. Neu angelegte Verzeichnisse entstehen mit `0700`. Nur beim Standardpfad und bei `SEO_CACHE_DIR` werden Gruppen- und Fremdrechte eines bestehenden Verzeichnisses entfernt. Strengere bestehende Rechte (z. B. `0500`) bleiben immer unveraendert. Jedes Cache-Verzeichnis muss dem aktuellen Benutzer gehoeren; ein fremdes (Docker-Volume, frueherer `sudo`-Lauf) fuehrt zum Abbruch, Abhilfe `chown`. Ist im Pfad etwas kein Verzeichnis (eine Datei, eine FIFO), endet der Lauf mit Exit Code `2`, mit und ohne `--dry-run` gleich.
 
 **Grenze.** Pruefung und Zugriff sind getrennte Systemaufrufe. Das schuetzt vor versehentlichen und vorbereiteten Symlinks, nicht vor einem Prozess desselben Benutzers, der waehrend des Laufs Verzeichnisse austauscht (siehe SECURITY.md im Repository).
 
@@ -191,10 +193,14 @@ Unterstuetzte `options`-Keys (alle optional, null-Defaults; nur diese werden vom
 | `providersUsed` | `[]` | Provider-Liste fuer das Output-Schema |
 | `missingCapabilities` | `[]` | Fehlende Capabilities fuer das Output-Schema |
 
-Falls keine aktuellen Daten vorhanden (weder VI noch Keywords):
-- Schreibe trotzdem einen Eintrag mit `status: "partial"`, `data_quality: "poor"`
+Falls keine aktuellen Daten vorhanden (weder VI noch Keywords noch ein anderer Messwert):
+- Es wird **kein** Eintrag angehaengt. `writeMonitorEntry()` gibt dann `written: false` und `skippedReason: "no_measurement"` zurueck und legt nichts an.
+- Grund: Ein Eintrag aus lauter `null` traegt keine Information, und als „letzter Eintrag“ loescht er beim naechsten Lauf das Delta gegen den letzten echten Messwert.
+- Sage dem User ausdruecklich, dass keine Quelle erreichbar war und deshalb nichts in die Zeitreihe geschrieben wurde, und welche Quelle woran gescheitert ist.
+
+Falls nur ein Teil der Daten vorhanden ist (mindestens ein Messwert):
+- Eintrag mit `status: "partial"` schreiben
 - Score-Berechnung mit verfuegbaren Komponenten; bei weniger als 2 Komponenten: `score: null`
-- Der Zeitstempel allein hat Wert fuer die Zeitreihe
 
 ## Recovery-Score-Formel (deterministisch)
 
@@ -295,14 +301,14 @@ Nach erfolgreichem Append des History-Eintrags, gib folgende Informationen aus:
 | Sistrix nicht erreichbar | Warnung, `vi = null`, Score ohne VI-Komponente | `partial` |
 | DataForSEO nicht verfuegbar (MCP), kein CSV-Import | Warnung, Keyword-Komponenten = `null` | `partial` |
 | DataForSEO nicht verfuegbar (MCP), CSV vorhanden | CSV-Fallback, `source_notes` eintragen | `partial` |
-| Beide Datenquellen nicht verfuegbar | Eintrag mit `score: null`, `status: "partial"`, `data_quality: "poor"` | `partial` |
+| Beide Datenquellen nicht verfuegbar, kein Messwert | Kein Eintrag (`written: false`, `skippedReason: "no_measurement"`); dem User melden | — |
 | `history.ndjson` corrupt | Warnung, kein Delta-Report, aktueller Eintrag wird geschrieben | `partial` |
 | `befund.json` fehlt | Warnung, kein Baseline fuer Keyword-Stabilitaet | `partial` |
 | Lock-Timeout 30s | Fehler eintragen (Exit Code 3), Abbruch | `failed` |
-| Symlink im Cache-Pfad | Fehler eintragen (Exit Code 2), Abbruch | `failed` |
-| Weniger als 2 Score-Komponenten verfuegbar | `score: null`; Eintrag trotzdem schreiben | `partial` |
+| Symlink im Cache-Pfad; `history.ndjson` oder `.lock` ist keine regulaere eigene Datei (Symlink, FIFO, Verzeichnis, Hardlink) | Abbruch sofort (Exit Code 2), nichts geschrieben, kein Lock bleibt zurueck | `failed` |
+| Weniger als 2 Score-Komponenten verfuegbar, aber mindestens ein Messwert | `score: null`; Eintrag schreiben | `partial` |
 
-Wichtig: Falls keine aktuellen Daten vorhanden sind (alle Quellen nicht erreichbar), wird trotzdem ein Eintrag mit `status: "partial"` und `data_quality: "poor"` geschrieben. Der Zeitstempel allein sichert die Zeitreihe.
+Wichtig: Falls keine aktuellen Daten vorhanden sind (alle Quellen nicht erreichbar), wird nichts angehaengt, weder im von Claude gefuehrten Ablauf noch beim direkten Skript-Aufruf. Eine Zeitreihe aus Leereintraegen sichert nichts; sie verdeckt den letzten echten Messwert.
 
 ## Validierungsregeln
 

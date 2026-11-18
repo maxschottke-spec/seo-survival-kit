@@ -57,7 +57,9 @@ function checkNumber(name, value, { min, max, integer = false }) {
   const ok = typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max
     && (!integer || Number.isSafeInteger(value));
   if (!ok) {
-    throw new Error(`Invalid value for ${name}: ${JSON.stringify(value)} (${integer ? 'whole number' : 'number'} from ${min} to ${max} expected)`);
+    // String() for numbers: JSON.stringify would print NaN and Infinity as "null".
+    const shown = typeof value === 'number' ? String(value) : JSON.stringify(value);
+    throw new Error(`Invalid value for ${name}: ${shown} (${integer ? 'whole number' : 'number'} from ${min} to ${max} expected)`);
   }
   return value;
 }
@@ -209,6 +211,9 @@ function determinePhase(score, baseline) {
 //   Without it: SEO_CACHE_DIR or ~/.cache/seo-rescue/.
 // options.manualInput — values were typed in by hand (direct CLI call);
 //   data_quality is capped at 'partial', confidence at 'medium'.
+// Without at least one measurement (vi, keywordsT10, options.keywordsTotal,
+//   options.viTrend4wPct, options.backlinkSpamScore) nothing is appended; the
+//   result then has written: false and skippedReason: 'no_measurement'.
 // options.dryRun — compute the entry against whatever is already in the cache,
 //   but create no directory, take no lock and append nothing.
 function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings, errors, options = {}) {
@@ -225,7 +230,13 @@ function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings,
   if (!Array.isArray(warnings) || !Array.isArray(errors)) {
     throw new Error('warnings and errors must be arrays');
   }
-  const dryRun = options.dryRun === true;
+  // No measurement at all -> nothing is appended, whoever calls. An entry with
+  // nothing but nulls adds no information, and as the "last entry" it erases the
+  // delta against the last real reading on the next run. A failed run belongs
+  // in the report to the user, not in the time series.
+  const hasMeasurement = [vi, keywordsT10, options.keywordsTotal, options.viTrend4wPct, options.backlinkSpamScore]
+    .some((v) => v != null);
+  const dryRun = options.dryRun === true || !hasMeasurement;
   const dir = dryRun ? resolveDomainDir(slug, options.cacheDir) : ensureDomainDir(slug, options.cacheDir);
   const historyPath = path.join(dir, 'history.ndjson');
   const lock = dryRun ? null : acquireLock(dir, 'recovery-monitor');
@@ -304,7 +315,7 @@ function writeMonitorEntry(inputDomain, domain, slug, vi, keywordsT10, warnings,
     };
 
     if (!dryRun) appendNDJSON(historyPath, entry);
-    return { entry, lastEntry, historyPath, written: !dryRun };
+    return { entry, lastEntry, historyPath, written: !dryRun, skippedReason: hasMeasurement ? (dryRun ? 'dry_run' : null) : 'no_measurement' };
   } finally {
     releaseLock(lock);
   }
@@ -342,7 +353,9 @@ const USAGE = `Usage: node recovery-monitor.js --domain <domain> [--vi <number>]
   --keywords-t10  Current number of keywords in the top 10, entered by hand.
                   Whole number from 0 to 1000000000.
   --cache-dir     Cache root to use instead of SEO_CACHE_DIR / ~/.cache/seo-rescue.
-                  No part of the path may be a symlink.
+                  Use a new directory of its own. No part of the path may be a
+                  symlink; an existing directory that group or others can access
+                  is refused and left unchanged.
   --dry-run       Print the entry that would be appended. Creates and writes nothing.
                   A switch: write it without a value.
 

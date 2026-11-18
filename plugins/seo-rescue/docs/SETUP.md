@@ -38,6 +38,8 @@ Standard: `~/.cache/seo-rescue/`
 
 - Modus: `0700` (nur Owner)
 - Symlinks werden verweigert
+- Das Verzeichnis muss dem aktuellen Benutzer gehoeren (sonst Abbruch; Abhilfe `chown`)
+- Der Ordnername je Domain ersetzt Punkte durch Bindestriche. `a-b.com` und `a.b.com` teilen sich deshalb einen Ordner (`a-b-com`); wer zwei solche Domains fuehrt, gibt jeder eine eigene Cache-Wurzel (`SEO_CACHE_DIR` oder `--cache-dir`)
 - Lock-Dateien verhindern parallele Writes
 - Atomic Writes verhindern korrupte Dateien
 

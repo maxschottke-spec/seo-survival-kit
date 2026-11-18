@@ -36,8 +36,8 @@ const sandbox = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'seo-rescu
 const decoyHome = path.join(sandbox, 'decoy-home');
 const decoyCache = path.join(sandbox, 'decoy-cache');
 const childCwd = path.join(sandbox, 'child-cwd');
-fs.mkdirSync(decoyHome);
-fs.mkdirSync(childCwd);
+fs.mkdirSync(decoyHome, { mode: 0o700 });
+fs.mkdirSync(childCwd, { mode: 0o700 });
 process.env.HOME = decoyHome;
 process.env.USERPROFILE = decoyHome;
 process.env.SEO_CACHE_DIR = decoyCache;
@@ -52,6 +52,13 @@ const POSIX = process.platform !== 'win32';
 
 let passed = 0;
 let failed = 0;
+
+// Fixture directories are created private (0700): an existing directory that
+// group or others can access is refused as an explicit cache dir.
+function mkdirPrivate(p) {
+  fs.mkdirSync(p, { recursive: true, mode: 0o700 });
+  fs.chmodSync(p, 0o700);
+}
 
 function decoyUntouched() {
   assert.strictEqual(fs.existsSync(decoyCache), false, 'SEO_CACHE_DIR decoy was created');
@@ -77,10 +84,33 @@ function freshDir() {
   return path.join(sandbox, `cache-${++n}`);
 }
 
-function run(script, args) {
-  const env = { ...process.env, HOME: decoyHome, USERPROFILE: decoyHome };
-  delete env.SEO_CACHE_DIR; // default target of the child = <decoy HOME>/.cache/seo-rescue
-  return spawnSync(process.execPath, [script, ...args], { encoding: 'utf8', shell: false, env, cwd: childCwd });
+// timeout: a regression that blocks (FIFO) must fail the test, not hang it.
+function run(script, args, opts = {}) {
+  const home = opts.home || decoyHome;
+  const env = { ...process.env, HOME: home, USERPROFILE: home };
+  delete env.SEO_CACHE_DIR; // default target of the child = <HOME>/.cache/seo-rescue
+  return spawnSync(process.execPath, [script, ...args], {
+    encoding: 'utf8', shell: false, env, cwd: opts.cwd || childCwd, timeout: 15000, killSignal: 'SIGKILL',
+  });
+}
+
+function mkfifo(p) {
+  const r = spawnSync('mkfifo', [p]);
+  return r.status === 0;
+}
+
+// Runs fn with a property of an object temporarily replaced.
+function withPatched(obj, key, value, fn) {
+  const original = obj[key];
+  obj[key] = value;
+  try { return fn(); } finally { obj[key] = original; }
+}
+
+function sameOutcome(a, b, pattern) {
+  assert.strictEqual(a.status, 2, `real run: exit ${a.status}\n${a.stderr}`);
+  assert.strictEqual(b.status, 2, `dry run: exit ${b.status}\n${b.stdout}${b.stderr}`);
+  assert.match(a.stderr, pattern);
+  assert.match(b.stderr, pattern);
 }
 
 function lines(file) {
@@ -123,7 +153,7 @@ test('ensureDomainDir(slug, dir) still validates the slug', () => {
 test('ensureDomainDir refuses a symlinked explicit cache dir', () => {
   if (!POSIX) return;
   const real = freshDir();
-  fs.mkdirSync(real);
+  mkdirPrivate(real);
   const link = freshDir();
   fs.symlinkSync(real, link);
   assert.throws(() => safe.ensureDomainDir('example-com', link), /symlink/);
@@ -133,7 +163,7 @@ test('ensureDomainDir refuses a symlinked explicit cache dir', () => {
 test('ensureDomainDir refuses a symlink in the PARENT path of the explicit cache dir', () => {
   if (!POSIX) return;
   const real = freshDir();
-  fs.mkdirSync(real);
+  mkdirPrivate(real);
   const link = freshDir();
   fs.symlinkSync(real, link);
   assert.throws(() => safe.ensureDomainDir('example-com', path.join(link, 'cache')), /symlink is part of the path/);
@@ -144,7 +174,7 @@ test('ensureDomainDir refuses a symlink in the PARENT path of the explicit cache
 test('the refusal names the resolved path to use instead', () => {
   if (!POSIX) return;
   const real = freshDir();
-  fs.mkdirSync(real);
+  mkdirPrivate(real);
   const link = freshDir();
   fs.symlinkSync(real, link);
   assert.throws(() => safe.getCacheDir(path.join(link, 'cache')), (e) => e.message.includes(path.join(real, 'cache')));
@@ -153,7 +183,7 @@ test('the refusal names the resolved path to use instead', () => {
 test('resolveDomainDir (dry run) refuses a symlink in the parent path too', () => {
   if (!POSIX) return;
   const real = freshDir();
-  fs.mkdirSync(real);
+  mkdirPrivate(real);
   const link = freshDir();
   fs.symlinkSync(real, link);
   assert.throws(() => safe.resolveDomainDir('example-com', path.join(link, 'cache')), /symlink is part of the path/);
@@ -163,8 +193,8 @@ test('ensureDomainDir refuses a symlinked domain dir', () => {
   if (!POSIX) return;
   const root = freshDir();
   const elsewhere = freshDir();
-  fs.mkdirSync(root);
-  fs.mkdirSync(elsewhere);
+  mkdirPrivate(root);
+  mkdirPrivate(elsewhere);
   fs.symlinkSync(elsewhere, path.join(root, 'example-com'));
   assert.throws(() => safe.ensureDomainDir('example-com', root), /symlink/);
   assert.deepStrictEqual(fs.readdirSync(elsewhere), []);
@@ -220,7 +250,7 @@ test('a domain dir with mode 0500 stays 0500', () => {
   if (!POSIX) return;
   const root = freshDir();
   const dir = path.join(root, 'example-com');
-  fs.mkdirSync(dir, { recursive: true });
+  mkdirPrivate(dir);
   fs.chmodSync(dir, 0o500);
   try {
     assert.strictEqual(safe.ensureDomainDir('example-com', root), dir);
@@ -230,19 +260,98 @@ test('a domain dir with mode 0500 stays 0500', () => {
   }
 });
 
-test('group/other bits are removed (0755 -> 0700, 0750 -> 0700, 0555 -> 0500)', () => {
+// Default path and SEO_CACHE_DIR are the user's cache by definition: an old
+// cache that is open to group/others keeps working and is tightened.
+test('SEO_CACHE_DIR: group/other bits are removed, special bits kept (0755->0700, 0750->0700, 0555->0500, 01777->01700, 02755->02700)', () => {
   if (!POSIX) return;
-  for (const [before, after] of [[0o755, 0o700], [0o750, 0o700], [0o555, 0o500]]) {
+  const saved = process.env.SEO_CACHE_DIR;
+  try {
+    for (const [before, after] of [[0o755, 0o700], [0o750, 0o700], [0o555, 0o500], [0o1777, 0o1700], [0o2755, 0o2700]]) {
+      const root = freshDir();
+      fs.mkdirSync(root);
+      fs.chmodSync(root, before);
+      // Some systems drop setgid/sticky on chmod by an unprivileged user: compare
+      // against what the directory really had, not against what was asked for.
+      const had = fs.statSync(root).mode & 0o7777;
+      const expected = had === before ? after : (had & ~0o077);
+      process.env.SEO_CACHE_DIR = root;
+      try {
+        safe.getCacheDir();
+        const now = fs.statSync(root).mode & 0o7777;
+        assert.strictEqual(now, expected, `${had.toString(8)} became ${now.toString(8)}, expected ${expected.toString(8)}`);
+        assert.strictEqual(now & 0o7000, had & 0o7000, 'special bits changed');
+      } finally {
+        fs.chmodSync(root, 0o700);
+      }
+    }
+  } finally {
+    process.env.SEO_CACHE_DIR = saved;
+  }
+});
+
+test('explicit cache dir: an EXISTING directory open to group/others is refused and NOT changed', () => {
+  if (!POSIX) return;
+  for (let m of [0o755, 0o750, 0o705, 0o1777, 0o2755]) {
     const root = freshDir();
     fs.mkdirSync(root);
-    fs.chmodSync(root, before);
-    try {
-      safe.getCacheDir(root);
-      assert.strictEqual(mode(root), after, `${before.toString(8)} became ${mode(root).toString(8)}`);
-    } finally {
-      fs.chmodSync(root, 0o700);
+    fs.chmodSync(root, m);
+    m = fs.statSync(root).mode & 0o7777; // what the system really set
+    assert.throws(() => safe.getCacheDir(root), /already exists and is accessible to group or others.*chmod 700/s);
+    assert.throws(() => safe.ensureDomainDir('example-com', root), /already exists and is accessible/);
+    assert.throws(() => safe.resolveDomainDir('example-com', root), /already exists and is accessible/);
+    assert.strictEqual(fs.statSync(root).mode & 0o7777, m, `mode ${m.toString(8)} was changed`);
+    assert.deepStrictEqual(fs.readdirSync(root), []);
+  }
+});
+
+test('explicit cache dir: an existing open DOMAIN dir inside a private root is refused and not changed', () => {
+  if (!POSIX) return;
+  const root = freshDir();
+  mkdirPrivate(root);
+  const dir = path.join(root, 'example-com');
+  fs.mkdirSync(dir);
+  fs.chmodSync(dir, 0o755);
+  assert.throws(() => safe.ensureDomainDir('example-com', root), /already exists and is accessible/);
+  assert.throws(() => safe.resolveDomainDir('example-com', root), /already exists and is accessible/);
+  assert.strictEqual(mode(dir), 0o755);
+});
+
+test('explicit cache dir: a NEW directory (and new parents) is created 0700', () => {
+  if (!POSIX) return;
+  const base = freshDir();
+  const root = path.join(base, 'a', 'b');
+  const dir = safe.ensureDomainDir('example-com', root);
+  for (const p of [base, path.join(base, 'a'), root, dir]) assert.strictEqual(mode(p), 0o700, p);
+});
+
+test('CLI: --cache-dir . in a 0755 directory -> exit 2 (real and dry run), mode still 755, nothing created', () => {
+  if (!POSIX) return;
+  const cwd = freshDir();
+  fs.mkdirSync(cwd);
+  fs.chmodSync(cwd, 0o755);
+  for (const extra of [[], ['--dry-run']]) {
+    for (const script of [MONITOR, CRAWL]) {
+      const args = script === MONITOR ? [...WITH_DATA, '--cache-dir', '.', ...extra] : ['--domain', 'example.com', '--cache-dir', '.', ...extra];
+      const r = run(script, args, { cwd });
+      assert.strictEqual(r.status, 2, `${path.basename(script)} ${extra.join(' ')}: exit ${r.status}\n${r.stdout}${r.stderr}`);
+      assert.match(r.stderr, /already exists and is accessible to group or others/);
+      assert.match(r.stderr, /chmod 700/);
     }
   }
+  assert.strictEqual(mode(cwd), 0o755);
+  assert.deepStrictEqual(fs.readdirSync(cwd), []);
+});
+
+test('CLI: an old default cache with mode 0755 keeps working and is tightened to 0700', () => {
+  if (!POSIX) return;
+  const home = freshDir();
+  const cache = path.join(home, '.cache', 'seo-rescue');
+  fs.mkdirSync(cache, { recursive: true });
+  fs.chmodSync(cache, 0o755);
+  const r = run(MONITOR, WITH_DATA, { home });
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.strictEqual(mode(cache), 0o700);
+  assert.strictEqual(lines(path.join(cache, 'example-com', 'history.ndjson')).length, 1);
 });
 
 // ---------------------------------------------------------------------------
@@ -251,7 +360,7 @@ console.log('\nlib/safe.js — files: symlink, hard link, non-file');
 test('appendNDJSON refuses a symlink and leaves its target alone', () => {
   if (!POSIX) return;
   const dir = freshDir();
-  fs.mkdirSync(dir);
+  mkdirPrivate(dir);
   const foreign = path.join(dir, 'foreign.txt');
   fs.writeFileSync(foreign, 'keep\n');
   const link = path.join(dir, 'history.ndjson');
@@ -263,7 +372,7 @@ test('appendNDJSON refuses a symlink and leaves its target alone', () => {
 test('appendNDJSON refuses a hard-linked file and leaves it alone', () => {
   if (!POSIX) return;
   const dir = freshDir();
-  fs.mkdirSync(dir);
+  mkdirPrivate(dir);
   const foreign = path.join(dir, 'foreign.txt');
   fs.writeFileSync(foreign, 'keep\n');
   const hard = path.join(dir, 'history.ndjson');
@@ -274,7 +383,7 @@ test('appendNDJSON refuses a hard-linked file and leaves it alone', () => {
 
 test('appendNDJSON still creates and appends to an ordinary file', () => {
   const dir = freshDir();
-  fs.mkdirSync(dir);
+  mkdirPrivate(dir);
   const file = path.join(dir, 'history.ndjson');
   safe.appendNDJSON(file, { a: 1 });
   safe.appendNDJSON(file, { a: 2 });
@@ -285,7 +394,7 @@ test('appendNDJSON still creates and appends to an ordinary file', () => {
 test('atomicWriteJSON refuses a symlink target and a directory target', () => {
   if (!POSIX) return;
   const dir = freshDir();
-  fs.mkdirSync(dir);
+  mkdirPrivate(dir);
   const foreign = path.join(dir, 'foreign.json');
   fs.writeFileSync(foreign, '{"keep":true}');
   const link = path.join(dir, 'issues.json');
@@ -293,7 +402,7 @@ test('atomicWriteJSON refuses a symlink target and a directory target', () => {
   assert.throws(() => safe.atomicWriteJSON(link, { a: 1 }), /symlink/);
   assert.strictEqual(fs.readFileSync(foreign, 'utf8'), '{"keep":true}');
   const sub = path.join(dir, 'sub');
-  fs.mkdirSync(sub);
+  mkdirPrivate(sub);
   assert.throws(() => safe.atomicWriteJSON(sub, { a: 1 }), /not a regular file/);
   assert.deepStrictEqual(fs.readdirSync(dir).sort(), ['foreign.json', 'issues.json', 'sub']);
 });
@@ -495,7 +604,7 @@ test('the limits themselves are accepted (--vi 1000000, --keywords-t10 100000000
 test('symlinked --cache-dir exits 2', () => {
   if (!POSIX) return;
   const real = freshDir();
-  fs.mkdirSync(real);
+  mkdirPrivate(real);
   const link = freshDir();
   fs.symlinkSync(real, link);
   const r = run(MONITOR, [...WITH_DATA, '--cache-dir', link]);
@@ -506,7 +615,7 @@ test('symlinked --cache-dir exits 2', () => {
 test('--cache-dir below a symlinked parent exits 2, nothing behind the symlink', () => {
   if (!POSIX) return;
   const real = freshDir();
-  fs.mkdirSync(real);
+  mkdirPrivate(real);
   const link = freshDir();
   fs.symlinkSync(real, link);
   refused(run(MONITOR, [...WITH_DATA, '--cache-dir', path.join(link, 'cache')]), null, /symlink is part of the path/);
@@ -518,7 +627,7 @@ test('history.ndjson is a symlink: exit 2, target unchanged, no lock left', () =
   if (!POSIX) return;
   const root = freshDir();
   const dir = path.join(root, 'example-com');
-  fs.mkdirSync(dir, { recursive: true });
+  mkdirPrivate(dir);
   const foreign = path.join(sandbox, `foreign-${n}.txt`);
   fs.writeFileSync(foreign, 'keep\n');
   fs.symlinkSync(foreign, path.join(dir, 'history.ndjson'));
@@ -532,7 +641,7 @@ test('history.ndjson is a hard link to another file: exit 2, that file unchanged
   if (!POSIX) return;
   const root = freshDir();
   const dir = path.join(root, 'example-com');
-  fs.mkdirSync(dir, { recursive: true });
+  mkdirPrivate(dir);
   const foreign = path.join(sandbox, `foreign-${n}.ndjson`);
   fs.writeFileSync(foreign, '{"keep":true}\n');
   fs.linkSync(foreign, path.join(dir, 'history.ndjson'));
@@ -545,7 +654,7 @@ test('history.ndjson is a hard link to another file: exit 2, that file unchanged
 test('a cache root with mode 0500 is not loosened by a run', () => {
   if (!POSIX) return;
   const root = freshDir();
-  fs.mkdirSync(root);
+  mkdirPrivate(root);
   fs.chmodSync(root, 0o500);
   try {
     const r = run(MONITOR, [...WITH_DATA, '--cache-dir', root, '--dry-run']);
@@ -649,7 +758,7 @@ test('every number in a written entry is finite (no value silently stored as nul
 test('a previous VI near zero gives a null delta WITH a warning, not a silent null', () => {
   const root = freshDir();
   const dir = path.join(root, 'example-com');
-  fs.mkdirSync(dir, { recursive: true });
+  mkdirPrivate(dir);
   fs.writeFileSync(path.join(dir, 'history.ndjson'), JSON.stringify({ vi: 1e-320, keywords_t10: 5 }) + '\n');
   const res = W(1000000, 7, { cacheDir: root, dryRun: true });
   assert.strictEqual(res.entry.vi_delta_pct, null);
@@ -661,7 +770,7 @@ test('a previous VI near zero gives a null delta WITH a warning, not a silent nu
 test('garbage in the previous history line is not used for arithmetic', () => {
   const root = freshDir();
   const dir = path.join(root, 'example-com');
-  fs.mkdirSync(dir, { recursive: true });
+  mkdirPrivate(dir);
   fs.writeFileSync(path.join(dir, 'history.ndjson'), JSON.stringify({ vi: 'abc', keywords_t10: '5', score: 'x' }) + '\n');
   const res = W(0.5, 7, { cacheDir: root, dryRun: true });
   assert.strictEqual(res.entry.vi_delta_pct, null);
@@ -714,7 +823,7 @@ test('CLI missing --domain and invalid domain exit 2', () => {
 test('CLI --cache-dir below a symlinked parent exits 2 (with and without --dry-run)', () => {
   if (!POSIX) return;
   const real = freshDir();
-  fs.mkdirSync(real);
+  mkdirPrivate(real);
   const link = freshDir();
   fs.symlinkSync(real, link);
   refused(run(CRAWL, ['--domain', 'example.com', '--cache-dir', path.join(link, 'cache')]), null, /symlink is part of the path/);
@@ -755,7 +864,7 @@ test('writeIssuesJSON: issues.json is a symlink -> refused, target unchanged, no
   if (!POSIX) return;
   const root = freshDir();
   const dir = path.join(root, 'example-com');
-  fs.mkdirSync(dir, { recursive: true });
+  mkdirPrivate(dir);
   const foreign = path.join(sandbox, `foreign-issues-${n}.json`);
   fs.writeFileSync(foreign, '{"keep":true}');
   fs.symlinkSync(foreign, path.join(dir, 'issues.json'));
@@ -768,13 +877,333 @@ test('writeIssuesJSON: replacing a hard-linked issues.json leaves the other name
   if (!POSIX) return;
   const root = freshDir();
   const dir = path.join(root, 'example-com');
-  fs.mkdirSync(dir, { recursive: true });
+  mkdirPrivate(dir);
   const other = path.join(sandbox, `other-issues-${n}.json`);
   fs.writeFileSync(other, '{"keep":true}');
   fs.linkSync(other, path.join(dir, 'issues.json'));
   I({ cacheDir: root, crawlerProvider: 'csv_import' });
   assert.strictEqual(fs.readFileSync(other, 'utf8'), '{"keep":true}');
   assert.strictEqual(JSON.parse(fs.readFileSync(path.join(dir, 'issues.json'), 'utf8')).summary.total_issues, 1);
+});
+
+// ---------------------------------------------------------------------------
+console.log('\nfinal review round — FIFO and other non-files');
+
+test('history.ndjson is a FIFO: exit 2 at once (no hang), no lock left, real and dry run', () => {
+  if (!POSIX) return;
+  const root = freshDir();
+  const dir = path.join(root, 'example-com');
+  mkdirPrivate(dir);
+  if (!mkfifo(path.join(dir, 'history.ndjson'))) return;
+  const r = run(MONITOR, [...WITH_DATA, '--cache-dir', root]);
+  assert.strictEqual(r.error, undefined, `run did not finish: ${r.error && r.error.message}`);
+  refused(r, null, /not a regular file/);
+  assert.deepStrictEqual(fs.readdirSync(dir), ['history.ndjson'], 'lock or other file left behind');
+  const d = run(MONITOR, [...WITH_DATA, '--cache-dir', root, '--dry-run']);
+  assert.strictEqual(d.error, undefined, 'dry run did not finish');
+  assert.strictEqual(d.status, 0, d.stderr); // dry run only reads; an unreadable history counts as "no previous entry"
+  assert.deepStrictEqual(fs.readdirSync(dir), ['history.ndjson']);
+});
+
+test('befund.json / issues.json as FIFO do not block a run', () => {
+  if (!POSIX) return;
+  const root = freshDir();
+  const dir = path.join(root, 'example-com');
+  mkdirPrivate(dir);
+  if (!mkfifo(path.join(dir, 'befund.json')) || !mkfifo(path.join(dir, 'issues.json'))) return;
+  const r = run(MONITOR, [...WITH_DATA, '--cache-dir', root]);
+  assert.strictEqual(r.error, undefined, 'run did not finish');
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.strictEqual(lines(path.join(dir, 'history.ndjson')).length, 1);
+});
+
+test('.lock is a FIFO or a directory: exit 2 at once instead of a 30 s wait', () => {
+  if (!POSIX) return;
+  for (const kind of ['fifo', 'dir']) {
+    const root = freshDir();
+    const dir = path.join(root, 'example-com');
+    mkdirPrivate(dir);
+    const lock = path.join(dir, '.lock');
+    if (kind === 'fifo') { if (!mkfifo(lock)) return; } else mkdirPrivate(lock);
+    const started = Date.now();
+    const r = run(MONITOR, [...WITH_DATA, '--cache-dir', root]);
+    assert.strictEqual(r.error, undefined, `${kind}: run did not finish`);
+    refused(r, null, /lock path is not a regular file/);
+    assert.ok(Date.now() - started < 10000, `${kind}: took ${Date.now() - started} ms`);
+    assert.deepStrictEqual(fs.readdirSync(dir), ['.lock']);
+  }
+});
+
+test('writeIssuesJSON with issues.json as FIFO is refused without blocking (child process)', () => {
+  if (!POSIX) return;
+  const root = freshDir();
+  const dir = path.join(root, 'example-com');
+  mkdirPrivate(dir);
+  if (!mkfifo(path.join(dir, 'issues.json'))) return;
+  const code = `const c=require(${JSON.stringify(CRAWL)});try{c.writeIssuesJSON('example.com','example-com','example.com',1,[],[],[],{cacheDir:${JSON.stringify(root)},crawlerProvider:'csv_import'});process.exit(0)}catch(e){console.error(e.message);process.exit(/not a regular file/.test(e.message)?7:1)}`;
+  const r = spawnSync(process.execPath, ['-e', code], { encoding: 'utf8', timeout: 15000, killSignal: 'SIGKILL', cwd: childCwd, env: { ...process.env, HOME: decoyHome } });
+  assert.strictEqual(r.error, undefined, 'did not finish');
+  assert.strictEqual(r.status, 7, r.stderr);
+  assert.deepStrictEqual(fs.readdirSync(dir), ['issues.json']);
+});
+
+test('appendNDJSON refuses a FIFO and a directory before opening', () => {
+  if (!POSIX) return;
+  const dir = freshDir();
+  mkdirPrivate(dir);
+  const fifo = path.join(dir, 'f.ndjson');
+  if (!mkfifo(fifo)) return;
+  let opened = false;
+  withPatched(fs, 'openSync', (...a) => { opened = true; throw new Error('openSync must not be reached'); }, () => {
+    assert.throws(() => safe.appendNDJSON(fifo, { a: 1 }), /not a regular file/);
+    assert.throws(() => safe.appendNDJSON(dir, { a: 1 }), /not a regular file/);
+  });
+  assert.strictEqual(opened, false);
+});
+
+test('safeLog skips a run.log that is a FIFO instead of blocking', () => {
+  if (!POSIX) return;
+  const dir = freshDir();
+  mkdirPrivate(dir);
+  if (!mkfifo(path.join(dir, 'run.log'))) return;
+  safe.safeLog(dir, 'run-1', 'hello');
+  const ok = freshDir();
+  mkdirPrivate(ok);
+  safe.safeLog(ok, 'run-1', 'hello');
+  assert.match(fs.readFileSync(path.join(ok, 'run.log'), 'utf8'), /\[run-1\] hello/);
+});
+
+// ---------------------------------------------------------------------------
+console.log('\nfinal review round — checks that a mutation must not survive');
+
+test('appendNDJSON opens with O_NOFOLLOW and O_NONBLOCK', () => {
+  if (!POSIX) return;
+  const dir = freshDir();
+  mkdirPrivate(dir);
+  const file = path.join(dir, 'h.ndjson');
+  const realOpen = fs.openSync;
+  let flags = null;
+  withPatched(fs, 'openSync', (p, f, m) => { if (p === file) flags = f; return realOpen(p, f, m); }, () => safe.appendNDJSON(file, { a: 1 }));
+  assert.ok(Number.isInteger(flags), 'openSync was not called for the file');
+  assert.ok((flags & fs.constants.O_NOFOLLOW) === fs.constants.O_NOFOLLOW && fs.constants.O_NOFOLLOW !== 0, 'O_NOFOLLOW missing');
+  assert.ok((flags & fs.constants.O_NONBLOCK) === fs.constants.O_NONBLOCK, 'O_NONBLOCK missing');
+  assert.ok((flags & fs.constants.O_APPEND) === fs.constants.O_APPEND, 'O_APPEND missing');
+});
+
+// Simulates the race: the name passes the lstat pre-check (here: lstat does not
+// see it) and is a symlink / FIFO by the time it is opened.
+const hideFromLstat = (hidden, fn) => {
+  const realLstat = fs.lstatSync;
+  return withPatched(fs, 'lstatSync', (p, ...rest) => {
+    if (p === hidden) { const e = new Error('ENOENT (simulated)'); e.code = 'ENOENT'; throw e; }
+    return realLstat(p, ...rest);
+  }, fn);
+};
+
+test('symlink that appears after the pre-check is still not followed (O_NOFOLLOW)', () => {
+  if (!POSIX) return;
+  const dir = freshDir();
+  mkdirPrivate(dir);
+  const foreign = path.join(dir, 'foreign.txt');
+  fs.writeFileSync(foreign, 'keep\n');
+  const link = path.join(dir, 'history.ndjson');
+  fs.symlinkSync(foreign, link);
+  hideFromLstat(link, () => assert.throws(() => safe.appendNDJSON(link, { a: 1 }), /symlink/));
+  assert.strictEqual(fs.readFileSync(foreign, 'utf8'), 'keep\n');
+});
+
+test('FIFO that appears after the pre-check does not block (O_NONBLOCK)', () => {
+  if (!POSIX) return;
+  const dir = freshDir();
+  mkdirPrivate(dir);
+  const fifo = path.join(dir, 'history.ndjson');
+  if (!mkfifo(fifo)) return;
+  const code = `const fs=require('fs');const safe=require(${JSON.stringify(path.join(__dirname, '..', '..', 'lib', 'safe.js'))});const real=fs.lstatSync;fs.lstatSync=(p,...r)=>{if(p===${JSON.stringify(fifo)}){const e=new Error('x');e.code='ENOENT';throw e}return real(p,...r)};try{safe.appendNDJSON(${JSON.stringify(fifo)},{a:1});process.exit(0)}catch(e){console.error(e.message);process.exit(/not a regular file/.test(e.message)?7:1)}`;
+  const r = spawnSync(process.execPath, ['-e', code], { encoding: 'utf8', timeout: 15000, killSignal: 'SIGKILL', cwd: childCwd, env: { ...process.env, HOME: decoyHome } });
+  assert.strictEqual(r.error, undefined, 'blocked on the FIFO');
+  assert.strictEqual(r.status, 7, r.stderr);
+});
+
+test('hard link that appears after the pre-check is caught by fstat on the open file', () => {
+  if (!POSIX) return;
+  const dir = freshDir();
+  mkdirPrivate(dir);
+  const foreign = path.join(dir, 'foreign.txt');
+  fs.writeFileSync(foreign, 'keep\n');
+  const hard = path.join(dir, 'history.ndjson');
+  fs.linkSync(foreign, hard);
+  hideFromLstat(hard, () => assert.throws(() => safe.appendNDJSON(hard, { a: 1 }), /hard links/));
+  assert.strictEqual(fs.readFileSync(foreign, 'utf8'), 'keep\n');
+});
+
+test('ownership: a cache dir, a domain dir, a history file and an issues file of another user are refused', () => {
+  if (!POSIX || typeof process.getuid !== 'function') return;
+  const realUid = process.getuid();
+  const root = freshDir();
+  const dir = safe.ensureDomainDir('example-com', root);
+  const history = path.join(dir, 'history.ndjson');
+  const issues = path.join(dir, 'issues.json');
+  fs.writeFileSync(history, '{"keep":true}\n', { mode: 0o600 });
+  fs.writeFileSync(issues, '{"keep":true}', { mode: 0o600 });
+  const saved = process.env.SEO_CACHE_DIR;
+  withPatched(process, 'getuid', () => realUid + 1, () => {
+    assert.throws(() => safe.getCacheDir(root), /not owned by the current user/);
+    assert.throws(() => safe.ensureDomainDir('example-com', root), /not owned by the current user/);
+    assert.throws(() => safe.resolveDomainDir('example-com', root), /not owned by the current user/);
+    process.env.SEO_CACHE_DIR = root;
+    try {
+      assert.throws(() => safe.getCacheDir(), /not owned by the current user/);
+    } finally {
+      process.env.SEO_CACHE_DIR = saved;
+    }
+    assert.throws(() => safe.appendNDJSON(history, { a: 1 }), /not owned by the current user/);
+    assert.throws(() => safe.atomicWriteJSON(issues, { a: 1 }), /not owned by the current user/);
+  });
+  assert.strictEqual(fs.readFileSync(history, 'utf8'), '{"keep":true}\n');
+  assert.strictEqual(fs.readFileSync(issues, 'utf8'), '{"keep":true}');
+  assert.deepStrictEqual(fs.readdirSync(dir).sort(), ['history.ndjson', 'issues.json']);
+});
+
+test('a failing chmod aborts instead of being swallowed', () => {
+  if (!POSIX) return;
+  const root = freshDir();
+  fs.mkdirSync(root);
+  fs.chmodSync(root, 0o755);
+  const saved = process.env.SEO_CACHE_DIR;
+  process.env.SEO_CACHE_DIR = root;
+  try {
+    withPatched(fs, 'chmodSync', () => { const e = new Error('EPERM (simulated chmod failure)'); e.code = 'EPERM'; throw e; }, () => {
+      assert.throws(() => safe.getCacheDir(), /simulated chmod failure/);
+      assert.throws(() => safe.ensureDomainDir('example-com'), /simulated chmod failure/);
+    });
+    assert.strictEqual(mode(root), 0o755);
+    assert.deepStrictEqual(fs.readdirSync(root), []);
+  } finally {
+    process.env.SEO_CACHE_DIR = saved;
+    fs.chmodSync(root, 0o700);
+  }
+});
+
+test('dry run: a symlink as domain dir is refused (resolveDomainDir and both CLIs)', () => {
+  if (!POSIX) return;
+  const root = freshDir();
+  const elsewhere = freshDir();
+  mkdirPrivate(root);
+  mkdirPrivate(elsewhere);
+  fs.symlinkSync(elsewhere, path.join(root, 'example-com'));
+  assert.throws(() => safe.resolveDomainDir('example-com', root), /must not be a symlink/);
+  refused(run(MONITOR, [...WITH_DATA, '--cache-dir', root, '--dry-run']), null, /must not be a symlink/);
+  refused(run(CRAWL, ['--domain', 'example.com', '--cache-dir', root, '--dry-run']), null, /must not be a symlink/);
+  assert.deepStrictEqual(fs.readdirSync(elsewhere), []);
+});
+
+// ---------------------------------------------------------------------------
+console.log('\nfinal review round — arguments, dry run = real run, no empty entries');
+
+for (const form of ['--cache-dir=--dry-run', '--cache-dir=-x', '--cache-dir=--', '--domain=--dry-run', '--domain=-example.com']) {
+  test(`${form} is refused (exit 2), no directory created`, () => {
+    refused(run(MONITOR, ['--vi', '1', ...(form.startsWith('--domain') ? [] : ['--domain', 'example.com']), form]), null, /looks like an option/);
+    refused(run(CRAWL, [...(form.startsWith('--domain') ? [] : ['--domain', 'example.com']), form]), null, /looks like an option/);
+  });
+}
+
+test('parseStrictCli refuses a value that starts with "-" and accepts "./-name"', () => {
+  usageError(['--cache-dir=--dry-run'], /looks like an option/);
+  usageError(['--cache-dir=-rf'], /looks like an option/);
+  usageError(['--domain=--help'], /looks like an option/);
+  assert.deepStrictEqual(safe.parseStrictCli(SPEC, ['--cache-dir=./-name']), { 'cache-dir': './-name' });
+});
+
+test('--cache-dir <file>/sub: real run and dry run both exit 2 with the same clear message', () => {
+  const file = freshDir();
+  fs.writeFileSync(file, 'x');
+  for (const [script, base] of [[MONITOR, WITH_DATA], [CRAWL, ['--domain', 'example.com']]]) {
+    const target = path.join(file, 'sub');
+    sameOutcome(run(script, [...base, '--cache-dir', target]), run(script, [...base, '--cache-dir', target, '--dry-run']), /is not a directory, so .* cannot be created/);
+  }
+  assert.strictEqual(fs.readFileSync(file, 'utf8'), 'x');
+});
+
+test('--cache-dir <file>: real run and dry run both exit 2 with the same clear message (no raw EEXIST)', () => {
+  const file = freshDir();
+  fs.writeFileSync(file, 'x');
+  for (const [script, base] of [[MONITOR, WITH_DATA], [CRAWL, ['--domain', 'example.com']]]) {
+    const a = run(script, [...base, '--cache-dir', file]);
+    sameOutcome(a, run(script, [...base, '--cache-dir', file, '--dry-run']), /cache dir is not a directory/);
+    assert.doesNotMatch(a.stderr, /EEXIST|ENOTDIR/);
+  }
+  assert.strictEqual(fs.readFileSync(file, 'utf8'), 'x');
+});
+
+test('a file where the domain dir belongs: real run and dry run both exit 2', () => {
+  const root = freshDir();
+  mkdirPrivate(root);
+  fs.writeFileSync(path.join(root, 'example-com'), 'x');
+  for (const [script, base] of [[MONITOR, WITH_DATA], [CRAWL, ['--domain', 'example.com']]]) {
+    sameOutcome(run(script, [...base, '--cache-dir', root]), run(script, [...base, '--cache-dir', root, '--dry-run']), /not a directory/);
+  }
+  assert.strictEqual(fs.readFileSync(path.join(root, 'example-com'), 'utf8'), 'x');
+});
+
+test('writeMonitorEntry without any measurement appends nothing and creates nothing', () => {
+  const root = freshDir();
+  const res = monitor.writeMonitorEntry('example.com', 'example.com', 'example-com', null, null, [], [], { cacheDir: root });
+  assert.strictEqual(res.written, false);
+  assert.strictEqual(res.skippedReason, 'no_measurement');
+  assert.strictEqual(fs.existsSync(root), false);
+  const u = monitor.writeMonitorEntry('example.com', 'example.com', 'example-com', undefined, undefined, ['Sistrix nicht erreichbar'], [], { cacheDir: root, runId: 'r1', providersUsed: [] });
+  assert.strictEqual(u.written, false);
+  assert.strictEqual(fs.existsSync(root), false);
+});
+
+test('writeMonitorEntry without measurement leaves an existing history untouched', () => {
+  const root = freshDir();
+  const first = W(0.5, 7, { cacheDir: root });
+  const before = fs.readFileSync(first.historyPath, 'utf8');
+  const res = monitor.writeMonitorEntry('example.com', 'example.com', 'example-com', null, null, [], [], { cacheDir: root });
+  assert.strictEqual(res.written, false);
+  assert.strictEqual(fs.readFileSync(first.historyPath, 'utf8'), before);
+  assert.strictEqual(fs.existsSync(path.join(root, 'example-com', '.lock')), false);
+});
+
+test('one measurement is enough to write (vi only, keywords only, an option only)', () => {
+  for (const [vi, t10, o] of [[0.5, null, {}], [null, 7, {}], [null, null, { keywordsTotal: 900 }], [null, null, { viTrend4wPct: -3 }], [null, null, { backlinkSpamScore: 2 }]]) {
+    const root = freshDir();
+    const res = W(vi, t10, { cacheDir: root, ...o });
+    assert.strictEqual(res.written, true, JSON.stringify([vi, t10, o]));
+    assert.strictEqual(res.skippedReason, null);
+    assert.strictEqual(lines(res.historyPath).length, 1);
+  }
+});
+
+test('writeIssuesJSON: crawlLimit / exportedRowsTotal must be whole numbers, nothing written otherwise', () => {
+  const bad = [
+    { crawlLimit: Infinity }, { crawlLimit: NaN }, { crawlLimit: -1 }, { crawlLimit: 0 }, { crawlLimit: 1.5 }, { crawlLimit: '500' },
+    { exportedRowsTotal: Infinity }, { exportedRowsTotal: NaN }, { exportedRowsTotal: -1 }, { exportedRowsTotal: 2.5 }, { exportedRowsTotal: '9' },
+  ];
+  for (const o of bad) {
+    const root = freshDir();
+    assert.throws(() => I({ cacheDir: root, crawlerProvider: 'csv_import', ...o }), /Invalid value for options\./, `${JSON.stringify(o)} accepted`);
+    assert.strictEqual(fs.existsSync(root), false);
+  }
+  // the message names the real value, not JSON's "null" for Infinity/NaN
+  assert.throws(() => I({ cacheDir: freshDir(), crawlerProvider: 'csv_import', crawlLimit: Infinity }), /crawlLimit: Infinity /);
+  assert.throws(() => W(NaN, 7, { cacheDir: freshDir() }), /Invalid value for vi: NaN /);
+  const root = freshDir();
+  const out = I({ cacheDir: root, crawlerProvider: 'csv_import', crawlLimit: 250, exportedRowsTotal: 0 });
+  assert.strictEqual(out.crawl_limit, 250);
+  assert.strictEqual(out.exported_rows_total, 0);
+  const written = JSON.parse(fs.readFileSync(path.join(root, 'example-com', 'issues.json'), 'utf8'));
+  assert.strictEqual(written.crawl_limit, 250);
+});
+
+test('classifyIssues: an issue type named like an Object.prototype key gets the default severity', () => {
+  for (const type of ['constructor', 'toString', '__proto__', 'hasOwnProperty', 'valueOf']) {
+    const [res] = crawl.classifyIssues([{ type, count: 1, details: [] }]);
+    assert.strictEqual(res.severity, 'medium', type);
+  }
+  assert.strictEqual(crawl.classifyIssues([{ type: 'missing_h1', count: 1 }])[0].severity, 'medium');
+  assert.strictEqual(crawl.classifyIssues([{ type: 'broken_internal_link', count: 1, details: [{ inlink_count: 500 }] }])[0].severity, 'critical');
 });
 
 fs.rmSync(sandbox, { recursive: true, force: true });

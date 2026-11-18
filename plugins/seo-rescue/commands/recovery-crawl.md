@@ -81,7 +81,9 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/recovery-crawl.js" --domain example.com --ca
 | `--cache-dir` ohne Wert, `--cache-dir --dry-run`, `--cache-dir=` | abgelehnt. Eine angegebene, aber leere Option gilt nie als „nicht angegeben“; es gibt keinen stillen Rueckfall auf `~/.cache/seo-rescue`. |
 | dieselbe Option zweimal | abgelehnt. |
 
-**Regeln fuer `--cache-dir`.** Kein Bestandteil des Pfads darf ein Symlink sein, auch kein Elternverzeichnis; die Fehlermeldung nennt den aufgeloesten Pfad, der stattdessen anzugeben ist. Auf macOS sind `/tmp` und `/var` selbst Symlinks: dort `/private/tmp/…` schreiben oder ein Verzeichnis unter dem eigenen Home nehmen. Das Verzeichnis muss dem aktuellen Benutzer gehoeren. Rechte fuer Gruppe und andere werden entfernt, strengere bestehende Rechte (z. B. `0500`) bleiben unveraendert. Dieselben Eigentums- und Rechtepruefungen gelten fuer `SEO_CACHE_DIR` und den Standardpfad.
+**Regeln fuer `--cache-dir`.** Kein Bestandteil des Pfads darf ein Symlink sein, auch kein Elternverzeichnis; die Fehlermeldung nennt den aufgeloesten Pfad, der stattdessen anzugeben ist. Auf macOS sind `/tmp` und `/var` selbst Symlinks: dort `/private/tmp/…` schreiben oder ein Verzeichnis unter dem eigenen Home nehmen. Auch `"$HOME/…"` scheitert, wenn das Home-Verzeichnis selbst ueber einen Symlink erreicht wird; dann den aufgeloesten Pfad nehmen, den die Meldung nennt. Werte, die mit `-` beginnen (`--cache-dir=--dry-run`), werden als vertippte Option abgelehnt.
+
+**Nimm ein eigenes, neues Verzeichnis.** Ein mit `--cache-dir` genanntes Verzeichnis, das schon existiert und fuer Gruppe oder andere zugaenglich ist (z. B. `.` oder `$HOME` mit `0755`), wird abgelehnt und nicht veraendert; die Meldung nennt `chmod 700 <dir>` fuer den Fall, dass es wirklich der Cache sein soll. Neu angelegte Verzeichnisse entstehen mit `0700`. Nur beim Standardpfad und bei `SEO_CACHE_DIR` werden Gruppen- und Fremdrechte eines bestehenden Verzeichnisses entfernt. Strengere bestehende Rechte (z. B. `0500`) bleiben immer unveraendert. Jedes Cache-Verzeichnis muss dem aktuellen Benutzer gehoeren; ein fremdes (Docker-Volume, frueherer `sudo`-Lauf) fuehrt zum Abbruch, Abhilfe `chown`. Ist im Pfad etwas kein Verzeichnis (eine Datei, eine FIFO), endet der Lauf mit Exit Code `2`, mit und ohne `--dry-run` gleich.
 
 **Grenze.** Pruefung und Zugriff sind getrennte Systemaufrufe. Das schuetzt vor versehentlichen und vorbereiteten Symlinks, nicht vor einem Prozess desselben Benutzers, der waehrend des Laufs Verzeichnisse austauscht (siehe SECURITY.md im Repository).
 
@@ -241,6 +243,7 @@ Unterstuetzte `options`-Keys (alle optional; nur diese werden vom Script gelesen
 | Key | Default | Bedeutung |
 |-----|---------|-----------|
 | `runId` | neu generiert | Run-ID aus Schritt 3 (immer uebergeben, damit der Lauf konsistent getaggt ist) |
+| (Zahlen) | — | `crawlLimit` und `exportedRowsTotal` muessen, wenn angegeben, ganze Zahlen sein (`crawlLimit` >= 1, `exportedRowsTotal` >= 0); `Infinity`, `NaN` und Zeichenketten werden vor dem ersten Dateizugriff abgelehnt |
 | `crawlLimit` | `500` | Crawl-Limit aus Schritt 4 |
 | `exportedRowsTotal` | `crawledUrls` | Summe exportierter Zeilen ueber alle Bulk-Exports |
 | `rawExportsUsed` | `[]` | Liste der verwendeten Export-Filter-Namen |
