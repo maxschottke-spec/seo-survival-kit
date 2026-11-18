@@ -26,7 +26,7 @@ Wenn `~/.cache/seo-rescue/{slug}/recovery-gate.json` mit `settlement_gate_active
   - Audit (read-only)
   - Monitoring-Render (read-only)
   - Re-Evaluation-Report
-  - Ticketliste fuer Rico / Entwicklung
+  - Ticketliste fuer die Entwicklung
   - **Plan-After-Gate-Dokument** anstelle eines normalen Action-Plans
 
 ### Wenn der User trotzdem Live-Aenderungen fordert

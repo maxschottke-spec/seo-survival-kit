@@ -79,7 +79,7 @@
 **Ursache:** Mehrere nicht-geloeschte seo-url Eintraege zeigen bereits auf denselben `foreignKey` im selben Sales Channel (undokumentiertes Constraint).
 **Diagnose:** Alle seo-url Eintraege fuer den Ziel-foreignKey im Live-Channel abfragen. Nicht-geloeschte zaehlen.
 **Workaround:** Anderen foreignKey (andere Kategorie) als Redirect-Ziel verwenden, oder existierende Eintraege zuerst loeschen.
-**Sauberer Fix:** Rico/Shopware Admin: doppelte seo-url Eintraege manuell bereinigen.
+**Sauberer Fix:** Entwicklung/Shopware Admin: doppelte seo-url Eintraege manuell bereinigen.
 
 ### Falscher Slug in seo-url
 
@@ -146,7 +146,7 @@
 - Read-only Crawls, GSC-/Sistrix-/DataForSEO-Pulls
 - Live-HTTP-Checks (Status, Canonical, Robots)
 - Schema-Drafts (lokal, kein Live-Push)
-- Rico-/Entwickler-Briefings
+- Entwickler-Briefings
 - Monitoring-Dashboards, QA-Reports
 - Rollback-Plan-Drafts
 - Ticket-Erstellung

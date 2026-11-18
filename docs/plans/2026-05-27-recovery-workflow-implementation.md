@@ -82,7 +82,7 @@ module.exports = {
 
 Run:
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 node -e "
 const { normalizeDomain } = require('./plugins/seo-rescue/lib/safe.js');
 const cases = [
@@ -114,7 +114,7 @@ Expected output:
 
 Run:
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 node -e "
 const { normalizeDomain } = require('./plugins/seo-rescue/lib/safe.js');
 const bad = ['', '   ', 'ftp://example.com', '127.0.0.1'];
@@ -289,7 +289,7 @@ module.exports = {
 
 Run:
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 node -e "
 const { atomicWriteJSON, ensureDomainDir } = require('./plugins/seo-rescue/lib/safe.js');
 const dir = ensureDomainDir('test-domain');
@@ -307,7 +307,7 @@ Expected: prints `{ "hello": "world" }` then `OK`.
 
 Run:
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 node -e "
 const { appendNDJSON, ensureDomainDir } = require('./plugins/seo-rescue/lib/safe.js');
 const dir = ensureDomainDir('test-domain');
@@ -614,7 +614,7 @@ https://status.search.google.com/products/rGHU1u7kqx6rbY6IYDM6/
 - [ ] **Step 2: Copy reference docs**
 
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 mkdir -p plugins/seo-rescue/references
 cp RECOVERY_SYSTEM.md plugins/seo-rescue/references/RECOVERY_SYSTEM.md
 cp DECISION_ENGINE.md plugins/seo-rescue/references/DECISION_ENGINE.md
@@ -777,7 +777,7 @@ module.exports = { classifyIssues, buildSummary, writeIssuesJSON, SEVERITY_MAP }
 
 Run:
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 node -e "
 const { classifyIssues } = require('./plugins/seo-rescue/scripts/recovery-crawl.js');
 const issues = [
@@ -1063,7 +1063,7 @@ module.exports = {
 
 Run:
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 node -e "
 const { computeRecoveryScore } = require('./plugins/seo-rescue/scripts/recovery-monitor.js');
 const current = { vi: 0.108, keywords_t10: 120 };
@@ -1081,7 +1081,7 @@ Expected: a score in the 40-70 range, `OK: in range`.
 
 Run:
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 node -e "
 const { formatDeltaReport } = require('./plugins/seo-rescue/scripts/recovery-monitor.js');
 const entry = { domain: 'example.com', timestamp: '2026-05-27T21:00:00Z', vi: 0.108, vi_delta_pct: 2.3, score: 62, phase: 'R2', keywords_t10: 120, keywords_t10_delta: 5 };
@@ -1259,7 +1259,7 @@ Add the 5 new commands to the README's Quick Reference.
 
 Run:
 ```bash
-cd /Users/max/Projekte/seo-survival-kit
+cd seo-survival-kit
 claude plugin validate plugins/seo-rescue
 claude plugin validate .
 ```
